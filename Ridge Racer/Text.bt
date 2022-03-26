@@ -1,0 +1,92 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct 
+{
+    int TextID;
+    int EntryOffset <format=hex, comment="Relative to end of map, needs to be multiplied by 2">;
+} TextEntry;
+
+typedef struct
+{
+    short always0;
+    wstring text;
+} TextData;
+typedef struct
+{
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+} CharTextMapping <bgcolor=cYellow>;
+
+typedef struct
+{
+    wchar_t SourceChar;
+    short RRCharId;
+} CharId <bgcolor=cGreen>;
+
+typedef struct
+{
+    short a;
+    short b;
+} unk3 <bgcolor=cGreen>;
+
+typedef struct
+{
+    int charMapEntryCount;
+    int charMappingOffset <format=hex, fgcolor=cRed>;
+    int charIdMapOffset <format=hex, fgcolor=cRed>;
+    int unkOffset3 <format=hex, fgcolor=cRed>;
+    int e;
+    int f;
+    int pad0 <hidden=true>;
+    int pad1 <hidden=true>;
+
+    local int cPos = FTell();
+
+    FSeek(charMappingOffset);
+    CharTextMapping charMaps[charMapEntryCount];
+
+    FSeek(charIdMapOffset);
+    CharId charIds[charMapEntryCount];
+    
+    FSeek(cPos);
+} CharDefMap <optimize=false>;
+
+struct Text
+{
+    struct Header
+    {
+        int charDefMapCount <fgcolor=cGreen>;
+        int textEntryCount <fgcolor=cGreen>;
+        int textEntriesOffset <format=hex, fgcolor=cRed>;
+        int pad0 <hidden=true>;
+    } header <bgcolor=cPurple>;
+
+    CharDefMap defMap1[header.charDefMapCount];
+
+    FSeek(header.textEntriesOffset);
+    TextEntry textEntries[header.textEntryCount];
+
+    local int i = 0;
+    local int dataPos = header.textEntriesOffset + (header.textEntryCount * 8);
+
+    for (i; i < header.textEntryCount; i++)
+    {
+        FSeek(dataPos + (textEntries[i].EntryOffset * 2));
+        TextData textData;
+    }
+} text;

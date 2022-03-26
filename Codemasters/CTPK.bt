@@ -1,0 +1,82 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Dirt 4 CTPK
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// UNFINISHED
+
+typedef struct EntryName
+{
+    int StrLen;
+    char Name[StrLen];
+
+};
+
+typedef struct
+{
+    byte unk;
+    byte Idx;
+    byte a;
+    byte b;
+
+} rowData;
+
+struct CTPK
+{
+    struct Header
+    {
+        char Magic[4];
+        int Version;
+        int unkHash;
+        int EntryNameOffset <fgcolor=cRed, format=hex>;
+        int unkOffset2 <fgcolor=cRed, format=hex>;
+        int pad;
+    } header <bgcolor=cPurple>;
+
+    FSeek(header.EntryNameOffset);
+    struct Entries
+    {
+        int entryCount <fgcolor=cGreen>;
+        EntryName entries[entryCount] <optimize=false>;
+    } entries;
+
+    FSeek(header.unkOffset2);
+
+    struct UnkStr
+    {
+        int entryCount;
+
+        struct unkEntry
+        {
+            int unkHash <format=hex>;
+            int DataOffset <format=hex, fgcolor=cRed>;
+
+            local int cPos = FTell();
+            FSeek(DataOffset);
+            int DataCount <fgcolor=cGreen>;
+
+            if (DataCount > 0)
+            {
+                struct Row {
+                    int Index;
+                    int RowLength;
+                    rowData RowData <optimize=false>;
+                } Rows[DataCount] <optimize=false>;
+            }
+
+            int zero <bgcolor=cRed, comment="Always Zero">;
+
+            FSeek(cPos);
+        } entries[entryCount] <bgcolor=cBlack, optimize=false>;
+
+    } unk;
+
+} ctpk;

@@ -1,0 +1,66 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
+typedef struct
+{
+    int HashOffset <format=hex, fgcolor=cRed>;
+    int Type;
+} Hash;
+
+typedef struct
+{
+    short UnkFlags <fgcolor=cLtBlue>;
+    short UnkCount <fgcolor=cLtBlue>;
+    int FileSize;
+    int UncompressedFileSize;
+    int CompressedFileSize;
+    int64 NameCRC <format=hex, fgcolor=cLtRed>;
+    if (UnkCount > 0)
+    {
+        int a[UnkCount];
+    }
+} Test <optimize=false>;
+
+struct BFS
+{
+    struct 
+    {
+        char Magic[4];
+        int Version <format=hex, comment="Must be exact, date as Hex">;
+        int TocSizeRaw : 31 <format=hex, fgcolor=cGreen>;
+        byte TocEncrypted : 1;
+
+        int EntryCount <fgcolor=cGreen>;
+        int unk;
+    } Header;
+    
+    int hashSize  <fgcolor=cGreen, comment="Driftopia - Must be 0x3E5/997">;
+    Hash aa[hashSize];
+    
+    local int cPos = FTell();
+    int baseSecondTocSize;
+    int unkSize;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+
+    FSeek(cPos + baseSecondTocSize);
+    Test test[Header.EntryCount];
+
+
+} Archive;
