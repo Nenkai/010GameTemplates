@@ -1,0 +1,29 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct TransformIT
+{
+    byte BaseIV[0x10];
+    int Unknown;
+
+    local int64 fileSize = FileSize();
+
+    const int BLOCK_SIZE = 0x20000;
+
+    struct Blocks
+    {
+        byte EncryptedData[0x20000];
+        byte MAC[0x10];
+    } blocks[(fileSize / BLOCK_SIZE)];
+
+} tft;
