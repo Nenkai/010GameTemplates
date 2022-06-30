@@ -1,0 +1,97 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Forza Binary XML
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short strLen;
+    char str[strLen];
+} xmlStr;
+
+string PrintStrIndex(int s)
+{
+    return BinaryXML.Strings.strs[s].str;
+}
+
+typedef struct
+{
+    if (BinaryXML.StringCount > 0xFFFF)
+        uint keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else if (BinaryXML.StringCount > 0xFF)
+        ushort keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else
+        ubyte keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+
+    if (BinaryXML.StringCount > 0xFFFF)
+        uint valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else if (BinaryXML.StringCount > 0xFF)
+        ushort valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else
+        ubyte valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+
+} Attribute <optimize=false>;
+
+local int i = 0;
+
+struct CXMLNode;
+struct CXMLNode
+{
+    enum <byte> FLAG 
+    { 
+        Node = 0x01, 
+        HasAttributes = 0x02, 
+        HasChildren = 0x04,
+    } Flags : 8 <fgcolor=cYellow>;
+
+    if (Flags & 0x02)
+    {
+        if (BinaryXML.StringCount > 0xFFFF)
+            uint valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        else if (BinaryXML.StringCount > 0xFF)
+            ushort valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        else
+            ubyte valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+
+        byte attributeCount <fgcolor=cGreen>;
+        local int i = 0;
+        Attribute attr[attributeCount];
+    }
+
+
+    if (Flags & 0x04)
+    {
+        ushort nodecount;
+
+        local int j = 0;
+        for (j = 0; j < nodecount; j++)
+        {
+            CXMLNode ChildNode;
+        }
+    }
+};
+
+struct BXML
+{
+    char Magic[4];
+    byte Version <comment="Must not be > 2 on FH5">;
+    int StringCount <fgcolor=cGreen>;
+    int StringDataSize <format=hex, comment="Size of the whole string table">;
+
+    struct 
+    {
+        xmlStr strs[StringCount] <optimize=false>;
+    } Strings;
+
+    byte Flag;
+    CXMLNode RootNode;
+
+} BinaryXML;
