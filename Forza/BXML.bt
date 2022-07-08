@@ -19,60 +19,62 @@ typedef struct
 
 string PrintStrIndex(int s)
 {
-    return BinaryXML.Strings.strs[s].str;
+    return BinaryXML.Strings.Strs[s].str;
 }
 
 typedef struct
 {
     if (BinaryXML.StringCount > 0xFFFF)
-        uint keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        uint KeyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
     else if (BinaryXML.StringCount > 0xFF)
-        ushort keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        ushort KeyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
     else
-        ubyte keyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        ubyte KeyStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
 
     if (BinaryXML.StringCount > 0xFFFF)
-        uint valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        uint ValueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
     else if (BinaryXML.StringCount > 0xFF)
-        ushort valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        ushort ValueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
     else
-        ubyte valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+        ubyte ValueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
 
 } Attribute <optimize=false>;
 
 local int i = 0;
 
+typedef enum<byte> 
+{ 
+    Node = 0x01, 
+    HasAttributes = 0x02, 
+    HasChildren = 0x04,
+} NodeFlags;
+
 struct CXMLNode;
 struct CXMLNode
 {
-    enum <byte> FLAG 
-    { 
-        Node = 0x01, 
-        HasAttributes = 0x02, 
-        HasChildren = 0x04,
-    } Flags : 8 <fgcolor=cYellow>;
+     NodeFlags Flags : 8 <fgcolor=cYellow>;
 
-    if (Flags & 0x02)
+    if (BinaryXML.StringCount > 0xFFFF)
+        uint NodeNameStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else if (BinaryXML.StringCount > 0xFF)
+        ushort NodeNameStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+    else
+        ubyte NodeNameStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
+
+    if (Flags & 0x02) // Attribute
     {
-        if (BinaryXML.StringCount > 0xFFFF)
-            uint valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
-        else if (BinaryXML.StringCount > 0xFF)
-            ushort valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
-        else
-            ubyte valueStrIndex <fgcolor=cGray, comment=PrintStrIndex>;
-
-        byte attributeCount <fgcolor=cGreen>;
+        byte AttributeCount <fgcolor=cGreen>;
         local int i = 0;
-        Attribute attr[attributeCount];
+        Attribute Attr[AttributeCount];
     }
 
 
     if (Flags & 0x04)
     {
-        ushort nodecount;
+        short ChildNodeCount;
 
         local int j = 0;
-        for (j = 0; j < nodecount; j++)
+        for (j = 0; j < ChildNodeCount; j++)
         {
             CXMLNode ChildNode;
         }
@@ -88,7 +90,7 @@ struct BXML
 
     struct 
     {
-        xmlStr strs[StringCount] <optimize=false>;
+        xmlStr Strs[StringCount] <optimize=false>;
     } Strings;
 
     byte Flag;
