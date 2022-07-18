@@ -1,0 +1,74 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Forza String Table
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .str
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    uint Hash <format=hex>;
+    int StringOffset <format=hex, fgcolor=cRed, comment="Relative to string table">;
+} entry;
+
+typedef struct
+{
+    wstring str <bgcolor=cGray>;
+} String <optimize=false>;
+
+struct
+{
+    struct
+    {
+        short version;
+        char Name[0x7E];
+
+        short Empty;
+        short TableCount;
+        int TableOffsets[TableCount] <format=hex>;
+    } Header <size=0x8C>;
+
+    local int i = 0;
+    for (i = 0; i < Header.TableCount; i++)
+    {
+        struct
+        {
+            int TableSize <format=hex, fgcolor=cYellow>;
+            int StringsSize <format=hex, fgcolor=cYellow>;
+            int EntryCount <fgcolor=cGreen>;
+
+            entry entries[EntryCount];
+            String strs[EntryCount];
+        } StringTable;
+    }
+    
+} StringTable;
+
+/* C# Sample for the hashing function
+static long HashString(string str, int bitSize, bool caseInsensitive)
+{
+    long v = (((long)1) << bitSize) - 1;
+    long res = v;
+    byte v7 = (byte)(bitSize - 7);
+
+    for (var i = 0; i < str.Length; i++)
+    {
+        char c = str[i];
+        if (!caseInsensitive && char.IsLetter(c) && char.IsUpper(c))
+            c = char.ToLower(c);
+
+        res = v & (((c ^ res) << 7) | ((c ^ res) >> v7));
+    }
+
+    return res;
+}
+
+
+HashString("IDS_Mode1String_2990", 32, true);
+*/
