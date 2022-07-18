@@ -1,0 +1,82 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: LTArchive
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int64 FileOffset <format=hex, fgcolor=cRed>;
+    int64 ComFileSize <format=hex, fgcolor=cYellow>; // Compressed file size
+    int64 RawFileSize <format=hex, fgcolor=cYellow>; // uncompressed file size
+    int ComMethod; // Compression Method, For zlib = 9
+
+    local int cPos = FTell();
+    FSeek(0x30 + NameOffset);
+    string FileName;
+    FSeek(cPos);
+
+    Printf("%d - %s\n", FileOffset, FileName);
+
+} FileEntry <optimize=false>;
+
+string PrintFileName(FileEntry& entry)
+{
+    return entry.FileName;
+}
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+
+    // for (var i = ChildStartIndex; i < ChildEndIndex; i++)
+    int ChildStartIndex;
+    int ChildEndIndex;
+    int FileCount <fgcolor=cGreen>;
+
+    local int cPos = FTell();
+    FSeek(0x30 + NameOffset);
+    string FolderName;
+    FSeek(cPos);
+} FolderEntry <optimize=false>;
+
+string PrintFolderName(FolderEntry& entry)
+{
+    return entry.FolderName;
+}
+
+struct LTArchive
+{
+    char Magic[4] <comment="Must match">;
+    int Version <comment="Must be 3">;
+
+    struct 
+    {
+        int NameTableSize;
+        int FolderCount;
+        int FileCount;
+        int unk;
+        int unk;
+        int unk;
+        char Hash[0x10];
+    } Header;
+
+    char NameTable[Header.NameTableSize];
+    struct
+    {
+        FileEntry entry[Header.FileCount] <comment=PrintFileName>;
+    } FileEntries <bgcolor=cYellow>;
+
+    struct 
+    {
+        FolderEntry folders[Header.FolderCount] <comment=PrintFolderName>;
+    } FolderEntries <bgcolor=cDkGreen>;
+} LTAR;
