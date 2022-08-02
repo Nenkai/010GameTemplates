@@ -11,6 +11,8 @@
 //   History: 
 //------------------------------------------------
 
+BitfieldDisablePadding();
+
 uint AlignValue(uint x, uint alignment)
 {
     local uint mask = ~(alignment - 1);
@@ -20,10 +22,50 @@ uint AlignValue(uint x, uint alignment)
 typedef struct
 {
     int Hash <format=hex, fgcolor=cPurple>;
-    byte a;
-    byte b;
-    short c;
-} HashEntry;
+    byte Type : 6;
+    byte Bits : 2;
+    byte AttributeCount;
+    short DataOffset;
+} Attribute;
+
+typedef struct 
+{
+    int KeyStringOffset <format=hex>;
+
+    local int cPos = FTell();
+    FSeek(0x1C + KeyStringOffset);
+    string Name;
+    FSeek(cPos);
+    
+    int CategoryCount;
+    int HashValue <format=hex, fgcolor=cPurple>;
+
+    local int j;
+    for (j = 0; j < CategoryCount; j++)
+    {
+        struct
+        {
+            int RecordNameOffset <format=hex, fgcolor=cRed>;
+            cPos = FTell();
+            FSeek(0x1C + RecordNameOffset);
+            string RecordName;
+            FSeek(cPos);
+
+            int RecordDataSize;
+            int AttributeCount;
+            int AttibuteStart;
+            int AttributeNameHash <format=hex>;
+
+            if (RecordDataSize > 0)
+                int AttributeValues[RecordDataSize];
+        } Record;
+    }
+} Category;
+
+string PrintCategoryName(Category& cat)
+{
+    return cat.Name;
+}
 
 struct GameDatabase
 {
@@ -35,51 +77,14 @@ struct GameDatabase
         int unkSize;
         int unk;
         int unk;
-        int nHashEntry;
+        int AttributeCount;
     } Header;
 
     byte StringTable[Header.StringTableSize];
-    HashEntry Entries[Header.nHashEntry];
+    Attribute Entries[Header.AttributeCount];
 
     local int i = 0;
-    int unkCount;
-    while (i < unkCount)
-    {
-        struct 
-        {
-            int KeyStringOffset <format=hex>;
-
-            local int cPos = FTell();
-            FSeek(0x1C + KeyStringOffset);
-            string str;
-            FSeek(cPos);
-            
-            int PropertyCount;
-            int HashValue <format=hex, fgcolor=cPurple>;
-
-            local int j;
-            for (j = 0; j < PropertyCount; j++)
-            {
-                struct
-                {
-                    int PropertyStringOffset <format=hex, fgcolor=cRed>;
-                    cPos = FTell();
-                    FSeek(0x1C + PropertyStringOffset);
-                    string PropertyName;
-                    FSeek(cPos);
-
-                    int ValueCount;
-                    int unkSize2;
-                    int HashEntryIndex;
-                    int ValueNameHash <format=hex>;
-
-                    if (ValueCount > 0)
-                        int Values[ValueCount];
-                } Property;
-            }
-        } Table;
-
-        i++;
-    }
+    int CategoryCount;
+    Category categories[CategoryCount] <optimize=false, comment=PrintCategoryName>;
 
 } GeDB;
