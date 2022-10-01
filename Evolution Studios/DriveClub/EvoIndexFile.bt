@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Reverse Engineered reading from DriveClub executable
+
+BitfieldDisablePadding();
+typedef struct
+{
+    short DatIndex : 16 <format=hex>;
+    int64 DataOffset : 48 <format=hex>;
+    int FileSizeUncompressed : 32;
+    int PathHash <format=hex>;
+    byte MD5Hash[0x10];
+} IndexEntry;
+
+struct
+{
+    struct 
+    {
+        int Magic <format=hex, comment="Must be 0x4E544144 or 0x58544144">;
+        int VersionMaybe <comment="value & 0xF000) != 0x1000 = fail">;
+        FILETIME DateBuilt <format=hex>;
+        int64 Unknown;
+        int HashingParam1;
+        int HashingParam2;
+        int CompressionFormat <comment="Must not be above 7">;
+        int unk4 <format=hex, comment="Must not be above 0x40000">;
+        int unk5;
+        int unk6;
+        int nDatInfos;
+        int unk8;
+        int nIndexEntry <fgcolor=cGreen, comment="Must not be above 1000000">;
+        ubyte DictSize <format=hex>;
+        byte CompressDictionary1[DictSize] <bgcolor=cDkRed>;
+        byte CompressDictionary2[DictSize] <bgcolor=cDkRed>;
+        int FileNamesCompressedLength <format=hex, fgcolor=cYellow>;
+        byte FileNamesCompressed[FileNamesCompressedLength] <bgcolor=cGray>;
+    
+        int Magic2 <format=hex, comment="Must be 0x12345678">;
+        IndexEntry entries[nIndexEntry] <optimize=false, bgcolor=cYellow>;
+        int Magic3 <format=hex, comment="Must be 0x12345678">;
+
+        int64 DatTimestamps[nDatInfos] <comment="Matches with value from DAT files at 0x08 - Must match aswell!">;
+    } Header;
+
+    
+} DatIndex;

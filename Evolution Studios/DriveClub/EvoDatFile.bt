@@ -1,0 +1,44 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct (int size)
+{
+    byte Data[size];
+} ChunkData;
+
+struct
+{
+    int Magic <format=hex, comment="Must be DATF">;
+    int Version <comment="Must be 4300">;
+    FILETIME Timestamp;
+    int64 Unk;
+    int ChunkCount;
+    int ChunkBufferSize <format=hex>;
+
+    // Timestamp must match with indentifier from index file when fetching a file
+    
+    struct
+    {
+        int CHNKMagic <format=hex, comment="Must be CHNK">;
+        int ChunkSizes[ChunkCount];
+    } ChunkListing;
+
+    struct
+    {
+        int DATAMagic <format=hex, comment="DATA magic, must match">;
+        local int i = 0;
+        for (i = 0; i < ChunkCount; i++)
+            ChunkData Chunk(ChunkListing.ChunkSizes[i]);
+        
+    } Data;
+} Dat;

@@ -1,0 +1,43 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Reverse Engineered reading from DriveClub executable
+// Mostly not done
+BitfieldDisablePadding();
+typedef struct
+{
+    int unk12Bits : 12;
+    int b : 20;
+    int c : 20;
+    int unk4Bits : 4;
+    int _empty_ : 8;
+
+    if (_empty_ != 0)
+        Printf("hello\n");
+
+} CacheEntry;
+
+struct
+{
+    struct 
+    {
+        int Magic;
+        int Unk;
+        int64 Hash <format=hex>;
+        int Magic2 <format=hex, comment="Must be 0x12345678">;
+    } Header <bgcolor=cPurple>;
+
+    local int pos = FileSize() - FTell();
+    CacheEntry cacheEntries[pos / sizeof(int64)] <optimize=false, bgcolor=cYellow>;
+    
+} DatCache;
