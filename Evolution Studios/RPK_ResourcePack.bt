@@ -1,0 +1,306 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Evolutions Studios Resource PacK
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------1
+BitfieldDisablePadding();
+
+typedef enum
+{
+    UNKNOWN = 0,
+    RESOURCE_INFO_BLOCK = 1,
+    STREAM_FORMAT = 2,
+    VERTEX_BUFFER = 3,
+    INDEX_BUFFER = 4,
+    PIXEL_BUFFER = 5,
+    Shader = 6,
+    MATERIAL = 7,
+    MESH = 8,
+    RESOURCE_COLLECTION = 9,
+    HAVOK = 10,
+    HIERARCHY = 11,
+    RIGID_BODY_BINDINGS = 12,
+    MOTORSTORM_WORLD = 13,
+    MESHES = 14,
+	SCENE = 15,
+    MOTORSTORM_VEHICLE = 16,
+    Font = 17,
+    CAMERAS = 18,
+	CAMERA = 19,
+    MOTORSTORM_SCENEOBJECT = 20,
+	MOTORSTORM_ENVIRONMENT = 21,
+    MOTORSTORM_CHARACTER = 22,
+    BASICBITMAP = 23,
+    MOTORSTORM_SOLIDS = 24,
+	MOTORSTORM_GROUND_RUSH = 25,
+	MOTORSTORM_PARTICLEEFFECT = 26,
+	ROADSYSTEM = 27,
+	GPU_PROGRAM = 28, // Not sure
+    GPU_PROGRAMBASE = 29,
+    ATTRIBUTE_SET = 30,
+    ATTRIBUTE_SET_BINDINGS = 31,
+    BASICFONT = 32,
+    OCTREE = 33,
+    GUI_ANIM = 34,
+    PLANT = 35,
+    ANIMATIONS = 36,
+    MOTORSTORM_LIGHTS = 37,
+    BIN = 38,
+    XML = 39,
+    PATCH = 40,
+    NEXUS_CHARACTER = 41,
+    NEXUS_ANIMATION = 42,
+    LEVEL_DATA = 43,
+    LEVEL_TRIGGER_VolumeResource = 44,
+    LEVEL_DO_RESET_VolumeResource = 45,
+    LEVEL_NO_RESET_VolumeResource = 46,
+    LEVEL_SPAWN_POINT = 47,
+    LEVEL_ROAD_REGION_VolumeResource = 48,
+    LEVEL_START_StartFinishVolumeResource = 49,
+    LEVEL_ROAD_DATA = 52,
+    AUDIO_VEHICLEAUDIO = 53,
+    AUDIO_VEHICLESOUNDEFFECT = 54,
+    AUDIO_VEHICLESAMPLE = 55,
+	ROAD_NETWORK = 56, 
+    LEVEL_SPLIT_VolumeResource = 57,
+	DEM = 58,
+	DEM_TILE = 59,
+    VEHICLE_CUSTOM_DATA = 60,
+    LEVEL_SCRIPTED_ROAD_LINE = 61,
+    PROCEDURAL_PLACEMENT = 62,
+    ACTOR_DATA = 63,
+    HABOOB_TEX_ATLAS_INDEX = 64,
+    CROWDS = 65,
+	AUDIO_SOUNDGROUP = 66,
+    SVGMESH = 67,
+    LEVEL_DRIFT_ZONE = 68,
+    AUDIO_FSB = 69,
+    ANIMATIONLIB = 70,
+    TOP_MIPS = 71,
+    LEVEL_AI_MAX_SPEED_VolumeResource = 72,
+    SCRIPTED_ROAD_REGION_VOLUME_VolumeResource = 73,
+    TRIGGER_DATA = 74,
+    DUST_DATA = 75,
+    VEHICLE_PARTICLES_DATA = 76,
+} ResourceTypeId;
+
+//////////////////////////////////////////////////
+////////////// MAIN STRUCTURES ///////////////////
+//////////////////////////////////////////////////
+typedef struct
+{
+    char Magic[4];
+    char Endian[4];
+} StreamHeader;
+
+typedef struct
+{
+    int64 Identifier : 48 <format=hex, fgcolor=cGray>;
+    ResourceTypeId Type : 16 <fgcolor=cPurple>;
+} ResourceIdentifier <comment=PrintIdent, bgcolor=cBlack>;
+
+string PrintIdent(ResourceIdentifier& identifier)
+{
+    local string str = "";
+    return "Type: " + EnumToString(identifier.Type);
+}
+
+typedef struct
+{
+    string str;
+} ResourceName;
+
+//////////////////////////////////////////////////
+//////////// RESOURCE STRUCTURES /////////////////
+//////////////////////////////////////////////////
+// Resource Info Block is at the bottom of this section
+
+// Stream Format (2)
+
+typedef enum
+{
+    FieldSemantic_UNKNOWN,
+    FieldSemantic_POSITION,
+    FieldSemantic_NORMAL,
+    FieldSemantic_BINORMAL,
+    FieldSemantic_TANGENT,
+    FieldSemantic_TEXCOORD,
+    FieldSemantic_COLOR,
+    FieldSemantic_BLENDWEIGHTS,
+    FieldSemantic_BLENDINDICES,
+    FieldSemantic_INDEX,
+} FieldSemantic;
+
+typedef struct
+{
+    StreamHeader streamHeader;
+    ResourceIdentifier ident;
+    short a;
+    short b;
+    byte EntryCount;
+
+    
+    struct
+    {
+        byte d;
+        byte e;
+        short f;
+        byte g;
+    } StreamFormatEntry[EntryCount];
+
+} StreamFormat;
+
+typedef struct
+{
+    StreamHeader streamHeader;
+    ResourceIdentifier identifier;
+} ResourceCollection;
+
+// BIN - (38)
+typedef struct
+{
+    StreamHeader streamHeader;
+    ResourceIdentifier identifier;
+    int BufferSize <format=hex>;
+    int BinarySize <format=hex>;
+    byte bin[BinarySize];
+} BinaryResource;
+
+// XML - (39)
+typedef struct
+{
+    StreamHeader streamHeader;
+    ResourceIdentifier identifier;
+    int BufferSize <format=hex>;
+    int XMLSize <format=hex>;
+    char xml[XMLSize];
+} XMLResource;
+
+// "ToC" - Main Resource Info Block (1)
+typedef struct
+{
+    ResourceIdentifier identifier;
+    int DataSize <format=hex, fgcolor=cGreen>;
+    int DataOffset <format=hex, fgcolor=cRed>;
+    short UnkResourceIdentifierCount <format=hex, fgcolor=cYellow>;
+
+    if (UnkResourceIdentifierCount != 0)
+        ResourceIdentifier unkIdentifiers[UnkResourceIdentifierCount] <optimize=false>;
+
+    short ResourceNameCount;
+    
+    local int cPos = FTell();
+    if (ResourceNameCount > 0)
+    {
+        int ResourceNameOffsets[ResourceNameCount] <format=hex>;
+
+        cPos = FTell();
+        FSeek(0x62 + ResourceNameOffsets[0]);
+        ResourceName ResourceNames[ResourceNameCount] <optimize=false>;
+        FSeek(cPos);
+    }
+
+    short SourceAssetPathCount;
+    
+    if (SourceAssetPathCount > 0)
+    {
+        int SourceAssetPathOffsets[SourceAssetPathCount] <format=hex>;
+
+        cPos = FTell();
+        FSeek(0x62 + Resource_PacK.ResourceInfoBlock.ResourcesNamesLength + SourceAssetPathOffsets[0]);
+        ResourceName SourceAssets[SourceAssetPathCount] <optimize=false>;
+        FSeek(cPos);
+    }
+
+    cPos = FTell();
+    FSeek(DataOffset);
+
+    switch (identifier.Type)
+    {
+        case STREAM_FORMAT:
+            StreamFormat streamFormat; break;
+
+        case RESOURCE_COLLECTION:
+            ResourceCollection resourceCollection; break;
+
+        case BIN:
+            BinaryResource binary; break;
+
+        case XML:
+            XMLResource xml; break;
+
+        // Implement more if needed
+    }
+
+    FSeek(cPos);
+} ResourceInfo <comment=PrintResourceInfo>;
+
+string PrintResourceInfo(ResourceInfo& resourceInfo)
+{
+    local string str = "";
+    return resourceInfo.ResourceNames[0].str + " (" + EnumToString(resourceInfo.identifier.Type) + ")";
+}
+
+struct
+{
+    struct
+    {
+        StreamHeader streamHdr;
+        int NameLength;
+        char Name[NameLength];
+        int SizeOfToC;
+        int OffsetToToC;
+    } Header <bgcolor=cPurple>;
+
+    StreamHeader hdr;
+    ResourceIdentifier identifier;
+
+    struct
+    {
+        int Version <format=hex>;
+        int MarkerMagicStart <format=hex>;
+        int ResourceCount;
+        int Unk1;
+        int Unk2 <format=hex>;
+        int ResourcesNamesLength <format=hex>;
+        int SourceFileNameLength <format=hex>;
+        int Unk3Count;
+        int Unk4Count;
+        ResourceIdentifier MainIdentifier;
+    
+        char ResourceNames[ResourcesNamesLength] <optimize=false>;
+        char SourceFileNames[SourceFileNameLength] <optimize=false>;
+
+        struct
+        {
+            ResourceInfo resInfos[ResourceCount] <optimize=false>;
+        } ResourceInfos;
+
+        if (Unk3Count > 0)
+        {
+            struct
+            {
+                ResourceIdentifier Unk3_Ident;
+                int Unk3Offset <format=hex, fgcolor=cRed>;
+            } Unk3_Stru[Unk3Count];
+        }
+
+        if (Unk4Count > 0)
+            int unk4_offsets[Unk4Count] <format=hex, fgcolor=cRed>;
+
+        int MarkerMagicEnd <format=hex>;
+        if (MarkerMagicEnd != 0x99999999)
+            Printf("Warning: Resource Info Block end magic marker did not match 0x99999999");
+        else
+            Printf("Resource Info Block parsed successfully!");
+
+    } ResourceInfoBlock;
+
+} Resource_PacK;
