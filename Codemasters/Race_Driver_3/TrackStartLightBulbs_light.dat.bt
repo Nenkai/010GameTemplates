@@ -1,0 +1,70 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: TRD3 Start Light Bulbs file (light.dat)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Debug symbols were used from the MAC version for RE'ing
+// Relevant functions: Track_Create, StartLights_BulbAdd
+
+typedef struct
+{
+    float x;
+    float y;
+    float z;
+} Vector3;
+
+typedef struct
+{
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4;
+
+typedef struct
+{
+    // 5000 = ?
+    // 5001 = ?
+    // 5002 = ?
+    // 5003 = ?
+    // 5004 = ?
+    // 5005 = ?
+    // 5007 = ?
+    // 5008 = ?
+    // 5009 = ?
+    // 5030 = Sun related?
+
+    // 5081/5091 = 1 Sequence Step
+    // 5082/5092 = 2 Sequence Steps
+    // 5083/5093 = 3 Sequence Steps
+    // 5084/5094 = 4 Sequence Steps
+    // 5085/5095 = 5 Sequence Steps
+    // 5090/5099 = 6 Sequence Steps (?)
+    int BulbTypeBits;
+    Vector4 vec4;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    float unk;
+    Vector3 unk;
+} StartLightBulb;
+
+struct
+{
+    int LightCount;
+    StartLightBulb bulb[LightCount] <optimize=false>;
+
+} TrackStartLightBulbs;

@@ -1,0 +1,88 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: TRD3 Height (Collision) File (col.col)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Debug symbols were used from the MAC version for RE'ing
+// Relevant functions: Height_Initialise, Height_BringPolygonIntoCache, Height_BringCellIntoCache
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+// global collision area is divided in cells, 256 x 256 aka [0..255]
+// cells are X and Z axis (no y aka height)
+const int HeightXCells = 256;
+const int HeightZCells = 256;
+
+// The sizes of a cell is calculated with (HeightMax - HeightMin) / 256;
+
+struct
+{
+    struct
+    {
+        Vector3 HeightBoundsMin;
+        Vector3 HeightBoundsMax;
+
+        int MeshDataSize <format=hex>;
+        int MeshPolyCachingDataCount;
+        int MeshVerticesCount;
+        int unk4;
+    } MeshHeader <bgcolor=cPurple>;
+
+    struct
+    {
+        short X <comment="(float)X / 16777215.0">;
+        short Y <comment="(float)Y / 16777215.0">;
+        short Z <comment="(float)Z / 16777215.0">;
+        byte YScale <comment="Add to Y with this * 65536.0">; // ((float)YScale * 65535.0) / 16777215.0)
+        byte ZScale <comment="Add to Z with this * 65536.0">; // ((float)YScale * 65535.0) / 16777215.0)
+    } Height_Mesh_Vertex[MeshHeader.MeshVerticesCount] <bgcolor=cGreen, comment="Short-signed & rescaled vertices">;
+    
+    struct
+    {
+        short RuntimeOnly_PolygonCacheFreeListEnd;
+        byte  SurfaceType_UsedFor_ValidForCollisionDetection <comment="Enum depends on Surfaces.zig">;
+        byte Unk : 7;
+        byte Unk2 : 1;
+    } PolyCachingData[MeshHeader.MeshPolyCachingDataCount] <bgcolor=cGray, comment="Mostly runtime stuff besides surface">;
+
+    struct
+    {
+        short A <comment="Triangle Face A">;
+        short B <comment="Triangle Face B">;
+        short C <comment="Triangle Face C">;
+    } MeshTriangles[MeshHeader.MeshPolyCachingDataCount] <bgcolor=cYellow, comment="Indices">;
+
+    
+    byte MeshData[MeshHeader.MeshDataSize] <comment="Holds triangle indices used for each cell area - Accessed with 4 * ((cellZ << 8) + cellX - 1) - 1024">;
+    /* Once indexed MeshData has triangle indices (in big endian format?):
+       byte TriangleIndex1_hi;
+       byte TriangleIndex1_lo;
+       byte TriangleIndex2_hi;
+       byte TriangleIndex2_lo;
+       byte TriangleIndex3_hi;
+       byte TriangleIndex3_lo;
+    */
+
+    if (FTell() != FileSize())
+    {
+        struct
+        {
+            // Accessed with: BitFieldCellContainsSharpPolys + 4 * ((uint)(cellX + (cellZ << 8)) >> 5)) >> (cellX & 0b11111) - 3 bits and 5 bits?
+            byte BitData[FileSize() - FTell()];
+
+        } BitFieldCellContainsSharpPolysEdgeTable;
+    }
+} HeightData;
