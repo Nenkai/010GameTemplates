@@ -16,12 +16,12 @@ vert_count = f.readInt()
 f.seek(0x28)
 
 for i in range(0, vert_count):
-    x = float(f.readShort()) / 16777215.0
     y = float(f.readShort()) / 16777215.0
+    x = float(f.readShort()) / 16777215.0
     z = float(f.readShort()) / 16777215.0
-    yscale = float(f.readByte() * 65536.0) / 16777215.0
+    xscale = float(f.readByte() * 65536.0) / 16777215.0
     zscale = float(f.readByte() * 65536.0) / 16777215.0
-    verts.append(((y + yscale) * 1000, x * 1000, (z + zscale) * 1000)) # Rescale x1000 for Model Researcher
+    verts.append(((x + xscale) * 1000, y * 1000, (z + zscale) * 1000)) # Rescale x1000 for Model Researcher
 
 f.seek(0x28 + (vert_count * 0x08) + (face_count * 4))
 
