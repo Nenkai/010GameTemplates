@@ -12,7 +12,7 @@
 //------------------------------------------------
 
 /* Unfinished for any other components other than model files which are parsed fully (hopefully).
-   (See ContentType, only CarSubModelHandler is implemented. Implement the rest through RE-ing.). 
+   (See ObjectType, only CarSubModelHandler is implemented. Implement the rest through RE-ing.). 
 
    Used debug symbols to guide me through (from Project Gotham Racing 3 (Network Test) [2005-10-16]).
  */
