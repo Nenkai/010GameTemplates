@@ -1,0 +1,56 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: sfsdata - Secure File System Data
+//   Authors: Nenkai - https://github.com/Nenkai
+//   Version: 
+//   Purpose: Secure File System for Forza games
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+/* Notes: This file is TFIT encrypted first. It provides a way to hash check
+          certain local files such as car zips and ui.zip. 
+          Somewhat similar to zipmanifest.
+          It does not contain any data.
+          
+          sfsdata file exists in >= FH4, but not used on PC versions
+          May be used in console versions.
+*/
+
+typedef struct
+{
+    byte Hash[0x14] <format=hex, comment="SHA1. Can be also SHA256, SHA384, SHA512">;
+} HashSegment;
+struct
+{
+    struct
+    {
+        int DiskSectorSize <format=hex>;
+        int FileCount;
+    } Header <bgcolor=cPurple>;
+    
+    struct SecureFileInfo
+    {
+        int NameOffset <format=hex, fgcolor=cRed>;
+        int TargetFileSize <comment="Of local file name points to", format=hex>;
+    } Infos[Header.FileCount];
+    
+    local int i = 0;
+    for (i = 0; i < Header.FileCount; i++)
+    {
+        struct
+        {
+            string Name <fgcolor=cGreen>;
+            
+            local int size = Infos[i].TargetFileSize;
+            local int nSegs = size / Header.DiskSectorSize;
+            if (size % Header.DiskSectorSize > 0)
+                nSegs++;
+                
+            HashSegment segments[nSegs] <bgcolor=cBlack>;
+        } FileSegments <comment=Name>;
+    }
+} SecureFileSystem;
