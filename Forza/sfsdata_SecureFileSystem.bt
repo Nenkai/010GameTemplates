@@ -16,7 +16,7 @@
           Somewhat similar to zipmanifest.
           It does not contain any data.
           
-          sfsdata file exists in >= FH4, but not used on PC versions
+          sfsdata file exists in >= FH3 (?), FM7, FH4, possibly early FH5, but not used on PC versions
           May be used in console versions.
 */
 
