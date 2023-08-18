@@ -24,6 +24,7 @@ typedef struct
 {
     byte Hash[0x14] <format=hex, comment="SHA1. Can be also SHA256, SHA384, SHA512">;
 } HashSegment;
+
 struct
 {
     struct
