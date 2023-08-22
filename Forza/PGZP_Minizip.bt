@@ -3,13 +3,15 @@
 //
 //      File: Playground MiniZip (PGZP)
 //   Authors: Nenkai
-//   Version: 
+//   Version: 100 and 101 (supports FH3 (100) <-> FH5 (101))
 //   Purpose: 
 //  Category: 
 // File Mask: .minizip
 //  ID Bytes: 50 47 5A 50
 //   History: 
 //------------------------------------------------
+
+BitfieldDisablePadding();
 
 typedef enum <short>
 {
@@ -21,10 +23,20 @@ typedef struct
 {
     int m_dwDataOffset <format=hex>;
     int m_dwSize <format=hex>;
-    CompressionType m_wCompressionMethod : 14;
-    short Padding : 2;
+    
+    if (Header.Version >= 101)
+    {
+        CompressionType m_wCompressionMethod : 12;
+        byte Padding : 4;
+    }
+    else
+    {
+        CompressionType m_wCompressionMethod : 14;
+        byte Padding : 2;
+    }
+    
     short ParentFolderIndex;
-} File;
+} File <optimize=false>;
 
 typedef struct
 {
