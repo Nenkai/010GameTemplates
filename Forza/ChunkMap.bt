@@ -1,0 +1,24 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short a;
+    byte UnkBool;
+    byte Flag;        
+} Entry <optimize=false>;
+
+struct
+{
+    Entry entry[11771];
+} ChunkMap;

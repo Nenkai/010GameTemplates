@@ -1,0 +1,28 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int Unk1;
+    int Unk2;
+    int GeoChunkIndex;    
+} UnkEntry;
+struct
+{
+    int Version <comment="Is checked">;
+    int IndexCount;
+    int UnkGeoChunkIndices[IndexCount];
+    
+    int unkCount;
+    UnkEntry unk[unkCount];
+} ChunkAssignmentFile;
