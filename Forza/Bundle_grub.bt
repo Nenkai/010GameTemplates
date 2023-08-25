@@ -123,7 +123,7 @@ typedef struct
         case TAG_METADATA_Atlas:
             struct
             {
-                byte xd[3];
+                byte unk[3];
             } Atlas;
             break;
             
