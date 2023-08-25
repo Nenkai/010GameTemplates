@@ -1,0 +1,396 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Forza Bundle Parser ("Grub" tag, for some reason)
+//   Authors: Nenkai
+//   Version: 1.09 (FH5)
+//   Purpose: Storing textures, models and more
+//  Category: 
+// File Mask: 
+//  ID Bytes: 62 75 72 47
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+string GetTagAsString(uint value)
+{
+    // Get a string out of it
+     local string s = "";
+     SPrintf(s, "%c%c%c%c", value >> 24, value >> 16, value >> 8, value);
+     return s;
+}
+
+typedef struct
+{
+    int A;
+    int B;
+    int C;
+} Face;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vector4;
+
+typedef struct
+{
+    byte StrLen;
+    char Str[StrLen];
+} _7BitString <comment=Str>;
+
+typedef struct
+{
+    int StrLen;
+    char Str[StrLen];
+} String4 <comment=Str, optimize=false>;
+
+
+// ---------------------------------------------
+
+const uint BundleTag = 0x47727562;
+
+// Textures (swatchbin)
+const uint TAG_BLOB_TextureContentBlob = 0x54584342; // "TXCB"
+
+// Models (modelbin)
+const uint TAG_BLOB_Skeleton = 0x536B656C; // "Skel"
+const uint TAG_BLOB_Morph = 0x4D727068; // "Mrph"
+const uint TAG_BLOB_Material = 0x4D617449; // "Matl"
+const uint TAG_BLOB_Mesh = 0x4D657368; // "Mesh"
+const uint TAG_BLOB_IndexBuffer = 0x496E6442; // "IndB"
+const uint TAG_BLOB_VertexLayout = 0x564C6179; // "VLay"
+const uint TAG_BLOB_VertexBuffer = 0x56657242; // "VerB"
+const uint TAG_BLOB_MorphBuffer = 0x4D427566; // "MBuf"
+const uint TAG_BLOB_Skin = 0x536B696E; // "Skin"
+const uint TAG_BLOB_Model = 0x4D6F646C; // "Modl"
+
+// Materials (materialbin)
+const uint TAG_BLOB_MaterialResource = 0x4D415449; // "MATI"
+const uint TAG_BLOB_MaterialShaderParameter = 0x4D545052; // "MTPR"
+
+// Models (modelbin)
+const uint TAG_METADATA_Name = 0x4E616D65; // "Name"
+const uint TAG_METADATA_TextureContentHeader = 0x54584348; // "TXCH"
+const uint TAG_METADATA_Identifier = 0x49642020; // "Id  "
+const uint TAG_METADATA_BBox = 0x42426F78; // "BBox"
+
+// Materials (materialbin)
+const uint TAG_METADATA_Atlas = 0x41545354; // "ATST"
+
+typedef struct
+{
+    int Count <format=hex>;
+    int TotalSize <format=hex>;
+    byte BufferWidth;
+    byte Pad;
+    short Unk;
+    int unk;
+} GraphicsHeader;
+
+struct MetaData;
+typedef struct
+{
+    local int metaDataBasePos = FTell();
+    
+    uint Tag <format=hex, bgcolor=cBlue>;
+    byte Unk : 4;
+    byte IdLength : 4;
+    byte Unk;
+    short OffsetToContents <format=hex>;
+    
+    FSeek(metaDataBasePos + OffsetToContents);
+    switch (Tag)
+    {
+        case TAG_METADATA_Name:
+            char Name[IdLength]; break;
+        case TAG_METADATA_Identifier:
+            uint Id; break;
+        case TAG_METADATA_BBox:
+            Vector3 Min;
+            Vector3 Max;
+            break;
+        case TAG_METADATA_Atlas:
+            struct
+            {
+                byte xd[3];
+            } Atlas;
+            break;
+            
+        default:
+            ;
+            break;
+            
+    }
+} MetaData <comment=PrintName>;
+
+string PrintName(MetaData& metaData)
+{
+     // Get a string out of it
+     local string s = GetTagAsString(metaData.Tag);
+     if (s == "TXCH")
+        return "TXCH - TeXture Content Header";
+    else
+        return s;
+}
+
+struct Bundle;
+
+typedef struct
+{
+    uint Tag <format=hex, bgcolor=cPurple>;
+    byte VersionMajor;
+    byte VersionMinor;
+    ushort MetaDataCount;
+    uint MetaDataOffset <format=hex>;
+    uint DataOffset <format=hex>;
+    uint DataSize <format=hex>;
+    uint UnkSize <format=hex>;
+    
+    local int j = 0;
+    for (j = 0; j < MetaDataCount; j++)
+    {
+        FSeek(baseBundlePos + MetaDataOffset + j * 0x08);
+        MetaData metaData <optimize=false>;
+    }
+    
+    FSeek(baseBundlePos + DataOffset);
+    switch (Tag)
+    {
+        case TAG_BLOB_Skeleton:
+            struct
+            {
+                ushort BoneCount;
+                struct
+                {
+                    String4 Name;
+                    short flags[3];
+                    float Matrix4[0x10];
+                } Bone[BoneCount] <optimize=false>;
+            } SkeletonBlob;
+            break;
+
+        case TAG_BLOB_Morph:
+            struct
+            {
+                short Unk;
+                String4 Str;
+            } MorphBlob;
+            break;
+            
+        case TAG_BLOB_Material:
+            struct
+            {
+                Bundle bundle;
+            } MaterialBlob;
+            break;
+            
+        case TAG_BLOB_MaterialResource:
+            struct
+            {
+                _7BitString Path;
+            } MaterialResourceBlob;
+            break;
+            
+        case TAG_BLOB_MaterialShaderParameter:
+            struct
+            {
+                int Unk;
+                int Unk2;
+                int Unk3;
+                int Unk4;
+            } MaterialShaderParameterBlob;
+            break;
+            
+        case TAG_BLOB_Mesh:
+            // FH3 - 1.08
+            // FH4/FH5 - 1.09
+            struct
+            {
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 9))
+                {
+                    short UnkV9[4];
+                }
+                
+                short UnkIndex <bgcolor=cRed>;
+                short MaterialID;
+                byte unk;
+                byte unk;
+                short unk;
+                byte unk;
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 2))
+                {
+                    byte UnkV2;
+                    byte UnkV2;
+                }
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 3))
+                {
+                    byte UnkV3;
+                }
+                
+                byte Unk;
+                short Unk;
+                
+                int Unk;
+                int Unk;
+                uint Unk;
+                uint Unk;
+                uint FaceCount;
+                uint Unk;
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 6))
+                {
+                    float UnkV6;
+                    uint UnkV6;
+                }
+                
+                uint Unk;
+                uint UnkEntryCount;
+                
+                struct
+                {
+                    int a;
+                    int b;
+                    int c;
+                    int dd;
+                } UnkEntry[UnkEntryCount];
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 4))
+                {
+                    int UnkV4;
+                    int UnkV4;
+                }
+                
+                uint UnkCount2;
+                
+                if (UnkCount2 > 0)
+                    int UnkInts[UnkCount2];
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 1))
+                {
+                    uint UnkV1;
+                }
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 5))
+                {
+                    Vector4 unkVecs[5];
+                }
+                
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 8))
+                {
+                    Vector4 unkVec4 <bgcolor=cBlack>;
+                    Vector4 unkVec4_2 <bgcolor=cBlack>;
+                }
+                
+                // Rest is padding
+            } MeshBlob;
+            break;
+            
+        case TAG_BLOB_IndexBuffer:
+            struct
+            {
+                GraphicsHeader hdr;
+                Face faces[hdr.Count / 3];
+            } IndexBufferBlob;
+            break;
+            
+        case TAG_BLOB_VertexLayout:
+            struct
+            {
+                short SemanticCount;
+                String4 Names[SemanticCount];
+            } VertexLayoutBlob;
+            break;
+            
+        case TAG_BLOB_VertexBuffer:
+            struct
+            {
+                GraphicsHeader hdr;
+                byte buffer[hdr.BufferWidth * hdr.Count];
+            } VertedBufferBlob;
+            break;
+            
+        case TAG_BLOB_MorphBuffer:
+        case TAG_BLOB_Skin:
+            struct
+            {
+                GraphicsHeader hdr;
+                byte buffer[hdr.BufferWidth * hdr.Count];
+            } MorphBufferBlob;
+            break;
+            
+        case TAG_BLOB_Model:
+            struct
+            {
+                short MeshCount;
+                short BuffersCount <comment="Combined buffers">;
+                short VertexLayoutCount;
+                short MaterialCount;
+                short unk;
+                short unk2;
+                short unk3;
+                short unk4;
+            } ModelBlob;
+            break;
+    }
+} Blob <optimize=false, comment=PrintBlob>;
+
+string PrintBlob(Blob& blob)
+{
+     // Get a string out of it
+     local string s = GetTagAsString(blob.Tag);
+     if (s == "TXCB")
+        return "TXCB - TeXture Content Blob";
+     else if (s == "Mesh")
+        return "Mesh (" + (blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "") + ")";
+    else
+        return s;
+}
+
+typedef struct
+{
+    local int baseBundlePos = FTell();
+    
+    struct FileHeaderV1
+    {
+        uint m_Tag <format=hex>;
+        byte m_VersionMajor;
+        byte m_VersionMinor;
+        
+        if (m_VersionMinor >= 1)
+        {
+            short __pad__;
+            uint m_HeaderSize <format=hex>;
+            uint m_TotalSize <format=hex>;
+            int m_BlobCount;
+        }
+        else
+        {
+            short m_BlobCount;
+            FSkip(0x08);
+        }
+    } m_Header <bgcolor=cGreen>;
+    
+    local int i = 0;
+    local int basePos = FTell();
+    for (i = 0; i < m_Header.m_BlobCount; i++)
+    {
+        FSeek(basePos + i * 0x18);
+        Blob blob;
+    }
+} Bundle;
+
+Bundle bundle;
+
