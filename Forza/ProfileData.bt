@@ -1,0 +1,499 @@
+//------------------------------------------------
+//      File: profiledata.bt
+//   Authors: Das, Nenkai
+//   Version: 1.4
+//   Purpose: decrypted savegame reading
+// File Mask: *.ProfileData
+//  ID Bytes: B6 F2 8B 4A
+//------------------------------------------------
+
+LittleEndian();
+
+// Utils
+uint Hash(char name[], int toLower, uint seed)
+{
+    local int i = 0;
+    for (i = 0; i < Strlen(name); i++)
+    {
+        seed ^= name[i] + (seed >> 2) + 32 * seed;   
+    }
+    
+    for (i = 0; i < Strlen(name); i++)
+    {
+        seed ^= name[i] + (seed >> 2) + 32 * seed;   
+    }
+    
+    return seed;
+}
+
+typedef struct {
+    uint NameHash <fgcolor=cGreen, format=hex>;
+    uint Size <format=hex>;
+} SizeInHeader <bgcolor=cPurple>;
+
+typedef struct
+{
+    int Length;
+    char Str[Length];
+} String4 <optimize=false, comment=GetStr>;
+
+string GetStr(String4& str)
+{
+    if (str.Length == 0)
+        return "<empty string>";
+    else
+        return str.Str;   
+}
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vec4;
+
+/////////////////////////////////////
+// Binary States
+/////////////////////////////////////
+
+typedef struct
+{
+    int Version;
+    int ListLength;
+    int Values[ListLength];  
+} GenericIntegerList;
+
+typedef struct
+{
+    int Version;
+    byte BitArray[0x1000];
+} RoadDiscoveryState;
+    
+typedef struct
+{
+    int Version;
+    String4 PlayedMusic;
+    String4 ActiveStation;
+    String4 StationListenTime;
+    
+    int ArrSize;
+    String4 Radios[ArrSize] <optimize=false>;
+} RadioState;
+
+typedef struct
+{
+    int Version;
+    Vec4 StoredPlayerPosition;
+    Vec4 Unk2;
+    byte Unk3;
+    String4 Unk4;
+    String4 Unk5;
+    int Unk6;
+    
+    int ArrLen;
+    int Unk[ArrLen];
+    
+    int ArrLen2;
+    if (ArrLen2 > 0)
+    {
+       struct
+       {
+           int UnkValue;
+           String4 UnkStr;
+       } UnkEntry;  
+    } 
+} PlayerState;
+
+typedef struct
+{
+    int Version;
+    int SkillPointsTotal;
+    int UnspentSkillPointsTotal;
+    int CurrentSkillTokensTotal;
+    byte SeenCarMasteriesScreen;
+    int BestSkillsCombo;
+    
+    int CarPerksPerCarDataCount;
+    struct
+    {
+        int CarID;
+        byte UnkByte;
+
+        int PerkCount;
+        
+        if (PerkCount > 0)
+        {
+            struct 
+            {
+                int PerkID;
+                
+                int Unk;
+                byte Unk2;
+            } PerkData[PerkCount] <optimize=false>;
+        }
+    } CarPerksPerCarData[CarPerksPerCarDataCount] <optimize=false>;
+    
+    if (Version >= 2)
+    {
+        byte V2_1;
+        uint V2_2;
+        byte V2_3;
+    }
+    
+    if (Version >= 3)
+    {
+        int V3_UnkArrLen;
+        
+        struct
+        {
+            int ID;
+            uint Unk;
+        } V3Data[V3_UnkArrLen];
+    }
+    
+    if (Version >= 4)
+    {
+        uint V4_Unk;
+    }
+} CarPerkSaveState;
+
+struct Stat;
+struct Stat
+{
+    uint64 Guid <format=hex>;
+    String4 value <optimize=false>;
+    
+    if (Version >= 2)
+    {
+        int Children;
+        Stat stat[Children] <optimize=false>;
+    }
+};
+    
+typedef struct
+{
+    int Version;
+    int StatCount;
+    
+    Stat stats[StatCount] <optimize=false>;
+} StatsSaveState;
+
+// Guid Calculation (speculation from a random piece of code)
+
+/* FH5 Code (13-09-2022 Steam Exe)
+    v102 = sub_142CB2F70("MyProfile") << 32; also DrivatarStats, probably many more
+    v103 = sub_142CB2F70("IDS_Stat_PlayerBusinessesOwned");
+    final = v102 | v103;
+    
+    // Generation:
+    uint __fastcall sub_142CB2F70(char *str)
+    {
+      int v2; // [rsp+30h] [rbp+8h] BYREF
+    
+      if ( *str )
+        return *sub_140946740(&v2, str + 1, __ROL4__(~*str, 7));
+      else
+        return -1;
+    }
+    
+    _DWORD *__fastcall sub_140946740(_DWORD *a1, _BYTE *a2, int a3)
+    {
+      int v4; // ecx
+      _DWORD *result; // rax
+      int v6; // [rsp+30h] [rbp+8h] BYREF
+    
+      if ( *a2 )
+      {
+        v4 = *sub_140946740(&v6, a2 + 1, __ROL4__(a3 ^ (char)*a2, 7));
+        result = a1;
+        *a1 = v4;
+      }
+      else
+      {
+        *a1 = a3;
+        return a1;
+      }
+      return result;
+    }
+*/
+typedef struct
+{
+    int Version;
+    int Unk;
+    int Unk2;
+} VIPSuperWheelspinsSaveState;
+
+typedef struct
+{
+    int Version;
+    int Unk;
+} PerkPeriodicWheelspinSaveState;
+
+typedef struct
+{
+    int Version;
+    int Count;
+    struct
+    {
+        uint Id;
+        
+        uint Unk;
+        uint Unk2;
+        int Unk3;
+        
+        int size;
+        struct
+        {
+            int Value;
+            byte Unk;
+            
+            String4 Type;
+            String4 Value;
+        } Values[size] <optimize=false>;
+        
+        byte Unk;
+        uint Unk;
+        uint Unk;
+        uint Unk;
+        int64 Unk <format=hex>;
+        uint Unk;
+    } ChallengeSaveData[Count] <optimize=false>;
+    
+    //uint UnkCount;
+    //uint UnkArr[UnkCount];
+} ChallengeSaveDataBase <optimize=false>;
+
+typedef struct
+{
+    ChallengeSaveDataBase DataBase;
+    uint Unk;
+    String4 Unk;
+} CollectiblesChallengeSaveState;
+
+typedef struct
+{
+    ChallengeSaveDataBase DataBase;
+    uint UnkCount;
+    uint UnkArray[UnkCount];
+} BadgeChallengeSaveState;
+
+typedef struct
+{
+    ChallengeSaveDataBase DataBase;
+    uint Unk;
+} HorizonOpenChallengeSaveState;
+
+typedef struct
+{
+     ChallengeSaveDataBase DataBase;
+     
+     int UnkPhotoDataGroupSize;
+     struct
+     {
+         uint ID;
+         
+         int unkSize;
+         struct
+         {
+             uint ID;
+             uint Unk;
+         } UnkPhotoData[unkSize] <optimize=false>;
+     } UnkPhotoDataGroup[UnkPhotoDataGroupSize] <optimize=false>;
+     
+     byte Unk;
+     int Unk2;
+     int Size;
+     int UnkArray[Size];
+} PhotoChallengeSaveState;
+
+/////////////////////////////////////////////
+typedef struct {
+    int    pattern <format=hex>; //each 'top' entry begins like this, no idea what it means tho
+    byte unk;
+    long    NameLength <name="Name Length">;
+    char    Name[ NameLength ] <name="Name", bgcolor=0xFFBBBB>;
+    long    vType; //value type?
+
+    if (vType == 0)
+    {
+        byte   Value <bgcolor=0xffff99>;
+    }
+    else if (vType == 1)
+    {
+        byte   Value <bgcolor=0xffff99>;
+    }
+    else if (vType == 4)
+    {
+        int64     Value <bgcolor=0xffff99>;
+    }
+    else if (vType == 9)
+    {
+        float    Value <bgcolor=0xffff99>;
+    }
+    else if (vType == 11)
+    {
+        int     StringLength;
+        if (StringLength > 0)
+            char    String[ StringLength ] <name="Placeholder String", bgcolor=0xffff99>;
+    }
+    else
+    {
+        int     Value <bgcolor=0xffff99>;
+    }
+} data <read=Name>;
+
+typedef struct
+{
+    int unkVersionMaybe;
+    local uint tag;
+    local int cnt;
+    
+    while (FTell() < ProfileOptionsHeader.Size)
+    {
+        data datas <name="Data Entries">;
+        
+        if (ReadUInt() != 0x2000)
+            break;
+    }
+} ProfileOptionsEntity;
+
+////////////////////////////////////////////////
+// Main Bulk
+////////////////////////////////////////////////
+const int PROFILE_HASH_SEED = 0x1505;
+
+const char PROFILE_OPTIONS_NAME[] = "profile";
+const char SAVESTATE_NAME[] = "savestate";
+const char BINARY_STATE_NAME[] = "binary";
+const char DATABASE_NAME[] = "database";
+
+SizeInHeader ProfileOptionsHeader;
+if (ProfileOptionsHeader.NameHash != Hash(PROFILE_OPTIONS_NAME, 0, PROFILE_HASH_SEED))
+    Printf("WARNING: 'profile' header hash did not match 0x%x!\n", Hash(PROFILE_OPTIONS_NAME, 0, PROFILE_HASH_SEED));   
+else
+    Printf("OK: 'profile' header hash 0x%x matches\n", ProfileOptionsHeader.NameHash);
+    
+union
+{
+    ProfileOptionsEntity entity;
+    byte ProfileOptionsData[ProfileOptionsHeader.Size];
+} ProfileOptions;
+
+SizeInHeader SaveStateHeader;
+if (SaveStateHeader.NameHash != Hash(SAVESTATE_NAME, 0, PROFILE_HASH_SEED))
+    Printf("WARNING: 'savestate' header hash did not match 0x%x!\n", Hash(SAVESTATE_NAME, 0, PROFILE_HASH_SEED));   
+else
+    Printf("OK: 'savestate' header hash 0x%x matches\n", SaveStateHeader.NameHash);
+    
+union
+{
+    byte SaveStateData[SaveStateHeader.Size];   
+} SaveState;
+
+SizeInHeader BinaryStateHeader;
+if (BinaryStateHeader.NameHash != Hash(BINARY_STATE_NAME, 0, PROFILE_HASH_SEED))
+    Printf("WARNING: 'binary' header hash did not match 0x%x!\n", Hash(BINARY_STATE_NAME, 0, PROFILE_HASH_SEED));   
+else
+    Printf("OK: 'binary' header hash 0x%x matches\n", BinaryStateHeader.NameHash);
+  
+
+Printf("--------------------------\n");
+union
+{
+    byte BinaryStateData[BinaryStateHeader.Size];   
+    struct
+    {
+        int StateCount;
+        
+        union 
+        {
+            uint64 XUID <format=hex>;
+            
+            BigEndian();
+            uint64 XUID_ <format=hex>;
+            LittleEndian();
+        } ProfileXUID;
+            
+        
+        struct
+        {
+            int NameLength;
+            char Name[NameLength];
+            
+            int TypeLength;
+            char Type[TypeLength];
+    
+            SizeInHeader DataHeader;
+            if (DataHeader.NameHash != Hash(Name + Type, 0, PROFILE_HASH_SEED))
+                Printf("WARNING: '%s' does not match expected hash of 0x%x", Name+Type, DataHeader.NameHash);
+            else
+                Printf("OK: '%s' state hash is correct\n", Name+Type);
+                
+            union
+            {
+                byte StateData[DataHeader.Size];
+                // Data is custom read depending on the Type
+                // Refer to <Name>@SaveStates->vtable->0x0C for deserialization. i.e PlaythroughState@SaveState
+                // most calls will be stream calls i.e ReadInt32 etc
+                
+                // Always starts with an int as the version
+                // Providing a fair few examples as a start varying from less to more complex
+                
+                // Also, version is always part of any state, but since we're in a union
+                // I defined it in each state structure
+                switch (Type)
+                {
+                    case "GenericIntegerList":
+                        GenericIntegerList State; break;
+                    case "RoadDiscoveryState":
+                        RoadDiscoveryState State; break;
+                    case "RadioState":
+                        RadioState State; break;
+                    case "PlayerState":
+                        PlayerState State; break;
+                    case "CarPerkSaveState":
+                        CarPerkSaveState State; break;
+                    case "ChallengeSaveDataBase": // Some have extra data on-top for this
+                        switch (Name)
+                        {
+                            case "CollectiblesChallengeSaveState":
+                                CollectiblesChallengeSaveState State; break;
+                            case "BadgeChallengeSaveState":
+                                BadgeChallengeSaveState State; break;
+                            case "HorizonOpenChallengeSaveState":
+                                HorizonOpenChallengeSaveState State; break;
+                            case "PhotoChallengeSaveState":
+                                PhotoChallengeSaveState State; break;
+                            default:
+                                ChallengeSaveDataBase State; break;
+                        }
+                        break;
+                    case "StatsSaveState":
+                        StatsSaveState State; break;
+                    case "VIPSuperWheelspinsSaveState":
+                        VIPSuperWheelspinsSaveState State; break;
+                    case "PerkPeriodicWheelspinSaveState":
+                        PerkPeriodicWheelspinSaveState State; break;
+                }
+                
+            } EntityData;
+            int Index;
+         } State[StateCount] <comment=Name, optimize=false>;
+    } BinaryStateEntity;
+} BinaryState;
+Printf("--------------------------\n");
+
+SizeInHeader DatabaseHeader;
+if (DatabaseHeader.NameHash != Hash(DATABASE_NAME, 0, PROFILE_HASH_SEED))
+    Printf("WARNING: 'database' header hash did not match 0x%x!\n", Hash(DATABASE_NAME, 0, PROFILE_HASH_SEED));   
+else
+    Printf("OK: 'database' header hash 0x%x matches\n", DatabaseHeader.NameHash);
+    
+union
+{
+    byte DatabaseData[DatabaseHeader.Size];   
+} Database;
+
+Printf("--------------------------\n");
+Printf("Profile XUID: %LX", BinaryState.BinaryStateEntity.ProfileXUID.XUID);
