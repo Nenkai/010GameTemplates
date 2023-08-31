@@ -55,6 +55,131 @@ typedef struct
     char Str[StrLen];
 } String4 <comment=Str, optimize=false>;
 
+typedef enum <int>
+{
+  DXGI_FORMAT_UNKNOWN = 0,
+  DXGI_FORMAT_R32G32B32A32_TYPELESS = 1,
+  DXGI_FORMAT_R32G32B32A32_FLOAT = 2,
+  DXGI_FORMAT_R32G32B32A32_UINT = 3,
+  DXGI_FORMAT_R32G32B32A32_SINT = 4,
+  DXGI_FORMAT_R32G32B32_TYPELESS = 5,
+  DXGI_FORMAT_R32G32B32_FLOAT = 6,
+  DXGI_FORMAT_R32G32B32_UINT = 7,
+  DXGI_FORMAT_R32G32B32_SINT = 8,
+  DXGI_FORMAT_R16G16B16A16_TYPELESS = 9,
+  DXGI_FORMAT_R16G16B16A16_FLOAT = 10,
+  DXGI_FORMAT_R16G16B16A16_UNORM = 11,
+  DXGI_FORMAT_R16G16B16A16_UINT = 12,
+  DXGI_FORMAT_R16G16B16A16_SNORM = 13,
+  DXGI_FORMAT_R16G16B16A16_SINT = 14,
+  DXGI_FORMAT_R32G32_TYPELESS = 15,
+  DXGI_FORMAT_R32G32_FLOAT = 16,
+  DXGI_FORMAT_R32G32_UINT = 17,
+  DXGI_FORMAT_R32G32_SINT = 18,
+  DXGI_FORMAT_R32G8X24_TYPELESS = 19,
+  DXGI_FORMAT_D32_FLOAT_S8X24_UINT = 20,
+  DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS = 21,
+  DXGI_FORMAT_X32_TYPELESS_G8X24_UINT = 22,
+  DXGI_FORMAT_R10G10B10A2_TYPELESS = 23,
+  DXGI_FORMAT_R10G10B10A2_UNORM = 24,
+  DXGI_FORMAT_R10G10B10A2_UINT = 25,
+  DXGI_FORMAT_R11G11B10_FLOAT = 26,
+  DXGI_FORMAT_R8G8B8A8_TYPELESS = 27,
+  DXGI_FORMAT_R8G8B8A8_UNORM = 28,
+  DXGI_FORMAT_R8G8B8A8_UNORM_SRGB = 29,
+  DXGI_FORMAT_R8G8B8A8_UINT = 30,
+  DXGI_FORMAT_R8G8B8A8_SNORM = 31,
+  DXGI_FORMAT_R8G8B8A8_SINT = 32,
+  DXGI_FORMAT_R16G16_TYPELESS = 33,
+  DXGI_FORMAT_R16G16_FLOAT = 34,
+  DXGI_FORMAT_R16G16_UNORM = 35,
+  DXGI_FORMAT_R16G16_UINT = 36,
+  DXGI_FORMAT_R16G16_SNORM = 37,
+  DXGI_FORMAT_R16G16_SINT = 38,
+  DXGI_FORMAT_R32_TYPELESS = 39,
+  DXGI_FORMAT_D32_FLOAT = 40,
+  DXGI_FORMAT_R32_FLOAT = 41,
+  DXGI_FORMAT_R32_UINT = 42,
+  DXGI_FORMAT_R32_SINT = 43,
+  DXGI_FORMAT_R24G8_TYPELESS = 44,
+  DXGI_FORMAT_D24_UNORM_S8_UINT = 45,
+  DXGI_FORMAT_R24_UNORM_X8_TYPELESS = 46,
+  DXGI_FORMAT_X24_TYPELESS_G8_UINT = 47,
+  DXGI_FORMAT_R8G8_TYPELESS = 48,
+  DXGI_FORMAT_R8G8_UNORM = 49,
+  DXGI_FORMAT_R8G8_UINT = 50,
+  DXGI_FORMAT_R8G8_SNORM = 51,
+  DXGI_FORMAT_R8G8_SINT = 52,
+  DXGI_FORMAT_R16_TYPELESS = 53,
+  DXGI_FORMAT_R16_FLOAT = 54,
+  DXGI_FORMAT_D16_UNORM = 55,
+  DXGI_FORMAT_R16_UNORM = 56,
+  DXGI_FORMAT_R16_UINT = 57,
+  DXGI_FORMAT_R16_SNORM = 58,
+  DXGI_FORMAT_R16_SINT = 59,
+  DXGI_FORMAT_R8_TYPELESS = 60,
+  DXGI_FORMAT_R8_UNORM = 61,
+  DXGI_FORMAT_R8_UINT = 62,
+  DXGI_FORMAT_R8_SNORM = 63,
+  DXGI_FORMAT_R8_SINT = 64,
+  DXGI_FORMAT_A8_UNORM = 65,
+  DXGI_FORMAT_R1_UNORM = 66,
+  DXGI_FORMAT_R9G9B9E5_SHAREDEXP = 67,
+  DXGI_FORMAT_R8G8_B8G8_UNORM = 68,
+  DXGI_FORMAT_G8R8_G8B8_UNORM = 69,
+  DXGI_FORMAT_BC1_TYPELESS = 70,
+  DXGI_FORMAT_BC1_UNORM = 71,
+  DXGI_FORMAT_BC1_UNORM_SRGB = 72,
+  DXGI_FORMAT_BC2_TYPELESS = 73,
+  DXGI_FORMAT_BC2_UNORM = 74,
+  DXGI_FORMAT_BC2_UNORM_SRGB = 75,
+  DXGI_FORMAT_BC3_TYPELESS = 76,
+  DXGI_FORMAT_BC3_UNORM = 77,
+  DXGI_FORMAT_BC3_UNORM_SRGB = 78,
+  DXGI_FORMAT_BC4_TYPELESS = 79,
+  DXGI_FORMAT_BC4_UNORM = 80,
+  DXGI_FORMAT_BC4_SNORM = 81,
+  DXGI_FORMAT_BC5_TYPELESS = 82,
+  DXGI_FORMAT_BC5_UNORM = 83,
+  DXGI_FORMAT_BC5_SNORM = 84,
+  DXGI_FORMAT_B5G6R5_UNORM = 85,
+  DXGI_FORMAT_B5G5R5A1_UNORM = 86,
+  DXGI_FORMAT_B8G8R8A8_UNORM = 87,
+  DXGI_FORMAT_B8G8R8X8_UNORM = 88,
+  DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM = 89,
+  DXGI_FORMAT_B8G8R8A8_TYPELESS = 90,
+  DXGI_FORMAT_B8G8R8A8_UNORM_SRGB = 91,
+  DXGI_FORMAT_B8G8R8X8_TYPELESS = 92,
+  DXGI_FORMAT_B8G8R8X8_UNORM_SRGB = 93,
+  DXGI_FORMAT_BC6H_TYPELESS = 94,
+  DXGI_FORMAT_BC6H_UF16 = 95,
+  DXGI_FORMAT_BC6H_SF16 = 96,
+  DXGI_FORMAT_BC7_TYPELESS = 97,
+  DXGI_FORMAT_BC7_UNORM = 98,
+  DXGI_FORMAT_BC7_UNORM_SRGB = 99,
+  DXGI_FORMAT_AYUV = 100,
+  DXGI_FORMAT_Y410 = 101,
+  DXGI_FORMAT_Y416 = 102,
+  DXGI_FORMAT_NV12 = 103,
+  DXGI_FORMAT_P010 = 104,
+  DXGI_FORMAT_P016 = 105,
+  DXGI_FORMAT_420_OPAQUE = 106,
+  DXGI_FORMAT_YUY2 = 107,
+  DXGI_FORMAT_Y210 = 108,
+  DXGI_FORMAT_Y216 = 109,
+  DXGI_FORMAT_NV11 = 110,
+  DXGI_FORMAT_AI44 = 111,
+  DXGI_FORMAT_IA44 = 112,
+  DXGI_FORMAT_P8 = 113,
+  DXGI_FORMAT_A8P8 = 114,
+  DXGI_FORMAT_B4G4R4A4_UNORM = 115,
+  DXGI_FORMAT_P208 = 130,
+  DXGI_FORMAT_V208 = 131,
+  DXGI_FORMAT_V408 = 132,
+  DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
+  DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
+  DXGI_FORMAT_FORCE_UINT = 0xffffffff
+} DXGI_FORMAT;
 
 // ---------------------------------------------
 
@@ -90,12 +215,12 @@ const uint TAG_METADATA_Atlas = 0x41545354; // "ATST"
 
 typedef struct
 {
-    int Count <format=hex>;
+    int Count;
     int TotalSize <format=hex>;
     byte BufferWidth;
     byte Pad;
-    short Unk;
-    int unk;
+    short NumElements;
+    DXGI_FORMAT Type;
 } GraphicsHeader;
 
 struct MetaData;
@@ -105,8 +230,7 @@ typedef struct
     
     uint Tag <format=hex, bgcolor=cBlue>;
     byte Unk : 4;
-    byte IdLength : 4;
-    byte Unk;
+    short IdLength : 12;
     short OffsetToContents <format=hex>;
     
     FSeek(metaDataBasePos + OffsetToContents);
@@ -123,7 +247,7 @@ typedef struct
         case TAG_METADATA_Atlas:
             struct
             {
-                byte unk[3];
+                byte xd[3];
             } Atlas;
             break;
             
@@ -174,7 +298,9 @@ typedef struct
                 struct
                 {
                     String4 Name;
-                    short flags[3];
+                    short ParentId;
+                    short FirstChildIndex;
+                    short NextIndex;
                     float Matrix4[0x10];
                 } Bone[BoneCount] <optimize=false>;
             } SkeletonBlob;
@@ -219,13 +345,16 @@ typedef struct
             {
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 9))
                 {
-                    short UnkV9[4];
+                    short UnkV9;
+                    short MaterialID;
+                    short UnkV9;
+                    short UnkV9;
                 }
                 
                 short UnkIndex <bgcolor=cRed>;
-                short MaterialID;
-                byte unk;
-                byte unk;
+                short UnkFlag;   
+                byte LODLevel1;
+                byte LODLevel2;
                 short unk;
                 byte unk;
                 
@@ -245,16 +374,17 @@ typedef struct
                 
                 int Unk;
                 int Unk;
-                uint Unk;
-                uint Unk;
+                uint FaceStartIndex;
+                uint UnkColorMaybe <format=hex>;
                 uint FaceCount;
-                uint Unk;
-                
+                uint VertexStartIndex;
+              
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 6))
                 {
                     float UnkV6;
-                    uint UnkV6;
+                    uint NumVerts;
                 }
+                
                 
                 uint Unk;
                 uint UnkEntryCount;
@@ -269,8 +399,8 @@ typedef struct
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 4))
                 {
-                    int UnkV4;
-                    int UnkV4;
+                    int VertexLayoutIndex;
+                    int UnkV42;
                 }
                 
                 uint UnkCount2;
@@ -311,6 +441,28 @@ typedef struct
             {
                 short SemanticCount;
                 String4 Names[SemanticCount];
+                short ElementCount;
+                
+                struct
+                {
+                    short m_SemanticNameIndex;
+                    short SemanticIndex;
+                    int InputSlot;
+                    DXGI_FORMAT Format;
+                    int AlignedByteOffset <comment="-1 = D3D12_APPEND_ALIGNED_ELEMENT ">;
+                    int InstanceDataStepRate;
+                } D3D12_INPUT_LAYOUT_DESC[ElementCount] <comment=Format>;
+                
+                if (VersionMajor >= 1)
+                    DXGI_FORMAT PackedFormats[ElementCount];
+
+                if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 1))
+                    uint BitFlags <format=hex, comment="Bit for each semantic present">;
+                    
+                // TEXCOORD/TEXCOORD_XONLY: 0x10, 0x08, 0x04, 0x02, 0x01
+                // TANGENT: 0x200, 0x100, 0x80, 0x40, 0x20
+                // COLOR: 0x400
+                    
             } VertexLayoutBlob;
             break;
             
@@ -318,8 +470,11 @@ typedef struct
             struct
             {
                 GraphicsHeader hdr;
-                byte buffer[hdr.BufferWidth * hdr.Count];
-            } VertedBufferBlob;
+                struct
+                {
+                    byte buffer[hdr.BufferWidth];
+                } Vertex[hdr.Count] <optimize=false>;
+            } VertexBufferBlob;
             break;
             
         case TAG_BLOB_MorphBuffer:
@@ -351,12 +506,45 @@ string PrintBlob(Blob& blob)
 {
      // Get a string out of it
      local string s = GetTagAsString(blob.Tag);
-     if (s == "TXCB")
-        return "TXCB - TeXture Content Blob";
-     else if (s == "Mesh")
-        return "Mesh (" + (blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "") + ")";
-    else
-        return s;
+     
+     local string ret = "";
+     switch (s)
+     {
+        case "TXCB":
+           ret = "TXCB - TeXture Content Blob";
+           break;
+           
+        case "MatI":
+            SPrintf(ret, "Matl - Material [ID: %d] (Name: %s)", blob.metaData[1].Id, 
+                blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "<none>");
+            break;
+            
+        case "Mesh":
+            SPrintf(ret, "Mesh (Name: %s)", blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "<none>");
+            break;
+            
+        case "VLay":
+            SPrintf(ret, "VLay - Vertex Layout [ID: %d]", blob.metaData[0].Id);
+            break;
+            
+        case "IndB":
+            SPrintf(ret, "IndB - Index Buffer [ID: %d] (Count: %d)", blob.metaData[0].Id, blob.IndexBufferBlob.hdr.Count);
+            break;
+            
+        case "VerB":
+            SPrintf(ret, "VerB - Vertex Buffer [ID: %d] (Count: %d)", blob.metaData[0].Id, blob.VertexBufferBlob.hdr.Count);
+            break;
+            
+        case "MBuf":
+            SPrintf(ret, "MBuf - Morph Buffer [ID: %d] (Count: %d)", blob.metaData[0].Id, blob.MorphBufferBlob.hdr.Count);
+            break;
+            
+        default:
+            ret = s;
+            break;
+     }
+     
+     return ret;
 }
 
 typedef struct
