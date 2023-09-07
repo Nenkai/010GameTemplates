@@ -3,13 +3,15 @@
 //
 //      File: CarScene (Forza .carbin)
 //   Authors: Nenkai
-//   Version: 1.0 (Supports FH3/4/5)
+//   Version: 1.1 (Supports FH3/4/5)
 //   Purpose: Master scene file definition for models
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+
+BitfieldDisablePadding();
 
 typedef struct
 {
@@ -194,58 +196,59 @@ string PrintCarRenderModel11(CarRenderModel11& model)
     return model.Path.Str;   
 }
 
+typedef enum <uint>
+{
+    CarPartEngine = 0,
+    CarPartDrivetrain = 1,
+    CarPartCarBody = 2,
+    CarPartMotor = 3,
+    CarPartBrakes = 4,
+    CarPartSpringDamper = 5,
+    CarPartAntiSwayFront = 6,
+    CarPartAntiSwayRear = 7,
+    CarPartTireCompound = 8,
+    CarPartRearWing = 9,
+    CarPartRimSizeFront = 10,
+    CarPartRimSizeRear = 11,
+    CarPartCamshaft = 12,
+    CarPartValves = 13,
+    CarPartDisplacement = 14,
+    CarPartPistonsCompression = 15,
+    CarPartFuelSystem = 16,
+    CarPartIgnition = 17,
+    CarPartExhaust = 18,
+    CarPartIntake = 19,
+    CarPartFlywheel = 20,
+    CarPartManifold = 21,
+    CarPartRestrictorPlate = 22,
+    CarPartOilCooling = 23,
+    CarPartSingleTurbo = 24,
+    CarPartTwinTurbo = 25,
+    CarPartQuadTurbo = 26,
+    CarPartSuperchargerCSC = 27,
+    CarPartSuperchargerDSC = 28,
+    CarPartIntercooler = 29,
+    CarPartClutch = 30,
+    CarPartTransmission = 31,
+    CarPartDriveline = 32,
+    CarPartDifferential = 33,
+    CarPartFrontBumper = 34,
+    CarPartRearBumper = 35,
+    CarPartHood = 36,
+    CarPartSideSkirts = 37,
+    CarPartTireWidthFront = 38,
+    CarPartTireWidthRear = 39,
+    CarPartWeightReduction = 40,
+    CarPartChassisStiffness = 41,
+    CarPartMotorParts = 42,
+    CarPartWheels = 43,
+} PartType;
+
 typedef struct
 {
-    enum <byte>
-    {
-        CarPartEngine = 0,
-        CarPartDrivetrain = 1,
-        CarPartCarBody = 2,
-        CarPartMotor = 3,
-        CarPartBrakes = 4,
-        CarPartSpringDamper = 5,
-        CarPartAntiSwayFront = 6,
-        CarPartAntiSwayRear = 7,
-        CarPartTireCompound = 8,
-        CarPartRearWing = 9,
-        CarPartRimSizeFront = 10,
-        CarPartRimSizeRear = 11,
-        CarPartCamshaft = 12,
-        CarPartValves = 13,
-        CarPartDisplacement = 14,
-        CarPartPistonsCompression = 15,
-        CarPartFuelSystem = 16,
-        CarPartIgnition = 17,
-        CarPartExhaust = 18,
-        CarPartIntake = 19,
-        CarPartFlywheel = 20,
-        CarPartManifold = 21,
-        CarPartRestrictorPlate = 22,
-        CarPartOilCooling = 23,
-        CarPartSingleTurbo = 24,
-        CarPartTwinTurbo = 25,
-        CarPartQuadTurbo = 26,
-        CarPartSuperchargerCSC = 27,
-        CarPartSuperchargerDSC = 28,
-        CarPartIntercooler = 29,
-        CarPartClutch = 30,
-        CarPartTransmission = 31,
-        CarPartDriveline = 32,
-        CarPartDifferential = 33,
-        CarPartFrontBumper = 34,
-        CarPartRearBumper = 35,
-        CarPartHood = 36,
-        CarPartSideSkirts = 37,
-        CarPartTireWidthFront = 38,
-        CarPartTireWidthRear = 39,
-        CarPartWeightReduction = 40,
-        CarPartChassisStiffness = 41,
-        CarPartMotorParts = 42,
-        CarPartWheels = 43,
-    } PartType;
-
+    PartType Type : 8;
     ushort CarPartVersion <comment="FH3/FH4: 2">;
-    uint Unk;
+    PartType Type2 : 32;
     uint ModelCount;
     CarRenderModel11 Models[ModelCount] <optimize=false>;
     
@@ -256,8 +259,9 @@ typedef struct
 
 string PartToString(Part& part)
 {
-    return EnumToString(part.PartType);   
+    return EnumToString(part.Type);   
 }
+    
 struct
 {
     ushort Version <comment="FH3/FH4 = 5, FH5: 6">;
@@ -295,7 +299,7 @@ struct
         struct
         {
             ushort UpgradablePartsVersion <comment="FH3/FH4/FH5: 3">;
-            uint Unk;
+            PartType Type;
             uint UpgradeCount;
             
             struct
