@@ -1,0 +1,342 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: CarScene (Forza .carbin)
+//   Authors: Nenkai
+//   Version: 1.0 (Supports FH3/4/5)
+//   Purpose: Master scene file definition for models
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int StrLen;
+    if (StrLen > 0)
+        char Str[StrLen];
+} String4 <comment=Str, optimize=false>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vec4;
+
+typedef struct
+{
+    Vec4 Min;
+    Vec4 Max;
+} Bounds; 
+
+typedef struct
+{
+    float M11;
+    float M12;
+    float M13;
+    float M14;
+    
+    float M21;
+    float M22;
+    float M23;
+    float M24;
+    
+    float M31;
+    float M32;
+    float M33;
+    float M34;
+    
+    float M41;
+    float M42;
+    float M43;
+    float M44;
+} Matrix4x4;
+
+typedef struct
+{
+    ushort CarRenderModel11Version <comment="FH3/FH4: 16, FH5: 18">;
+    String4 Path;
+    Matrix4x4 Matrix;
+    
+    if (CarRenderModel11Version < 5)
+        uint LODBits;
+    else
+        ushort LODBits;   
+    
+    String4 Name;
+    short Unk;
+    byte unk;
+    
+    int Unk; // 5 bits?
+    
+    if (CarRenderModel11Version < 9)
+        String4 Unk; // was removed later on
+    
+    if (CarRenderModel11Version >= 2)
+    {
+        uint ContainerCountV2;
+        if (ContainerCountV2 > 0)
+        {
+            struct
+            {
+                String4 Name;
+                int Unk;
+            } Container[ContainerCountV2] <optimize=false>;
+        }
+    }
+    
+    if (CarRenderModel11Version >= 3)
+    {
+        uint ContainerCountV3;   
+        struct
+        {
+            String4 Name;
+            int Unk;
+        } Container[ContainerCountV3] <optimize=false>;
+    }
+    
+    if (CarRenderModel11Version >= 6)
+    {
+        byte Droppable;
+        
+        if (Droppable)
+        {
+            float DropValue;
+            uint DropPartID;
+        }
+    }
+    
+    if (CarRenderModel11Version >= 8)
+        float BreakAmount;   
+
+    if (CarRenderModel11Version >= 9)
+    {
+        uint AOMapInfoCount;
+        struct
+        {
+            ushort AOMapInfoVersion <comment="FH3/FH4: 3">;
+            String4 Path;
+            int Unk;
+            int Unk2;
+            
+            if (AOMapInfoVersion == 1)
+            {
+                short UnkV1;
+                byte UnkV1;
+            }
+            else if (AOMapInfoVersion >= 2)
+            {
+                GUID guid;
+            }
+            
+            byte Unk;
+            
+            if (AOMapInfoVersion >= 3)
+            {
+                signed byte unk;
+                signed byte unk;
+            }
+        } AOMapInfo[AOMapInfoCount] <optimize=false>; // CarScene::ICarRenderModel::AOMapInfo
+    }
+    
+    if (CarRenderModel11Version >= 10)
+        byte IsInteriorWindshield;
+    
+    if (CarRenderModel11Version >= 11)
+    {
+        byte UnkV11_1;
+        byte UnkV11_2;
+        uint UnkV11_3;
+        uint UnkV11_4;
+        uint UnkV11_5;
+        uint UnkV11_6;
+    }
+    
+    if (CarRenderModel11Version >= 12)
+        String4 UnkV12;
+    
+    if (CarRenderModel11Version >= 13)
+        GUID GuidV13;
+    
+    if (CarRenderModel11Version >= 14)
+    {
+        GUID GuidV14;
+        uint UnkV14;
+    }
+    
+    if (CarRenderModel11Version >= 15)
+        uint UnkV15;
+    
+    if (CarRenderModel11Version >= 16)
+    {
+        uint UnkCountV16;
+        if (UnkCountV16 > 0)
+        {
+            struct
+            {
+                GUID UnkGuidV16;
+            } UnkGUIDs[UnkCountV16];
+        }
+    }
+    
+    if (CarRenderModel11Version >= 17) // FH5
+        ubyte UnkV17;
+        
+    if (CarRenderModel11Version >= 18) // FH5
+        uint UnkV18;
+} CarRenderModel11 <comment=PrintCarRenderModel11>;
+
+string PrintCarRenderModel11(CarRenderModel11& model)
+{
+    return model.Path.Str;   
+}
+
+typedef struct
+{
+    enum <byte>
+    {
+        CarPartEngine = 0,
+        CarPartDrivetrain = 1,
+        CarPartCarBody = 2,
+        CarPartMotor = 3,
+        CarPartBrakes = 4,
+        CarPartSpringDamper = 5,
+        CarPartAntiSwayFront = 6,
+        CarPartAntiSwayRear = 7,
+        CarPartTireCompound = 8,
+        CarPartRearWing = 9,
+        CarPartRimSizeFront = 10,
+        CarPartRimSizeRear = 11,
+        CarPartCamshaft = 12,
+        CarPartValves = 13,
+        CarPartDisplacement = 14,
+        CarPartPistonsCompression = 15,
+        CarPartFuelSystem = 16,
+        CarPartIgnition = 17,
+        CarPartExhaust = 18,
+        CarPartIntake = 19,
+        CarPartFlywheel = 20,
+        CarPartManifold = 21,
+        CarPartRestrictorPlate = 22,
+        CarPartOilCooling = 23,
+        CarPartSingleTurbo = 24,
+        CarPartTwinTurbo = 25,
+        CarPartQuadTurbo = 26,
+        CarPartSuperchargerCSC = 27,
+        CarPartSuperchargerDSC = 28,
+        CarPartIntercooler = 29,
+        CarPartClutch = 30,
+        CarPartTransmission = 31,
+        CarPartDriveline = 32,
+        CarPartDifferential = 33,
+        CarPartFrontBumper = 34,
+        CarPartRearBumper = 35,
+        CarPartHood = 36,
+        CarPartSideSkirts = 37,
+        CarPartTireWidthFront = 38,
+        CarPartTireWidthRear = 39,
+        CarPartWeightReduction = 40,
+        CarPartChassisStiffness = 41,
+        CarPartMotorParts = 42,
+        CarPartWheels = 43,
+    } PartType;
+
+    ushort CarPartVersion <comment="FH3/FH4: 2">;
+    uint Unk;
+    uint ModelCount;
+    CarRenderModel11 Models[ModelCount] <optimize=false>;
+    
+    if (CarPartVersion >= 2)
+        Bounds BoundsV2;
+        
+} Part <comment=PartToString, optimize=false>;
+
+string PartToString(Part& part)
+{
+    return EnumToString(part.PartType);   
+}
+struct
+{
+    ushort Version <comment="FH3/FH4 = 5, FH5: 6">;
+    
+    if (Version >= 3)
+        GUID GuidV3;
+        
+    if (Version >= 5)
+        byte UnkV5;
+    uint Unk;
+    
+    String4 ModelName;
+    String4 ModelBundlePath;
+    
+    if (Version >= 2)
+        short VisibleLODBitsV2 <format=hex>;
+        
+    if (Version < 4)
+    {
+        uint PartCount;
+        struct
+        {
+            String4 Path;
+        } PartOld[PartCount];
+    }
+    else
+    {
+        uint NonUpgradablePartCount;
+        Part NonUpgradableParts[NonUpgradablePartCount];
+    }
+    
+    uint UpgradablePartCount; // Count for something?
+    if (UpgradablePartCount)
+    {
+        struct
+        {
+            ushort UpgradablePartsVersion <comment="FH3/FH4/FH5: 3">;
+            uint Unk;
+            uint UpgradeCount;
+            
+            struct
+            {
+                ushort UpgradeVersion <comment="FH3/FH4/FH5: 3">;
+                byte Unk;
+                byte Unk2;
+                uint ID;
+                int Unk4;
+                byte Unk5;
+                
+                if (UpgradeVersion < 3)
+                {
+                    uint ModelCount;
+                    CarRenderModel11 Models[ModelCount];
+                }
+                
+                if (UpgradeVersion >= 2)
+                    Bounds BoundsV2;
+                    
+            } Upgrade[UpgradeCount] <optimize=false>; // CarScene::UpgradablePart::Upgrade
+            
+            if (UpgradablePartsVersion >= 3)
+            {
+                uint ModelCount;
+                struct
+                {
+                    uint IDCount;
+                    uint IDs[IDCount];
+                    CarRenderModel11 Model;
+                } UnkModelEntry[ModelCount] <optimize=false>;
+                
+            }
+        } UpgradableParts[UpgradablePartCount] <optimize=false>;
+    }
+
+    if (Version >= 6) // FH5
+        byte UnkV6;
+} CarScene;
+
+if (FTell() == FileSize())
+    Printf("OK: CarScene file fully parsed!");
+else
+    Printf("Warning: CarScene file was not fully parsed");
