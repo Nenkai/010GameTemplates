@@ -1,0 +1,62 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: FH5 Hash Manifest
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// From reverse engineered code, read through a stream
+// ulong then int
+
+struct
+{
+    uint64 FileNameHash <format=hex>;
+    int Unk;
+} HashManifestEntry[FileSize() / 12] <comment="Number of entries depends on file size">;
+
+/*
+unsigned __int64 __fastcall Hash(char *path, char toLower, unsigned int seed)
+{
+  char v3; // al
+  char *v4; // r14
+  char *v8; // rbx
+  int v9; // ecx
+  unsigned int i; // ebx
+  int v11; // ecx
+
+  v3 = *path;
+  v4 = path + 1;
+  v8 = path + 1;
+  if ( *path )
+  {
+    do
+    {
+      if ( toLower )
+        v3 = tolower(v3);
+      v9 = v3;
+      v3 = *v8;
+      seed ^= v9 + (seed >> 2) + 32 * seed;
+      ++v8;
+    }
+    while ( v3 );
+    v3 = *path;
+  }
+  for ( i = seed; v3; ++v4 )
+  {
+    if ( toLower )
+      v3 = tolower(v3);
+    v11 = v3;
+    v3 = *v4;
+    i ^= v11 + (i >> 2) + 32 * i;
+  }
+  return seed | (i << 32);
+}
+
+Hash(path, false, 0x1505u);
+*/
