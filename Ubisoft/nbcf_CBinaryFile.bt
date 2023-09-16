@@ -1,0 +1,70 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Binary XML, used in various ubisoft games - Far Cry, Watch Dogs, The Crew
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    local ubyte val = ReadByte();
+    if (val < 0xFE)
+        ubyte Value;
+    else
+    {
+        ubyte Flag;
+        int Value;   
+    }
+
+} PackedValue;
+
+int HasOffset(PackedValue& value)
+{
+    if (exists(value.Flag))
+        return value.Flag == 0xFE;
+    else
+        return value.Value == 0xFE;
+}
+
+typedef struct NodeAttr
+{
+    uint NameHash <format=hex, comment="CRC">;
+    PackedValue SizeOrOffset;
+    if (!HasOffset(SizeOrOffset))
+        byte Data[SizeOrOffset.Value];
+};
+
+struct Node;
+struct Node
+{
+    PackedValue ChildCountOrPointer;
+        
+    if (!HasOffset(ChildCountOrPointer))
+    {
+        uint NodeNameHash <format=hex, comment="CRC">;
+        PackedValue AttrCount;
+        
+        if (AttrCount.Value > 0)
+            NodeAttr Attributes[AttrCount.Value] <optimize=false>;
+        
+        if (ChildCountOrPointer.Value > 0)
+            Node Child[ChildCountOrPointer.Value] <optimize=false>;
+    }
+};
+
+struct
+{
+    uint Magic <format=hex, comment="Is checked">;
+    ushort VersionMajor;
+    ushort Flags <comment="1 = Debug, not stripped">;
+    int Unk;
+    int Unk2;
+    
+    Node Root;
+} CBinaryFile;
