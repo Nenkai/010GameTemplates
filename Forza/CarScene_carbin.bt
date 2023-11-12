@@ -3,7 +3,7 @@
 //
 //      File: CarScene (Forza .carbin)
 //   Authors: Nenkai
-//   Version: 1.1 (Supports FH3/4/5)
+//   Version: 1.2 (Supports FH3/4/5)
 //   Purpose: Master scene file definition for models
 //  Category: 
 // File Mask: 
@@ -85,8 +85,9 @@ typedef struct
             struct
             {
                 String4 Name;
-                int Unk;
-            } Container[ContainerCountV2] <optimize=false>;
+                int BundleSizeMaybe;
+                byte BundleMaybe[BundleSizeMaybe];
+            } ContainerV2[ContainerCountV2] <optimize=false>;
         }
     }
     
@@ -97,7 +98,7 @@ typedef struct
         {
             String4 Name;
             int Unk;
-        } Container[ContainerCountV3] <optimize=false>;
+        } ContainerV3[ContainerCountV3] <optimize=false>;
     }
     
     if (CarRenderModel11Version >= 6)
@@ -198,50 +199,57 @@ string PrintCarRenderModel11(CarRenderModel11& model)
 
 typedef enum <uint>
 {
-    CarPartEngine = 0,
-    CarPartDrivetrain = 1,
-    CarPartCarBody = 2,
-    CarPartMotor = 3,
-    CarPartBrakes = 4,
-    CarPartSpringDamper = 5,
-    CarPartAntiSwayFront = 6,
-    CarPartAntiSwayRear = 7,
-    CarPartTireCompound = 8,
-    CarPartRearWing = 9,
-    CarPartRimSizeFront = 10,
-    CarPartRimSizeRear = 11,
-    CarPartCamshaft = 12,
-    CarPartValves = 13,
-    CarPartDisplacement = 14,
-    CarPartPistonsCompression = 15,
-    CarPartFuelSystem = 16,
-    CarPartIgnition = 17,
-    CarPartExhaust = 18,
-    CarPartIntake = 19,
-    CarPartFlywheel = 20,
-    CarPartManifold = 21,
-    CarPartRestrictorPlate = 22,
-    CarPartOilCooling = 23,
-    CarPartSingleTurbo = 24,
-    CarPartTwinTurbo = 25,
-    CarPartQuadTurbo = 26,
-    CarPartSuperchargerCSC = 27,
-    CarPartSuperchargerDSC = 28,
-    CarPartIntercooler = 29,
-    CarPartClutch = 30,
-    CarPartTransmission = 31,
-    CarPartDriveline = 32,
-    CarPartDifferential = 33,
-    CarPartFrontBumper = 34,
-    CarPartRearBumper = 35,
-    CarPartHood = 36,
-    CarPartSideSkirts = 37,
-    CarPartTireWidthFront = 38,
-    CarPartTireWidthRear = 39,
-    CarPartWeightReduction = 40,
-    CarPartChassisStiffness = 41,
-    CarPartMotorParts = 42,
-    CarPartWheels = 43,
+    // Type                             DB Table
+    CarPartEngine = 0,               // List_UpgradeEngine
+    CarPartDrivetrain = 1,           // List_UpgradeDrivetrain
+    CarPartCarBody = 2,              // List_UpgradeCarBody
+    CarPartMotor = 3,                // List_UpgradeMotor
+    CarPartBrakes = 4,               // List_UpgradeBrakes
+    CarPartSpringDamper = 5,         // List_UpgradeSpringDamper
+    CarPartAntiSwayFront = 6,        // List_UpgradeAntiSwayFront
+    CarPartAntiSwayRear = 7,         // List_UpgradeAntiSwayRear
+    CarPartTireCompound = 8,         // List_UpgradeTireCompound
+    CarPartRearWing = 9,             // List_UpgradeRearWing
+    CarPartRimSizeFront = 10,        // List_UpgradeRimSizeFront
+    CarPartRimSizeRear = 11,         // List_UpgradeRimSizeRear
+    CarPartCamshaft = 12,            // List_UpgradeEngineCamshaft
+    CarPartValves = 13,              // List_UpgradeEngineValves
+    CarPartDisplacement = 14,        // List_UpgradeEngineDisplacement
+    CarPartPistonsCompression = 15,  // List_UpgradeEnginePistonsCompression
+    CarPartFuelSystem = 16,          // List_UpgradeEngineFuelSystem
+    CarPartIgnition = 17,            // List_UpgradeEngineIgnition
+    CarPartExhaust = 18,             // List_UpgradeEngineExhaust
+    CarPartIntake = 19,              // List_UpgradeEngineIntake
+    CarPartFlywheel = 20,            // List_UpgradeEngineFlywheel
+    CarPartManifold = 21,            // List_UpgradeEngineManifold
+    CarPartRestrictorPlate = 22,     // List_UpgradeEngineRestrictorPlate
+    CarPartOilCooling = 23,          // List_UpgradeEngineOilCooling
+    CarPartSingleTurbo = 24,         // List_UpgradeEngineTurboSingle
+    CarPartTwinTurbo = 25,           // List_UpgradeEngineTurboTwin
+    CarPartQuadTurbo = 26,           // List_UpgradeEngineTurboQuad
+    CarPartSuperchargerCSC = 27,     // List_UpgradeEngineCSC
+    CarPartSuperchargerDSC = 28,     // List_UpgradeEngineDSC
+    CarPartIntercooler = 29,         // List_UpgradeEngineIntercooler
+    CarPartClutch = 30,              // List_UpgradeDrivetrainClutch
+    CarPartTransmission = 31,        // List_UpgradeDrivetrainTransmission
+    CarPartDriveline = 32,           // List_UpgradeDrivetrainDriveline
+    CarPartDifferential = 33,        // List_UpgradeDrivetrainDifferential
+    CarPartFrontBumper = 34,         // List_UpgradeCarBodyFrontBumper
+    CarPartRearBumper = 35,          // List_UpgradeCarBodyRearBumper
+    CarPartHood = 36,                // List_UpgradeCarBodyHood
+    CarPartSideSkirts = 37,          // List_UpgradeCarBodySideSkirt
+    CarPartTireWidthFront = 38,      // List_UpgradeCarBodyTireWidthFront
+    CarPartTireWidthRear = 39,       // List_UpgradeCarBodyTireWidthRear
+    CarPartWeightReduction = 40,     // List_UpgradeCarBodyWeight
+    CarPartChassisStiffness = 41,    // List_UpgradeCarBodyChassisStiffness
+    CarPartMotorParts = 42,          // List_UpgradeMotorParts
+    // #define NUM_PARTS_TOTAL = 42
+    
+    // Aside
+    CarPartWheelStyle = 43,
+    CarPartAspiration = 44,
+    
+    
 } PartType;
 
 typedef struct
