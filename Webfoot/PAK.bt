@@ -15,6 +15,8 @@ typedef struct
     int IsCompressed <comment="Should be 1">;
     int DecompressedChunkSize <format=hex>;
     // Compressed or decompressed data follows...
+    // JCALG1 (without header) is most likely the right algorithm based on dissasembly & magic values (0x27F, 0x37FF, 0x10000)
+    // 0x2022174 - American Girl - Kit Mystery Challenge! (USA)
 } ChunkInfo;
         
 struct Entry;
@@ -79,3 +81,6 @@ uint Hash(string str, int strLen)
   return uVar2 ^ -1;
 }
 */
+
+// File fetching done at 0x2020d04 - American Girl - Kit Mystery Challenge! (USA)
+// FileSystem init at 0x2020b0c
