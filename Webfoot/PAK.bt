@@ -1,0 +1,81 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Webfoot .PAK
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+typedef struct
+{
+    int IsCompressed <comment="Should be 1">;
+    int DecompressedChunkSize <format=hex>;
+    // Compressed or decompressed data follows...
+} ChunkInfo;
+        
+struct Entry;
+typedef struct
+{
+    uint PathCRC <format=hex>;
+    uint FileChunksOffset <format=hex>;
+    uint DecompressedFileSize <format=hex>;
+    uint NumChunks <comment="Splitted into 0x2000 chunks">;
+    
+    FSeek(FileChunksOffset);
+    int ChunkOffsets[NumChunks] <format=hex>;
+    
+    local int j;
+    
+    if (NumChunks == 1)
+    {
+        ChunkInfo ChunkInfo_;
+    }
+    else
+    {
+        for (j = 0; j < NumChunks - 1; j++)
+        {
+            FSeek(ChunkOffsets[j]);
+            ChunkInfo ChunkInfo_;
+        }
+    }
+    
+    FSeek(FileSize());
+    
+} Entry;
+
+struct
+{
+   struct
+   {
+       int FileCount;
+   } Header <bgcolor=cPurple>;
+   
+   local int i = 0;
+   for (i = 0; i < Header.FileCount; i++)
+   {
+       FSeek(4 + (i * 0x10));
+       Entry entry;
+   }
+   
+} Pak;
+
+// Valid file
+// Hash("icon_backpack.bmp")
+// Note: lowercase'd
+
+/* 0x2027838 - American Girl - Kit Mystery Challenge! (USA)
+uint Hash(string str, int strLen)
+{  
+  int result = -1;
+  
+  local int i;
+  for (i = 0; i < strLen; i++)
+      result = g_Crc[result & 0xff ^ str[i]] ^ result >> 8; // g_Crc = 0x00000000, 0x77073096, ...
+
+  return uVar2 ^ -1;
+}
+*/
