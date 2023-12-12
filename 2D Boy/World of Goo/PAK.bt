@@ -24,7 +24,7 @@ BigEndian();
 uint Hash(string str)
 {
     local int i = 0;
-    local uint value = Header.InitialHash_Magic; // Unk bool in header might be used as start value?
+    local uint value = Pak.Header.InitialHash_Magic; // Unk bool in header might be used as start value?
     
     // If starts by \, skip x chars
     // If is below 48 (below number range), skip x chars
@@ -73,7 +73,7 @@ struct
             byte Data[FileSize];
         } Entry;
     }
-} Header;
+} Pak;
 
 // One valid file:
-// Hash("res/images/levelimages/OCD_flag1.png.binbig");
+//Printf("%x", Hash("res/images/levelimages/OCD_flag1.png.binbig"));
