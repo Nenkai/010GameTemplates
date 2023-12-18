@@ -12,13 +12,75 @@
 //------------------------------------------------
 
 // Note1: may not stricly be used for just master.pak
-// Note2: Embedded pak at 0x802823e0 of executable (0x27E4E0 physical address) - default pak?
-// Note3: Another one at 0x80289020 (0x285120 physical address) - with unk param 1 at 0x08
+
+// Note2: Executable has embedded paks:
+// * WoG USA Release 
+//   - Lookup pak header: 0x802823E0 of executable (0x27E4E0 physical address)
+//   - Core resources pak: 0x80289020 (0x285120 physical address)
+// * WoG USA Demo 
+//   - Lookup pak header: 0x80277840 of executable (0x273940 physical address)
+//   - Core resources pak: 0x8027CA00 (0x278B00 physical address)
+
 // Note4: Searching for hash is just done through top to bottom, no binary searching - also other paks may be used
-// Note5: If there is any compression, it'll most likely be LZ as random chunks of text can be seen throughout
+// Note5: If there is any compression, it'll most likely be LZ as random chunks of text can be seen throughout (wii compression?)
 // Note6: Compression is maybe handled outside file system code.
 
+// PPC is Big Endian
 BigEndian();
+
+// Lookup/Toc without data for pak file within executable (00000001.app)
+// May be used as fallback lookup table if missing from pak?
+const uint DOL_Toc1_Offset = 0x27E4E0; 
+
+// Fallback toc (with data) for core files (properties folder?) within executable (00000001.app)
+const uint DOL_Toc2_Offset = 0x285120; // Some XMLs
+
+//FSeek(DOL_Toc2_Offset);
+
+local int BaseFilePos = FTell();
+
+struct
+{
+    
+    struct
+    {
+        int ResourceCount;
+        uint InitialHash_Magic <format=hex>;
+        uint IsCompressed;
+    } Header;
+    
+    local int i = 0;
+    
+    for (i = 0; i < Header.ResourceCount; i++)
+    {
+        FSeek(BaseFilePos + 0x0C + (i * 0x10));
+        struct
+        {
+            uint Hash <format=hex>;
+            uint ResourceOffset <format=hex>;
+            uint ResourceSize <format=hex>;
+            union 
+            {
+                uint Value <format=hex>;
+                struct
+                {
+                    ushort Width;
+                    ushort Height;
+                } WH;
+            } ResourceMetadata;
+            
+            if (BaseFilePos != DOL_Toc1_Offset)
+            {
+                FSeek(BaseFilePos + ResourceOffset);
+                byte ResourceData[ResourceSize];
+            }
+        } Resource;
+    }
+} Pak;
+
+///////////////////////////////////
+// Hashing
+///////////////////////////////////
 
 // 0x800f1fb4 - SearchByHash(WiiStorageDVD *param_1, char *path, PakWrapper *param_3)
 uint Hash(string str)
@@ -45,35 +107,6 @@ uint Hash(string str)
     
     return value;
 }
-
-struct
-{
-    struct
-    {
-        int ResourceCount;
-        uint InitialHash_Magic;
-        uint UnkBool <comment="Package is processed differently if this isn't 0, i.e file sizes aren't present?">;
-    } Header;
-    
-    local int basePos = FTell();
-    local int i = 0;
-    
-    for (i = 0; i < Header.ResourceCount; i++)
-    {
-        FSeek(0x0C + (i * 0x10));
-        struct
-        {
-            uint Hash <format=hex>;
-            uint FileOffset <format=hex>;
-            uint FileSize <format=hex>; // Not there if Header.UnkBool is not 0
-            ushort Unk <format=hex>;
-            ushort Unk2 <format=hex>;
-            
-            FSeek(FileOffset);
-            byte Data[FileSize];
-        } Entry;
-    }
-} Pak;
 
 // One valid file:
 //Printf("%x", Hash("res/images/levelimages/OCD_flag1.png.binbig"));
