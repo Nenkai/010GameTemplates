@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Boy::WiiImage (.png.binbig)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .png.binbig
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int countDistinct(byte a[], int n)
+{
+   local int i, j, count = 1;
+   for (i = 1; i < n; i++)
+   {
+      for (j = 0; j < i; j++)   
+      {
+         if (a[i] == a[j])
+            break;
+      }
+      
+      if (i == j)
+         count++;
+   }
+   
+   return count;
+}
+
+int GetNumChannels()
+{
+    return countDistinct(Header.channelMap, 4);
+}
+
+struct
+{
+    struct
+    {
+        int padWidth;
+        int padHeight;
+        int totalWidth;
+        int totalHeight;
+        int originalWidth;
+        int originalHeight;
+        byte channelMap[4];
+        int Empty;
+    } Header <size=0x20>;
+    
+    local int numChannels = GetNumChannels();
+    struct
+    {
+        byte data[Header.padWidth * Header.padHeight];
+    } ChannelData[numChannels] <optimize=false>;
+    
+} Boy_WiiImage;
