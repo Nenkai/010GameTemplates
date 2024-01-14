@@ -1,0 +1,20 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Bean Dreams Texture Group (compressed)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+struct
+{
+    uint64 DecompressedSize <format=hex>;
+    byte GZipCompressedData[FileSize() - 8];
+} TextureGroup;

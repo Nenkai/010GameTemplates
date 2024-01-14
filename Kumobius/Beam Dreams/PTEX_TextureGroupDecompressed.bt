@@ -1,0 +1,48 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Bean Dreams Texture Group (decompressed)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+struct
+{
+    // 0x10 read then uint read
+    byte Magic[0x10];
+    int NumTextures;
+    
+    struct
+    {
+        // 0x28 bytes read
+        byte Magic[0x10];
+        byte Unknown[0x08];
+        int NumMipmap;
+        int UnkBool;
+        int Width;
+        int Height;
+        int OpenglMipmapMethod1 <format=hex>;
+        int OpenglMipmapMethod2 <format=hex>;
+        int OpenglCompressionMethod <format=hex>;
+        int OpenglChannelSizeType <format=hex>;
+        
+        // 0x04 read then size read
+        int DataSize;
+        byte Data[DataSize] <format=hex>;
+    } Texture2D;
+    
+} TextureGroupDecompressed;
+/*
+struct
+{
+    uint64 DecompressedSize <format=hex>;
+    byte GZipCompressedData[FileSize() - 8];
+} TextureGroup;
+*/
