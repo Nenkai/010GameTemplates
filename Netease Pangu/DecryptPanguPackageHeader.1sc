@@ -1,0 +1,13 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Script File
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+PanguPackage.Header.offset ^= 0x2C086F61A5EA;
+PanguPackage.Header.count ^= 0x20220217;

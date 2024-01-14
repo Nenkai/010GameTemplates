@@ -1,0 +1,28 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
+struct
+{
+    uint64 Id;
+    uint64 Unk;
+    int RawSize <format=hex>;
+    int CompressSize <format=hex>;
+    uint64 Offset : 48 <format=hex>;
+    enum <byte> { COMP_TYPE_RAW, COMP_TYPE_LZ4, COMP_TYPE_ZSTD } CompressType;
+    byte          : 8;
+    byte RawHash[0x10] <format=hex>;
+    byte Hash[0x10] <format=hex>;
+} Index[69511];

@@ -1,0 +1,25 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+struct
+{
+    // libunity.so - "Package.OpenImpl header %d count %d offset %llu"
+    struct
+    {
+        uint header;
+        uint64 offset; // xorred 0x2C086F61A5EA
+        uint count;    // xorred 0x20220217
+    } Header;
+} PanguPackage;
