@@ -20,6 +20,9 @@
 // * WoG USA Demo 
 //   - Lookup pak header: 0x80277840 of executable (0x273940 physical address)
 //   - Core resources pak: 0x8027CA00 (0x278B00 physical address)
+// * WoG JP Release 
+//   - Lookup pak header: 0x802964a0 of executable (0x292580 physical address)
+//   - Core resources pak: 0x8029da60 (0x299B40 physical address)
 
 // Note4: Searching for hash is just done through top to bottom, no binary searching - also other paks may be used
 // Note5: If there is any compression, it'll most likely be LZ as random chunks of text can be seen throughout (wii compression?)
