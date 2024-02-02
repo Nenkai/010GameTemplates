@@ -10,6 +10,7 @@ My "database" of 010 Editor templates for various games I've created over the ye
 * Driveclub
 * FEAR 2
 * Forza
+* [Gran Turismo](https://github.com/Nenkai/GT-File-Specifications-Documentation)
 * Granblue Fantasy: Relink
 * Project Cars
 * Project Gotham Racing
