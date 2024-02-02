@@ -1,0 +1,92 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Pro Evolution Soccer table_ent.bin
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short Unk;
+    short Unk2;
+} Table3Entry;
+
+struct
+{
+  struct
+  {
+      struct
+      {
+          int Table0Count <fgcolor=cGreen>;
+          int NamesCount <fgcolor=cGreen>;
+          int Table2Count <fgcolor=cGreen>;
+          int Table3Count <fgcolor=cGreen>;
+          int Table4Count <fgcolor=cGreen>;
+          int Table5Count <fgcolor=cGreen>;
+          int Table6Count <fgcolor=cGreen>;
+          
+          int Table0Offset <fgcolor=cRed, format=hex>;
+          int NameOffsetTableOffset <fgcolor=cRed, format=hex>;
+          int Table2Offset <fgcolor=cRed, format=hex>;
+          int Table3Offset <fgcolor=cRed, format=hex>;
+          int Table4Offset <fgcolor=cRed, format=hex>;
+          int Table5Offset <fgcolor=cRed, format=hex>;
+          int NameStringsOffset <fgcolor=cRed, format=hex>;
+      } Header;
+      
+      FSeek(Header.NameOffsetTableOffset);
+      int NameOffsets[Header.NamesCount] <bgcolor=cRed, format=hex>;
+    
+      FSeek(Header.Table0Offset);
+      int UnkTable0[Header.Table0Count] <bgcolor=cBlue>;
+
+      FSeek(Header.Table2Offset);
+      int UnkTable2[Header.Table2Count] <bgcolor=cPurple>;
+      
+      FSeek(Header.Table3Offset);
+      Table3Entry UnkTable3[Header.Table3Count] <bgcolor=cGreen>;
+ 
+      FSeek(Header.Table4Offset);
+      short UnkTable4[Header.Table4Count] <bgcolor=cBlack>;
+      
+      FSeek(Header.Table5Offset);
+      byte UnkTable5[Header.Table5Count] <bgcolor=cGray>;
+
+      local int i = 0;
+      local int offset;
+      local int size;
+      
+      FSeek(Header.NameStringsOffset);
+      struct
+      {
+          for (i = 0; i < Header.NamesCount; i++)
+          {
+             offset = i == 0 ? 0 : NameOffsets[i - 1];
+             size = i == 0 ? NameOffsets[i] : NameOffsets[i] - NameOffsets[i - 1];
+             FSeek(Header.NameStringsOffset + offset);
+             
+             if (size != 0)
+             {
+                 struct
+                 {
+                    char str[size];
+                 } FileName <optimize=false, comment=str>;
+             }
+             else
+             {
+                 struct 
+                 {
+                     
+                 } EmptyFileName;   
+             }
+          }
+       } Names <bgcolor=cYellow>;
+      
+  } Header;  
+} File;
