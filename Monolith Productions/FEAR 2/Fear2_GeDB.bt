@@ -1,0 +1,90 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Game Database
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+uint AlignValue(uint x, uint alignment)
+{
+    local uint mask = ~(alignment - 1);
+    return (x + (alignment - 1)) & mask;
+}
+
+typedef struct
+{
+    int Hash <format=hex, fgcolor=cPurple>;
+    byte Type : 6;
+    byte Bits : 2;
+    byte AttributeCount;
+    short DataOffset;
+} Attribute;
+
+typedef struct 
+{
+    int KeyStringOffset <format=hex>;
+
+    local int cPos = FTell();
+    FSeek(0x1C + KeyStringOffset);
+    string Name;
+    FSeek(cPos);
+    
+    int CategoryCount;
+    int HashValue <format=hex, fgcolor=cPurple>;
+
+    local int j;
+    for (j = 0; j < CategoryCount; j++)
+    {
+        struct
+        {
+            int RecordNameOffset <format=hex, fgcolor=cRed>;
+            cPos = FTell();
+            FSeek(0x1C + RecordNameOffset);
+            string RecordName;
+            FSeek(cPos);
+
+            int RecordDataSize;
+            int AttributeCount;
+            int AttibuteStart;
+            int AttributeNameHash <format=hex>;
+
+            if (RecordDataSize > 0)
+                int AttributeValues[RecordDataSize];
+        } Record;
+    }
+} Category;
+
+string PrintCategoryName(Category& cat)
+{
+    return cat.Name;
+}
+
+struct GameDatabase
+{
+    struct
+    {
+        char Magic[4];
+        int Version;
+        int StringTableSize <format=hex, fgcolor=cGreen>;
+        int unkSize;
+        int unk;
+        int unk;
+        int AttributeCount;
+    } Header;
+
+    byte StringTable[Header.StringTableSize];
+    Attribute Entries[Header.AttributeCount];
+
+    local int i = 0;
+    int CategoryCount;
+    Category categories[CategoryCount] <optimize=false, comment=PrintCategoryName>;
+
+} GeDB;
