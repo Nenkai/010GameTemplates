@@ -1,0 +1,303 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: VM Script Bytecode file
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Events/Cutscenes, Quests, AI (XC2)
+//  Category: 
+// File Mask: .sb
+//  ID Bytes: 53 42 20 20
+//   History: 
+//------------------------------------------------
+typedef struct
+{
+    short NameID;
+    short Always1;
+    short StaticID;
+    short Always0;
+    short Always0;
+} VariableDebugInfo <optimize=false>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntriesOffset <format=hex, fgcolor=cRed>;
+    int NumLocalPool;
+    
+    FSeek(basePos + EntriesOffset);
+    local int baseTblOffset = FTell();
+    struct
+    {
+        short Offset <format=hex, fgcolor=cRed>;
+        short Count; 
+    } OffsetAndCounts[NumLocalPool];
+    
+    local int i = 0;
+    for (i = 0; i < NumLocalPool; i++)
+    {
+        FSeek(baseTblOffset + OffsetAndCounts[i].Offset);
+        struct
+        {
+            VariableDebugInfo vars[OffsetAndCounts[i].Count];
+        } LocalSymPool;
+    }
+} FunctionDebugInfoVariableGroup;
+         
+struct
+{
+    struct
+    {
+        char Magic[4];
+        byte Version <comment="Xeno DE: 2">;
+        byte Unused_Reserved;
+        enum <byte>
+        {
+            ShouldNotBe1_1 = 1,
+            Scrambled = 2,
+        } UnkFlag <format=hex, comment="Must not be 1">;
+        byte IsLoaded <comment="Runtime">;
+        
+        uint CodeOfs <format=hex, fgcolor=cRed>;
+        uint IDsOfs <format=hex, fgcolor=cRed>;
+        uint IntPoolOfs <format=hex, fgcolor=cRed>;
+        uint FixedPoolOfs <format=hex, fgcolor=cRed>;
+        uint StringsOfs <format=hex, fgcolor=cRed>;
+        uint FuncsOfs <format=hex, fgcolor=cRed>;
+        uint PluginImportsOfs <format=hex, fgcolor=cRed>;
+        uint OCImportOfs <format=hex, fgcolor=cRed>;
+        uint FuncImportsOfs <format=hex, fgcolor=cRed>;
+        uint StaticsOfs <format=hex, fgcolor=cRed>;
+        uint LocalPoolOfs <format=hex, fgcolor=cRed>;
+        uint SystemAtrOfs <format=hex, fgcolor=cRed>;
+        uint AttributesOfs <format=hex, fgcolor=cRed>;
+        uint DebugSymsOfs <format=hex, fgcolor=cRed>;
+    } Header <size=0x40>;
+    
+    FSeek(Header.IDsOfs);
+    struct
+    {
+        int RelativeEntriesOffset <format=hex>;
+        int NumIDs;
+        int OffsetSize;
+        short IDOffsets[NumIDs];
+    } IDs;
+    
+    FSeek(Header.IntPoolOfs);
+    struct
+    {
+        int RelativeEntriesOffset;
+        int NumInts;
+        int Ints[NumInts];
+    } IntPool;
+    
+    FSeek(Header.FixedPoolOfs);
+    struct
+    {
+        int RelativeEntriesOffset;
+        int NumFloats;
+        float Floats[NumFloats];
+    } FixedPool;
+    
+    FSeek(Header.StringsOfs);
+    struct
+    {
+        int RelativeEntriesOffset <format=hex>;
+        int NumStrs;
+        int OffsetSize;
+    } StringPool;
+    
+    FSeek(Header.FuncsOfs);
+    struct
+    {
+        int RelativeEntriesOffset <format=hex>;
+        int NumFuncs;
+        int EntrySize;
+        
+        struct
+        {
+            short NameID;
+            short NumArguments;
+            short Unknown;
+            short UNUSED_NumLocals;
+            short LocalPoolIndex;
+            short Unused;
+            int CodeRelativeStartOffset <format=hex, fgcolor=cRed>;
+            int CodeRelativeEndOffset <format=hex, fgcolor=cRed>;
+        } Funcs[NumFuncs];
+    } FuncPool;
+    
+    FSeek(Header.PluginImportsOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        int EntrySize;
+        
+        struct
+        {
+            short PluginNameID;
+            short FunctionNameID;
+        } Funcs[NumEntries];
+        
+    } PluginImportTable;
+    
+    FSeek(Header.OCImportOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        int EntrySize;
+        
+        short IDs[NumEntries];
+    } OCImportTable;
+    
+    FSeek(Header.FuncImportsOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        int EntrySize;
+        
+        int IDs[NumEntries];
+    } FuncImportTable;
+    
+    FSeek(Header.StaticsOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        
+        struct
+        {
+            short Type;
+            short Pad;
+            int b;
+            int c;
+        } Static[NumEntries] <optimize=false>;
+    } StaticsPool;
+    
+    FSeek(Header.LocalPoolOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        int OffsetType;
+        
+        local int basePos = FTell();
+        short Offs[NumEntries] <fgcolor=cRed, format=hex>;
+        
+        local int i = 0;
+        for (i = 0; i < NumEntries; i++)
+        {
+            FSeek(basePos + Offs[i]);
+            struct
+            {
+                int LocalsOffset;
+                int Cnt;
+                
+                struct
+                {
+                    short Type;
+                    short Pad;
+                    int b;
+                    int c;
+                } Local[Cnt] <optimize=false>;
+            } Stacc;
+            
+        }
+    } LocalPool;
+    
+    FSeek(Header.SystemAtrOfs);
+    struct
+    {
+        int EntriesOffset <format=hex>;
+        int NumEntries;
+        int EntrySize;
+        
+        short IDIndex[NumEntries];
+        
+    } SystemAttr;
+    
+    if (Header.DebugSymsOfs != 0)
+    {
+        FSeek(Header.DebugSymsOfs);
+        struct
+        {
+            int StaticSymbolsOfs <format=hex, fgcolor=cRed>;
+            int LocalSymsOfs <format=hex, fgcolor=cRed>;
+            int ArgSymsOfs <format=hex, fgcolor=cRed>;
+            int FileNamesOfs <format=hex, fgcolor=cRed>;
+            int LineInfoOfs <format=hex, fgcolor=cRed>;
+            
+            if (StaticSymbolsOfs != 0)
+            {
+                FSeek(Header.DebugSymsOfs + StaticSymbolsOfs);
+                struct
+                {
+                    local int basePos = FTell();
+                    int EntriesOffset <format=hex, fgcolor=cRed>;
+                    int Count;
+                    
+                    FSeek(basePos + EntriesOffset);
+                    VariableDebugInfo vars[Count];
+                } StaticSyms;
+            }
+            
+            if (LocalSymsOfs != 0)
+            {
+                FSeek(Header.DebugSymsOfs + LocalSymsOfs);
+                FunctionDebugInfoVariableGroup FuncLocals;
+            }
+    
+            if (ArgSymsOfs != 0)
+            {
+                FSeek(Header.DebugSymsOfs + ArgSymsOfs);
+                FunctionDebugInfoVariableGroup FuncArgs;
+            }
+            
+            if (FileNamesOfs != 0)
+            {
+                FSeek(Header.DebugSymsOfs + FileNamesOfs);
+                struct
+                {
+                    int RelativeEntriesOffset <format=hex>;
+                    int NumStrs;
+                    
+                    local int baseTblPos = FTell();
+                    short StringOffsets[NumStrs];
+                    
+                    local int i = 0;
+                    for (i = 0; i < NumStrs; i++)
+                    {
+                        FSeek(baseTblPos + StringOffsets[i]);
+                        struct
+                        {
+                            string str;
+                        } Str <comment=str>;
+                    }
+                } StringPool;
+            }
+            
+            if (LineInfoOfs != 0)
+            {
+                FSeek(Header.DebugSymsOfs + LineInfoOfs);
+                struct
+                {
+                    int RelativeEntriesOffset <format=hex>;
+                    int NumInfos;
+                    
+                    struct
+                    {
+                        short SourceNameID;
+                        Printf(StringPool.Str[SourceNameID].str + "\n");
+                        short LineNumber;
+                        int InstructionAddr;
+                    } LineInfo[NumInfos] <optimize=false>;
+                    
+                    
+                } LineInfos;
+            }
+        } DebugSyms;
+    }
+} ResScript;
