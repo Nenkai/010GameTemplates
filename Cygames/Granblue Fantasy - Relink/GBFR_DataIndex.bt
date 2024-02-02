@@ -11,6 +11,12 @@
 //   History: 
 //------------------------------------------------
 
+// Base steam release - useful offsets:
+// .i reader = 0x1401ABD50
+// hash finder = 0x1406F8380
+// xxhash = 0x14069AC40
+// decompression: 0x143666F40
+
 struct
 {
     int MainHeaderOffset <format=hex>;
