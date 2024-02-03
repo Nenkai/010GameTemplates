@@ -19,85 +19,139 @@
 
 struct
 {
-    int MainHeaderOffset <format=hex>;
+    int FieldsTableOffset <format=hex>;
     byte Empty[6];
     short OffsetTableSize <comment="Relative to here">;
-    short OffsetsToFields[(OffsetTableSize - 2) / 2] <comment="Starting from next header">;
-} FileHeader <size=0x20, bgcolor=cRed>;
+    
+    short UnknownOffset;
+    short CodeNameFieldOffset <format=hex>;
+    short ChunkSizeFieldOffset <format=hex>;
+    short XXHashSeedFieldOffset <format=hex>;
+    short SecondHashTableFieldOffset <format=hex>;
+    short HashToFileEntryTableFieldOffset <format=hex>;
+    short FileEntriesTableFieldOffset <format=hex>;
+    short FirstHashTableFieldOffset <format=hex>;
+    short Table2FieldOffset <format=hex>;
+    short Table1FieldOffset <format=hex>;
+    
+    // [3] is offset to custom seed (int64) for xxhash?
+} FieldDefinitionHeader <size=0x20, bgcolor=cRed>;
 
-FSeek(FileHeader.MainHeaderOffset);
+FSeek(FieldDefinitionHeader.FieldsTableOffset);
+int OffsetTableOffsetToBehind <format=hex, fgcolor=cPurple>;
+
+local int basePos = FTell();
+
 struct
 {
-    int OffsetTableOffsetToBehind <format=hex>;
-    int UnkOffset <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[9]">;
-    int UnkOffset2 <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[8]">;
-    int UnkOffset3  <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[7]">;
-    int UnkOffset4 <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[6]">;
-    int UnkOffset5 <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[5]">;
-    int HashTable2Offset <format=hex, fgcolor=cRed, comment="Relative to here. Pointed to by offset table entry[4]">;
-    int ChunkSizeMaybe <format=hex, fgcolor=cRed>;
-    int UnkOffset6 <format=hex>;
-} MainHeader;
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.Table1FieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    struct
+    {
+        int Table1Count;
+        int Entries[Table1Count];
+    } Table1 <bgcolor=cGreen>; // Num chunks maybe?
+} Table1Field;
 
-
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[9] + MainHeader.UnkOffset);
 struct
 {
-    int Table1Count;
-    int Entries[Table1Count];
-} Table1; // Num chunks maybe?
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.Table2FieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    struct
+    {
+        int TableCount;
+        uint64 DataOffsets[TableCount] <format=hex>;
+    } TableUnk <bgcolor=cBlue>;
+} Table2Field;
 
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[8] + MainHeader.UnkOffset2);
 struct
 {
-    int TableCount;
-    uint64 DataOffsets[TableCount] <format=hex>;
-} TableUnk;
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.FirstHashTableFieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    
+    struct
+    {
+        int HashCount;
+        uint64 OrderedXXHash_Hashes[HashCount] <format=hex, comment="xxHash">; // Example: system/table/saveinfo.tbl
+    } FileHashTable <bgcolor=cYellow>;
+} FirstHashTableField <comment="This table is checked first - boot table?">;
 
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[7] + MainHeader.UnkOffset3);
 struct
 {
-    int HashCount;
-    uint64 OrderedXXHash_Hashes[HashCount] <format=hex, comment="xxHash">; // Example: system/table/saveinfo.tbl
-} FileHashTable;
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.FileEntriesTableFieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    struct
+    {
+         uint32 fileCount;
+         struct 
+         {
+            uint64 Offset <format=hex>;
+            uint32 Size <format=hex>;
+            uint32 CompressedSize <format=hex>; // Should be fastlz?
+            uint32 header;
+            byte unk0;
+            byte unk1;
+            byte DataFileNumber <comment="Must not be 2? has an hardcoded check">;
+            byte unk2;
+    
+        } FileEntries[fileCount];
+    } FileEntriesTable <optimize=false>;
+} FileEntriesTableField <bgcolor=cDkYellow>;
 
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[6] + MainHeader.UnkOffset4);
+local int largest;
+local int largest2;
+
 struct
 {
-     uint32 fileCount;
-     struct 
-     {
-        uint64 Offset <format=hex>;
-        uint32 Size <format=hex>;
-        uint32 CompressedSize <format=hex>; // Should be fastlz?
-        uint32 header;
-        byte unk0;
-        byte unk1;
-        byte DataFileNumber;
-        byte unk2;
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.HashToFileEntryTableFieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    
+    struct
+    {
+         int EntriesCount;
+         struct
+         {
+             int FileEntryIndex;
+             int FileEntryIndex2;
+             int FileEntryIndex3;
+         } FileIndex[EntriesCount];
+    } HashToFileEntryTable <bgcolor=cGray, optimize=false>;
+} HashToFileEntryTableField;
 
-    } FileEntries[fileCount];
-} FileEntriesTable <optimize=false>;
-
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[5] + MainHeader.UnkOffset5);
+Printf("%d", largest);
 struct
 {
-     int EntriesCount;
-     struct
-     {
-         int a;
-         int b;
-         int c;
-     } UnkEntry[EntriesCount];
-} Table5 <optimize=false>;
+    FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.SecondHashTableFieldOffset);
+    int TableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(TableOffset) + TableOffset);
+    
+    struct
+    {
+         int HashCount;
+         uint64 OrderedXXHash_Hashes[HashCount] <format=hex, comment="xxHash">; // Example: system/table/saveinfo.tbl
+    } HashTable2 <bgcolor=cDkBlue, optimize=false>; // This is the main file table, IIRC
+} SecondHashTableField <comment="This table is checked after the first one if file wasn't found">;
 
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[4] + MainHeader.HashTable2Offset);
-struct
+if (FieldDefinitionHeader.CodeNameFieldOffset > 0)
 {
-     int HashCount;
-     uint64 OrderedXXHash_Hashes[HashCount] <format=hex, comment="xxHash">; // Example: system/table/saveinfo.tbl
-} HashTable2 <optimize=false>; // This is the main file table, IIRC
-
-FSeek(FileHeader.MainHeaderOffset + FileHeader.OffsetsToFields[1] + MainHeader.UnkOffset6);
-uint CodeNameLength;
-char CodeName[CodeNameLength];
+    struct
+    {
+        FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.CodeNameFieldOffset);
+        int CodeNameOffset <format=hex>;
+        
+        FSeek(startof(CodeNameOffset) + CodeNameOffset);
+        uint CodeNameLength;
+        char CodeName[CodeNameLength];
+    } CodeNameField;
+}
