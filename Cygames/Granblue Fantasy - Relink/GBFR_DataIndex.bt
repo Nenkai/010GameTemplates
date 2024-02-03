@@ -106,9 +106,6 @@ struct
     } FileEntriesTable <optimize=false>;
 } FileEntriesTableField <bgcolor=cDkYellow>;
 
-local int largest;
-local int largest2;
-
 struct
 {
     FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.HashToFileEntryTableFieldOffset);
@@ -128,7 +125,6 @@ struct
     } HashToFileEntryTable <bgcolor=cGray, optimize=false>;
 } HashToFileEntryTableField;
 
-Printf("%d", largest);
 struct
 {
     FSeek(FieldDefinitionHeader.FieldsTableOffset + FieldDefinitionHeader.SecondHashTableFieldOffset);
