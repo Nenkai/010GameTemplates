@@ -1,0 +1,203 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Model Material (.mmat)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .mmat
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE: This file is a FlatBuffers file and not intended to be read with a template
+// A fbs file is provided next to this file
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize;
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+} FlatArkHeader <bgcolor=cPurple>;
+
+FlatArkHeader Hdr;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
+uint Field1_Magic <format=hex, comment="Enforced, cannot be different">;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
+struct
+{
+    int DataOffset <format=hex>;
+
+    FSeek(startof(DataOffset) + DataOffset);
+    struct
+    {
+        int NumEntries;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        
+        local int i = 0;
+        for (i = 0; i < NumEntries; i++)
+        {
+            FSeek(startof(Offsets[i]) + Offsets[i]);
+            struct
+            {
+                FlatArkFields Fields;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    int NumEntries;
+                    uint64 Ent[NumEntries];
+                } Field1;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    int NumEntries2;
+                    int Offsets2[NumEntries2] <format=hex, fgcolor=cRed>;
+                    local int j = 0;
+                    for (j = 0; j < NumEntries2; j++)
+                    {
+                         FSeek(startof(Offsets2[j]) + Offsets2[j]);
+                         struct
+                         {
+                             FlatArkFields Fields2;
+                             
+                             FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                             uint F2_1_ID;
+                             
+                             FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                             struct
+                             {
+                                uint NameOffset;
+                                FSeek(startof(NameOffset) + NameOffset);
+                                uint strLen;
+                                char str[strLen];
+                             } FieldName;
+                         } Nested;
+                    }
+                } Field2;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[3]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    int ArrLength;
+                    int Arr[ArrLength];
+                } Field3;
+
+                FSeek(startof(Fields) + Fields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    FlatArkFields Fields2;
+                    
+                    FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                    uint F1;
+                    
+                    FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                    uint F2;
+                } Field4;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[5]);
+                int Field5;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[6]);
+                byte Field6;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[7]);
+                byte Field7;
+                
+                FSeek(startof(Fields) + Fields.OffsetTable[8]);
+                byte Field8;
+                
+                if (Fields.OffsetTable[9] != 0)
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[9]);
+                    byte Field9;
+                }
+                
+                if (Fields.OffsetTable[10] != 0)
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[10]);
+                    byte Field10;
+                }
+                
+                if (Fields.OffsetTable[11] != 0)
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[11]);
+                    byte Field11;
+                }
+            } Entry; 
+        }
+    } MMat2;
+} Field2;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
+struct
+{
+    int DataOffset <format=hex>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    int NumEntries;
+    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < NumEntries; i++)
+    {
+        FSeek(startof(Offsets[i]) + Offsets[i]);
+        struct
+        {
+            FlatArkFields Fields;
+            
+            FSeek(startof(Fields) + Fields.OffsetTable[1]);
+            struct
+            {
+                uint BufferOffset;
+                FSeek(startof(BufferOffset) + BufferOffset);
+                uint BufferSize;
+                uint Buffer[BufferSize];
+            } Field1_Buffer <bgcolor=cGray>;
+            
+            FSeek(startof(Fields) + Fields.OffsetTable[2]);
+            uint Field2_IDMaybe <format=hex>;
+        } Entry; 
+        
+    }
+        
+} Field3;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
+int Field4;
+
+if (Hdr.Fields.OffsetTable[5] != 0)
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[5]);
+    int Field5;
+}
+
+if (Hdr.Fields.OffsetTable[6] != 0)
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[6]);
+    byte Field6;
+}
