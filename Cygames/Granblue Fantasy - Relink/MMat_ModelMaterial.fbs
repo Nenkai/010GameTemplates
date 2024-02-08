@@ -23,7 +23,7 @@ table MatStruct1
     A1:[ulong];
     A2:[MatStruct1_A2];
     A3:[int];
-    A4:MatStruct1_A4; // Todo fix this one - missing a string
+    A4:MatStruct1_A4;
     A5:uint;
     A6:byte;
     A7:byte;
