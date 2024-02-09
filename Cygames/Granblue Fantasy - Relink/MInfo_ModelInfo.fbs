@@ -1,0 +1,115 @@
+// all FlatSharp FBS attributes start with the 'fs_' prefix.
+attribute "fs_serializer";
+
+namespace GBFRDataTools.Entities;
+
+// Main Root Table
+table ModelInfo (fs_serializer) {
+    Magic:uint; // 0x134B249
+    LODInfos:[LODInfo];
+    LODInfos2:[LODInfo];
+    A4:[float];
+    SubMeshes:[SubMeshInfo];
+    A6:[ModelInfo_A5];
+    A7:[ushort];
+    A8:[BoundaryBox];
+    A9:Vec4;
+    A10:ModelInfo_A10; // Used very rarely in bgXXXX files
+    A11:ModelInfo_A11;
+    A12:float;
+    A13:float;
+    A14:float;
+    A15:float;
+    A16:float;
+    A17:float;
+    A18:float;
+    A19:float;
+    A20:float;
+    A21:byte;
+    A22:byte;
+    // Many of these may just be bools
+    A23:byte;
+    A24:byte;
+    A25:byte;
+    A26:byte;
+    A27:byte;
+    A28:byte;
+    A29:byte;
+    A30:byte;
+    A31:byte;
+    A32:byte;
+}
+
+table LODInfo
+{
+    MeshBuffers:[MeshBufferLocator];
+    A2:[LODInfo_A2];
+    A3:int;
+    A4:int;
+    A5:byte;
+    A6:byte;
+}
+
+table SubMeshInfo
+{
+    Name:string;
+    BBox:BoundaryBox;
+}
+
+table ModelInfo_A5
+{
+    UnkID:uint;
+    Unk:byte;
+}
+
+table ModelInfo_A10
+{
+    UnkID:uint; // Not always present
+    A2:float;
+    A3:byte;
+    A4:byte;
+}
+
+/////////////////
+// Util structs
+/////////////////
+struct MeshBufferLocator
+{
+    Offset:ulong;
+    Size:ulong;
+}
+
+struct LODInfo_A2
+{
+    Offset:int;
+    Count:int;
+    Unk:int;
+}
+
+struct Vec3 {
+  x:float;
+  y:float;
+  z:float;
+}
+
+struct Vec4 {
+  x:float;
+  y:float;
+  z:float;
+  r:float;
+}
+
+struct BoundaryBox {
+  Min:Vec3;
+  Max:Vec3;
+}
+
+struct ModelInfo_A11
+{
+    // Maybe just 7 floats instead
+    A1:int;
+    A2:Vec3;
+    A3:Vec3;
+}
+
+root_type ModelInfo;
