@@ -3,6 +3,12 @@ attribute "fs_serializer";
 
 namespace GBFRDataTools.Entities;
 
+struct UnkIDPlusOther
+{
+    ID:uint;
+    ID2:uint;
+}
+
 table MatStruct1_A4
 {
     Unk:[string];
@@ -18,9 +24,9 @@ table MatStruct1_A2
     Name:string;
 }
 
-table MatStruct1
+ table MatStruct1
 {
-    A1:[ulong];
+    A1:[UnkIDPlusOther];
     A2:[MatStruct1_A2];
     A3:[int];
     A4:MatStruct1_A4;
@@ -31,7 +37,8 @@ table MatStruct1
     A9:byte;
     A10:byte;
     A11:byte;
-}
+    A12:byte;
+} 
 
 table MatStruct2
 {
@@ -41,14 +48,12 @@ table MatStruct2
 }
 
 table ModelMaterial (fs_serializer) {
-    Magic:uint = 0x134B247;
+    Magic:uint;
     Entries1:[MatStruct1];
     Entries2:[MatStruct2];
-    Unk:int;
-    Unk2:int;
-    Unk3:int; // This one is unknown, not set
-    Unk4:byte;
+    Unk:string;
+    Unk2:byte; // Not all .mmat sets this one, but 'em' mat files seems to do so
+    Unk3:byte;
 }
-
 
 root_type ModelMaterial;
