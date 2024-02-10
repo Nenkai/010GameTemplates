@@ -5,34 +5,34 @@ namespace GBFRDataTools.Entities;
 
 struct UnkIDPlusOther
 {
-    ID:uint;
-    ID2:uint;
+    ParamHash:uint;
+    Flags:uint;
 }
 
-table MatStruct1_A4
+table GraniteStruct
 {
-    Unk:[string];
-    Unk2:[int];
+    PageFile:[string];
+    TexHash:[uint];
     Unk3:byte;
     Unk4:byte;
     Unk5:byte;
 }
 
-table MatStruct1_A2
+table TexStruct
 {
-    ID:uint;
+    TexHash:uint;
     Name:string;
 }
 
- table MatStruct1
+table Material
 {
-    A1:[UnkIDPlusOther];
-    A2:[MatStruct1_A2];
+    ParamBuffer:[UnkIDPlusOther];
+    Textures:[TexStruct];
     A3:[int];
-    A4:MatStruct1_A4;
+    Granite:GraniteStruct;
     A5:uint;
-    A6:byte;
-    A7:byte;
+    PixelShader:byte;
+    VertexShader:byte;
     A8:byte;
     A9:byte;
     A10:byte;
@@ -40,7 +40,7 @@ table MatStruct1_A2
     A12:byte;
 } 
 
-table MatStruct2
+table MatParameters
 {
     Buffer:[float];
     ID:uint;
@@ -49,8 +49,8 @@ table MatStruct2
 
 table ModelMaterial (fs_serializer) {
     Magic:uint;
-    Entries1:[MatStruct1];
-    Entries2:[MatStruct2];
+    Materials:[Material];
+    Parameters:[MatParameters];
     Unk:string;
     Unk2:byte; // Not all .mmat sets this one, but 'em' mat files seems to do so
     Unk3:byte;
