@@ -12,7 +12,7 @@ table ModelSkeleton (fs_serializer) {
 table Bone
 {
     A1:BoneInfo;
-    A2:ushort;
+    ParentID:ushort;
     Name:string; // Should always start with '_'. (Has a check)
     Position:Vec3;
     Quat:Quaternion;
@@ -21,7 +21,7 @@ table Bone
 
 struct BoneInfo
 {
-    ParentID:ushort;
+    BoneID:ushort;
     Unk:uint;
 }
 
