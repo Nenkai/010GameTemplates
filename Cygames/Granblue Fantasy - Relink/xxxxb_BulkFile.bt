@@ -1,0 +1,499 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+} Vec2;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vec4;
+
+typedef struct
+{
+    int StrLen;
+    char Str[StrLen];
+} String4;
+
+typedef struct
+{
+    int SubEntryCount;
+    
+    if (SubEntryCount > 0)
+    {
+        int Offs[SubEntryCount];
+            
+        local int j = 0;
+        for (j = 0; j < SubEntryCount; j++)
+        {
+            FSeek(startof(SubEntryCount) + Offs[j]);
+            String4 File;
+        }
+    }
+    
+    FSeek(FileSize());
+} FileTable;
+
+typedef struct
+{
+    int FieldDataOffset;
+    FSeek(startof(SubEntryOffset) + FieldDataOffset);
+    
+    switch (FieldNameHashes[i])
+    {
+        case 0x70ECEBD: // Hash("Scale")
+            Vec3 vec3;
+            break;
+        case 0x15457247:
+            Vec2 vec2;
+            break;
+        case 0x340E78FF:
+            Vec2 vec2;
+            break;
+        case 0x3FA67E6D: // Listb name?
+            String4 str; 
+            break;
+        case 0x44A14F6E:
+            Vec2 vec2;
+            break;
+        case 0x8824FB49:
+            Vec2 vec2;
+            break;  
+        case 0x906076C7: // Hash("Rotation")
+            Vec4 vec4;
+            break;   
+        case 0x92EB81BE:
+            Vec2 vec2;
+            break;     
+        case 0x98ABE892: // Hash("Active")
+            int value;
+            break;  
+        case 0xA14FC2CE: // Hash("Pivot")
+            Vec2 vec2;
+            break;
+        case 0xC1717AC7:
+            float xd;
+            break;
+                   
+        default:
+            Warning("Unsupported %x", FieldNameHashes[i]);
+            break;
+    }
+    
+    FSeek(FileSize());
+} LayoutAttribute;
+
+typedef struct
+{
+    int SubEntryCount;
+    int Offs[SubEntryCount];
+    
+    local int j = 0;
+    for (j = 0; j < SubEntryCount; j++)
+    {
+        FSeek(startof(SubEntryCount) + Offs[j]);
+        
+        struct
+        {
+            int SubEntryOffset;
+            FSeek(startof(SubEntryOffset) + SubEntryOffset);
+            int NumFields;
+            int FieldNameHashes[NumFields] <format=hex>;
+            
+            local int i = 0;
+            for (i = 0; i < NumFields; i++)
+            {
+                FSeek(startof(SubEntryOffset) + 4 + (i * 4));
+                LayoutAttribute layoutAttribute;
+            }
+        } Layout;
+    }
+} Layouts;
+         
+typedef struct
+{
+    int SubEntryCount;
+    int Offs[SubEntryCount];
+        
+    local int j = 0;
+    for (j = 0; j < SubEntryCount; j++)
+    {
+        FSeek(startof(SubEntryCount) + Offs[j]);
+        String4 MaterialName;
+    }
+    
+    FSeek(FileSize());
+} Materials;
+
+typedef struct
+{
+    local int tableOffset = FTell();
+    
+    int NumEntriesOffset;
+    FSeek(startof(NumEntriesOffset) + NumEntriesOffset);
+    int NumberOfEntries;
+    uint EntriesHashes[NumberOfEntries] <format=hex>;
+       
+    FSeek(tableOffset + 4);
+    int EntryOffsets[NumberOfEntries];
+    
+    local int j = 0;
+    for (j = 0; j < NumberOfEntries; j++)
+    {
+        FSeek(tableOffset + EntryOffsets[j]);
+        struct
+        {
+            switch (EntriesHashes[j])
+            {
+                case 0x29F23D69: // Hash("Ita")
+                    FileTable Ita;
+                    break;
+                case 0x58A2F4E7: // Hash("Common");
+                    FileTable Common;
+                    break;
+                case 0x7E613519: // Hash("Eng");
+                     FileTable Eng;
+                    break;
+                case 0x84D06053: // Hash("Kor");
+                     FileTable Kor;
+                    break;
+                case 0xB41B79AF: // Hash("Cht");
+                     FileTable Cht;
+                    break;
+                case 0xBBAB1E9C: // Hash("Esp");
+                    FileTable Esp;
+                    break;
+                case 0xCF88F342: // Hash("Deu");
+                    FileTable Deu;
+                    break;
+                case 0xD9C5540A: // Hash("Fra");
+                    FileTable Fra;
+                    break;
+                case 0xDA3F7BEB: // Hash("Chs");
+                    FileTable Chs;
+                    break;
+                case 0xDE91FFDB: // Hash("Por");
+                    FileTable Por;
+                    break;
+                case 0xE6C3B0EA: // Hash("Jpn");
+                    FileTable Jpn;
+                    break;
+                default:
+                    Printf("Unsupported %x\n", EntriesHashes[i]);
+                    break;
+            }
+        } Field;
+    }
+    
+    FSeek(FileSize());
+} LocalizeTable;
+
+typedef struct
+{
+    int SubEntryCount;
+    int Offs[SubEntryCount];
+        
+    local int j = 0;
+    for (j = 0; j < SubEntryCount; j++)
+    {
+        FSeek(startof(SubEntryCount) + Offs[j]);
+        String4 AnimationFile;
+    }
+    
+    FSeek(FileSize());
+} Animations;
+
+typedef struct
+{
+    local int tableOffset = FTell();
+    
+    int NumEntriesOffset;
+    FSeek(startof(NumEntriesOffset) + NumEntriesOffset);
+    int NumberOfEntries;
+    uint EntriesHashes[NumberOfEntries] <format=hex>;
+       
+    FSeek(tableOffset + 4);
+    int EntryOffsets[NumberOfEntries];
+    
+    local int j = 0;
+    for (j = 0; j < NumberOfEntries; j++)
+    {
+        FSeek(tableOffset + EntryOffsets[j]);
+        struct
+        {
+            switch (EntriesHashes[j])
+            {
+                case 0xA64D9A97:
+                    uint UnknownHash <format=hex>; // abilityelement.image.imageb matches -> 116EAB7F|hud_guide_command.tex.texb|hud_cmnd_ablt_icon01
+                    break;
+                    
+                case 0xF3BF53BF:
+                    String4 PathName;
+                    break;
+                    
+                default:
+                    Printf("Unsupported %x\n", EntriesHashes[i]);
+                    break;
+            }
+        } Field;
+    }
+    
+    FSeek(FileSize());
+} Unk_26E9CB0E_Entry;
+
+typedef struct
+{
+    int SubEntryCount;
+    
+    if (SubEntryCount > 0)
+    {
+        int Offs[SubEntryCount];
+            
+        local int j = 0;
+        for (j = 0; j < SubEntryCount; j++)
+        {
+            FSeek(startof(SubEntryCount) + Offs[j]);
+            Unk_26E9CB0E_Entry entry;
+        }
+    }
+    
+    FSeek(FileSize());
+} Unk_26E9CB0E;
+
+typedef struct
+{
+    local int tableOffset = FTell();
+    
+    int NumEntriesOffset;
+    FSeek(startof(NumEntriesOffset) + NumEntriesOffset);
+    int NumberOfEntries;
+    uint EntriesHashes[NumberOfEntries] <format=hex>;
+       
+    FSeek(tableOffset + 4);
+    int EntryOffsets[NumberOfEntries];
+    
+    local int j = 0;
+    for (j = 0; j < NumberOfEntries; j++)
+    {
+        FSeek(tableOffset + EntryOffsets[j]);
+        struct
+        {
+            switch (EntriesHashes[j])
+            {
+                case 0x8B4F6DA: // Hash("Force");
+                    int force;
+                    break;
+                case 0x2E182583: // Hash("Language");
+                    String4 language;
+                    break;
+                case 0x6C9EC8F9: // Hash("Material");
+                    String4 material;
+                    break;
+                case 0xA93808B8:
+                    int unk;
+                    break;
+                case 0xB58C064F: // Hash("Font");
+                    String4 unk;
+                    break;
+                case 0xCC64EBE9:
+                    int unk;
+                    break;
+                case 0xFEA3133C:
+                    int unk;
+                    break;
+                default:
+                    Printf("Unsupported %x\n", EntriesHashes[j]);
+                    break;
+            }
+        } Field;
+    }
+    
+    FSeek(FileSize());
+} Unk_EBA87EEE_Entry;
+
+typedef struct
+{
+    int SubEntryCount;
+    
+    if (SubEntryCount > 0)
+    {
+        int Offs[SubEntryCount];
+            
+        local int j = 0;
+        for (j = 0; j < SubEntryCount; j++)
+        {
+            FSeek(startof(SubEntryCount) + Offs[j]);
+            Unk_EBA87EEE_Entry entry;
+        }
+    }
+    
+    FSeek(FileSize());
+} Unk_EBA87EEE;
+
+typedef struct
+{
+    local int tableOffset = FTell();
+    
+    int NumEntriesOffset;
+    FSeek(startof(NumEntriesOffset) + NumEntriesOffset);
+    int NumberOfEntries;
+    uint EntriesHashes[NumberOfEntries] <format=hex>;
+       
+    FSeek(tableOffset + 4);
+    int EntryOffsets[NumberOfEntries];
+    
+    local int j = 0;
+    for (j = 0; j < NumberOfEntries; j++)
+    {
+        FSeek(tableOffset + EntryOffsets[j]);
+        struct
+        {
+            switch (EntriesHashes[j])
+            {
+                case 0x125D85E2:
+                    Vec2 Unk;
+                    break;
+                case 0x2FE9E963: // Hash("Rect");
+                    float Rect[4];
+                    break;
+                case 0x31BE5C4D: // Hash("Name");
+                    String4 Name;
+                    break;
+                case 0xBD6AFEDB: // Hash("Padding");
+                    float Padding[4];
+                    break;
+                case 0xDAD18D6A: // Hash("Uv");
+                    float Uv[4];
+                    break;
+                case 0xE94449C7: // Hash("Border");
+                    float Border[4];
+                    break;
+                default:
+                    Printf("Unsupported %x\n", EntriesHashes[j]);
+                    break;
+            }
+        } Field;
+    }
+    
+    FSeek(FileSize());
+} Sprite;
+typedef struct
+{
+    int SubEntryCount;
+    
+    if (SubEntryCount > 0)
+    {
+        int Offs[SubEntryCount];
+            
+        local int j = 0;
+        for (j = 0; j < SubEntryCount; j++)
+        {
+            FSeek(startof(SubEntryCount) + Offs[j]);
+            Sprite sprite;
+        }
+    }
+    
+    FSeek(FileSize());
+} Sprites;
+
+struct
+{
+    int TableOffset <format=hex>;
+    
+    FSeek(TableOffset);
+    int RevOffset;
+    
+    FSeek(startof(RevOffset) + RevOffset);
+    int NumberOfEntries;
+    uint EntriesHashes[NumberOfEntries] <format=hex>;
+    
+    FSeek(startof(RevOffset) + 4);
+    int EntryOffsets[NumberOfEntries];
+             
+    local int i = 0;
+    for (i = 0; i < NumberOfEntries; i++)
+    {
+        FSeek(startof(RevOffset) + EntryOffsets[i]);
+        
+        switch (EntriesHashes[i])
+        {
+            case 0xEC305D91: // Hash("Layouts");
+                Layouts Layouts_;
+                break;
+            
+            // list.listb
+            case 0x5A616DF1: // Hash("Materials");
+                Materials Materials_;
+                break;
+            case 0x698F193B: 
+                LocalizeTable UnkNames;
+                break;
+            case 0x70012652: // Hash("Animations");
+                Animations Animations_;
+                break;
+            case 0x9029CEE4:
+                Printf("9029CEE4 has data, unmapped yet");
+                break;
+            case 0xB6AF00CA:
+                LocalizeTable unk_B6AF00CA;
+                break;
+            case 0xDC516826:
+                FileTable unk_DC516826;
+                break;
+            case 0xE986E3BF:
+                FileTable unk_E986E3BF;
+                break;
+                
+            // image.imageb
+            case 0x26E9CB0E:
+                Unk_26E9CB0E unk_E986E3BF;
+                break;
+                
+            // lang.langb
+            case 0xEBA87EEE:
+                Unk_EBA87EEE a;
+                break;
+                
+            // tex.texb
+            case 0x3B01796E: // Hash("Filter");
+                int Filter;
+                break;
+            case 0x74A903BD: // Hash("Wrap");
+                int Wrap;
+                break;
+            case 0xE69DCB46: // Hash("Size");
+                Vec2 Size;
+                break;
+            case 0xF638659D: // Hash("Sprites");
+                Sprites Sprites_;
+                break;
+                
+             default:
+                Printf("Unsupported %x\n", EntriesHashes[i]);
+                break;
+        }
+    }
+} BulkFile;
