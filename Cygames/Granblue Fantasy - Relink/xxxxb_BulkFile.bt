@@ -1,15 +1,22 @@
 //------------------------------------------------
 //--- 010 Editor v14.0 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: Bulk File
+//   Authors: Nenkai
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
+// File Mask: .viewb/.listb/.imageb/.texb/.matb
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+
+// Reminder: All hashes is XXHash32 Custom 
+// - https://github.com/Nenkai/GBFRDataTools/blob/master/GBFRDataTools/Utils/XXHash32Custom.cs
+
+// English word list, executable strings, game strings & bruteforce up to length 5 have been attempted
+// on all hashes for these files known.
+// There is possibly room for improvement. Perhaps specific game-related word dictionaries?
 
 typedef struct
 {
@@ -491,9 +498,79 @@ struct
                 Sprites Sprites_;
                 break;
                 
-             default:
-                Printf("Unsupported %x\n", EntriesHashes[i]);
+            // mat.matb
+            case 0x27E0E2B:
+                uint UnkColor_27E0E2B;
                 break;
+            case 0x91FA80E:
+                uint Unk_91FA80E;
+                break;
+            case 0xB9FF5F2:
+                uint Unk_B9FF5F2;
+                break;
+            case 0x259D1272:
+                float Unk_259D1272;
+                break;
+            case 0x3A20E9D0:
+                float Unk_3A20E9D0;
+                break;
+            case 0x3B78C221:
+                Vec4 Unk_3B78C221;
+                break;
+            case 0x3E2A81D8:
+                String4 Unk_3E2A81D8;
+                break;
+            case 0x441547F2:
+                float Unk_441547F2;
+                break;
+            case 0x4A7281DC:
+                float Unk_4A7281DC;
+                break;
+            case 0x5FE3E992:
+                float Unk_5FE3E992;
+                break;
+            case 0x6CEA21BE:
+                float UnkColor_6CEA21BE[4];
+                break;
+            case 0x73D3C558:
+                float Unk_73D3C558;
+                break;
+            case 0x782A1E2C:
+                Vec4 Unk_782A1E2C;
+                break;
+            case 0x81FF4BE7:
+                float Unk_81FF4BE7;
+                break;
+            case 0x9224EC42:
+                float Unk_9224EC42;
+                break;
+            case 0x931ACDFD:
+                float Unk_931ACDFD;
+                break;
+            case 0xA2EB4DAD:
+                float Unk_A2EB4DAD;
+                break;
+            case 0xA9335950:
+                float Unk_A9335950;
+                break;
+            case 0xB01407ED: // Hash("Blend");
+                float Blend;
+                break;
+            case 0xB9CB0755:
+                Vec4 Unk_B9CB0755;
+                break;
+            case 0xBC57E8F6:
+                float Unk_BC57E8F6;
+                break;
+            case 0xF2927894:
+                float Unk_F2927894;
+                break;
+            case 0xFCEFC255:
+                float Unk_FCEFC255;
+                break;
+            default:
+               Printf("Unsupported %x\n", EntriesHashes[i]);
+               break;
         }
     }
 } BulkFile;
