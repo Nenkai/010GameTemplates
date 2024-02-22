@@ -1,0 +1,207 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: PlatinumGames .sop
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: No idea. Model bone manipulation?
+//  Category: 
+// File Mask: .sop
+//  ID Bytes: 73 6F 70 00
+//   History: 
+//------------------------------------------------
+
+
+typedef enum
+{
+    // Functions
+    AxisMove = 0x0A0530081,
+    AxisRoll = 0x61D80537,
+    AxisRollBlend = 0x0B1FFF4E6,
+    CopyRotate = 0x419A6851,
+    YawPitchRotate = 0x448815BE,
+    Unk_426305E9 = 0x426305E9,
+    Unk_6BE3DB64 = 0x6BE3DB64,
+    
+    // Input/Output
+    OutputObject = 0x5B0292DD,
+    InputObject = 0x1B5B0525,
+    
+    // Names?
+    AxisAngle0 = 0x0F0C45656,
+    AxisAngle1 = 0x87C366C0,
+    AxisAngle2 = 0x1ECA377A,
+    RollRate = 0x72B10DA8,
+    RollRate0 = 0x2CA445F6,
+    RollRate1 = 0x5BA37560,
+    MoveAngle0 = 0x83CC1313,
+    MoveAngle1 = 0x0F4CB2385,
+    MoveOffset = 0x57C13F03,
+    MoveLength = 0x0FB66B61,
+    MoveRange0 = 0x0F583549C,
+    MoveRange1 = 0x8284640A,
+    RotateRate = 0x479150BC,
+    YawRate = 0x0FDE1DC21,
+    PitchRate = 0x3A601413,
+    YawLimit0 = 0x20E2107,
+    YawLimit1 = 0x75091191,
+    PitchLimit0 = 0x7AC1F875,
+    PitchLimit1 = 0x0DC6C8E3, 
+} MainType;
+
+typedef struct
+{
+    MainType Hash <format=hex>;
+    uint Bone  <format=hex>;
+} InputOrOutput;
+
+typedef struct
+{
+   MainType Hash <format=hex>;
+   uint Unk;
+   float Value;
+} Elem;
+
+struct
+{
+    uint Magic;
+    uint VersionDate <format=hex>;
+    int Entries;
+    int Offsets[Entries] <format=hex>;
+    
+    local int i = 0;
+    for (i = 0; i < Entries; i++)
+    {
+        FSeek(Offsets[i]);
+        
+        struct
+        {
+            struct
+            {
+                MainType Hash <format=hex>;
+                byte NumOutputs;
+                byte NumInputs;
+                byte NumOps;
+                byte Unused;
+            } Function;
+            
+            InputOrOutput Outputs[Function.NumOutputs];
+            InputOrOutput Input[Function.NumInputs];
+    
+            Elem elems[Function.NumOps];
+            
+            if (Function.Hash == YawPitchRotate)
+            {
+                 // 0x5B0292DD
+                 // 0x1B5B0525
+                 
+                 // 0xFDE1DC21
+                 // 0x3A601413
+                 // 0x20E2107
+                 // 0x75091191
+                 // 0x7AC1F875
+                 // 0xDC6C8E3
+                 // 0x218365B8
+            }
+            else if (Function.Hash == AxisRoll)
+            {
+                // 0x5B0292DD
+                // 0x1B5B0525
+                
+                // 0x2E933545
+                // 0x599405D3
+                // 0xC09D5469
+                // 0x72B10DA8
+            }
+            else if (Function.Hash == AxisRollBlend)
+            {
+                // 0x5B0292DD
+                // 0x1B5B0525
+                
+                // 0x2E933545
+                // 0x599405D3
+                // 0xC09D5469
+                // 0x72B10DA8
+                // 0x9BE488F1
+            }
+            else if (Function.Hash == Unk_426305E9) // New in relink?
+            {
+                // 0x5B0292DD
+                // 0x1B5B0525
+                
+                // 0x2E933545
+                // 0x599405D3
+                // 0xC09D5469
+                // 0xB94B2AAD
+                // 0xCE4C1A3B
+                // 0x57454B81
+                // 0x1A827F32
+                // 0x838B2E88
+                // 0xFB66B61
+                // 0xF583549C
+                // 0x8284640A
+                // 0xF852F4E8
+            }
+            else if (Function.Hash == Unk_6BE3DB64) // New in relink?
+            {
+                // 0x5B0292DD
+                // 0x1B5B0525
+                
+                // 0x2E933545
+                // 0x599405D3
+                // 0xC09D5469
+                // 0x661B9B76
+                // 0x111CABE0
+                // 0x8815FA5A
+                // 0xF77F6A12
+                // 0x80785A84
+                // 0x19710B3E
+                // 0xE5F48E7D
+                // 0xBFAEF51
+            }
+            else if (Function.Hash == CopyRotate)
+            {
+                 // 0x5B0292DD
+                 // 0x1B5B0525
+                 
+                 // 0x479150BC
+            }
+            else if (Function.Hash == AxisMove)
+            {
+                // 0x5B0292DD
+                // 0x1B5B0525
+                
+                // 0x2E933545
+                // 0x599405D3
+                // 0xC09D5469
+                // 0xB94B2AAD
+                // 0xCE4C1A3B
+                // 0x57454B81
+                // 0x1A827F32
+                // 0x838B2E88
+                // 0xFB66B61
+                // 0xF583549C
+                // 0x8284640A
+                // 0xF852F4E8
+            }
+            else
+            {
+                Printf("Not supported main type %x?", Main.Hash);     
+            }
+            
+            // Usable anywhere?:
+            // - 0x82BEF4AE
+            // - 0xF5B9C438
+            // - 0x6CB09582
+            // - 0x903510C1
+            // - 0xE7322057
+            // - 0x7E3B71ED
+            
+            // - 0x597EA425
+            // - 0x2E7994B3
+            // - 0xB770C509
+            
+        } Entry;
+    }
+    
+} Sop;
