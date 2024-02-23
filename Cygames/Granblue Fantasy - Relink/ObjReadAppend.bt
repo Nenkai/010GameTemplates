@@ -1,0 +1,218 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: ObjRead Append
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: append.objread
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE: This file is a FlatBuffers file and not intended to be read with a template
+// A fbs file is provided next to this file
+
+typedef struct
+{
+    int StrLen;
+    char Str[StrLen];   
+} String4;
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize;
+    
+    if (OffsetTableSize >= 0x0D)
+        Printf("\n");
+        
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+FlatArkHeader Hdr;
+
+typedef struct
+{
+    FlatArkFields fields;
+    
+    FSeek(startof(fields) + fields.OffsetTable[1]);
+    int ObjId <format=hex, bgcolor=cYellow>;
+    
+    FSeek(startof(fields) + fields.OffsetTable[2]);
+    int A2 <bgcolor=cYellow>;
+    
+    if (fields.OffsetTableSize > 8)
+    {
+        FSeek(startof(fields) + fields.OffsetTable[3]);
+        int A3 <bgcolor=cYellow>;
+    }
+    
+    if (fields.OffsetTableSize > 10)
+    {
+        FSeek(startof(fields) + fields.OffsetTable[4]);
+        byte A4 <bgcolor=cYellow>;
+    }
+} SubEntry;
+
+typedef struct
+{
+    int Index;
+    int ObjId <format=hex>;
+} Key; // Whole thing is used for bsearch
+
+struct
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
+    uint Offset <format=hex, bgcolor=cPurple, comment="Enforced, cannot be different">;
+
+    FSeek(startof(Offset) + Offset);
+    int NumEntries <bgcolor=cYellow>;
+    int Offsets[NumEntries] <bgcolor=cYellow>;
+    
+    local int i = 0;
+    for (i = 0; i < NumEntries; i++)
+    {
+        FSeek(startof(Offsets[i]) + Offsets[i]);
+        struct
+        {
+            FlatArkFields fields;
+            
+            FSeek(startof(fields) + fields.OffsetTable[1]);
+            Key key <bgcolor=cYellow>;
+            
+            if (exists(fields.OffsetTable[2]) && fields.OffsetTable[2] != 0)
+            {
+                FSeek(startof(fields) + fields.OffsetTable[2]);
+                struct
+                {
+                    int DataOffset <bgcolor=cYellow>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    int NumEntries_ <bgcolor=cYellow>;
+                    int EntriesOffsets[NumEntries_] <format=hex, bgcolor=cYellow>;
+
+                    local int j = 0;
+                    for (j = 0; j < NumEntries_; j++)
+                    {
+                        FSeek(startof(EntriesOffsets[j]) + EntriesOffsets[j]);
+                        SubEntry sub;
+                    }
+                    
+                    FSeek(FileSize());
+                } A2;
+            }
+            
+            if (exists(fields.OffsetTable[3]) && fields.OffsetTable[3] != 0)
+            {
+                FSeek(startof(fields) + fields.OffsetTable[3]);
+                struct
+                {
+                    int DataOffset <bgcolor=cYellow>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    int NumEntries_ <bgcolor=cYellow>;
+                    Key keys[NumEntries_] <bgcolor=cYellow>;
+                   
+                } A3;
+            }
+            
+            if (exists(fields.OffsetTable[4]) && fields.OffsetTable[4] != 0)
+            {
+                FSeek(startof(fields) + fields.OffsetTable[4]);
+                int A4 <bgcolor=cYellow>;
+            }
+            
+            if (exists(fields.OffsetTable[5]) && fields.OffsetTable[5] != 0)
+            {
+                FSeek(startof(fields) + fields.OffsetTable[5]);
+                byte IsModelOnly <bgcolor=cYellow>;
+            }
+        } Entry;
+    }
+    
+    FSeek(FileSize());
+} Field1;
+
+
+struct
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
+    uint Offset <format=hex, bgcolor=cPurple, comment="Enforced, cannot be different">;
+
+    FSeek(startof(Offset) + Offset);
+    int NumEntries <format=hex, bgcolor=cYellow>;
+    int Offsets[NumEntries] <format=hex, bgcolor=cYellow>;
+    
+    local int i = 0;
+    for (i = 0; i < NumEntries; i++)
+    {
+        FSeek(startof(Offsets[i]) + Offsets[i]);
+        struct
+        {
+            FlatArkFields fields;
+            
+            FSeek(startof(fields) + fields.OffsetTable[1]);
+            Key key <bgcolor=cYellow>;
+            
+            if (fields.OffsetTable[2] != 0)
+            {
+                FSeek(startof(fields) + fields.OffsetTable[2]);
+                struct
+                {
+                    int DataOffset <bgcolor=cYellow>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    int NumEntries_ <bgcolor=cYellow>;
+                    int EntriesOffsets[NumEntries_] <format=hex, bgcolor=cYellow>;
+
+                    local int j = 0;
+                    for (j = 0; j < NumEntries_; j++)
+                    {
+                        FSeek(startof(EntriesOffsets[j]) + EntriesOffsets[j]);
+                        String4 Str <bgcolor=cYellow>;
+                    }
+                    
+                    FSeek(FileSize());
+                } A2;
+            }
+            
+            if (exists(fields.OffsetTable[3]) && fields.OffsetTable[3])
+            {
+                struct
+                {
+                    FSeek(startof(fields) + fields.OffsetTable[3]); 
+                    int DataOffset <format=hex, bgcolor=cYellow>;
+                    
+                    FSeek(startof(DataOffset) + DataOffset);
+                    int NumStrings <format=hex, bgcolor=cYellow>;
+                    int StringsOffsets[NumStrings] <format=hex, bgcolor=cYellow>;
+                    
+                    local int j = 0;
+                    for (j = 0; j < NumStrings; j++)
+                    {
+                        FSeek(startof(StringsOffsets[j]) + StringsOffsets[j]);
+                        String4 Str <bgcolor=cYellow>;
+                    }
+                    
+                    FSeek(FileSize());
+                } A3;
+            }
+        } Entry;
+    }
+    
+    FSeek(FileSize());
+} Field2;
