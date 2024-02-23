@@ -1,0 +1,40 @@
+// all FlatSharp FBS attributes start with the 'fs_' prefix.
+attribute "fs_serializer";
+
+namespace GBFRDataTools.FlatBuffers;
+
+struct Key
+{
+    index:int;
+    obj_id:uint;
+}
+
+table SubTable1
+{
+    obj_id:int;
+    a2:int;
+}
+
+table Unk1
+{
+    key:Key;
+    unk_table_a2:[SubTable1];
+    sub_keys:[Key];
+    a4:int;
+    model_only:bool;
+}
+
+table Unk2
+{
+    key:Key;
+    paths:[string];
+    paths_2:[string];
+}
+
+table ObjReadAppend (fs_serializer) 
+{
+    a1:[Unk1]; // Has to be ordered by key for bsearch.
+    a2:[Unk2]; // Has to be ordered by key for bsearch.
+}
+
+root_type ObjReadAppend;
