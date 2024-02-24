@@ -1,0 +1,260 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Granite SDK GTS (TileSet)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .gts
+//  ID Bytes: 47 52 50 47
+//   History: 
+//------------------------------------------------
+
+// Everything taken mostly straight from unity RE'ing
+
+BitfieldDisablePadding();
+
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
+struct GDEX;
+
+typedef struct
+{
+    uint Tag <format=hex>;
+    enum <byte> 
+    { 
+        GDEXItem_Object = 1,
+        GDEXItem_String = 2,
+        GDEXItem_Short = 3,
+        GDEXItem_IntArray = 8,
+        GDEXItem_GUIDArray = 13,
+    } Type;
+    byte Flags;
+    
+    if (Flags & 0x1)
+        uint64 ItemSize : 48 <format=hex>;
+    else
+        ushort ItemSize <format=hex>;
+        
+    local int basePos = FTell();
+    
+    switch (Type)
+    {
+        case GDEXItem_Object:
+            while (FTell() < basePos + ItemSize)
+                GDEX child;
+            break;
+            
+        case GDEXItem_String:
+            wstring Str;
+            break;
+            
+        case GDEXItem_Short:
+            short Value;
+            break;
+            
+        case GDEXItem_IntArray:
+            int Values[ItemSize / sizeof(int)];
+            break;
+            
+        case GDEXItem_GUIDArray:
+            struct
+            {
+                GUID guid;
+            } GUIDs[ItemSize / sizeof(GUID)];
+            break;
+    }
+
+    FSeek(AlignValue(basePos + ItemSize, 0x04));
+} GDEX <comment=TagToName>;
+
+string TagToName(GDEX& gdex)
+{
+    switch (gdex.Tag)
+    {
+        case 0x4154454D:
+            return "Metadata";
+        case 0x534C5441:
+            return "Atlas";
+        case 0x53545854:
+            return "TextureSet";
+        case 0x52545854:
+            return "Texture";
+        case 0x454D414E:
+            return "Name";
+        case 0x48544457:
+            return "Width";
+        case 0x54484748:
+            return "Height";
+        case 0x58585858:
+            return "XXXX";
+        case 0x59595959:
+            return "YYYY";
+        case 0x52444441:
+            return "TilingMethod";
+        case 0x42475253:
+            return "SRGB";
+        case 0x424D4854:
+            return "Thumbnail";
+        case 0x4A4F5250:
+            return "Project";
+        case 0x464E494C:
+            return "Layer Info";
+        case 0x5259414C:
+            return "Layer";
+        case 0x58444E49:
+            return "Index";
+        case 0x45505954:
+            return "Format Type";
+        case 0x4F464E49:
+            return "Information";
+        case 0x504D4F43:
+            return "Component";
+        case 0x57504D43:
+            return "CMPW";
+        case 0x524A414D:
+            return "Version Major";
+        case 0x524E494D:
+            return "Version Minor";
+        case 0x56444C42:
+            return "Build Version";
+        case 0x464E4942:
+            return "Build Information";
+        case 0x45544144:
+            return "Date Time";
+        case 0x534B4C42:
+            return "Blocks";
+        case 0x454C4954:
+            return "Tiling Mode";
+        case 0x52504442:
+            return "Build Profile";
+        case 0x504D544C:
+            return "LTMP";
+    }
+    
+    return "";
+}
+
+struct
+{
+    // Graphine::Granite::Internal::TiledFile::Initialize
+    struct
+    {
+        char Magic[4] <comment="Should be GPRG">;
+        int Version <comment="Up to 6">;
+    } VersionInformation <bgcolor=cBlack>;
+    
+    if (VersionInformation.Version >= 5) // Graphine::Granite::Internal::TiledFile::InitializeV3orV4
+    {
+        union
+        {   
+            byte data[0xC0];  
+            struct TileFileHeader
+            {
+                int unk;
+                byte guid[0x10];
+                int numLayers <fgcolor=cGreen, comment="Number of data layers in the file. Max 4">;
+                uint64 layersOffset <format=hex, fgcolor=cRed, comment="Offset pointing to LayerInfo [numLayers].">;
+                int numLevels <fgcolor=cGreen, comment="Number of resolution levels in this tile. Max 14">;
+                uint64 levelsOffset <format=hex, fgcolor=cRed, comment="Offset pointing to LevelInfo[numLevels].">;
+                int tileWidth <comment="The width of the individual tiles in pixels (including borders)">;
+                int tileHeight <comment="The height of the individual tiles in pixels (including borders)">;
+                int tileBorder <comment="Border in pixels around the tile.">;
+                int tileMaxSize <comment="The maximum size of all the tiles in the file (this can be used to allocate read buffers etc.)">;
+                int numFlatTiles <fgcolor=cGreen, comment="The total number of tiles in this tile set.">;
+                uint64 flatTilesOffset <format=hex, fgcolor=cRed, comment="Offset pointing to FlatTileInfo[numFlatTiles].">;
+                int unused;
+                int unused;
+                int numReverseTiles <fgcolor=cGreen, comment="Number of reverse tile items in this file.">;
+                uint64 reverseTilesOffset <format=hex, fgcolor=cRed, comment="Offset pointing to PackedTileListItem[numReverseTiles].">;
+                int unused;
+                int unused;
+                int unused;
+                int unused;
+                int unused;
+                int unused;
+                int unused;
+                int pageSize <format=hex, comment="The size in bytes of the pages in this tile set.">;
+                int numPageFiles <fgcolor=cGreen, comment="The total number of page files in this tile set.">;
+                uint64 pagesFilesOffset <format=hex, fgcolor=cRed, comment="Offset pointing to PageFileInfo [numPageFiles].">;
+                int metaSize <format=hex, comment="The size in bytes of the meta data.">;
+                uint64 metaOffset <format=hex, fgcolor=cRed, comment="Offset pointing to char[metaSize].">;
+                int numParameterBlocks <fgcolor=cGreen, comment="The number of compression parameter blocks.">;
+                uint64 parameterBlocksOffset <format=hex, fgcolor=cRed, comment="Offset pointing to ParameterBlockInfo [numParameterBlocks].">;
+                uint64 thumbnailOffset <format=hex, comment="Offset pointing to a ThumbnailsInfo struct. Zero if there is no thumbnail included in the file.">;
+            } Header <size=0xB8, bgcolor=cPurple>;
+        } HeaderV5orV6; 
+
+        FSeek(HeaderV5orV6.Header.layersOffset);
+        struct
+        {
+            uint FormatType;
+            uint DefaultColor <format=hex>;
+        } LayerInfo[HeaderV5orV6.Header.numLayers];
+        
+        FSeek(HeaderV5orV6.Header.levelsOffset);
+        struct
+        {
+            int Width;
+            int Height;
+            int TileIndicesOffsetsMaybe <format=hex, comment="Width * Height * NumLayer * 4">;
+            int __pad__;
+            
+        } LevelInfo[HeaderV5orV6.Header.numLevels];
+        
+        FSeek(HeaderV5orV6.Header.parameterBlocksOffset);
+        struct
+        {
+            int id <format=hex, comment="Unique identifying id of this parameter block. The CodedLayerTileHeader refer to parameter blocks using this id.">;
+            int codec <comment="Codec for which this parameter block is meant.">;
+            int size <format=hex, comment="Size of the parameter block in bytes.">;
+            int offset <format=hex, fgcolor=cRed, comment="Offset of the parameter block.">;
+            int pad;
+        } ParameterBlockInfo[HeaderV5orV6.Header.numParameterBlocks];
+        
+        FSeek(HeaderV5orV6.Header.pagesFilesOffset);
+        struct
+        {
+            wchar_t name[0x100] <comment="The file name of the page file (null terminated).">;
+            int numPages <comment="The total number of data pages in this file.">;
+            byte checksum[0x10] <format=hex, comment="128-bit MD5 hash.">;
+            int type <comment="Type of the page file, can be a GTP or a GTEX.">;
+
+            if (VersionInformation.Version >= 6)
+            {
+                int sizeInBytes <format=hex>;
+                int Pad;
+            }
+        } PageFileInfo[HeaderV5orV6.Header.numPageFiles] <optimize=false, comment=name>;
+        
+        FSeek(HeaderV5orV6.Header.metaOffset);
+        GDEX MetaItem;
+        
+        FSeek(HeaderV5orV6.Header.reverseTilesOffset);
+        struct
+        {
+            byte Layer : 4;
+            byte Mipmap : 4;
+            int Y : 12;
+            int X : 12;
+        } PackedTileListItem[HeaderV5orV6.Header.numReverseTiles] <bgcolor=cDkYellow>;
+        
+        FSeek(HeaderV5orV6.Header.flatTilesOffset);
+        struct
+        {
+            // order might not be right
+            ushort pageFileIndex <comment="Index of the pagefile in the tileset this tile is located in.">;
+            ushort numTiles <comment="Number of tiles that reference this flat tile.">;
+            ushort pageIndex <comment="Index of the page in the pagefile this tile is located in.">;
+            ushort tileIndex <comment="Index of the tile in the page this tile is located.">;
+            uint tileListOffset <comment="Offset in the tilelist where numTiles PackedTileListItems are found that point back to the tiles referencing this tile.">;
+        } FlatTileInfo[HeaderV5orV6.Header.numFlatTiles] <bgcolor=cYellow>;
+    }
+
+    
+} GranitePageFile;
