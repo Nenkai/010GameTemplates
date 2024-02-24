@@ -15,6 +15,7 @@
 typedef enum
 {
     // Functions
+    // Names are CRC32
     AxisMove = 0x0A0530081,
     AxisRoll = 0x61D80537,
     AxisRollBlend = 0x0B1FFF4E6,
