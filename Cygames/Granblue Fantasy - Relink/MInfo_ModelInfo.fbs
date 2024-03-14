@@ -5,7 +5,7 @@ namespace GBFRDataTools.Entities;
 
 // asset::impl::ModelInfoImpl
 table ModelInfo (fs_serializer) {
-    magic:uint; // 0x134B249
+    magic:uint; // 20230729, 20240213 (1.1.1)
     lods:[StreamLOD];
     shadow_lods:[StreamLOD];
     a4:[float];
@@ -37,6 +37,9 @@ table ModelInfo (fs_serializer) {
     bool30:bool;
     bool31:bool; // Unused?
     bool32:bool;
+    // 1.1.1
+    bool33:bool;
+    float34:float;
 }
 
 table StreamLOD
