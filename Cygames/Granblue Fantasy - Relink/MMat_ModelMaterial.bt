@@ -36,17 +36,17 @@ typedef struct
 FlatArkHeader Hdr;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
-uint Field1_Magic <format=hex, comment="Enforced, cannot be different">;
+uint Magic <format=hex, comment="Enforced, cannot be different", bgcolor=cYellow>;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
 struct
 {
-    int DataOffset <format=hex>;
+    int DataOffset <format=hex, fgcolor=cRed>;
 
     FSeek(startof(DataOffset) + DataOffset);
     struct
     {
-        int NumEntries;
+        int NumEntries <fgcolor=cGreen>;
         int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
         
         local int i = 0;
@@ -62,9 +62,14 @@ struct
                 {
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
-                    int NumEntries <bgcolor=cYellow>;
-                    uint64 Ent[NumEntries] <bgcolor=cYellow>;
-                } Field1;
+                    int NumEntries <fgcolor=cGreen>;
+                    struct
+                    {
+                        uint ParamHash;
+                        ushort ValueOrOffset;
+                        ushort ValueType;
+                    } ShaderParam[NumEntries] <bgcolor=cYellow>;
+                } ShaderParams;
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[2]);
                 struct
@@ -72,7 +77,7 @@ struct
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
                     
-                    int NumEntries2 <bgcolor=cYellow>;
+                    int NumEntries2 <fgcolor=cGreen>;
                     int Offsets2[NumEntries2] <format=hex, fgcolor=cRed>;
                     local int j = 0;
                     for (j = 0; j < NumEntries2; j++)
@@ -80,31 +85,31 @@ struct
                          FSeek(startof(Offsets2[j]) + Offsets2[j]);
                          struct
                          {
-                             FlatArkFields Fields2;
+                             FlatArkFields Fields;
                              
-                             FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
-                             uint F2_1_ID <bgcolor=cYellow>;
+                             FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                             uint ShaderMapNameHash <format=hex, bgcolor=cYellow>;
                              
-                             FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                             FSeek(startof(Fields) + Fields.OffsetTable[2]);
                              struct
                              {
                                 uint NameOffset <bgcolor=cYellow>;
                                 FSeek(startof(NameOffset) + NameOffset);
-                                uint strLen <bgcolor=cYellow>;
+                                uint strLen <fgcolor=cGreen>;
                                 char str[strLen] <bgcolor=cYellow>;
-                             } FieldName;
-                         } Nested;
+                             } TextureName;
+                         } TextureMapInfo;
                     }
-                } Field2;
+                } TextureParams;
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[3]);
                 struct
                 {
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
-                    int ArrLength <bgcolor=cYellow>;
+                    int ArrLength <fgcolor=cGreen>;
                     int Arr[ArrLength] <bgcolor=cYellow>;
-                } Field3;
+                } A3;
 
                 if (Fields.OffsetTable[4])
                 {
@@ -120,25 +125,31 @@ struct
                         {   
                             uint ArrOffset <bgcolor=cYellow>;
                             FSeek(startof(ArrOffset) + ArrOffset);
-                            int NumEntries <bgcolor=cYellow>;
-                            struct
+                            
+                            int NumEntries <fgcolor=cGreen>;
+                            local int j;
+                            for (j = 0; j < NumEntries; j++)
                             {
-                                int StrOffset <bgcolor=cYellow>;
-                                FSeek(startof(StrOffset) + StrOffset);
-                                
-                                int StrSize <bgcolor=cYellow>;
-                                char Str[StrSize] <bgcolor=cYellow>;
-                            } Str[NumEntries];
-                        } NamesField;
+                                FSeek(startof(NumEntries) + 4 + (j * 0x04));
+                                struct
+                                {
+                                    int StrOffset <bgcolor=cYellow>;
+                                    FSeek(startof(StrOffset) + StrOffset);
+                                    
+                                    int StrSize <bgcolor=cYellow>;
+                                    char Str[StrSize] <bgcolor=cYellow>;
+                                } Name;
+                            }
+                        } PageFiles;
                         
                         FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
                         struct
                         {
                             int ArrOffset <bgcolor=cYellow>;
                             FSeek(startof(ArrOffset) + ArrOffset);
-                            int ArrLen <bgcolor=cYellow>;
+                            int ArrLen <fgcolor=cGreen>;
                             int Arr[ArrLen] <bgcolor=cYellow>;
-                        } F2;
+                        } LayerToShaderMapNameHash;
                         
                         if (exists(Fields2.OffsetTable[3]) && Fields2.OffsetTable[3] != 0)
                         {
@@ -155,30 +166,30 @@ struct
                         if (exists(Fields2.OffsetTable[5]) && Fields2.OffsetTable[5] != 0)
                         {
                            FSeek(startof(Fields2) + Fields2.OffsetTable[5]);
-                           byte F5 <bgcolor=cYellow>;
+                           byte TileSetNumber <bgcolor=cYellow>;
                         }
-                    } Field4;
+                    } GraniteParams;
                 }
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[5]);
-                int Field5 <bgcolor=cYellow>;
+                int UniqueMaterialNameHashMaybe <format=hex, bgcolor=cYellow>;
                 
                 if (exists(Fields.OffsetTable[6]) && Fields.OffsetTable[6] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[6]);
-                    byte Field6 <bgcolor=cYellow>;
+                    byte ShaderType <bgcolor=cYellow>;
                 }
                 
                 if (exists(Fields.OffsetTable[7]) && Fields.OffsetTable[7] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[7]);
-                    byte Field7 <bgcolor=cYellow>;
+                    byte ShaderSubType <bgcolor=cYellow>;
                 }
                 
                 if (exists(Fields.OffsetTable[8]) && Fields.OffsetTable[8] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[8]);
-                    byte Field8 <bgcolor=cYellow>;
+                    byte UnkType8 <bgcolor=cYellow>;
                 }
                 
                 if (exists(Fields.OffsetTable[9]) && Fields.OffsetTable[9] != 0)
@@ -204,18 +215,18 @@ struct
                     FSeek(startof(Fields) + Fields.OffsetTable[12]);
                     byte Field12 <bgcolor=cYellow>;
                 }
-            } Entry; 
+            } Material; 
         }
-    } MMat2;
-} Field2;
+    } Materials_;
+} Materials;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
 struct
 {
-    int DataOffset <format=hex>;
+    int DataOffset <fgcolor=cRed, format=hex>;
     FSeek(startof(DataOffset) + DataOffset);
     
-    int NumEntries;
+    int NumEntries <fgcolor=cGreen>;
     int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
     
     local int i = 0;
@@ -231,29 +242,35 @@ struct
             {
                 uint BufferOffset <bgcolor=cYellow>;
                 FSeek(startof(BufferOffset) + BufferOffset);
-                uint BufferSize <bgcolor=cYellow>;
-                uint Buffer[BufferSize] <bgcolor=cYellow>;
-            } Field1_Buffer <bgcolor=cGray>;
+                uint BufferSize <fgcolor=cGreen>;
+                uint Buffer_[BufferSize] <bgcolor=cYellow>;
+            } Buffer <bgcolor=cGray>;
             
             FSeek(startof(Fields) + Fields.OffsetTable[2]);
-            uint Field2_IDMaybe <format=hex>;
-        } Entry; 
+            uint UnkUniqueParamNameHash <format=hex, bgcolor=cYellow>;
+        } ConstantBuffer; 
         
     }
         
-} Field3;
+} ConstantBuffers;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
-int Field4;
+struct
+{
+    int DataOffset <fgcolor=cRed, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    int NumEntries <fgcolor=cGreen>;
+    float Data[NumEntries] <bgcolor=cYellow>;
+} ShaderParamDataBuffers;
 
 if (Hdr.Fields.OffsetTable[5] != 0)
 {
     FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[5]);
-    int Field5;
+    int Field5 <bgcolor=cYellow>;
 }
 
 if (Hdr.Fields.OffsetTable[6] != 0)
 {
     FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[6]);
-    byte Field6;
+    byte Field6 <bgcolor=cYellow>;
 }
