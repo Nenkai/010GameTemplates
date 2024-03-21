@@ -161,8 +161,8 @@ table Material
     constant_buffer_indices:[ushort];
     granite_params:GraniteVirtualTextureStreamingInfo;
     unique_material_name_hash_maybe:uint;
-    pixel_shader:byte;
-    vertex_shader:byte;
+    shader_type:byte;
+    shader_sub_type:byte;
     unk_type_8:byte; // 0-3
     bool9:bool;
     bool10:bool;
