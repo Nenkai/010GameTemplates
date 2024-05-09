@@ -1,0 +1,36 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: BCS1 Symbols file (used in The Shoot)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    int ImageOffset <format=hex>;
+    int StrOffset <format=hex>;
+    
+    FSeek(StrOffset);
+    string Symbol;
+} Symbol;
+
+struct
+{
+    uint Magic;
+    int Count;
+    
+    local int i = 0;
+    for (i = 0; i < Count; i++)
+    {
+        FSeek(0x08 + (i * 0x08));
+        Symbol symbol;   
+    }
+} BCS1;
