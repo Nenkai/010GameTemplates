@@ -1,0 +1,53 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: TextureBin
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef ubyte u8;
+typedef uint u32;
+
+struct
+{
+    struct Hw__TextureBinHeader
+    {
+      u8 m_pMagic[4];
+      u32 m_Version;
+      u32 m_nTex;
+      u32 m_OfsOfs <format=hex>;
+      u32 m_SizeOfs <format=hex>;
+      u32 m_FlgOfs <format=hex>;
+      u32 m_HashOfs <format=hex>;
+      u32 m_ImageHead;
+    } Header <bgcolor=cPurple>;
+
+    FSeek(Header.m_OfsOfs);
+    int DataOffsets[Header.m_nTex];
+    
+    FSeek(Header.m_SizeOfs);
+    int TextureSizes[Header.m_nTex];
+    
+    FSeek(Header.m_FlgOfs);
+    
+    // isHash?
+    // isReduce?
+    // isX360?
+    // isMipMap?
+    // isCubeMap?
+    // isDummy?
+    // 0x20000000 = isAlpha
+    // 0x10000000 = isPunch?
+    // 0x8000000 = isAlphaOnly?
+    
+    int TextureFlags[Header.m_nTex]; 
+    
+    FSeek(Header.m_HashOfs);
+    int TextureHashes[Header.m_nTex] <format=hex>;
+} TextureBin;
