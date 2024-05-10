@@ -1,0 +1,125 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    local int basePos = FTell();
+    
+    char Magic[4];
+    enum <ushort> { None = 0x00, Scrambled = 0x02 } Flags;
+    ushort SheetNameOffset <format=hex, fgcolor=cRed>;
+    ushort IdSize <format=hex, fgcolor=cGreen>;
+    ushort MemberNamesHashesOffset <format=hex, fgcolor=cGreen>;
+    ushort MemberNamesHashesLength <format=hex, fgcolor=cGreen>;
+    ushort IdsOffset <format=hex, fgcolor=cRed>;
+    ushort IdCount <fgcolor=cGreen>;
+    ushort IdTop;
+    ushort Unk;
+    ushort Checksum <format=hex>;
+    int StringsOffset <format=hex, fgcolor=cRed>;
+    int TotalStringLength <format=hex, fgcolor=cGreen>;
+    ushort MembersOffset <format=hex, fgcolor=cRed>;
+    ushort MemberCount <fgcolor=cGreen>;
+    
+    FSeek(basePos + MemberNamesHashesOffset);
+    ushort MemberNamesHashes[MemberNamesHashesLength] <format=hex>;
+    
+    if (MemberNamesHashesLength != 0x3D)
+        Printf("%d", MemberNamesHashesLength);
+    FSeek(basePos + SheetNameOffset);
+    union
+    {
+        string SheetName;
+        byte MemberNames[MemberNamesHashesOffset - SheetNameOffset];
+    } Names;
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < MemberCount; i++)
+        {
+            FSeek(basePos + MembersOffset + (i * 6));
+            struct
+            {
+                ushort TypeDefOffset <format=hex, fgcolor=cRed>;
+                ushort PreviousEntryWithSameHash <format=hex, fgcolor=cRed>;
+                ushort NameOffset <format=hex, fgcolor=cRed>;
+                
+                if (Flags != 2)
+                {
+                    FSeek(basePos + TypeDefOffset);
+                    struct
+                    {
+                        byte Type;
+                        enum <byte> 
+                        {
+                            VarType_None,
+                            VarType_UByte,
+                            VarType_UShort,
+                            VarType_UInt,
+                            VarType_SByte,
+                            VarType_Short,
+                            VarType_Int,
+                            VarType_String,
+                            VarType_Float,
+                        } VarType;
+                        ushort OffsetInId <format=hex>;
+
+                    } MemberTypeDef;
+                
+                    FSeek(basePos + NameOffset);
+                    string Name;
+                }
+                
+                FSeek(FileSize());
+            } Member <comment=Name>;
+        }
+    } Members;
+    
+    FSeek(basePos + IdsOffset);
+    struct
+    {
+        struct
+        {
+            byte IdData[IdSize];
+        } Id[IdCount] <optimize=false>;
+    } Ids;
+
+    if (TotalStringLength > 0)
+    {
+        FSeek(basePos + StringsOffset);
+        byte StringData[TotalStringLength] <optimize=false>;
+    }
+    
+} FP <comment=Names.SheetName>;
+
+struct BDAT
+{
+    struct
+    {
+        int NumFiles;
+        int FileSize <format=hex>;
+    } Header;
+    
+    int FilesOffsets[Header.NumFiles] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < Header.NumFiles; i++)
+    {
+        FSeek(FilesOffsets[i]);
+        FP fp;
+    }
+    
+} BinaryData;

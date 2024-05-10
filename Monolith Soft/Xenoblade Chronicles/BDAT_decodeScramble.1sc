@@ -1,0 +1,49 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Script File
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+void decodeScramble_data(byte data[], int length, ushort checksum)
+{
+    local byte chk_hi = (byte)(~checksum >> 8);
+    local byte chk_lo = (byte)~checksum;
+    
+    local int j = 0;
+    local byte hi, lo;
+    for (j = 0; j < length; j += 2)
+    {
+        hi = data[j];
+        lo = data[j + 1];
+
+        data[j] ^= chk_hi;
+        data[j + 1] ^= chk_lo;
+
+        chk_hi += hi;
+        chk_lo += lo;
+    }
+}
+
+void decodeScramble(FP& fp)
+{
+    if ((fp.Flags & 0x02) == 0)
+        return;
+
+    if (fp.TotalStringLength != 0)
+        decodeScramble_data(fp.StringData, fp.TotalStringLength, fp.Checksum);
+    decodeScramble_data(fp.Names.MemberNames, fp.MemberNamesHashesOffset - fp.SheetNameOffset, fp.Checksum);
+    
+    fp.Flags &= ~2;
+}
+
+local int i = 0;
+for (i = 208; i < 209; i++)
+{
+    FSeek(BinaryData.FilesOffsets[i] + BinaryData.fp[i].StringsOffset);
+    decodeScramble(BinaryData.fp[i]);
+}
