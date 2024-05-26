@@ -134,7 +134,7 @@ enum ShaderMapTypeHash : uint
 
 struct ShaderParamInfo
 {
-    param_hash:ShaderParameterTypeNameHash;
+    param_hash:ShaderParameterTypeNameHash(key);
     value_or_offset:ushort; // When float/Vec2/3/4 this is an offset to the float pool
     value_type:ShaderParamValueType;
 }
@@ -150,7 +150,7 @@ table GraniteVirtualTextureStreamingInfo
 
 table TextureMapInfo
 {
-    shader_map_name_hash:ShaderMapTypeHash;
+    shader_map_name_hash:ShaderMapTypeHash(key);
     texture_name:string;
 }
 
@@ -172,7 +172,7 @@ table Material
 
 table ConstantBuffer
 {
-    buffer:[float];
+    buffer:[uint];
     unk_unique_param_name_hash:uint;
 }
 
