@@ -1,18 +1,17 @@
 //------------------------------------------------
 //--- 010 Editor v14.0 Binary Template
 //
-//      File: Model Material (.mmat)
-//   Authors: Nenkai
+//      File: 
+//   Authors: 
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: .mmat
+// File Mask: 
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
 
-// NOTE: This file is a FlatBuffers file and not intended to be read with a template
-// A fbs file is provided next to this file
+
 
 typedef struct
 {
@@ -36,17 +35,17 @@ typedef struct
 FlatArkHeader Hdr;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
-uint Magic <format=hex, comment="Enforced, cannot be different", bgcolor=cYellow>;
+uint Field1_Magic <bgcolor=cRed, format=hex, comment="Enforced, cannot be different">;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
 struct
 {
-    int DataOffset <format=hex, fgcolor=cRed>;
+    int DataOffset <bgcolor=cBlue, format=hex>;
 
     FSeek(startof(DataOffset) + DataOffset);
     struct
     {
-        int NumEntries <fgcolor=cGreen>;
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
         int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
         
         local int i = 0;
@@ -62,14 +61,14 @@ struct
                 {
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
-                    int NumEntries <fgcolor=cGreen>;
+                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
                     struct
                     {
-                        uint ParamHash;
-                        ushort ValueOrOffset;
-                        ushort ValueType;
-                    } ShaderParam[NumEntries] <bgcolor=cYellow>;
-                } ShaderParams;
+                        uint param_hash <format=hex>;
+                        ushort value_or_offset;
+                        ushort value_type;
+                    } ShaderParamInfo[NumEntries] <bgcolor=cBlue>;
+                } shader_params;
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[2]);
                 struct
@@ -77,7 +76,7 @@ struct
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
                     
-                    int NumEntries2 <fgcolor=cGreen>;
+                    int NumEntries2 <fgcolor=cGreen, bgcolor=cBlue>;
                     int Offsets2[NumEntries2] <format=hex, fgcolor=cRed>;
                     local int j = 0;
                     for (j = 0; j < NumEntries2; j++)
@@ -88,28 +87,28 @@ struct
                              FlatArkFields Fields;
                              
                              FSeek(startof(Fields) + Fields.OffsetTable[1]);
-                             uint ShaderMapNameHash <format=hex, bgcolor=cYellow>;
+                             uint shader_map_name_hash <bgcolor=cBlue, format=hex>;
                              
                              FSeek(startof(Fields) + Fields.OffsetTable[2]);
                              struct
                              {
-                                uint NameOffset <bgcolor=cYellow>;
+                                uint NameOffset <bgcolor=cBlue>;
                                 FSeek(startof(NameOffset) + NameOffset);
-                                uint strLen <fgcolor=cGreen>;
-                                char str[strLen] <bgcolor=cYellow>;
-                             } TextureName;
+                                uint strLen <fgcolor=cGreen, bgcolor=cBlue>;
+                                char str[strLen] <bgcolor=cBlue>;
+                             } texture_name;
                          } TextureMapInfo;
                     }
-                } TextureParams;
+                } texture_maps;
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[3]);
                 struct
                 {
                     int DataOffset <format=hex, fgcolor=cRed>;
                     FSeek(startof(DataOffset) + DataOffset);
-                    int ArrLength <fgcolor=cGreen>;
-                    int Arr[ArrLength] <bgcolor=cYellow>;
-                } A3;
+                    int ArrLength <fgcolor=cGreen, bgcolor=cBlue>;
+                    short Arr[ArrLength] <bgcolor=cBlue>;
+                } constant_buffer_indices;
 
                 if (Fields.OffsetTable[4])
                 {
@@ -123,110 +122,104 @@ struct
                         FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
                         struct
                         {   
-                            uint ArrOffset <bgcolor=cYellow>;
+                            uint ArrOffset <bgcolor=cBlue>;
                             FSeek(startof(ArrOffset) + ArrOffset);
-                            
-                            int NumEntries <fgcolor=cGreen>;
-                            local int j;
-                            for (j = 0; j < NumEntries; j++)
+                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                            struct
                             {
-                                FSeek(startof(NumEntries) + 4 + (j * 0x04));
-                                struct
-                                {
-                                    int StrOffset <bgcolor=cYellow>;
-                                    FSeek(startof(StrOffset) + StrOffset);
-                                    
-                                    int StrSize <bgcolor=cYellow>;
-                                    char Str[StrSize] <bgcolor=cYellow>;
-                                } Name;
-                            }
-                        } PageFiles;
+                                int StrOffset <bgcolor=cBlue>;
+                                FSeek(startof(StrOffset) + StrOffset);
+                                
+                                int StrSize <fgcolor=cGreen, bgcolor=cBlue>;
+                                char Str[StrSize] <bgcolor=cBlue>;
+                            } Str[NumEntries];
+                        } page_files;
                         
                         FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
                         struct
                         {
-                            int ArrOffset <bgcolor=cYellow>;
+                            int ArrOffset <bgcolor=cBlue>;
                             FSeek(startof(ArrOffset) + ArrOffset);
-                            int ArrLen <fgcolor=cGreen>;
-                            int Arr[ArrLen] <bgcolor=cYellow>;
-                        } LayerToShaderMapNameHash;
+                            int ArrLen <fgcolor=cGreen, bgcolor=cBlue>;
+                            int Arr[ArrLen] <bgcolor=cBlue>;
+                        } layer_to_shader_map_name_hash;
                         
                         if (exists(Fields2.OffsetTable[3]) && Fields2.OffsetTable[3] != 0)
                         {
                            FSeek(startof(Fields2) + Fields2.OffsetTable[3]);
-                           byte F3 <bgcolor=cYellow>;
+                           byte unk3 <bgcolor=cBlue>;
                         }
                         
                         if (exists(Fields2.OffsetTable[4]) && Fields2.OffsetTable[4] != 0)
                         {
                            FSeek(startof(Fields2) + Fields2.OffsetTable[4]);
-                           byte F4 <bgcolor=cYellow>;
+                           byte unk4 <bgcolor=cBlue>;
                         }
                         
                         if (exists(Fields2.OffsetTable[5]) && Fields2.OffsetTable[5] != 0)
                         {
                            FSeek(startof(Fields2) + Fields2.OffsetTable[5]);
-                           byte TileSetNumber <bgcolor=cYellow>;
+                           byte tile_set_number <bgcolor=cBlue>;
                         }
-                    } GraniteParams;
+                    } granite_params;
                 }
                 
                 FSeek(startof(Fields) + Fields.OffsetTable[5]);
-                int UniqueMaterialNameHashMaybe <format=hex, bgcolor=cYellow>;
+                int unique_material_name_hash_maybe <bgcolor=cBlue, format=hex>;
                 
                 if (exists(Fields.OffsetTable[6]) && Fields.OffsetTable[6] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[6]);
-                    byte ShaderType <bgcolor=cYellow>;
+                    byte shader_type <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[7]) && Fields.OffsetTable[7] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[7]);
-                    byte ShaderSubType <bgcolor=cYellow>;
+                    byte shader_sub_type <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[8]) && Fields.OffsetTable[8] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[8]);
-                    byte UnkType8 <bgcolor=cYellow>;
+                    byte unk_type_8 <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[9]) && Fields.OffsetTable[9] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[9]);
-                    byte Field9 <bgcolor=cYellow>;
+                    byte bool9 <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[10]) && Fields.OffsetTable[10] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[10]);
-                    byte Field10 <bgcolor=cYellow>;
+                    byte bool10 <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[11]) && Fields.OffsetTable[11] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[11]);
-                    byte Field11 <bgcolor=cYellow>;
+                    byte bool11 <bgcolor=cBlue>;
                 }
                 
                 if (exists(Fields.OffsetTable[12]) && Fields.OffsetTable[12] != 0)
                 {
                     FSeek(startof(Fields) + Fields.OffsetTable[12]);
-                    byte Field12 <bgcolor=cYellow>;
+                    byte bool12 <bgcolor=cBlue>;
                 }
-            } Material; 
+            } MaterialEntry; 
         }
-    } Materials_;
-} Materials;
+    } Material;
+} materials <bgcolor=cBlue>;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
 struct
 {
-    int DataOffset <fgcolor=cRed, format=hex>;
+    int DataOffset <bgcolor=cGray, format=hex>;
     FSeek(startof(DataOffset) + DataOffset);
     
-    int NumEntries <fgcolor=cGreen>;
+    int NumEntries <fgcolor=cGreen, bgcolor=cGray>;
     int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
     
     local int i = 0;
@@ -240,28 +233,26 @@ struct
             FSeek(startof(Fields) + Fields.OffsetTable[1]);
             struct
             {
-                uint BufferOffset <bgcolor=cYellow>;
+                uint BufferOffset <bgcolor=cGray>;
                 FSeek(startof(BufferOffset) + BufferOffset);
-                uint BufferSize <fgcolor=cGreen>;
-                uint Buffer_[BufferSize] <bgcolor=cYellow>;
-            } Buffer <bgcolor=cGray>;
+                uint BufferSize <fgcolor=cGreen, bgcolor=cGray>;
+                uint Buffer[BufferSize] <bgcolor=cGray>;
+            } buffer <bgcolor=cGray>;
             
             FSeek(startof(Fields) + Fields.OffsetTable[2]);
-            uint UnkUniqueParamNameHash <format=hex, bgcolor=cYellow>;
-        } ConstantBuffer; 
-        
+            uint unk_unique_param_name_hash <bgcolor=cGray, format=hex>;
+        } Entry; 
     }
-        
-} ConstantBuffers;
+} constant_buffers <bgcolor=cGray>;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
 struct
 {
-    int DataOffset <fgcolor=cRed, fgcolor=cRed>;
-    FSeek(startof(DataOffset) + DataOffset);
-    int NumEntries <fgcolor=cGreen>;
-    float Data[NumEntries] <bgcolor=cYellow>;
-} ShaderParamDataBuffers;
+     int ArrOffset <bgcolor=cGreen, format=hex>;
+     FSeek(startof(ArrOffset) + ArrOffset);
+     int ArrLen <bgcolor=cGreen>;
+     int Arr[ArrLen] <bgcolor=cGreen>;
+} shader_param_float_data_pool <bgcolor=cGreen>;
 
 if (Hdr.Fields.OffsetTable[5] != 0)
 {
