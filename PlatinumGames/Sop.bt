@@ -1,34 +1,47 @@
 //------------------------------------------------
 //--- 010 Editor v14.0 Binary Template
 //
-//      File: PlatinumGames .sop
+//      File: PlatinumGames Animation Script Operator (.sop)
 //   Authors: Nenkai
 //   Version: 
-//   Purpose: No idea. Model bone manipulation?
+//   Purpose: Animation scripting (not purely animation data)
 //  Category: 
 // File Mask: .sop
 //  ID Bytes: 73 6F 70 00
 //   History: 
 //------------------------------------------------
 
-
+// Names are CRC32
 typedef enum
 {
-    // Functions
-    // Names are CRC32
     AxisMove = 0x0A0530081,
+    RollMove = 0x426305E9,
     AxisRoll = 0x61D80537,
     AxisRollBlend = 0x0B1FFF4E6,
     CopyRotate = 0x419A6851,
     YawPitchRotate = 0x448815BE,
-    Unk_426305E9 = 0x426305E9,
     Unk_6BE3DB64 = 0x6BE3DB64,
-    
+} Operator;
+
+typedef enum
+{
     // Input/Output
     OutputObject = 0x5B0292DD,
     InputObject = 0x1B5B0525,
-    
-    // Names?
+} IOType;
+
+typedef enum
+{    
+    // Arguments?
+    RollAxis0 = 0x2E933545,
+    RollAxis1 = 0x599405D3,
+    RollAxis2 = 0xC09D5469,
+    MoveAxis0 = 0xB94B2AAD,
+    MoveAxis1 = 0xCE4C1A3B,
+    MoveAxis2 = 0x57454B81,
+    MoveOffset0 = 0x6D854FA4,
+    MoveOffset1 = 0x1A827F32,
+    MoveOffset2 = 0x838B2E88,
     AxisAngle0 = 0x0F0C45656,
     AxisAngle1 = 0x87C366C0,
     AxisAngle2 = 0x1ECA377A,
@@ -38,35 +51,37 @@ typedef enum
     MoveAngle0 = 0x83CC1313,
     MoveAngle1 = 0x0F4CB2385,
     MoveOffset = 0x57C13F03,
-    MoveLength = 0x0FB66B61,
-    MoveRange0 = 0x0F583549C,
+    MoveLength = 0xFB66B61,
+    MoveRange0 = 0xF583549C,
     MoveRange1 = 0x8284640A,
+    EtcRate = 0x9BE488F1,
     RotateRate = 0x479150BC,
-    YawRate = 0x0FDE1DC21,
+    YawRate = 0xFDE1DC21,
     PitchRate = 0x3A601413,
     YawLimit0 = 0x20E2107,
     YawLimit1 = 0x75091191,
     PitchLimit0 = 0x7AC1F875,
     PitchLimit1 = 0x0DC6C8E3, 
-} MainType;
+    RollType = 0x218365B8,
+} ArgumentType;
 
 typedef struct
 {
-    MainType Hash <format=hex>;
+    IOType IOType_ <format=hex>;
     uint Bone  <format=hex>;
-} InputOrOutput;
+} InputOrOutput <comment=EnumToString(IOType_)>;
 
 typedef struct
 {
-   MainType Hash <format=hex>;
+   ArgumentType ArgumentType_ <format=hex>;
    uint Unk;
    float Value;
-} Elem;
+} Argument <comment=EnumToString(ArgumentType_)>;
 
 struct
 {
-    uint Magic;
-    uint VersionDate <format=hex>;
+    uint Magic <format=hex>;
+    uint VersionDate <format=hex, comment="Probably checked">;
     int Entries;
     int Offsets[Entries] <format=hex>;
     
@@ -79,78 +94,78 @@ struct
         {
             struct
             {
-                MainType Hash <format=hex>;
+                Operator Operator_ <format=hex>;
                 byte NumOutputs;
                 byte NumInputs;
-                byte NumOps;
+                byte NumArguments;
                 byte Unused;
-            } Function;
+            } Unit <comment=EnumToString(Operator_)>;
             
-            InputOrOutput Outputs[Function.NumOutputs];
-            InputOrOutput Input[Function.NumInputs];
+            InputOrOutput Outputs[Unit.NumOutputs];
+            InputOrOutput Input[Unit.NumInputs];
     
-            Elem elems[Function.NumOps];
+            Argument Arguments[Unit.NumArguments];
             
-            if (Function.Hash == YawPitchRotate)
+            if (Unit.Operator_ == YawPitchRotate)
             {
                  // 0x5B0292DD
                  // 0x1B5B0525
                  
-                 // 0xFDE1DC21
-                 // 0x3A601413
-                 // 0x20E2107
-                 // 0x75091191
-                 // 0x7AC1F875
-                 // 0xDC6C8E3
-                 // 0x218365B8
+                 // 0xFDE1DC21 - YawRate
+                 // 0x3A601413 - PitchRate
+                 // 0x20E2107  - YawLimit0
+                 // 0x75091191 - YawLimit1
+                 // 0x7AC1F875 - PitchLimit0
+                 // 0xDC6C8E3  - PitchLimit1
+                 // 0x218365B8 - RollType
             }
-            else if (Function.Hash == AxisRoll)
+            else if (Unit.Operator_ == AxisRoll)
             {
                 // 0x5B0292DD
                 // 0x1B5B0525
                 
-                // 0x2E933545
-                // 0x599405D3
-                // 0xC09D5469
+                // 0x2E933545 - RollAxis0
+                // 0x599405D3 - RollAxis1
+                // 0xC09D5469 - RollAxis2
                 // 0x72B10DA8
             }
-            else if (Function.Hash == AxisRollBlend)
+            else if (Unit.Operator_ == AxisRollBlend)
             {
                 // 0x5B0292DD
                 // 0x1B5B0525
                 
-                // 0x2E933545
-                // 0x599405D3
-                // 0xC09D5469
+                // 0x2E933545 - RollAxis0
+                // 0x599405D3 - RollAxis1
+                // 0xC09D5469 - RollAxis2
                 // 0x72B10DA8
                 // 0x9BE488F1
             }
-            else if (Function.Hash == Unk_426305E9) // New in relink?
+            else if (Unit.Operator_ == RollMove) // New in relink?
             {
                 // 0x5B0292DD
                 // 0x1B5B0525
                 
-                // 0x2E933545
-                // 0x599405D3
-                // 0xC09D5469
-                // 0xB94B2AAD
-                // 0xCE4C1A3B
-                // 0x57454B81
-                // 0x1A827F32
-                // 0x838B2E88
-                // 0xFB66B61
-                // 0xF583549C
-                // 0x8284640A
+                // 0x2E933545 - RollAxis0
+                // 0x599405D3 - RollAxis1
+                // 0xC09D5469 - RollAxis2
+                // 0xB94B2AAD - MoveAxis0
+                // 0xCE4C1A3B - MoveAxis1
+                // 0x57454B81 - MoveAxis2
+                // 0x1A827F32 - MoveOffset1
+                // 0x838B2E88 - MoveOffset2
+                // 0xFB66B61  - MoveLength
+                // 0xF583549C - MoveRange0
+                // 0x8284640A - MoveRange1
                 // 0xF852F4E8
             }
-            else if (Function.Hash == Unk_6BE3DB64) // New in relink?
+            else if (Unit.Operator_ == Unk_6BE3DB64) // New in relink?
             {
                 // 0x5B0292DD
                 // 0x1B5B0525
                 
-                // 0x2E933545
-                // 0x599405D3
-                // 0xC09D5469
+                // 0x2E933545 - RollAxis0
+                // 0x599405D3 - RollAxis1
+                // 0xC09D5469 - RollAxis2
                 // 0x661B9B76
                 // 0x111CABE0
                 // 0x8815FA5A
@@ -160,34 +175,34 @@ struct
                 // 0xE5F48E7D
                 // 0xBFAEF51
             }
-            else if (Function.Hash == CopyRotate)
+            else if (Unit.Operator_ == CopyRotate)
             {
                  // 0x5B0292DD
                  // 0x1B5B0525
                  
-                 // 0x479150BC
+                 // 0x479150BC - RotateRate
             }
-            else if (Function.Hash == AxisMove)
+            else if (Unit.Operator_ == AxisMove)
             {
                 // 0x5B0292DD
                 // 0x1B5B0525
                 
-                // 0x2E933545
-                // 0x599405D3
-                // 0xC09D5469
-                // 0xB94B2AAD
-                // 0xCE4C1A3B
-                // 0x57454B81
-                // 0x1A827F32
-                // 0x838B2E88
-                // 0xFB66B61
-                // 0xF583549C
-                // 0x8284640A
+                // 0x2E933545 - RollAxis0
+                // 0x599405D3 - RollAxis1
+                // 0xC09D5469 - RollAxis2
+                // 0xB94B2AAD - MoveAxis0
+                // 0xCE4C1A3B - MoveAxis1
+                // 0x57454B81 - MoveAxis2
+                // 0x1A827F32 - MoveOffset1
+                // 0x838B2E88 - MoveOffset2
+                // 0xFB66B61 - MoveLength
+                // 0xF583549C - MoveRange0
+                // 0x8284640A - MoveRange1
                 // 0xF852F4E8
             }
             else
             {
-                Printf("Not supported main type %x?", Main.Hash);     
+                Printf("Operator %x not supported", Unit.Operator_);     
             }
             
             // Usable anywhere?:
@@ -202,7 +217,7 @@ struct
             // - 0x2E7994B3
             // - 0xB770C509
             
-        } Entry;
+        } Entry <comment=EnumToString(Unit.Operator_)>;
     }
     
-} Sop;
+} ScriptOperator;
