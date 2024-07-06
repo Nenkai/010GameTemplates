@@ -1,0 +1,26 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Nowhere MotorolaE1000 Text File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int Count;
+int StrOffsets[Count + 1];
+
+local int i = 0;
+for (i = 0; i < Count; i++)
+{
+    FSeek(StrOffsets[i]);
+    struct
+    {
+        byte Unk;
+        string Str;
+    } LocaleString <comment=Str>;
+}
