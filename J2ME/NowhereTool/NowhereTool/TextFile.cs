@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Syroot.BinaryData;
 
-namespace TextTool;
+namespace NowhereTool;
 
 public class TextFile
 {

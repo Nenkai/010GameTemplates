@@ -1,0 +1,29 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int Count;
+int Offsets[Count + 1] <bgcolor=cGreen>;
+
+local int i = 0;
+for (i = 0; i < Count; i++)
+{
+    FSeek(Offsets[i]);
+    struct
+    {
+        int Flag;
+        int Unk2;
+        int Flag3;
+        int Size;
+        byte FileSize[Size - 0x10] <bgcolor=cGray>;
+    } ImageDesc;
+}
