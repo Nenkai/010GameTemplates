@@ -1,0 +1,65 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: PlatinumGames Binary XML
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .bxm
+//  ID Bytes: 42 58 4D 00
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+struct
+{
+    int Magic <format=hex>;
+    int veropt;
+    short numElem;
+    short numAttr;
+    int sizeText;
+} XmlBinHeader;
+
+local int i = 0;
+struct
+{
+    for (i = 0; i < XmlBinHeader.numElem; i++)
+    {
+        struct
+        {
+            ushort numChild;
+            ushort idxChild;
+            ushort numAttr;
+            ushort idxAttr;
+        } XmlBinElem <comment=Attrs.XmlBinAttr16[idxAttr].Key>;   
+    }
+} Bins;
+
+i = 0;
+
+local int mapPos = FTell();
+local int dataPos = FTell() + (XmlBinHeader.numAttr * 4);
+
+struct
+{
+    for (i = 0; i < XmlBinHeader.numAttr; i++)
+    {
+        FSeek(mapPos + (i * 4));
+        struct
+        {
+            ushort keyOffset;
+            ushort valueOffset;
+            
+            FSeek(dataPos + keyOffset);
+            string Key;
+            
+            if (valueOffset != 0xFFFF)
+            {
+                FSeek(dataPos + valueOffset);
+                string Value;
+            }
+        } XmlBinAttr16;   
+    }
+} Attrs;
