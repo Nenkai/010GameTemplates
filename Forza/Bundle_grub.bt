@@ -2,7 +2,7 @@
 //--- 010 Editor v14.0 Binary Template
 //
 //      File: Forza Bundle Parser ("Grub" tag, for some reason)
-//   Authors: Nenkai
+//   Authors: Nenkai, Doliman
 //   Version: 1.09 (FH5)
 //   Purpose: Storing textures, models and more
 //  Category: 
@@ -11,14 +11,15 @@
 //   History: 
 //------------------------------------------------
 
+LittleEndian();
 BitfieldDisablePadding();
 
 string GetTagAsString(uint value)
 {
     // Get a string out of it
-     local string s = "";
-     SPrintf(s, "%c%c%c%c", value >> 24, value >> 16, value >> 8, value);
-     return s;
+    local string s = "";
+    SPrintf(s, "%c%c%c%c", value >> 24, value >> 16, value >> 8, value);
+    return s;
 }
 
 typedef struct
@@ -27,6 +28,12 @@ typedef struct
     int B;
     int C;
 } Face;
+
+typedef struct
+{
+    float X;
+    float Y;
+} Vector2;
 
 typedef struct
 {
@@ -45,9 +52,27 @@ typedef struct
 
 typedef struct
 {
-    byte StrLen;
-    char Str[StrLen];
-} _7BitString <comment=Str>;
+    float R;
+    float G;
+    float B;
+    float A;
+} Color;
+
+typedef struct
+{
+    local int32 StrLength = 0; // 7BitEncodedInt
+    local ubyte StrLengthNext = 1;
+    local int StrLengthShift;
+    for (StrLengthShift = 0; StrLengthNext; StrLengthShift += 7)
+    {
+        int StrLengthByte : 7;
+        ubyte StrLengthNext : 1;
+        StrLength |= (StrLengthByte << StrLengthShift);
+    }
+    if (StrLength > 0) {
+        char Str[StrLength];
+    }
+} _7BitString <comment=(exists(Str) ? Str : "")>;
 
 typedef struct
 {
@@ -57,129 +82,213 @@ typedef struct
 
 typedef enum <int>
 {
-  DXGI_FORMAT_UNKNOWN = 0,
-  DXGI_FORMAT_R32G32B32A32_TYPELESS = 1,
-  DXGI_FORMAT_R32G32B32A32_FLOAT = 2,
-  DXGI_FORMAT_R32G32B32A32_UINT = 3,
-  DXGI_FORMAT_R32G32B32A32_SINT = 4,
-  DXGI_FORMAT_R32G32B32_TYPELESS = 5,
-  DXGI_FORMAT_R32G32B32_FLOAT = 6,
-  DXGI_FORMAT_R32G32B32_UINT = 7,
-  DXGI_FORMAT_R32G32B32_SINT = 8,
-  DXGI_FORMAT_R16G16B16A16_TYPELESS = 9,
-  DXGI_FORMAT_R16G16B16A16_FLOAT = 10,
-  DXGI_FORMAT_R16G16B16A16_UNORM = 11,
-  DXGI_FORMAT_R16G16B16A16_UINT = 12,
-  DXGI_FORMAT_R16G16B16A16_SNORM = 13,
-  DXGI_FORMAT_R16G16B16A16_SINT = 14,
-  DXGI_FORMAT_R32G32_TYPELESS = 15,
-  DXGI_FORMAT_R32G32_FLOAT = 16,
-  DXGI_FORMAT_R32G32_UINT = 17,
-  DXGI_FORMAT_R32G32_SINT = 18,
-  DXGI_FORMAT_R32G8X24_TYPELESS = 19,
-  DXGI_FORMAT_D32_FLOAT_S8X24_UINT = 20,
-  DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS = 21,
-  DXGI_FORMAT_X32_TYPELESS_G8X24_UINT = 22,
-  DXGI_FORMAT_R10G10B10A2_TYPELESS = 23,
-  DXGI_FORMAT_R10G10B10A2_UNORM = 24,
-  DXGI_FORMAT_R10G10B10A2_UINT = 25,
-  DXGI_FORMAT_R11G11B10_FLOAT = 26,
-  DXGI_FORMAT_R8G8B8A8_TYPELESS = 27,
-  DXGI_FORMAT_R8G8B8A8_UNORM = 28,
-  DXGI_FORMAT_R8G8B8A8_UNORM_SRGB = 29,
-  DXGI_FORMAT_R8G8B8A8_UINT = 30,
-  DXGI_FORMAT_R8G8B8A8_SNORM = 31,
-  DXGI_FORMAT_R8G8B8A8_SINT = 32,
-  DXGI_FORMAT_R16G16_TYPELESS = 33,
-  DXGI_FORMAT_R16G16_FLOAT = 34,
-  DXGI_FORMAT_R16G16_UNORM = 35,
-  DXGI_FORMAT_R16G16_UINT = 36,
-  DXGI_FORMAT_R16G16_SNORM = 37,
-  DXGI_FORMAT_R16G16_SINT = 38,
-  DXGI_FORMAT_R32_TYPELESS = 39,
-  DXGI_FORMAT_D32_FLOAT = 40,
-  DXGI_FORMAT_R32_FLOAT = 41,
-  DXGI_FORMAT_R32_UINT = 42,
-  DXGI_FORMAT_R32_SINT = 43,
-  DXGI_FORMAT_R24G8_TYPELESS = 44,
-  DXGI_FORMAT_D24_UNORM_S8_UINT = 45,
-  DXGI_FORMAT_R24_UNORM_X8_TYPELESS = 46,
-  DXGI_FORMAT_X24_TYPELESS_G8_UINT = 47,
-  DXGI_FORMAT_R8G8_TYPELESS = 48,
-  DXGI_FORMAT_R8G8_UNORM = 49,
-  DXGI_FORMAT_R8G8_UINT = 50,
-  DXGI_FORMAT_R8G8_SNORM = 51,
-  DXGI_FORMAT_R8G8_SINT = 52,
-  DXGI_FORMAT_R16_TYPELESS = 53,
-  DXGI_FORMAT_R16_FLOAT = 54,
-  DXGI_FORMAT_D16_UNORM = 55,
-  DXGI_FORMAT_R16_UNORM = 56,
-  DXGI_FORMAT_R16_UINT = 57,
-  DXGI_FORMAT_R16_SNORM = 58,
-  DXGI_FORMAT_R16_SINT = 59,
-  DXGI_FORMAT_R8_TYPELESS = 60,
-  DXGI_FORMAT_R8_UNORM = 61,
-  DXGI_FORMAT_R8_UINT = 62,
-  DXGI_FORMAT_R8_SNORM = 63,
-  DXGI_FORMAT_R8_SINT = 64,
-  DXGI_FORMAT_A8_UNORM = 65,
-  DXGI_FORMAT_R1_UNORM = 66,
-  DXGI_FORMAT_R9G9B9E5_SHAREDEXP = 67,
-  DXGI_FORMAT_R8G8_B8G8_UNORM = 68,
-  DXGI_FORMAT_G8R8_G8B8_UNORM = 69,
-  DXGI_FORMAT_BC1_TYPELESS = 70,
-  DXGI_FORMAT_BC1_UNORM = 71,
-  DXGI_FORMAT_BC1_UNORM_SRGB = 72,
-  DXGI_FORMAT_BC2_TYPELESS = 73,
-  DXGI_FORMAT_BC2_UNORM = 74,
-  DXGI_FORMAT_BC2_UNORM_SRGB = 75,
-  DXGI_FORMAT_BC3_TYPELESS = 76,
-  DXGI_FORMAT_BC3_UNORM = 77,
-  DXGI_FORMAT_BC3_UNORM_SRGB = 78,
-  DXGI_FORMAT_BC4_TYPELESS = 79,
-  DXGI_FORMAT_BC4_UNORM = 80,
-  DXGI_FORMAT_BC4_SNORM = 81,
-  DXGI_FORMAT_BC5_TYPELESS = 82,
-  DXGI_FORMAT_BC5_UNORM = 83,
-  DXGI_FORMAT_BC5_SNORM = 84,
-  DXGI_FORMAT_B5G6R5_UNORM = 85,
-  DXGI_FORMAT_B5G5R5A1_UNORM = 86,
-  DXGI_FORMAT_B8G8R8A8_UNORM = 87,
-  DXGI_FORMAT_B8G8R8X8_UNORM = 88,
-  DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM = 89,
-  DXGI_FORMAT_B8G8R8A8_TYPELESS = 90,
-  DXGI_FORMAT_B8G8R8A8_UNORM_SRGB = 91,
-  DXGI_FORMAT_B8G8R8X8_TYPELESS = 92,
-  DXGI_FORMAT_B8G8R8X8_UNORM_SRGB = 93,
-  DXGI_FORMAT_BC6H_TYPELESS = 94,
-  DXGI_FORMAT_BC6H_UF16 = 95,
-  DXGI_FORMAT_BC6H_SF16 = 96,
-  DXGI_FORMAT_BC7_TYPELESS = 97,
-  DXGI_FORMAT_BC7_UNORM = 98,
-  DXGI_FORMAT_BC7_UNORM_SRGB = 99,
-  DXGI_FORMAT_AYUV = 100,
-  DXGI_FORMAT_Y410 = 101,
-  DXGI_FORMAT_Y416 = 102,
-  DXGI_FORMAT_NV12 = 103,
-  DXGI_FORMAT_P010 = 104,
-  DXGI_FORMAT_P016 = 105,
-  DXGI_FORMAT_420_OPAQUE = 106,
-  DXGI_FORMAT_YUY2 = 107,
-  DXGI_FORMAT_Y210 = 108,
-  DXGI_FORMAT_Y216 = 109,
-  DXGI_FORMAT_NV11 = 110,
-  DXGI_FORMAT_AI44 = 111,
-  DXGI_FORMAT_IA44 = 112,
-  DXGI_FORMAT_P8 = 113,
-  DXGI_FORMAT_A8P8 = 114,
-  DXGI_FORMAT_B4G4R4A4_UNORM = 115,
-  DXGI_FORMAT_P208 = 130,
-  DXGI_FORMAT_V208 = 131,
-  DXGI_FORMAT_V408 = 132,
-  DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
-  DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
-  DXGI_FORMAT_FORCE_UINT = 0xffffffff
+    DXGI_FORMAT_UNKNOWN = 0,
+    DXGI_FORMAT_R32G32B32A32_TYPELESS = 1,
+    DXGI_FORMAT_R32G32B32A32_FLOAT = 2,
+    DXGI_FORMAT_R32G32B32A32_UINT = 3,
+    DXGI_FORMAT_R32G32B32A32_SINT = 4,
+    DXGI_FORMAT_R32G32B32_TYPELESS = 5,
+    DXGI_FORMAT_R32G32B32_FLOAT = 6,
+    DXGI_FORMAT_R32G32B32_UINT = 7,
+    DXGI_FORMAT_R32G32B32_SINT = 8,
+    DXGI_FORMAT_R16G16B16A16_TYPELESS = 9,
+    DXGI_FORMAT_R16G16B16A16_FLOAT = 10,
+    DXGI_FORMAT_R16G16B16A16_UNORM = 11,
+    DXGI_FORMAT_R16G16B16A16_UINT = 12,
+    DXGI_FORMAT_R16G16B16A16_SNORM = 13,
+    DXGI_FORMAT_R16G16B16A16_SINT = 14,
+    DXGI_FORMAT_R32G32_TYPELESS = 15,
+    DXGI_FORMAT_R32G32_FLOAT = 16,
+    DXGI_FORMAT_R32G32_UINT = 17,
+    DXGI_FORMAT_R32G32_SINT = 18,
+    DXGI_FORMAT_R32G8X24_TYPELESS = 19,
+    DXGI_FORMAT_D32_FLOAT_S8X24_UINT = 20,
+    DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS = 21,
+    DXGI_FORMAT_X32_TYPELESS_G8X24_UINT = 22,
+    DXGI_FORMAT_R10G10B10A2_TYPELESS = 23,
+    DXGI_FORMAT_R10G10B10A2_UNORM = 24,
+    DXGI_FORMAT_R10G10B10A2_UINT = 25,
+    DXGI_FORMAT_R11G11B10_FLOAT = 26,
+    DXGI_FORMAT_R8G8B8A8_TYPELESS = 27,
+    DXGI_FORMAT_R8G8B8A8_UNORM = 28,
+    DXGI_FORMAT_R8G8B8A8_UNORM_SRGB = 29,
+    DXGI_FORMAT_R8G8B8A8_UINT = 30,
+    DXGI_FORMAT_R8G8B8A8_SNORM = 31,
+    DXGI_FORMAT_R8G8B8A8_SINT = 32,
+    DXGI_FORMAT_R16G16_TYPELESS = 33,
+    DXGI_FORMAT_R16G16_FLOAT = 34,
+    DXGI_FORMAT_R16G16_UNORM = 35,
+    DXGI_FORMAT_R16G16_UINT = 36,
+    DXGI_FORMAT_R16G16_SNORM = 37,
+    DXGI_FORMAT_R16G16_SINT = 38,
+    DXGI_FORMAT_R32_TYPELESS = 39,
+    DXGI_FORMAT_D32_FLOAT = 40,
+    DXGI_FORMAT_R32_FLOAT = 41,
+    DXGI_FORMAT_R32_UINT = 42,
+    DXGI_FORMAT_R32_SINT = 43,
+    DXGI_FORMAT_R24G8_TYPELESS = 44,
+    DXGI_FORMAT_D24_UNORM_S8_UINT = 45,
+    DXGI_FORMAT_R24_UNORM_X8_TYPELESS = 46,
+    DXGI_FORMAT_X24_TYPELESS_G8_UINT = 47,
+    DXGI_FORMAT_R8G8_TYPELESS = 48,
+    DXGI_FORMAT_R8G8_UNORM = 49,
+    DXGI_FORMAT_R8G8_UINT = 50,
+    DXGI_FORMAT_R8G8_SNORM = 51,
+    DXGI_FORMAT_R8G8_SINT = 52,
+    DXGI_FORMAT_R16_TYPELESS = 53,
+    DXGI_FORMAT_R16_FLOAT = 54,
+    DXGI_FORMAT_D16_UNORM = 55,
+    DXGI_FORMAT_R16_UNORM = 56,
+    DXGI_FORMAT_R16_UINT = 57,
+    DXGI_FORMAT_R16_SNORM = 58,
+    DXGI_FORMAT_R16_SINT = 59,
+    DXGI_FORMAT_R8_TYPELESS = 60,
+    DXGI_FORMAT_R8_UNORM = 61,
+    DXGI_FORMAT_R8_UINT = 62,
+    DXGI_FORMAT_R8_SNORM = 63,
+    DXGI_FORMAT_R8_SINT = 64,
+    DXGI_FORMAT_A8_UNORM = 65,
+    DXGI_FORMAT_R1_UNORM = 66,
+    DXGI_FORMAT_R9G9B9E5_SHAREDEXP = 67,
+    DXGI_FORMAT_R8G8_B8G8_UNORM = 68,
+    DXGI_FORMAT_G8R8_G8B8_UNORM = 69,
+    DXGI_FORMAT_BC1_TYPELESS = 70,
+    DXGI_FORMAT_BC1_UNORM = 71,
+    DXGI_FORMAT_BC1_UNORM_SRGB = 72,
+    DXGI_FORMAT_BC2_TYPELESS = 73,
+    DXGI_FORMAT_BC2_UNORM = 74,
+    DXGI_FORMAT_BC2_UNORM_SRGB = 75,
+    DXGI_FORMAT_BC3_TYPELESS = 76,
+    DXGI_FORMAT_BC3_UNORM = 77,
+    DXGI_FORMAT_BC3_UNORM_SRGB = 78,
+    DXGI_FORMAT_BC4_TYPELESS = 79,
+    DXGI_FORMAT_BC4_UNORM = 80,
+    DXGI_FORMAT_BC4_SNORM = 81,
+    DXGI_FORMAT_BC5_TYPELESS = 82,
+    DXGI_FORMAT_BC5_UNORM = 83,
+    DXGI_FORMAT_BC5_SNORM = 84,
+    DXGI_FORMAT_B5G6R5_UNORM = 85,
+    DXGI_FORMAT_B5G5R5A1_UNORM = 86,
+    DXGI_FORMAT_B8G8R8A8_UNORM = 87,
+    DXGI_FORMAT_B8G8R8X8_UNORM = 88,
+    DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM = 89,
+    DXGI_FORMAT_B8G8R8A8_TYPELESS = 90,
+    DXGI_FORMAT_B8G8R8A8_UNORM_SRGB = 91,
+    DXGI_FORMAT_B8G8R8X8_TYPELESS = 92,
+    DXGI_FORMAT_B8G8R8X8_UNORM_SRGB = 93,
+    DXGI_FORMAT_BC6H_TYPELESS = 94,
+    DXGI_FORMAT_BC6H_UF16 = 95,
+    DXGI_FORMAT_BC6H_SF16 = 96,
+    DXGI_FORMAT_BC7_TYPELESS = 97,
+    DXGI_FORMAT_BC7_UNORM = 98,
+    DXGI_FORMAT_BC7_UNORM_SRGB = 99,
+    DXGI_FORMAT_AYUV = 100,
+    DXGI_FORMAT_Y410 = 101,
+    DXGI_FORMAT_Y416 = 102,
+    DXGI_FORMAT_NV12 = 103,
+    DXGI_FORMAT_P010 = 104,
+    DXGI_FORMAT_P016 = 105,
+    DXGI_FORMAT_420_OPAQUE = 106,
+    DXGI_FORMAT_YUY2 = 107,
+    DXGI_FORMAT_Y210 = 108,
+    DXGI_FORMAT_Y216 = 109,
+    DXGI_FORMAT_NV11 = 110,
+    DXGI_FORMAT_AI44 = 111,
+    DXGI_FORMAT_IA44 = 112,
+    DXGI_FORMAT_P8 = 113,
+    DXGI_FORMAT_A8P8 = 114,
+    DXGI_FORMAT_B4G4R4A4_UNORM = 115,
+    DXGI_FORMAT_P208 = 130,
+    DXGI_FORMAT_V208 = 131,
+    DXGI_FORMAT_V408 = 132,
+    DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
+    DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
+    DXGI_FORMAT_FORCE_UINT = 0xffffffff
 } DXGI_FORMAT;
+
+typedef enum <int>
+{
+    Float_32x4 = 0,
+    UInt_32x4,
+    Int_32x4,
+    Float_32x3,
+    UInt_32x3,
+    Int_32x3,
+    Float_32x2,
+    UInt_32x2,
+    Int_32x2,
+    Float_16x4,
+    UNorm_16x4,
+    UInt_16x4,
+    Norm_16x4,
+    Int_16x4,
+    Float_32,
+    UInt_32,
+    Int_32,
+    Float_16x2,
+    UNorm_16x2,
+    UInt_16x2,
+    Norm_16x2,
+    Int_16x2,
+    UNorm_8x4,
+    UInt_8x4,
+    Norm_8x4,
+    Int_8x4,
+    UNorm_10x3_2,
+    UInt_10x3_2,
+    UFloat_11_11_10,
+    Float_16,
+    UNorm_16,
+    UInt_16,
+    Norm_16,
+    Int_16,
+    UNorm_8x2,
+    UInt_8x2,
+    Norm_8x2,
+    Int_8x2,
+    UNorm_5_6_5,
+    UNorm_5x3_1,
+    UNorm_4x4,
+    UNorm_8,
+    UInt_8,
+    Norm_8,
+    Int_8,
+    MAdd_UNorm_16x4,
+    MAdd_UNorm_16x2,
+    MAdd_UNorm_16,
+    Fit_Norm_10x3_2,
+    MAdd_Norm_16x3_PackLeft,
+    MAdd_Norm_16x3_PackRight,
+    Norm_16x3_PackLeft,
+    Norm_16x3_PackRight
+} PackedFormat;
+
+typedef enum <ubyte>
+{
+    Vector_ShaderParameter = 0,
+    Color_ShaderParameter = 1,
+    Float_ShaderParameter = 2,
+    Bool_ShaderParameter = 3,
+    Int_ShaderParameter = 4,
+    Swizzle_ShaderParameter = 5,
+    Texture2D_ShaderParameter = 6,
+    Sampler_ShaderParameter = 7,
+    ColorGradient_ShaderParameter = 8,
+    FunctionRange_ShaderParameter = 9,
+    Vector2_ShaderParameter = 11
+} ShaderParameterType;
+
+//typedef enum <ubyte>
+//{
+//    Int = 0;
+//    Float = 1;
+//    Float2 = 2;
+//    Float4 = 3;
+//    Boolean = 4;
+//    Texture = 5; // or 6
+//    RenderTargetTexture = 6; // or 5
+//    Sampler = 7;
+//} ShaderParameterType; // MaterialShaderParameter.h, enum ShaderParameterType::ParameterType
 
 // ---------------------------------------------
 
@@ -191,10 +300,11 @@ const uint TAG_BLOB_TextureContentBlob = 0x54584342; // "TXCB"
 // Models (modelbin)
 const uint TAG_BLOB_Skeleton = 0x536B656C; // "Skel"
 const uint TAG_BLOB_Morph = 0x4D727068; // "Mrph"
-const uint TAG_BLOB_Material = 0x4D617449; // "Matl"
+const uint TAG_BLOB_Material = 0x4D617449; // "MatI"
 const uint TAG_BLOB_Mesh = 0x4D657368; // "Mesh"
 const uint TAG_BLOB_IndexBuffer = 0x496E6442; // "IndB"
 const uint TAG_BLOB_VertexLayout = 0x564C6179; // "VLay"
+const uint TAG_BLOB_InstancedVertexLayout = 0x494C6179; // "ILay"
 const uint TAG_BLOB_VertexBuffer = 0x56657242; // "VerB"
 const uint TAG_BLOB_MorphBuffer = 0x4D427566; // "MBuf"
 const uint TAG_BLOB_Skin = 0x536B696E; // "Skin"
@@ -202,16 +312,28 @@ const uint TAG_BLOB_Model = 0x4D6F646C; // "Modl"
 
 // Materials (materialbin)
 const uint TAG_BLOB_MaterialResource = 0x4D415449; // "MATI"
+const uint TAG_BLOB_MATL = 0x4D41544C; // "MATL"
 const uint TAG_BLOB_MaterialShaderParameter = 0x4D545052; // "MTPR"
+
+// Shaders (shaderbin)
+const uint TAG_BLOB_DefaultShaderParameter = 0x44465052; // "DFPR"
+const uint TAG_BLOB_LightScenario = 0x4C534345; // "LSCE"
+const uint TAG_BLOB_DebugLightScenario = 0x44424C53; // "DBLS"
+const uint TAG_BLOB_CBMP = 0x43424D50; // "CBMP"
+const uint TAG_BLOB_TXMP = 0x54584D50; // "TXMP"
+const uint TAG_BLOB_SPMP = 0x53504D50; // "SPMP"
 
 // Models (modelbin)
 const uint TAG_METADATA_Name = 0x4E616D65; // "Name"
 const uint TAG_METADATA_TextureContentHeader = 0x54584348; // "TXCH"
 const uint TAG_METADATA_Identifier = 0x49642020; // "Id  "
 const uint TAG_METADATA_BBox = 0x42426F78; // "BBox"
+const uint TAG_METADATA_TextureReferences = 0x54526566; // "TRef"
 
 // Materials (materialbin)
 const uint TAG_METADATA_Atlas = 0x41545354; // "ATST"
+const uint TAG_METADATA_BLEN = 0x424C454E; // "BLEN"
+const uint TAG_METADATA_VDCL = 0x5644434C; // "VDCL"
 
 typedef struct
 {
@@ -223,23 +345,35 @@ typedef struct
     DXGI_FORMAT Type;
 } GraphicsHeader;
 
+struct LODFlags {
+    ushort LODS : 1;
+    ushort LOD0 : 1;
+    ushort LOD1 : 1;
+    ushort LOD2 : 1;
+    ushort LOD3 : 1;
+    ushort LOD4 : 1;
+    ushort LOD5 : 1;
+    ushort __padding__ : 9;
+};
+
 struct MetaData;
 typedef struct
 {
     local int metaDataBasePos = FTell();
     
     uint Tag <format=hex, bgcolor=cBlue>;
-    byte Unk : 4;
-    short IdLength : 12;
-    short OffsetToContents <format=hex>;
+    short Version : 4;
+    short Size : 12;
+    short Offset <format=hex>;
+    //Printf("%d\t%s\n", Version, GetTagAsString(Tag));
     
-    FSeek(metaDataBasePos + OffsetToContents);
+    FSeek(metaDataBasePos + Offset);
     switch (Tag)
     {
         case TAG_METADATA_Name:
-            char Name[IdLength]; break;
+            char Name[Size]; break;
         case TAG_METADATA_Identifier:
-            uint Id; break;
+            int Id; break;
         case TAG_METADATA_BBox:
             Vector3 Min;
             Vector3 Max;
@@ -247,12 +381,31 @@ typedef struct
         case TAG_METADATA_Atlas:
             struct
             {
-                byte unk[3];
+                ubyte Unk <comment="bool">;
+                if (Version >= 2) {
+                    ubyte UnkV2 <comment="bool">;
+                }
             } Atlas;
             break;
-            
+        case TAG_METADATA_BLEN:
+            ubyte Unk <comment="bool">;
+            ubyte Unk <comment="bool">;
+            break;
+        case TAG_METADATA_VDCL:
+            if (Version >= 2) {
+                int UnkV2_Size;
+                struct {
+                    uint NameCRC32Hash <comment="LightScenario.Name", format=hex>; // "CarShadowDepthLightScenario" = 0xDBB1C7AA
+                    uint Unk <comment="unsigned long">; // hex?
+                } UnkV2[UnkV2_Size];
+            }
+            break;
+        case TAG_METADATA_TextureReferences:
+            int TexturePathHashLength;
+            uint TexturePathHash[TexturePathHashLength] <format=hex, comment=".swatchbin path CRC-32 lowercase">; // unsigned long
+            break;
         default:
-            ;
+            ubyte UnkBuffer[Size];
             break;
             
     }
@@ -264,7 +417,9 @@ string PrintName(MetaData& metaData)
      local string s = GetTagAsString(metaData.Tag);
      if (s == "TXCH")
         return "TXCH - TeXture Content Header";
-    else
+     else if (s == "TRef")
+        return "TRef - Texture References";
+     else
         return s;
 }
 
@@ -295,30 +450,35 @@ typedef struct
             struct
             {
                 ushort BoneCount;
+                local int i;
                 struct
                 {
                     String4 Name;
-                    short ParentId;
-                    short FirstChildIndex;
+                    short ParentIndex; // Left-child right-sibling representation
+                    short ChildIndex;
                     short NextIndex;
+                    i++;
                     float Matrix4[0x10];
-                } Bone[BoneCount] <optimize=false>;
+                } Bone[BoneCount] <optimize=false, comment=Str("%s", Name.Str)>;
+                if (VersionMajor >= 1) { // FH3 OpusProfile 142AE00B5
+                    uint32 UnkSizeV1 <comment="unsigned long">;
+                    if (UnkSizeV1 > 0) {
+                        ubyte UnkV1[UnkSizeV1];
+                    }
+                }
             } SkeletonBlob;
             break;
 
         case TAG_BLOB_Morph:
             struct
             {
-                short Unk;
-                String4 Str;
-            } MorphBlob;
+                short Size;
+                String4 Str[Size];
+            } MorphBlob; // LoadMorphTable(Bundle::BlobReader *, std::map<std::string, short> *)
             break;
             
         case TAG_BLOB_Material:
-            struct
-            {
-                Bundle bundle;
-            } MaterialBlob;
+            Bundle MaterialBlob;
             break;
             
         case TAG_BLOB_MaterialResource:
@@ -328,13 +488,98 @@ typedef struct
             } MaterialResourceBlob;
             break;
             
-        case TAG_BLOB_MaterialShaderParameter:
+        case TAG_BLOB_MATL:
             struct
             {
-                int Unk;
-                int Unk2;
-                int Unk3;
-                int Unk4;
+                _7BitString Path;
+                if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 1) {
+                    _7BitString Path;
+                }
+                if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 2) {
+                    _7BitString Path;
+                }
+            } MaterialResourceBlob;
+            break;
+            
+        case TAG_BLOB_DefaultShaderParameter:
+        case TAG_BLOB_MaterialShaderParameter:
+            struct {
+                if (VersionMajor > 2 || VersionMajor == 2 && VersionMinor >= 1) {
+                    ushort Size;
+                } else {
+                    ubyte Size;
+                }
+                if (Size > 0) {
+                    if (VersionMajor <= 1) {
+                         // if majorVersion != 1 then Error
+                    } else {
+                        i = 0;
+                        struct {
+                            ubyte majorVersion; // if majorVersion < 2 then Error
+                            ubyte minorVersion;
+                            uint NameHash <format=hex, comment="CRC-32 of parameter name, case-sensitive">; // unsigned long, MTPR.Hash == DFPR.Hash
+                            if (majorVersion > 3 || majorVersion == 3 && minorVersion >= 1) {
+                                ubyte HasUnkV31 <comment="bool">;
+                                if (HasUnkV31) {
+                                    uint UnkV31 <comment="unsigned long">;
+                                }
+                            }
+                            ShaderParameterType Type; // unsigned char
+                            if (majorVersion >= 3) {
+                                GUID UnkV30;
+                            }
+                            struct {
+                                switch (Type) {
+                                case Vector_ShaderParameter:
+                                    Vector4 Value;
+                                    break;
+                                case Color_ShaderParameter:
+                                    Color Value;
+                                    break;
+                                case Float_ShaderParameter:
+                                    float Value;
+                                    break;
+                                case Bool_ShaderParameter:
+                                case Int_ShaderParameter:
+                                    uint Value;
+                                    break;
+                                case Swizzle_ShaderParameter:
+                                    ubyte Unk2[16];
+                                    break;
+                                case Texture2D_ShaderParameter:
+                                    _7BitString Path;
+                                    if (majorVersion >= 2) {
+                                        ulong PathCRC32 <format=hex,comment="lowercase">;
+                                    }
+                                    //Printf("%08X\t%s\r\n", NameHash, Path.Str);
+                                    break;
+                                case FunctionRange_ShaderParameter:
+                                    ubyte Unk2[16];
+                                    break;
+                                case Vector2_ShaderParameter:
+                                    Vector2 Value;
+                                    if (majorVersion == 1)
+                                    {
+                                        ubyte UnkV1[8];
+                                    }
+                                    break;
+                                case Sampler_ShaderParameter:
+                                    ubyte Unk[12];
+                                    break;
+                                }
+                            } Data;
+                            //Printf("%s %s\n", exists(metaData) ? metaData[0].Name : "-", EnumToString(Type));
+                            //Printf("%d %08X %s\r\n", i, NameHash, EnumToString(Type));
+                            i++;
+                        } ShaderParameter[Size] <optimize=false, comment=EnumToString(Type)>;
+                    }
+                    
+                    if (Tag == TAG_BLOB_MaterialShaderParameter) {
+                        uint Unk <comment="unsigned long">;
+                        uint Unk <comment="unsigned long">;
+                        uint Unk <comment="unsigned long">;
+                    }
+                }
             } MaterialShaderParameterBlob;
             break;
             
@@ -343,70 +588,79 @@ typedef struct
             // FH4/FH5 - 1.09
             struct
             {
+                short Unk_MaterialID_FH3;
+                
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 9))
                 {
-                    short UnkV9;
-                    short MaterialID;
-                    short UnkV9;
-                    short UnkV9;
+                    short UnkV9_MaterialID;
+                    short UnkV9_0;
+                    short UnkV9_1;
+                } else {
+                    //Printf("%s %d\n", metaData[0].Name, Unk_MaterialID_FH3);
                 }
                 
-                short UnkIndex <bgcolor=cRed>;
-                short UnkFlag;   
-                byte LODLevel1;
-                byte LODLevel2;
-                short unk;
+                short BoneIndex <bgcolor=cRed>;
+                LODFlags LODs; // don't render if == 0
+                byte LowestLOD; // don't render if sign bit is set (& 0x10 == 0); 14251B9BD
+                byte HighestLOD;
+                ushort unk0;
+                //   9 001001 Shadow (unk0)
+                //   17 010001 main
+                //   28 011100 blur
+                //   56 111000 label
+                //   60 111100 blurLip_LODS0|blurRim_LODS0
                 byte unk;
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 2))
                 {
-                    byte UnkV2;
-                    byte UnkV2;
+                    ubyte UnkV2_SkinningElementsCount;
+                    ubyte UnkV2_MorphWeightsCount;
                 }
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 3))
                 {
-                    byte UnkV3;
+                    byte UnkV3 <comment="bool">; // objectCBuffer.g_DecompressFlags[1] ?
                 }
                 
-                byte Unk;
-                short Unk;
+                byte Unk <comment="bool">; // objectCBuffer.g_DecompressFlags[0] ?
+                ushort Unk;
                 
                 int Unk;
-                int Unk;
-                uint FaceStartIndex;
-                uint UnkColorMaybe <format=hex>;
-                uint FaceCount;
-                uint VertexStartIndex;
+                uint Unk;
+                int FaceStartIndex;
+                int VertIndexOffset; // VBuf[buf_id][IndB[id]+VertIndexOffset], "Base vertex offset magnitude"
+                uint FaceIndexCount;
+                uint FacesCount;
+                //Printf("%s %d\n", metaData[0].Name, FaceCount);
               
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 6))
                 {
-                    float UnkV6;
-                    uint NumVerts;
+                    float ACMR <comment="Average Cache Miss Ratio">; // =V6_NumVerts/FaceCount
+                    uint ACMR_VertsCount;
                 }
                 
-                
-                uint Unk;
-                uint UnkEntryCount;
+                uint VertexLayoutId;
+                uint VertexBufferCount;
                 
                 struct
                 {
-                    int a;
-                    int b;
-                    int c;
-                    int dd;
-                } UnkEntry[UnkEntryCount];
+                    int Id;
+                    int InputSlot;
+                    int Stride;
+                    int Offset;
+                } VertexBuffer[VertexBufferCount] <comment="m_VertexBufferIndices">;
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 4))
                 {
-                    int VertexLayoutIndex;
-                    int UnkV42;
+                    int V4_MorphBufferId;
+                    int V4_SkinningId;
                 }
+                // 0x5524 - wheelLF
                 
-                uint UnkCount2;
+                uint ConstantBufferIndicesCount;
                 
-                if (UnkCount2 > 0)
-                    int UnkInts[UnkCount2];
+                if (ConstantBufferIndicesCount > 0)
+                    int ConstantBufferIndices[ConstantBufferIndicesCount] <comment="m_ConstantBufferIndices">;
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 1))
                 {
@@ -415,13 +669,19 @@ typedef struct
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 5))
                 {
-                    Vector4 unkVecs[5];
+                    struct
+                    {
+                        float vTranslation;
+                        float vScale;
+                        float uTranslation;
+                        float uScale;
+                    } texTransformation[5]; // union __m128 {{v translation, v scale} x2}; objectCBuffer.g_UVScale
                 }
                 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 8))
                 {
-                    Vector4 unkVec4 <bgcolor=cBlack>;
-                    Vector4 unkVec4_2 <bgcolor=cBlack>;
+                    Vector4 vertPosScale; // objectCBuffer.g_PosScale
+                    Vector4 vertPosTranslation; // objectCBuffer.g_PosOffset
                 }
                 
                 // Rest is padding
@@ -436,11 +696,12 @@ typedef struct
             } IndexBufferBlob;
             break;
             
+        case TAG_BLOB_InstancedVertexLayout:
         case TAG_BLOB_VertexLayout:
             struct
             {
-                short SemanticCount;
-                String4 Names[SemanticCount];
+                short m_ElementNamesLength;
+                String4 m_ElementNames[m_ElementNamesLength];
                 short ElementCount;
                 
                 struct
@@ -451,17 +712,33 @@ typedef struct
                     DXGI_FORMAT Format;
                     int AlignedByteOffset <comment="-1 = D3D12_APPEND_ALIGNED_ELEMENT ">;
                     int InstanceDataStepRate;
-                } D3D12_INPUT_LAYOUT_DESC[ElementCount] <comment=Format>;
+                } D3D12_INPUT_LAYOUT_DESC[ElementCount] <comment=Str("%d - %s", m_SemanticNameIndex, EnumToString(Format))>;
                 
                 if (VersionMajor >= 1)
+                    PackedFormat PackedFormats[ElementCount]; // FH3 OpusProfile 142ADCF74
+                else
                     DXGI_FORMAT PackedFormats[ElementCount];
 
                 if (VersionMajor > 1 || (VersionMajor <= 1 && VersionMinor >= 1))
-                    uint BitFlags <format=hex, comment="Bit for each semantic present">;
+                {
+                    //uint BitFlags <format=hex, comment="Bit for each semantic present">;
+                    uint TEXCOORD_1 : 1;
+                    uint TEXCOORD_2 : 1;
+                    uint TEXCOORD_3 : 1;
+                    uint TEXCOORD_4 : 1;
+                    uint TEXCOORD_5 : 1;
+                    uint TANGENT_1 : 1;
+                    uint TANGENT_2 : 1;
+                    uint TANGENT_3 : 1;
+                    uint TANGENT_4 : 1;
+                    uint TANGENT_5 : 1;
+                    uint COLOR : 1;
+                    uint __pad__ : 21;
                     
-                // TEXCOORD/TEXCOORD_XONLY: 0x10, 0x08, 0x04, 0x02, 0x01
-                // TANGENT: 0x200, 0x100, 0x80, 0x40, 0x20
-                // COLOR: 0x400
+                    // TEXCOORD/TEXCOORD_XONLY: 0x10, 0x08, 0x04, 0x02, 0x01
+                    // TANGENT: 0x200, 0x100, 0x80, 0x40, 0x20
+                    // COLOR: 0x400
+                }
                     
             } VertexLayoutBlob;
             break;
@@ -470,14 +747,68 @@ typedef struct
             struct
             {
                 GraphicsHeader hdr;
+                /*
+                for (i = 0; i < hdr.Count; i++)
+                {
+                    struct
+                    {
+                        byte buffer[hdr.BufferWidth];
+                    } Vertex;
+                }
+                */
+                //*
                 struct
                 {
                     byte buffer[hdr.BufferWidth];
                 } Vertex[hdr.Count] <optimize=false>;
+                //*/
             } VertexBufferBlob;
             break;
             
         case TAG_BLOB_MorphBuffer:
+            struct
+            {
+                GraphicsHeader hdr;
+                /*struct
+                {
+                    struct
+                    {
+                        hfloat x;
+                        hfloat y;
+                        hfloat z;
+                        hfloat id;
+                    } Weight[hdr.NumElements];
+                } Vertex[hdr.Count] <optimize=false>;*/
+                struct
+                {
+                    for (j = 0; j < 2; j++)
+                    {
+                        struct
+                        {
+                            // weight_id (rim)
+                            //   0 - diameter
+                            //   1 - width
+                            // weight_id (tire)
+                            //   0 - outer diameter
+                            //   1 - inner diameter
+                            //   2:3 - tire deformation
+                            local int k;
+                            for (k = 0; k < hdr.NumElements / 2; k++)
+                            {
+                                struct
+                                {
+                                    hfloat x;
+                                    hfloat y;
+                                    hfloat z;
+                                    hfloat id; // unsigned int
+                                } Weight;
+                            }
+                        } Group; // 0 - position, 1 - normal
+                    }
+                } Vertex[hdr.Count] <optimize=false>;
+            } MorphBufferBlob;
+            break;
+            
         case TAG_BLOB_Skin:
             struct
             {
@@ -489,15 +820,74 @@ typedef struct
         case TAG_BLOB_Model:
             struct
             {
-                short MeshCount;
-                short BuffersCount <comment="Combined buffers">;
-                short VertexLayoutCount;
+                short MeshCount; // CommonModel::Mesh?
+                short BuffersCount <comment="Combined buffers">; // IndB, VerB, ConB, MBuf, Skin; CommonModel::ModelBuffer?
+                short LayoutsCount; // ILay, VLay; CommonModel::VertexLayout?
                 short MaterialCount;
-                short unk;
-                short unk2;
-                short unk3;
-                short unk4;
+                char HasLODs;
+                char LowestLOD;
+                char HighestLOD;
+                char __pad__;
+                LODFlags LODs; // FH3 OpusDev forza_x64_profile.exe: 2A333BF
+                if (VersionMajor > 1 || (VersionMajor == 1 && VersionMinor >= 2)) {
+                    char DecompressFlags <comment="Store normal.x in position.w">; // FH3 OpusDev forza_x64_profile.exe: 2ADCDA8; 1, 2; g_DecompressFlags
+                } else {
+                    char __pad__;
+                }
+                char __pad__;
             } ModelBlob;
+            break;
+        
+        case TAG_BLOB_LightScenario:
+        case TAG_BLOB_DebugLightScenario:
+            struct {
+                if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 1) {
+                    ubyte UnkV11 <comment="bool">;
+                    if (UnkV11) {
+                        Printf("UnkV11 is currently not supported.");
+                    }
+                }
+                ubyte Size;
+                struct {
+                    _7BitString Name;
+                    uint Unk <comment="unsigned long">;
+                    if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 4) {
+                        ubyte UnkV14 <comment="bool">;
+                    }
+                    local uint Size;
+                    if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 2) {
+                        uint Size <comment="unsigned long">;
+                    }
+                    struct {
+                        if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 2) {
+                            ubyte UnkV12 <comment="unsigned char">;
+                        }
+                        _7BitString Path;
+                        if (UnkV14) {
+                            _7BitString Path;
+                        }
+                    } Unk2[Size] <optimize=false>;
+					
+                    if (VersionMajor > 1 || VersionMajor == 1 && VersionMinor >= 3) {
+                        int UnkV13 <comment="long">;
+                        _7BitString Path;
+                    }
+                } LightScenario[Size] <optimize=false>;
+            } LightScenarioBlob;
+            break;
+        case TAG_BLOB_CBMP:
+        case TAG_BLOB_TXMP:
+        case TAG_BLOB_SPMP:
+            ubyte Size;
+            struct {
+                uint NameHash <format=hex>;
+                ushort Id_Offset <comment="CBuffer - offset; SRV Texture, Sampler - id">;
+                GUID Guid;
+            } ShaderParameter[Size] <optimize=false>;
+            //Printf("\r\n");
+            break;
+        default:
+            ubyte UnkBuffer[DataSize];
             break;
     }
 } Blob <optimize=false, comment=PrintBlob>;
@@ -515,16 +905,20 @@ string PrintBlob(Blob& blob)
            break;
            
         case "MatI":
-            SPrintf(ret, "Matl - Material [ID: %d] (Name: %s)", blob.metaData[1].Id, 
-                blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "<none>");
+            SPrintf(ret, "MatI - Material [ID: %d] (Name: %s)", blob.metaData[1].Id, 
+                blob.metaData[0].Size > 0 ? blob.metaData[0].Name : "<none>");
             break;
             
         case "Mesh":
-            SPrintf(ret, "Mesh (Name: %s)", blob.metaData[0].IdLength > 0 ? blob.metaData[0].Name : "<none>");
+            SPrintf(ret, "Mesh (Name: %s)", blob.metaData[0].Size > 0 ? blob.metaData[0].Name : "<none>");
             break;
             
         case "VLay":
             SPrintf(ret, "VLay - Vertex Layout [ID: %d]", blob.metaData[0].Id);
+            break;
+            
+        case "ILay":
+            SPrintf(ret, "ILay - Instanced Vertex Layout [ID: %d]", blob.metaData[0].Id);
             break;
             
         case "IndB":
@@ -537,6 +931,42 @@ string PrintBlob(Blob& blob)
             
         case "MBuf":
             SPrintf(ret, "MBuf - Morph Buffer [ID: %d] (Count: %d)", blob.metaData[0].Id, blob.MorphBufferBlob.hdr.Count);
+            break;
+            
+        case "Skin":
+            SPrintf(ret, "Skin - Skinning [ID: %d] (Count: %d)", blob.metaData[0].Id, blob.MorphBufferBlob.hdr.Count);
+            break;
+            
+        case "VARS":
+            SPrintf(ret, "VARS - Variables");
+            break;
+            
+        case "LSCE":
+            SPrintf(ret, "LSCE - Light Scenario");
+            break;
+            
+        case "CBMP":
+            SPrintf(ret, "CBMP - Constant Buffer MP");
+            break;
+            
+        case "TXMP":
+            SPrintf(ret, "TXMP - Texture MP");
+            break;
+            
+        case "SPMP":
+            SPrintf(ret, "SPMP - Sampler MP");
+            break;
+            
+        case "DBLS":
+            SPrintf(ret, "DBLS - Debug Light Scenario");
+            break;
+            
+        case "MTPR":
+            SPrintf(ret, "MTPR - Material Shader Parameters");
+            break;
+            
+        case "DFPR":
+            SPrintf(ret, "DFPR - Default Shader Parameters");
             break;
             
         default:
