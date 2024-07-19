@@ -2,7 +2,7 @@
 //--- 010 Editor v14.0 Binary Template
 //
 //      File: PlatinumGames Eff/Est 
-//   Authors: Nenkai
+//   Authors: Nenkai, some information taken from https://github.com/ArthurHeitmann/F-SERVO
 //   Version: 
 //   Purpose: 
 //  Category: 
@@ -11,20 +11,14 @@
 //   History: 
 //------------------------------------------------
 
-// Based on Vanquish debug syms, may have been updated/outdated
-struct Hw_cVec3
-{
-    float x;
-    float y;
-    float z;
-};
+// Some fields were copied from Vanquish Debug Symbols
+// Uses an older different format/version of the effect file (EST magic)
+// But some structures remained
 
-struct cF32Decrease
-{
-  float m_value;
-};
+// Some of the fields were checked on read using nier automata
+// Some structs might be different (?) in Granblue Fantasy: Relink - like move
 
-struct EspColor
+typedef struct EspColor
 {
   float r;
   float g;
@@ -32,7 +26,19 @@ struct EspColor
   float a;
 };
 
-struct EstSizeAnm_Normal
+typedef struct /*Hw::*/cVec3
+{
+    float x;
+    float y;
+    float z;   
+};
+
+typedef struct cF32Decrease
+{
+  float m_value;
+};
+
+typedef struct EstSizeAnm_Normal
 {
   float add_w;
   float add_h;
@@ -40,25 +46,19 @@ struct EstSizeAnm_Normal
   cF32Decrease mul_h;
   float add_wh;
   cF32Decrease mul_wh;
-  uint32 _pad[8];
+  uint _pad[8];
 };
 
-struct EstSizeAnm_Key
+typedef struct EstSizeAnm_Key
 {
   float keyFrame[5];
   float value[5];
   ushort maxFrame;
   ubyte rndFrame;
   ubyte _pad0;
-  uint32 flag;
-  uint32 _pad1;
-  uint32 _pad2;
-};
-
-union CmnParam__size_anm_union
-{
-  EstSizeAnm_Normal normal;
-  EstSizeAnm_Key key;
+  uint flag;
+  uint _pad1;
+  uint _pad2;
 };
 
 struct EstColAnm_Normal
@@ -68,13 +68,13 @@ struct EstColAnm_Normal
   cF32Decrease d_b;
   cF32Decrease d_a;
   cF32Decrease d_ra;
-  uint32 _pad[18];
+  uint _pad[18];
 };
 
 struct EstColAnm_Key
 {
   float keyFrame[4];
-  EspColor value[4];
+  EspColor value[5]; // added 1
   ushort maxFrame;
   ubyte rndFrame;
   ubyte _pad0;
@@ -82,157 +82,409 @@ struct EstColAnm_Key
   float cntFinalAdd;
 };
 
-union CmnParam__col_anm_union
+enum <uint> sEffectFunc
 {
-  EstColAnm_Normal normal;
-  EstColAnm_Key key;
+     sEffectParticleGenerationData = 0x54524150,
+     sEffectMoveData = 0x45564F4D,
+     sEffectEmitterData = 0x46494D45,
+     sEffectTextureInfoData = 0x20584554,
+     sEffectSizeSinAnimation = 0x41535A53,
+     sEffectPosSinAnimation = 0x41535350,
+     sEffectRotSinAnimation = 0x41535452,
+     sEffectFreeVecWork = 0x4B575646,
+     sEffectFreeWork = 0x204B5746,
+     EffectEmitterMoveData = 0x564D4D45,
+     Emitter_EffectSizeSinAnimation = 0x41534D45,
+     Emitter_EffectPosSinAnimation = 0x41504D45,
+     Emitter_EffectRotSinAnimation = 0x41524D45,
+     Emitter_EffectFreeVecWork = 0x56464D45,
+     Emitter_EffectFreeWork = 0x57464D45,
+     EffectTextureSettingColor = 0x20435354,
+     EffectTextureSettingMask = 0x204D5354,
+     EffectTextureSettingNormal = 0x204E5354,
+     EffectRenderSetting = 0x444E4552,
+     ModelShaderJackSettingData = 0x47534A4D,
+     ModelShaderColorMap = 0x4D434A4D,
+     ModelShaderNormalMap = 0x4D4E4A4D,
+     ModelShaderMaskMap = 0x4D4D4A4D,
+     ModelShaderJackDistortionData = 0x54444A4D,
+     ModelShaderJackFresnelData = 0x4E464A4D,
+     ModelShaderJackCubeMapData = 0x4D434A4D,
+     ModelShaderJackVertexAnimation = 0x41564A4D,
 };
 
-
-struct EspCmnBlock
+typedef struct MoveData
 {
-  uint16 espId;
-  uint16 life;
-  uint32 flag[2];
-  ubyte parentNo;
-  ubyte partsNo;
-  short releaseTime;
-  ubyte callId;
-  ubyte randFix;
-  byte priority;
-  ubyte fogType;
-  uint32 eventObjId;
-  ubyte vanishAlphaAngle;
-  ubyte AttenuationAlphaAngle;
-  ushort __dummy;
-  uint _dummy[9];
-};
+    // This is all good
+    uint32 flag[1] <format=hex>;
+    cVec3 pos;
+    cVec3 r_pos;
+    cVec3 spd;
+    cVec3 r_spd;
+    cF32Decrease d_spd;
+    cVec3 acc;
+    cVec3 rot;
+    cVec3 r_rot;
+    cVec3 rotSpd;
+    cVec3 r_rotSpd;
+    cF32Decrease rot_d_spd;
+    byte size_anm_type;
+    byte col_anm_type;
+    short _size_sinanm_offset;
+    short _pos_sinanm_offset;
+    short _rot_sinanm_offset;
+    float size_h;
+    float size_w;
+    float r_size_h;
+    float r_size_w;
+    
+    union /* CmnParam::size_anm_union*/
+    {
+        EstSizeAnm_Normal normal;
+        EstSizeAnm_Key key;
+    } CmnParam_size_anm_union;
+    
+    EspColor col;                
+    EspColor r_col;
+    short colStartFrame;
+    short colMaxFrame;
+    
+    union /* CmnParam::col_anm_union */
+    {
+      EstColAnm_Normal normal;
+      EstColAnm_Key key;
+    } CmnParam_col_anm_union;
 
-struct CmnParam
+    // Starting from here, no idea
+
+};
+     
+// カラー使用設定になっているのにカラーテクスチャ設定データが見つかりません
+typedef struct EffectTextureSetting
 {
-  uint32 flag[1];
-  Hw_cVec3 pos;
-  Hw_cVec3 r_pos;
-  Hw_cVec3 spd;
-  Hw_cVec3 r_spd;
-  cF32Decrease d_spd;
-  Hw_cVec3 acc;
-  Hw_cVec3 rot;
-  Hw_cVec3 r_rot;
-  Hw_cVec3 rotSpd;
-  Hw_cVec3 r_rotSpd;
-  cF32Decrease rot_d_spd;
-  byte size_anm_type;
-  byte col_anm_type;
-  short _size_sinanm_offset;
-  short _pos_sinanm_offset;
-  short _rot_sinanm_offset;
-  float size_h;
-  float size_w;
-  float r_size_h;
-  float r_size_w;
-  CmnParam__size_anm_union size_anm;
-  EspColor col;
-  EspColor r_col;
-  short colStartFrame;
-  short colMaxFrame;
-  CmnParam__col_anm_union col_anm;
-  ushort _vecOffset;
-  ushort _wkOffset;
-  float wind_pow;
-  ubyte _pad00;
-  ubyte r_pos_type;
-  ubyte vanish_start_time;
-  ubyte vanish_delete_time;
-  Hw_cVec3 gravity;
-  float size_wh;
-  float r_size_wh;
-  uint wind_type;
-  float min_spd;
-  uint _dummy[3];
-};
-
-struct EmtCmnBlock
+    ushort VERIFIED_UnkResourceId_0x00 <format=hex>; // No more than 1000
+    byte VERIFIED_0x02;
+    byte _0x03;
+    ushort VERIFIED_0x04;
+    short VERIFIED_0x06;
+    short VERIFIED_0x08;
+    short VERIFIED_0x0A;
+    int VERIFIED_Flag_0x0C <format=hex>;
+    byte VERIFIED_Type_0x10;
+}; 
+         
+typedef struct EstSinAnm
 {
-  ubyte num;
-  ubyte interval;
-  ubyte emtId;
-  ubyte interval_mul;
-  ushort startFrame;
-  ushort endFrame;
-  byte a_num;
-  byte r_num;
-  byte a_interval;
-  ubyte r_interval;
-  ubyte div_num;
-  byte setPriority;
-  byte lodType;
-  ubyte _pad02;
-  float lodDistOfs;
-  uint32 _dummy[5];
+  float start;
+  float r_start;
+  float cycle;
+  float range;
+  float cycle_add;
+  float range_add;
+  float range_mul;
 };
-
-struct sEstTableHeader
+                          
+typedef struct (int dataOffset)
 {
-  EspCmnBlock cmn;
-  CmnParam cp;
-  EmtCmnBlock emt_cmn_block;
-  uint16 _pad;
-  uint16 _emtOffset;
-  float timeRate;
-  uint16 texId;
-  uint16 maskTexId;
-  float posOfsset;
-  float alphaNear;
-  float alphaFar;
-  float texCx;
-  float texCy;
-  int16 anmSpd;
-  ubyte anmStart;
-  ubyte anmEnd;
-  uint32 anmFlag;
-  ubyte anmRnd;
-  ubyte blendType;
-  ubyte maskPtnNo;
-  ubyte anmStartFrame;
-  float simRate;
-  int16 prim_type;
-  ubyte shd_type;
-  ubyte shd_type_sub;
-  EspColor shd_col0;
-  EspColor shd_col1;
-  byte shd_param;
-  ubyte anmSpdRnd;
-  uint16 dmy_pad1;
-  float softPtRate;
-  uint32 _dummy[21];
-};
+    struct
+    {
+        int UnkFlag;
+        sEffectFunc FuncName <format=hex, fgcolor=cLtBlue>;
+        int Size;
+        int Offset <fgcolor=cRed>;
+    } Meta <bgcolor=cBlue>;
+    
+    if (Meta.Size <= 0)
+        return;
+        
+    FSeek(dataOffset + Meta.Offset);
+    union
+    {
+        byte Bytes[Meta.Size] <bgcolor=cBlack>;
+        
+        // VERIFIED means it's verified to be read by the game
+        // Names may not be right
+        switch (Meta.FuncName)
+        {
+            case sEffectParticleGenerationData: // PART
+                // 効果発生データ取得失敗
+                // Similar to EspCmnBlock of old EST file
+                struct 
+                {
+	                int16  VERIFIED_espId_0x00; // Handled by engine class 'esp%d'
+                    int16  VERIFIED_life_0x02;
+	                int VERIFIED_flag_0x04[2] <format=hex>;
+	                int16  anchor_bone; // Maybe inaccurate
+	                short VERIFIED_0x0E;
+                    short VERIFIED_releaseTime_0x10; // releaseTime は0に設定してください
+                    short _0xD2;
+                    byte VERIFIED_callId_0x14; // が不正です。(自分自身と同じＩＤを呼ぼうとしています)
+                    byte VERIFIED_randFix_0x15 <comment="Name might not be accurate (guessed from debug syms)">;
+                    byte VERIFIED_priority_0x16 <comment="Name might not be accurate (guessed from debug syms)">;
+                    byte _fogType <comment="Name might not be accurate (guessed from debug syms)">;
+                    int _0x18 <format=hex>;
+                    byte VERIFIED_0x1C;
+                    byte VERIFIED_0x1D;
+                    byte VERIFIED_0x1E;
+                    byte _0x1F;
+                    int VERIFIED_0x20;
+                    int VERIFIED_0x24;
+                    int VERIFIED_0x28; // is this a int?
+                    byte _pad_[0x14];
+                } EffectParticleGenerationData; 
+                break;
+                
+            case sEffectMoveData: // MOVE
+                MoveData Move;
+            break;
+            
+        case sEffectEmitterData: // EMIF
+            struct
+            {
+                int16 count;
+	            int16 VERIFIED_espId_0x04; // nier max 19
+	            int16 _0x06;
+	            int16 VERIFIED_0x08;
+	            int16 play_delay;
+	            int16 ShowAtOnce;
+	            int16 size;
+	            int16 unk;
+	            float u_b[8];  
+            } EffectEmitterData;
+            break;
+            
+        case sEffectTextureInfoData: // TEX 
+            // Similar to fields after emt_cmn_block of sEstTableHeader of old EST file
+            struct
+            {
+                float VERIFIED_timeRate_0x00;
+	            int16 VERIFIED_texId_0x04 <format=hex>; // Id 1? Name is verified - 不正なリソースＩＤ[%x]
+	            int16 VERIFIED_maskTexId_0x06 <format=hex>; // Id 2? - マスクテクスチャ[%d]が見つかりません
+	            float VERIFIED_posOfsset_0x08;
+	            float VERIFIED_alphaNear_0x0C;
+	            float VERIFIED_alphaFar_0x10;
+	            float VERIFIED_texCx_0x14;
+	            float VERIFIED_texCy_0x18;
+	            int16 VERIFIED_anmSpd_0x1C; // For texture
+	            byte  VERIFIED_TextureIndex_0x1E; // For texture
+	            byte  VERIFIED_is_single_frame_0x1F; // For texture
+	            uint VERIFIED_Flags_0x20;
+                byte VERIFIED_0x24; // For texture
+                byte VERIFIED_UnkType_0x25;
+	            byte VERIFIED_MaskIndex_0x26; // For mask (?)
+                byte VERIFIED_0x27; // For texture
+	            float VERIFIED_simRate_0x28;
+	            uint16 VERIFIED_prim_type_0x2C <format=hex>; // Name is verified - 十字組み系は片面描画を設定出来ません, プリミティブタイプ[%d]が不正です
+	            byte VERIFIED_shd_type_0x2E <comment="Shader Type">;
+                byte VERIFIED_shd_type_sub_0x2F <comment="Shader Type Sub">;
+                float VERIFIED_0x30;
+                float VERIFIED_0x34;
+	            float Unused[6];
+	            byte _0x51;
+                byte VERIFIED_0x51; // For texture
+                byte VERIFIED_0x52;
+                byte VERIFIED_0x53;
+                
+	            float VERIFIED_0x54;
+                
+                float VERIFIED_0x58;
+                float VERIFIED_0x5C;
+                
+                float VERIFIED_0x60;
+	            float VERIFIED_0x64;
+                
+	            float VERIFIED_brightness_0x68;
+                
+	            float VERIFIED_0x6C;
+	            float VERIFIED_0x70;
+                
+	            ushort VERIFIED_0x74;	// For mask
+                byte VERIFIED_0x76; // For mask
+	            byte VERIFIED_0x77; // For mask
+                byte VERIFIED_0x78; // For mask
+                byte VERIFIED_0x79; // For mask
+                ushort VERIFIED_Flags_0x7A <format=hex>;
+                uint VERIFIED_Flags_0x7C <format=hex, comment="NOT A FLOAT">;
+                float _0x80;
+                float VERIFIED_0x84;
+                
+                float VERIFIED_0x88;
+                float VERIFIED_0x8C;
+                
+                float VERIFIED_0x90;
+                float VERIFIED_0x94;
+                uint VERIFIED_CubemapFileResourceId_0x98; // cEffResourceManager:不正なリソースＩＤ[%x] - no more than 100
+                float _0x9C;
+                float VERIFIED_0xA0;
+                float VERIFIED_0xA4;
+                float VERIFIED_0xA8;
+                byte AA[0x1];
+                byte VERIFIED_0xAD;
+            }  EffectTextureInfoData;
+            break;
+            
+        case Emitter_EffectSizeSinAnimation:
+        case sEffectSizeSinAnimation:
+            // All correct
+            struct
+            {
+              uint flag <format=hex>;
+              EstSinAnm width;
+              EstSinAnm height;
+            } EstSizeSinAnm;
+            break;
+            
+        case Emitter_EffectPosSinAnimation:
+        case sEffectPosSinAnimation:
+            // All correct
+            struct
+            {
+              uint flag <format=hex>;
+              EstSinAnm x;
+              EstSinAnm y;
+              EstSinAnm z;
+            } EstPosSinAnm;
+            break;
+            
+        case Emitter_EffectRotSinAnimation:
+        case sEffectRotSinAnimation:
+            // All correct
+            struct
+            {
+              uint flag <format=hex>;
+              EstSinAnm x;
+              EstSinAnm y;
+              EstSinAnm z;
+            } EstRotSinAnm;
+            break;
+            
+        case sEffectFreeVecWork:
+            struct
+            {
+                float VERIFIED_0x00[18]; // [0] = 距離チェックの範囲がマイナスに設定されています
+                
+            } EffectFreeVecWork;
+            break;
+            
+        case sEffectFreeWork: // FWK
+            // All correct
+            struct
+            {
+              int16 wk0; // パーティクル発生個数が０以下です。, 環境フラグの設定が不正です (when >= 4)
+              int16 wk1;
+              int16 wk2; // wk2は0以上を指定してください[%d]
+              int16 wk3; // wk3は-2以上を指定してください[%d]
+              int16 wk4; // wk4は-2以上を指定してください
+              int16 wk5;
+              int16 wk6;
+              int16 wk7;
+              byte wk8;
+              byte wk9;
+              byte wk10;
+              byte wk11;
+              byte wk12;
+              byte wk13;
+              byte wk14;
+              byte wk15;
+              uint _dummy[2];
+            } CmnWork;
 
+            break;
+            
+        case EffectEmitterMoveData: // EMMV
+            MoveData Move;
+            break;
+            
+        case Emitter_EffectFreeVecWork:
+            struct
+            {
+                cVec3 VERIFIED_0x00;
+                cVec3 VERIFIED_0x0C;
+                
+                float VERIFIED_0x18;
+                float VERIFIED_0x1C;
+                float VERIFIED_0x20;
+                float VERIFIED_0x24;
+                float VERIFIED_0x28;
+                float VERIFIED_0x2C;
+                float VERIFIED_0x30;
+                float VERIFIED_0x34;
+                float _0x38; // not verified
+                cVec3 VERIFIED_0x3C;
+            } EffectFreeVecWork;
+            break;
+            
+        case EffectTextureSettingColor:
+        case EffectTextureSettingMask:
+        case EffectTextureSettingNormal:
+            EffectTextureSetting Setting;
+            break;
+            
+        case ModelShaderColorMap:
+            // Taken from f-servo, not sure if any of this is accurate
+            struct
+            {
+                int16 size_1;
+	            int16 size_2;
+	            int16 u_a_1[6];
+	            int16 effect_lines_type_maybe;
+	            int16 unk_1;
+	            int16 unk_2;
+	            int16 effect_lines_size_maybe;
+	            float part_size;
+	            float move_speed_on_player_x;
+	            float move_speed_on_player_y;
+	            float u_a_3[4];
+	            float move_speed_on_player_z;
+	            float move_speed;
+	            float move_speed_acceletarion;
+	            float u_a_4[4];
+            } ModelShaderColorMap;
+            break;
+            
+        default:
+            Printf("Unsupported: name=%s, magic=0x%x", EnumToString(Meta.FuncName), Meta.FuncName);
+            break;
+        }
+    } Data;
+} Function <comment=EnumToString(Meta.FuncName)>;
+
+//////////////////////////////////////////////////
+// MAIN HEADER
+//////////////////////////////////////////////////
+Printf("\nCheck the template source for more information.\n");
 struct
 {
     struct sEstHeader
     {
       char name[4];
-      uint32 nTbl <fgcolor=cGreen>;
-      
-      // starting from here are guesses, not from debug symbols
-      uint tblOfs <format=hex, fgcolor=cRed>;
-      uint unkOffset2 <format=hex, fgcolor=cRed>;
-      uint tblDataOfs <format=hex, fgcolor=cRed>;
-      uint Unk4;
-      uint Unk5;
-      uint _pad;
-    } EstHeader;
+      uint32 NumEntries <fgcolor=cGreen>;
+      uint EntryArrayMapOffset <format=hex, fgcolor=cRed>;
+      uint OffsetOfFunctions <format=hex, fgcolor=cRed>;
+      uint EntryDataOffsetStart <format=hex, fgcolor=cRed>;
+      uint FunctionSize <format=hex>;
+      uint NumFunctionsPerTable <format=hex>;
+      uint _pad_;
+    } EstHeader <bgcolor=cPurple>;
+    
+    FSeek(EstHeader.EntryArrayMapOffset);
+    int TblDataOffsets[EstHeader.NumEntries] <fgcolor=cRed, bgcolor=cYellow>;
     
     struct
     {
-      int TableOffsets[EstHeader.nTbl] <format=hex>;
-      local int i = 0;
-      for (i = 0; i < EstHeader.nTbl; i++)
-      {
-        FSeek(TableOffsets[i]);
-        sEstTableHeader tableHdr;
-      }
-    } TableHeaders;
-
+         local int i = 0;
+         local int sizePerTable = EstHeader.FunctionSize * EstHeader.NumFunctionsPerTable;
+         for (i = 0; i < EstHeader.NumEntries; i++)
+         {
+            struct
+            {
+                local int j;
+                for (j = 0; j < EstHeader.NumFunctionsPerTable; j++)
+                {
+                    FSeek(EstHeader.OffsetOfFunctions + (i * sizePerTable) + (j * EstHeader.FunctionSize));
+                    Function func(TblDataOffsets[i]);
+                }
+            } FunctionTable;
+         }
+    } Functions;
 } espEmtEst;
