@@ -189,7 +189,7 @@ typedef struct (int dataOffset)
     struct
     {
         int UnkFlag;
-        sEffectFunc FuncName <format=hex, fgcolor=cLtBlue>;
+        sEffectFunc FuncName <format=hex, fgcolor=cLtBlue, comment="NOT USED. Game expects functions to be at specified offsets">;
         int Size;
         int Offset <fgcolor=cRed>;
     } Meta <bgcolor=cBlue>;
