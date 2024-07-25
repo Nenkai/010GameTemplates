@@ -2,11 +2,11 @@
 //--- 010 Editor v14.0 Binary Template
 //
 //      File: Forza Bundle Parser ("Grub" tag, for some reason)
-//   Authors: Nenkai, Doliman
+//   Authors: Nenkai, Doliman100
 //   Version: 1.09 (FH5)
 //   Purpose: Storing textures, models and more
 //  Category: 
-// File Mask: 
+// File Mask: *.modelbin,*.swatchbin,*.pb
 //  ID Bytes: 62 75 72 47
 //   History: 
 //------------------------------------------------
@@ -206,6 +206,30 @@ typedef enum <int>
     DXGI_FORMAT_FORCE_UINT = 0xffffffff
 } DXGI_FORMAT;
 
+typedef enum <uint>
+{
+    BC1_UNORM = 0,
+    BC2_UNORM = 1,
+    BC3_UNORM = 2,
+    BC4_UNORM = 3,
+    BC4_SNORM = 4,
+    BC5_UNORM = 5,
+    BC5_SNORM = 6,
+    BC6H_UF16 = 7,
+    BC6H_SF16 = 8,
+    BC7_UNORM = 9,
+    R32G32B32A32_FLOAT = 10,
+    R16G16B16A16_UNORM = 11,
+    R16G16B16A16_FLOAT = 12,
+    R8G8B8A8_UNORM = 13,
+    B5G6R5_UNORM = 14,
+    B5G5R5A1_UNORM = 15,
+    R8_UNORM = 19,
+    A8_UNORM = 20,
+    R8G8_UNORM = 21,
+    BC7_UNORM_2 = 22,
+} Encoding;
+                    
 typedef enum <int>
 {
     Float_32x4 = 0,
@@ -403,6 +427,89 @@ typedef struct
         case TAG_METADATA_TextureReferences:
             int TexturePathHashLength;
             uint TexturePathHash[TexturePathHashLength] <format=hex, comment=".swatchbin path CRC-32 lowercase">; // unsigned long
+            break;
+        case TAG_METADATA_TextureContentHeader:
+            if (parentof(this).VersionMajor != 2) 
+            {
+                struct 
+                {
+                    local int64 p = FTell();
+                    local int64 p2;
+                    
+                    uint unk0_offset <format=hex>;
+                    uint unk1_offset <format=hex>;
+                    struct 
+                    {
+                        GUID guid;
+                        uint m_Width; // 14236D178
+                        uint m_Height;
+                        uint m_Depth;
+                        short m_NumSlices; // & 0x3FFF; D3D12_RESOURCE_DESC.DepthOrArraySize
+                        ubyte mipLevels;
+                        ubyte unk_bitfield : 1;
+                        ubyte unk_bitfield : 1;
+                        ubyte __padding__ : 6; // & 0xFC
+                        int transcoding <comment="TextureTranscoding::Enum">;
+                        int colorProfile2;
+                        int colorProfile <comment="1 = sRBG">;
+                        uint dword2C;
+                        //int encoding_offset; // TextureEncoding::Enum
+                        // Formats, TextureFormat_Count = 0x2F
+                    } content;
+                    local int next_offset_local = unk0_offset;
+                    while (next_offset_local != -1) {
+                        FSeek(p + next_offset_local);
+                        struct {
+                            uint value_offset <format=hex>; // relative to TXCH data begin
+                            int next_offset <format=hex>;
+                            next_offset_local = next_offset;
+                            
+                            p2 = FTell();
+                            FSeek(p + value_offset);
+                            uint value;
+                            FSeek(p2);
+                        } headerParameter;
+                        // [0] - TextureEncoding::Enum encoding; count == numSlices??
+                        // [1] - int PitchOrLinearSize
+                    }
+                    next_offset_local = unk1_offset;
+                    while (next_offset_local != -1) {
+                        FSeek(p + next_offset_local);
+                        struct {
+                            uint value_offset; // relative to TXCB data begin
+                            int next_offset;
+                            next_offset_local = next_offset;
+                        } blobParameter; // count == mips
+                    }
+                    
+                } DataPC;
+            } 
+            else
+            {
+                struct 
+                {
+                    GUID guid; // instead of "<unnamed>"
+                    ushort width;
+                    ushort height;
+                    ushort Depth;
+                    ushort width2;
+                    ushort height2;
+                    ushort unk;
+                    ubyte unk;
+                    ubyte MipLevels;
+                    ubyte BaseMipLevel;
+                    uint TileMode : 5; // x & 0x1F, XG_TILE_MODE, 14236BD28
+                    Encoding Encoding_ : 6;
+                    uint Transcoding : 6;
+                    uint unk : 3; // (x >> 17) & 0x7, 14236BD13
+                    uint ColorProfile : 3;
+                    uint unk_padding : 2;
+                    uint unk : 1; // (1 << 25), 14236CDAB
+                    uint unk : 1; // (1 << 26), 1423535D6
+                    uint unk : 1; // (1 << 27), 14236C23C
+                    uint PitchOrLinearSize_bit : 4; // (1 >> 28), 14236BD33; PitchOrLinearSize = 1 << (value + 4)
+                } DataDurango; // Xbox One
+            }
             break;
         default:
             ubyte UnkBuffer[Size];
@@ -1011,4 +1118,3 @@ typedef struct
 } Bundle;
 
 Bundle bundle;
-
