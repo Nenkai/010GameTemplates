@@ -1,0 +1,60 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Netease NeoX Package (2)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.npk
+//  ID Bytes: 4E 58 50 4B
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex>;
+        uint NumFiles;
+        uint VersionMajor;
+        uint VersionMinor;
+        uint VersionPatch;
+        uint TableOffset <format=hex>;
+    } Header <bgcolor=cPurple, comment="Always 0x18">;
+    
+    FSeek(Header.TableOffset);
+    struct
+    {
+        int FileNameCRCHash <comment="Should be ordered?", format=hex>;
+        int CompressedDataOffset <format=hex>;
+        int CompressedSize <format=hex>;
+        int UncompressedSize <format=hex>;
+        int CompressedDataCRC <format=hex>;
+        int UncompressedDataCRC <format=hex>;
+        enum <short> 
+        { 
+            Comp_None, 
+            Comp_Zlib, // Failed to uncompress npk file(ZLIB) %d in real file %s opener tag %s, error code %d
+            Comp_LZ4, // Failed to uncompress npk file(LZ4) %d in real file %s opener tag %s, error code %d
+            Comp_LZO_4,
+            Comp_LZO_5,
+            Comp_LZO_6,
+            Comp_LZO_7,
+            Comp_LZO_8,
+            Comp_LZO_9,
+            Comp_LZO_10,
+            Comp_LZO_11,
+        } CompressionMethod;
+        
+        enum <short> 
+        { 
+            Enc_None, 
+            Enc_Xor, 
+            Enc_Rc4, 
+            Enc_Aes,
+            Enc_Xor2, // https://github.com/hax0r31337/denpk2
+        } EncryptionMethod;
+    } FileInfo[Header.NumFiles] <bgcolor=cGray>;
+    
+} NeoXPackage; // neox::package::NeoXPackage
