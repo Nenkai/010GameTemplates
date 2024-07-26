@@ -1,0 +1,68 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize;
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+FlatArkHeader Hdr;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
+uint Field1_Magic <format=hex, bgcolor=cPurple, comment="Enforced, cannot be different">;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
+struct
+{
+    uint DataOffset <bgcolor=cYellow>;
+    FSeek(startof(DataOffset) + DataOffset);
+    int NumEntries <bgcolor=cYellow>;
+    int Offsets[NumEntries] <bgcolor=cYellow>;
+    
+    local int j;
+    for (j = 0; j < NumEntries; j++)
+    {
+         FSeek(startof(Offsets[j]) + Offsets[j]);
+         struct
+         {
+             FlatArkFields Fields;
+             
+             FSeek(startof(Fields) + Fields.OffsetTable[1]);
+             struct
+             {
+                uint NameOffset <bgcolor=cYellow>;
+                FSeek(startof(NameOffset) + NameOffset);
+                uint strLen <bgcolor=cYellow>;
+                char str[strLen] <bgcolor=cYellow>;
+             } F1_FieldName;
+             
+             FSeek(startof(Fields) + Fields.OffsetTable[2]);
+             uint objId <format=hex, bgcolor=cYellow>;
+
+         } Nested;
+    }
+} Field2;
