@@ -1,0 +1,941 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Sony SGX (PSP, PS3) sound file
+//   Authors: Nenkai#9075, Xenn
+//   Version: 
+//   Purpose: Sound Setup (sample, music, sequences, bus, surround)
+//  Category: 
+// File Mask: *.sgd,*.sgh
+//  ID Bytes: 53 47 58 44
+//   History: 
+//------------------------------------------------
+
+// The file is always LE.
+LittleEndian();
+
+// Information taken from debug symbols, Folklore PS3, but also PSP Camera debug syms
+
+string PrintNameFromOffset(int& i)
+{
+    if (i == 0)
+        return "(unnamed)";
+
+    return "Name: " + ReadString(i);
+}
+
+local int curPos;
+
+////////////////////////////////////
+///////////////////// Main typedefs
+////////////////////////////////////
+
+typedef uint sguint32;
+typedef int sgint32;
+typedef short sgint16;
+typedef byte sgint8;
+typedef ubyte sguint8;
+
+// Similar if not inspired from RIFF chunks
+struct tagSgxdChunkHeader
+{
+  union
+  {
+    sguint32 ident <format=hex, fgcolor=cPurple>;
+    char identStr[4];
+  } ident;
+  sgint32 size <format=hex, fgcolor=cGreen>;
+};
+typedef tagSgxdChunkHeader SgxdChunkHeader <comment=PrintChunkName>;
+
+string PrintChunkName(SgxdChunkHeader& header)
+{
+    return header.ident.identStr;
+}
+
+typedef enum <byte> SGXRequest
+{
+   gSgxSndWaveStrSet = 0, // 3
+   gSgxSndNoteSet = 1, // 1
+   gSgxSndSeqSet = 2, // 2
+   gSgxSndWaveSet = 3, // 0 - Direct call to sound
+
+   SgxBusCalcSetupReqBuf = 4, // 16
+   SgxBusCallEffectParam = 5, // 17
+   SgxConfCall = 6,
+} SGXRequest;
+
+////////////////////////////////
+///////////////////// Note - RGN
+////////////////////////////////
+struct tagSgxdRgn
+{
+  // 1 = volume stuff
+  // 2 = pitch related
+  // 4 = use base note - 1000 (??) as wave index, otherwise use wave field
+  sgint32 flags;
+  
+  // For lookup, note range is used if this is blank (should always be)
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint32 ssize;
+  sgint8 prior;
+  sguint8 gpid;
+  sgint8 gpmode;
+  sgint8 gpnum;
+  sgint32 resv1;
+  sgint32 ef;
+  sgint8 noteL;
+  sgint8 noteH;
+  sgint16 resv2;
+  sguint8 baseN;
+  sgint8 baseC;
+  sgint16 pitch;
+  sgint16 vol0;
+  sgint16 vol1;
+  sgint16 dry;
+  sgint16 wet;
+  sgint32 env0;
+  sgint32 env1;
+  sgint8 volcv;
+  sgint8 pancv;
+  sgint8 bendL;
+  sgint8 bendH;
+  sgint32 wave;
+};
+typedef tagSgxdRgn SgxdRgn <comment=PrintRgn>;
+
+string PrintRgn(SgxdRgn& rgn)
+{
+    if (rgn.name == 0)
+        return "(unnamed)";
+
+    return "Name: " + ReadString(rgn.name);
+}
+
+struct tagSgxdRgnHeader
+{
+  sgint32 flags;
+  sgint32 nrgn <fgcolor=cGreen>;
+  
+  struct
+  {
+    int count <fgcolor=cGreen>;
+    int off <format=hex, fgcolor=cRed>;
+  } arr[nrgn] <optimize=false>;
+  
+  local int i = 0;
+  for (i = 0; i < nrgn; i++)
+  {
+      FSeek(arr[i].off);
+      struct
+      {
+          SgxdRgn aRgn[arr[i].count] <format=hex>;
+      } entries;
+  }
+};
+typedef tagSgxdRgnHeader SgxdRgnHeader;
+
+////////////////////////////
+//////////////// Name - NAME
+////////////////////////////
+struct tagSgxdName
+{
+  BitfieldDisablePadding();
+
+  struct Src
+  {  
+    short WaveRequestIndex : 16;
+    byte SeqRequestIndex : 8;
+    byte Unk : 4;
+    SGXRequest RequestType : 4;
+  } src;
+
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+};
+typedef tagSgxdName SgxdName <optimize=false, comment=PrintSgxdName>;
+
+string PrintSgxdName(SgxdName& name)
+{
+    return ReadString(name.name) + " (" + EnumToString(name.src.RequestType) + ")";
+}
+
+struct tagSgxdNameHeader
+{
+  sgint32 flags;
+  sgint32 nname <fgcolor=cGreen>;
+  SgxdName aName[nname];
+};
+typedef tagSgxdNameHeader SgxdNameHeader;
+
+///////////////////////////
+/////////////// Wave - WAVE
+///////////////////////////
+struct tagSgxdWave
+{
+  sgint32 flags; // 1 = mono? 2 = sgxResFindCopyWaveSurroundInfo called? 4 = sgxResFindWaveMarker called?
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  enum <sgint8>  
+  {
+    // sgxFormSampleToByte(sgint32 form, sgint32 ch, sgint32 par0, sgint32 par1, sgbool isBeg, sgint32 smpl)
+    //   PSADPCM = 16 * smpl / 28 * ch
+    //   ShortAPCDM = 4 * smpl / 6 * ch
+    //   AC3 = 
+          /* if ( !isBeg )
+            v8 = smpl + 1791;
+          result = v8 / 0x600 * par1 */
+    //   10 = 4 * smpl * ch
+    //   11 = 4 * smpl * ch
+
+    // sgxGetFormUnitByte(sgint32 form, sgint32 ch, sgint32 par0, sgint32 par1)
+    //   PSADPCM = 16 * ch
+    //   ShortAPCDM = 4 * ch
+    //   AC3 = return par1
+    //   Unk10 = 4 * ch
+    //   Unk11 = 4 * ch
+    //   default return par1
+    PCM16LE = 0,
+    PCM16BE = 1, 
+    OGG_VORBIS = 2, // Confirm?
+    PSADPCM = 3,
+    ATRAC3plus = 4,
+    ShortAPCDM = 5,
+    AC3 = 6,
+    Unk10 = 10, 
+    Unk11 = 11, 
+  } form <comment="Format">; // {PCM = 1, OGG = 2, PSADPCM = 3, ATRAC3plus = 4, ShortPSADPCM = 5, AC3 = 6} Type;
+  
+  sgint8 ch <comment="Channels">;
+  sgint8 nloop;
+  sgint8 resv <comment="Reserved">;
+  sgint32 freq <comment="Sample Rate">; // //Doesn't seem to matter for PSADPCM
+  sgint32 par0 <comment="BitRate">;
+  sgint32 par1 <comment="640 in AC3 = 640kbps">;
+  sgint16 volL <format=hex, comment="Volume Left">;
+  sgint16 volR <format=hex, comment="Volume Right">;
+  sgint32 wbeg <comment="Loop Start Position">;
+  sgint32 wend <comment="Loop Start Samples">;
+  sgint32 lbeg <comment="Loop Begin Sample - Make this the starting point of the loop from Awave">;
+  sgint32 lend <comment="Loop End Sample - Make this the sample size of the audio">;
+  sgint32 bsize <format=hex, comment="ChannelDataSize">;
+  sgint32 aBody[2] <format=hex, comment="Start and End Data Offsets">;
+
+  if (name == 0)
+    Printf("Wave Entry: (unnamed) (" + EnumToString(form) + ")\n");
+  else
+    Printf("Wave Entry: %s", ReadString(name) + " (" + EnumToString(form) + ")\n");
+};
+typedef tagSgxdWave SgxdWave <comment=PrintWave>;
+
+string PrintWave(SgxdWave& wave)
+{
+    // Try matching with the name chunk
+    int found = false;
+    local int i = 0;
+    for (i = 0; i < Entry.pWave.nwave; i++)
+    {
+        if (startof(Entry.pWave.aWave[i]) == startof(wave))
+        {
+            found = true;
+            break;  
+        }
+    }
+    
+    if (found)
+    {
+        local int j = 0;
+        for (j = 0; j < Entry.pName.nname; j++)
+        {
+            if (Entry.pName.aName[j].src.WaveRequestIndex == i)
+                return ReadString(Entry.pName.aName[j].name) + " (" + EnumToString(wave.form) + ")";
+        }
+    }
+    
+    if (wave.name == 0)
+        return "(unnamed)" + " (" + EnumToString(wave.form) + ")";
+
+    return ReadString(wave.name) + " (" + EnumToString(wave.form) + ")";
+}
+
+
+struct tagSgxdWaveHeader
+{
+  sgint32 flags;
+  sgint32 nwave <fgcolor=cGreen>;
+  SgxdWave aWave[nwave] <optimize=false>;
+};
+typedef tagSgxdWaveHeader SgxdWaveHeader;
+
+//////////////////////////
+////////// Sequence - SEQD
+//////////////////////////
+
+typedef struct (int size)
+{
+    struct
+    {
+        byte Digit1 : 4;
+        byte Digit2 : 4;
+    } Byte[size];
+} BcdValue;
+
+struct SesqValue;
+typedef struct // Part of SesqReadData
+{
+    if (ReadUByte() > 0xA0)
+        return;
+        
+    byte ValueSize : 4;
+    enum <byte> { PositiveBcd = 0, NegativeBcd = 1, Random = 2, SysReg = 3, Reg = 4, Unk = 5 } Type : 4;
+        
+    switch (Type)
+    {
+        case PositiveBcd:
+        case NegativeBcd:
+            BcdValue Values(ValueSize); // Binary coded decimals
+            break;
+            
+        case Random:
+            SesqValue base;
+            SesqValue min;
+            SesqValue max;
+            break;
+            
+        case SysReg:
+        case Reg:
+            BcdValue regIndex(ValueSize);
+            break;
+            
+        case Unk:
+            Warning("Unimplemented sesq value type %d", EnumToString(Type));
+            
+            BcdValue count(ValueSize);
+            // Use count and read two? min max?
+            break;
+            
+    }
+    
+} SesqValue;
+
+typedef struct
+{
+    // PSP Sgx has functions non-inlined, useful
+    // PSP Camera 1 or 3 has debug syms
+    // Func handler = SesqCore
+    enum <ubyte> 
+    {
+        SesqSubPlay = 0xB0,
+        SesqSubStop = 0xB1,
+        SesqSubStopRel = 0xB2,
+        SesqSubGetStatus = 0xB3,
+        
+        SesqCtrl = 0xC0,
+        SesqAdsr = 0xC1,
+        SesqBendW = 0xC2,
+        SesqAdsrDirect = 0xC3,
+        
+        SesqPlay = 0xD0,
+        SesqStop = 0xD1,
+        SesqStopRel = 0xD2,
+        GetPortStatus = 0xD3,
+        SesqPlayWave = 0xD4,
+        SesqPlayNoise = 0xD5,
+        
+        sgxSndSetSysReg = 0xE0,
+        sgxSndSetSysReg_Add = 0xE1,   // +=
+        sgxSndSetSysReg_Minus = 0xE2, // -=
+        sgxSndSetSysReg_Mul = 0xE3,   // *=
+        sgxSndSetSysReg_Div = 0xE4,   // /=
+        sgxSndSetSysReg_Mod = 0xE5,   // %=
+        sgxSndSetSysReg_And = 0xE6,   // &=
+        sgxSndSetSysReg_Or = 0xE7,    // |=
+        sgxSndSetSysReg_Xor = 0xE8,   // ^=
+        
+        Unk_0xF0 = 0xF0, // Just returns 0x00
+        Wait = 0xF1,
+        Jump = 0xF2,
+        LoopBegProc = 0xF3,
+        LoopEndProc = 0xF4,
+        JumpNotEqual = 0xF5,
+        Jump3 = 0xF6,
+        JumpGreaterEqual = 0xF7,
+        JumpLesser = 0xF8,
+        sgxSndDoMarkerCallback = 0xF9,
+        SesqLoopBreak = 0xFA,
+        Print = 0xFE,
+        End = 0xFF,
+        
+    } Command <format=hex>;
+    
+    switch (Command)
+    {
+        case SesqSubPlay: // 0xB0
+            struct
+            {
+                SesqValue id;   // Defaults 0
+                SesqValue prog; // Defaults 0 - Points to RGN (region)
+                SesqValue note; // Defaults 0
+                SesqValue unused_volume; // Defaults 0
+            } SesqPlay;
+            break;
+            
+        case SesqSubStop: // 0xB1
+        case SesqSubStopRel: // 0xB2
+            struct
+            {
+                SesqValue id;   // Defaults 0
+            } SesqSubStop;
+            break;
+            
+        case SesqSubGetStatus: // 0xB3:
+            struct
+            {
+                SesqValue id;   // Defaults 0
+            } SesqSubGetStatus;
+            break;
+            
+        case SesqCtrl: // 0xC0
+            struct
+            {
+                SesqValue id; // Defaults 0
+                SesqValue type; // Defaults 0
+                SesqValue value; // Defaults 0
+                SesqValue time; // Defaults 0
+                SesqValue boolUnk; // Defaults 0
+                SesqValue isGlobal; // Defaults 0
+            } SesqCtrl;
+            break;
+            
+        case SesqAdsr: // 0xC1
+            struct
+            {
+                SesqValue uid;       // Defaults 0
+                SesqValue adsrIndex; // Defaults 0
+                SesqValue isGlobal;  // Defaults 0
+            } SesqAdsr;
+            break;
+            
+        case SesqBendW: // 0xC2 - maybe bugged? Refers to command 15 (CmdAdsrID) instead of 17? (CmdBendWID)
+            struct
+            {
+                SesqValue unk1;      // Defaults 0
+                SesqValue unk2;      // Defaults 12
+                SesqValue unk3;      // Defaults 12
+                SesqValue isGlobal;  // Defaults 0
+            } SesqAdsr;
+            break;
+            
+        case SesqAdsrDirect: // 0xC3 - NOT IN PSP
+            struct
+            {
+                SesqValue par0;  // Defaults 0
+                SesqValue unkBool;  // Defaults 0
+                SesqValue par0;  // Defaults 0
+                SesqValue par0;  // Defaults 0 - no more than 127
+                SesqValue par0;  // Defaults 0 - no more than 15
+                SesqValue par0;  // Defaults 0 - no more than 15
+                SesqValue par1;  // Defaults 0
+                SesqValue par1;  // Defaults 0
+                SesqValue par1;  // Defaults 0
+                SesqValue par1;  // Defaults 0
+                SesqValue isGlobal;  // Defaults 0
+                
+                // par0 and par1 sent to sgxVoCtrl
+            } SesqAdsrDirect;
+            break;
+            
+        case SesqPlay: /* 0xD0 */
+            struct
+            {
+                SesqValue uid; // Defaults 0
+                SesqValue prog; // Defaults 0 - Points to RGN (region)
+                SesqValue note; // Defaults 0
+                SesqValue volume; // Defaults 0x1000
+            } SesqPlay;
+            break;
+           
+        case SesqStop:    // 0xD1
+        case SesqStopRel: // 0xD2
+            struct
+            {
+                SesqValue id;        // Defaults 0
+                SesqValue isGlobal;  // Defaults 0
+            } SesqStop;
+            break;
+            
+        case GetPortStatus: // 0xD3
+            struct
+            {
+                SesqValue uid;       // Defaults 0 - sgxPortGetUnitStatus
+                SesqValue isGlobal;  // Defaults 0
+            } GetPortStatus;
+            break;
+            
+        case SesqPlayWave: // 0xD4
+            struct
+            {
+                SesqValue uid;       // Defaults 0 - sgxPortGetUnitStatus
+                SesqValue wave;      // Defaults 0
+                SesqValue vol;       // Defaults 4096
+                SesqValue prior;     // Defaults 128
+                SesqValue group;     // Defaults 0
+                SesqValue gpmode;    // Defaults 0
+                SesqValue gpnum;     // Defaults 0
+            } SesqPlayWave;
+            break;
+            
+        case SesqPlayNoise: // 0xD5
+            struct
+            {
+                SesqValue uid;       // Defaults 0 - sgxPortGetUnitStatus
+                SesqValue wave;      // Defaults 0
+                SesqValue vol;       // Defaults 4096
+                SesqValue prior;     // Defaults 128
+                SesqValue group;     // Defaults 0
+                SesqValue gpmode;    // Defaults 0
+                SesqValue gpnum;     // Defaults 0
+            } SesqPlayNoise;
+            break;
+            
+        case sgxSndSetSysReg:
+        case sgxSndSetSysReg_Add:
+        case sgxSndSetSysReg_Minus:
+        case sgxSndSetSysReg_Mul:
+        case sgxSndSetSysReg_Div:
+        case sgxSndSetSysReg_Mod:
+        case sgxSndSetSysReg_And:
+        case sgxSndSetSysReg_Or:
+        case sgxSndSetSysReg_Xor:
+            BcdValue type; // Type has to be register or sys register
+            SesqValue baseValue;
+            SesqValue rightHandSideValue;
+            break;
+            
+        case Wait: // 0xF1
+            struct
+            {
+                SesqValue time;
+            } SesqWait;
+            break;
+            
+        case Jump: // 0xF2
+            struct
+            {
+                SesqValue timeOffset;
+            } Jump;
+            break;
+            
+        case LoopBegProc: // 0xF3
+            struct
+            {
+                SesqValue count;
+            } LoopBegProc;
+            break;
+            
+        case LoopEndProc: // 0xF4
+            break;
+            
+        case JumpNotEqual:
+        case Jump3:
+        case JumpGreaterEqual:
+        case JumpLesser:
+            struct
+            {
+                 SesqValue v1;
+                 SesqValue v2;
+                 SesqValue timeOffset;
+            } JumpUnk;
+            break;
+            
+        case sgxSndDoMarkerCallback: // 0xF9
+            struct
+            {
+                SesqValue data;
+            } sgxSndDoMarkerCallback;
+            
+        case SesqLoopBreak: // 0xFA
+            struct
+            {
+                 SesqValue v1;
+                 SesqValue v2;
+            } JumpUnk;
+            break;
+            
+        case Print: // 0xFE
+            struct
+            {
+                 SesqValue value;
+            } Print;
+            break;
+            
+        case End:
+            break;      
+
+        default:
+            Printf("Unsupported SESQ command: %x\n", Command);
+            break;
+    }
+} SesqCommand <comment=EnumToString(Command)>;
+
+struct tagSgxdSeq
+{
+  enum <sgint32> { SeqFlags_SeqLoop = 1 } flags;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  enum <sgint16> { SeqFormat_Sesq = 0, SeqFormat_Midi = 1 } form <comment="Format of sequence - 0 = Sony SeqSe/Sesq (see ps2sdk), 1 = Midi">;
+  sgint16 reso;
+  sgint16 volL <format=hex, comment="Volume Left">;
+  sgint16 volR <format=hex, comment="Volume Right">;
+  sgint32 size <format=hex, comment="Command Buffer Size">;
+  
+  local int basePos = FTell();
+  union
+  {
+     sguint8 data[size] <comment="Command Buffer">;  
+     if (form == SeqFormat_Sesq)
+     {
+        struct
+        {
+            local int i = 0;
+            while (FTell() < basePos + size)
+                SesqCommand cmd;
+        } Sesq <bgcolor=cBlack>;
+     }
+  } data;
+  
+};
+typedef tagSgxdSeq SgxdSeq <comment=PrintSgxdSeq>;
+
+string PrintSgxdSeq(SgxdSeq& seq)
+{
+    return ReadString(seq.name);
+}
+struct tagSgxdSeqGrp
+{
+  sgint32 flags;
+  sgint32 nofs;
+  sgint32 aOfs[nofs];
+
+  local int i = 0;
+  for (i = 0; i < nofs; i++)
+  {
+    if (aOfs[i] != 0)
+    {
+        FSeek(aOfs[i]);
+        SgxdSeq seq;
+    }
+  }
+};
+typedef tagSgxdSeqGrp SgxdSeqGrp <comment=PrintSgxdSeqGroup>;
+
+string PrintSgxdSeqGroup(SgxdSeqGrp& grp)
+{
+    // Try matching with the name chunk
+    int found = false;
+    local int i = 0;
+    for (i = 0; i < Entry.pSeq.nofs; i++)
+    {
+        if (startof(Entry.pSeq.grp[i]) == startof(grp))
+        {
+            found = true;
+            break;  
+        }
+    }
+    
+    if (found)
+    {
+        local int j = 0;
+        for (j = 0; j < Entry.pSeq.nofs; j++)
+        {
+            if (Entry.pName.aName[j].src.SeqRequestIndex == i)
+                return ReadString(Entry.pName.aName[j].name);
+        }
+    }
+    
+    return "";
+};
+
+struct tagSgxdSeqHeader
+{
+  sgint32 flags;
+  sgint32 nofs <fgcolor=cGreen>;
+  sgint32 aOfs[nofs] <format=hex, fgcolor=cRed>;
+
+  local int i = 0;
+  for (i = 0; i < nofs; i++)
+  {
+    if (aOfs[i] != 0)
+    {
+        FSeek(aOfs[i]);
+        SgxdSeqGrp grp;
+    }
+  }
+};
+typedef tagSgxdSeqHeader SgxdSeqHeader;
+
+//////////////////////////////////////
+//////////////// Bus Param/Text - CONF
+//////////////////////////////////////
+struct tagSgxdText
+{
+  sgint32 flags;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint32 ofs <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+};
+typedef tagSgxdText SgxdText;
+
+struct tagSgxdTextHeader
+{
+  sgint32 flags;
+  sgint32 num;
+  SgxdText aText[num];
+};
+typedef tagSgxdTextHeader SgxdTextHeader;
+
+/////////////////////////////////////////
+/////////////////////////// Tuning - TUNE
+/////////////////////////////////////////
+struct tagSgxdTuning
+{
+  sgint32 flags;
+  sgint32 rname;
+  sgint32 type;
+  sgint32 def;
+  sgint32 resv0;
+  sgint32 num;
+  sgint32 nameofs;
+  sgint32 dataofs;
+};
+typedef tagSgxdTuning SgxdTuning;
+
+struct tagSgxdTuningHeader
+{
+  sgint32 flags;
+  sgint32 ntuning;
+  SgxdTuning aTuning[];
+};
+typedef tagSgxdTuningHeader SgxdTuningHeader;
+
+//////////////////////////////////////////////
+////////////////////////// WaveSurround - WSUR
+//////////////////////////////////////////////
+struct tagSgxdWaveSurround
+{
+  sgint8 flags;
+  sgint8 ch;
+  sgint16 angle;
+  sgint16 dist;
+  sgint16 level;
+};
+typedef tagSgxdWaveSurround SgxdWaveSurround;
+
+struct tagSgxdWaveSurroundHeader
+{
+  sgint32 flags;
+  sgint32 nwave;
+  struct
+  {
+    int numSur;
+    int pos <format=hex>;
+  } entryInfo[nwave];
+  
+  local int i = 0;
+  for (i = 0; i < nwave; i++)
+  {
+      FSeek(entryInfo[i].pos);
+      struct
+      {
+          SgxdWaveSurround sur[entryInfo[i].numSur];
+      } entries;
+  }
+};
+typedef tagSgxdWaveSurroundHeader SgxdWaveSurroundHeader;
+
+/////////////////////////////////////////////
+/////////////////////////// WaveMarker - WMRK
+/////////////////////////////////////////////
+struct tagSgxdWaveMarker
+{
+  sgint32 name;
+  sgint32 pos;
+  sgint32 len;
+};
+typedef tagSgxdWaveMarker SgxdWaveMarker;
+
+struct tagSgxdWaveMarkerHeader
+{
+  sgint32 flags;
+  sgint32 nwave;
+  struct
+  {
+    sgint32 aMarker[2] <format=hex>;
+  } arr[nwave];
+};
+typedef tagSgxdWaveMarkerHeader SgxdWaveMarkerHeader;
+
+///////////////////////////////
+////////////////////////// ASDR
+///////////////////////////////
+struct tagSgxdAdsrHeader
+{
+  sgint32 flags;
+  sgint32 nadsr;
+  sguint32 aAdsr[nadsr];
+};
+typedef tagSgxdAdsrHeader SgxdAdsrHeader;
+
+//////////////////////////////////////////
+///////////////////////// Bus Setup - BUSS
+//////////////////////////////////////////
+struct tagSgxdBusEffect
+{
+  sgint32 flags;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint32 module <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint8 aCAssign[8];
+  sgint8 nibus;
+  sgint8 nobus;
+  sgint16 resv0;
+  sgint8 aIBus[4];
+  sgint8 aOBus[4];
+  sgint16 aIGain[4];
+  sgint16 aOGain[4];
+  sgint32 pbody <format=hex, fgcolor=cRed>;
+  sgint32 resv1;
+  sgint32 resv2;
+  sgint32 resv3;
+};
+typedef tagSgxdBusEffect SgxdBusEffect <comment=PrintNameFromOffset(name)>;
+
+struct tagSgxdBusUnit
+{
+  sgint32 flags;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint32 resv0;
+  sgint32 resv1;
+};
+typedef tagSgxdBusUnit SgxdBusUnit <comment=PrintNameFromOffset(name)>;
+
+struct tagSgxdBusSetup
+{
+  sgint32 flags;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint8 nunit <fgcolor=cGreen>;
+  sgint8 neffect <fgcolor=cGreen>;
+  sgint8 munit;
+  sgint8 resv0;
+  sgint32 resv1;
+  sgint32 aUnit <format=hex, fgcolor=cRed>;
+  sgint32 aEffect <format=hex, fgcolor=cRed>;
+  sgint32 oper <format=hex, fgcolor=cRed>;
+  sgint32 oparam <format=hex, fgcolor=cRed>;
+  sgint32 resv2;
+  sgint32 resv3;
+  sgint32 resv4;
+  sgint32 resv5;
+
+  local int cPos = FTell();
+  if (nunit > 0)
+  {
+    FSeek(aUnit);
+    SgxdBusUnit units[nunit] <optimize=false>;
+  }
+
+  if (neffect > 0)
+  {
+    FSeek(aEffect);
+    SgxdBusEffect effects[neffect] <optimize=false>;
+  }
+  FSeek(cPos);
+};
+typedef tagSgxdBusSetup SgxdBusSetup;
+
+struct tagSgxdBusSetupHeader
+{
+  sgint32 flags;
+  sgint32 nsetup;
+  SgxdBusSetup aSetup[nsetup] <optimize=false>;
+};
+typedef tagSgxdBusSetupHeader SgxdBusSetupHeader;
+
+//////////////////////////////////////
+////////////////////////// MAIN HEADER
+//////////////////////////////////////
+struct tagSgxdFileHeader
+{
+  sguint32 SGXD <format=hex, comment="Magic">;
+  sgint32 name <format=hex, fgcolor=cRed, comment=PrintNameFromOffset>;
+  sgint32 hsize <format=hex, comment="Header Size">;
+  sgint32 bsize <format=hex, comment="Body Size, 1 bit unk, 31 bit size">;
+};
+
+typedef tagSgxdFileHeader SgxdFileHeader;
+
+struct SGXD
+{
+    SgxdFileHeader header;
+    Printf("SGXD Name: %s\n", ReadString(header.name));
+
+    local int i = 0;
+    local int baseChunkDataPos;
+    local int done = false;
+
+    while (!FEof())
+    {
+        SgxdChunkHeader chunkHeader;
+        baseChunkDataPos = FTell();
+
+        switch (chunkHeader[i].ident.ident)
+        {
+            case 0x454D414E: // NAME
+                SgxdNameHeader pName;
+                break;
+
+            case 0x444E4752: // RGND:
+                SgxdRgnHeader pRgn;
+                break;
+
+            case 0x45564157: // WAVE
+                SgxdWaveHeader pWave;
+                break;
+    
+            case 0x52555357: // WSUR
+                SgxdWaveSurroundHeader pWaveSurround;
+                break;
+
+            case 0x4B524D57: // WMRK
+                SgxdWaveMarkerHeader pWaveMarker;
+                break;
+
+            case 0x44514553: // SEQD
+                SgxdSeqHeader pSeq;
+                break;
+
+            case 0x52534441: // ADSR
+                SgxdAdsrHeader pAdsr;
+                break;
+
+            case 0x53535542: // BBUS
+                SgxdBusSetupHeader pBSetup;
+                break;
+
+            case 0x464E4F43: // CONF
+                SgxdTextHeader pText;
+                break;
+  
+            case 0x454E5554: // TUNE
+                SgxdTuningHeader pTuning;
+                break;
+
+            
+            default:
+                done = true;
+                return;
+        }
+
+
+        FSeek(baseChunkDataPos + chunkHeader[i].size);
+        i++;
+
+        if (done)
+           break;
+    }
+} Entry;
