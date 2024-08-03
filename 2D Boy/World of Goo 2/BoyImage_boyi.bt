@@ -13,14 +13,35 @@
 
 struct
 {
+    // "Boyi"
+    // Game also supports JPEG, PNG, GIF, BMP, PSD, PIC, PNM, HDR
+    // as it uses stb (https://github.com/nothings/stb)
+    // -> https://github.com/nothings/stb/blob/master/stb_image.h
     uint Magic <format=hex>;
     uint Version;
-    short OriginalWidth;
-    short OriginalHeight;
-    short Width;
-    short Height;
-    uint CompressedSize <format=hex>;
-    uint UncompressedSize <format=hex>;
-    FSkip(0x0C);
-    byte Data[CompressedSize]; // ZStd Compressed
+    
+    struct
+    {
+        short Width;
+        short Height;
+        short UnusedWidthMaybe;
+        short UnusedHeightMaybe;
+        uint CompressedSize <format=hex>;
+        uint UncompressedSize <format=hex>;
+    } ImageInfo;
+    
+    struct
+    {
+        ushort UnkWidth2;
+        ushort UnkHeight2;
+        uint CompSize2;
+        uint UncompSize2;
+    } ImageInfo2;
+    
+    byte ImageData[ImageInfo.CompressedSize]; // ZStd Compressed, KTX header
+    
+    if (ImageInfo2.UncompSize2)
+    {
+        byte Data2[ImageInfo2.CompSize2];
+    } 
 } BoyImage;
