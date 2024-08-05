@@ -1,0 +1,129 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: World of Goo 2 - Shader Resource
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.shader
+//  ID Bytes: 62 6F 79 73
+//   History: 
+//------------------------------------------------
+
+const uint HEADER_SIZE = 0x10;
+const uint START_DATA_OFFSET = HEADER_SIZE + 0xE0 * 32; // Max 32?
+
+struct
+{
+   struct
+   {
+       uint Magic <format=hex, comment="Not read">;
+       uint Unk <comment="Not read">;
+       uint Unk <comment="Not read">;
+       ushort ArrCount;
+       ushort SubArrCount;
+   } Header <bgcolor=cPurple>;
+   
+   local int i = 0;
+   local int j = 0;
+   
+   local int cnt;
+   for (i = 0; i < Header.ArrCount; i++)
+   {
+       struct
+       {
+           for (j = 0; j < Header.SubArrCount; j++)
+           {
+               cnt = (i * Header.SubArrCount) * 0xE0;
+               FSeek(0x10 + cnt + (j * 0xE0));
+               struct
+               {
+                   char Name[0x50];
+                   int ShaderOffset <format=hex, fgcolor=cRed>;
+                   int ShaderSize <format=hex>;
+                   int FragmentShaderSize <format=hex>;
+                   int Empty <format=hex>;
+                   int Shader2Offset <format=hex, fgcolor=cRed>;
+                   int Shader2Size <format=hex>;
+                   int FragmentShader2Size <format=hex, fgcolor=cRed>;
+                   int Unk8;
+                   int Unk9;
+                   int Unk10;
+                   int Unk11;
+                   int Unk12;
+                   int Unk13;
+                   int Unk14;
+                   int Unk15;
+                   int Unk16;
+                   int Unk17;
+                   int Unk18;
+                   int Unk19;
+                   int Unk20;
+                   int ShaderSourceOffset <format=hex, fgcolor=cRed>;
+                   int ShaderSourceSize <format=hex>;
+                   int FragmentShaderSourceSize <format=hex>;
+                   int Empty;
+                   int ShaderSource2Offset <format=hex, fgcolor=cRed>;
+                   int ShaderSource2Size <format=hex>;
+                   int FragmentShaderSource2Size <format=hex>;
+                   int Empty;
+                   int Shader3Offset <format=hex, fgcolor=cRed>;
+                   int Shader3Size <format=hex>;
+                   int FragmentShader3Size <format=hex>;
+                   int Empty;
+                   int Unk33;
+                   int Unk34;
+                   int Unk35;
+                   int Unk36;
+                   
+                   if (ShaderSize)
+                   {
+                       FSeek(START_DATA_OFFSET + ShaderOffset);
+                       byte Shader[ShaderSize];
+                       
+                       if (FragmentShaderSize)
+                           byte FragmentShader[FragmentShaderSize];
+                   }
+                   
+                   if (Shader2Size)
+                   {
+                       FSeek(START_DATA_OFFSET + Shader2Offset);
+                       byte Shader2[Shader2Size];
+                       
+                       if (FragmentShader2Size)
+                           byte FragmentShader2[FragmentShader2Size];
+                   }
+                   
+                   if (ShaderSourceSize)
+                   {
+                       FSeek(START_DATA_OFFSET + ShaderSourceOffset);
+                       char ShaderSource[ShaderSourceSize];
+                       
+                       if (FragmentShaderSourceSize)
+                           char FragmentShaderSource[FragmentShaderSourceSize];
+                   }
+                   
+                   if (ShaderSource2Size)
+                   {
+                       FSeek(START_DATA_OFFSET + ShaderSource2Offset);
+                       char ShaderSource2[ShaderSource2Size];
+                       
+                       if (FragmentShaderSource2Size)
+                           char FragmentShaderSource2[FragmentShaderSource2Size];
+                   }
+                   
+                   if (Shader3Size)
+                   {
+                       FSeek(START_DATA_OFFSET + Shader3Offset);
+                       char Shader3[Shader3Size];
+                       
+                       if (FragmentShader3Size)
+                           char FragmentShader3[FragmentShader3Size];
+                   }
+               } ShaderInfo <bgcolor=cGray, comment=Name>;
+           }
+       } ShaderArray;
+   }
+
+} BoyShader;
