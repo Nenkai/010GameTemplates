@@ -1,0 +1,64 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FF16 .pac Pack file
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.pac
+//  ID Bytes: 50 41 43 4B
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    uint Magic <format=hex, comment="Checked">;
+    uint Size <format=hex>;
+    int NumFiles;
+    byte Unk;
+    byte Encrypted;
+    ushort NumChunks;
+    int64 PackSize <format=hex>;
+    byte UnkEmpty[0x100];
+    int64 ChunkTableOffset <format=hex>;
+    int64 StringTableOffset <format=hex>;
+    int64 StringTableSize <format=hex>;
+} Header;
+
+FSeek(0x400);
+struct
+{
+    uint CompressedFileSize <format=hex>;
+    byte IsCompressed;
+    enum <byte>
+    {
+        None,
+        UseSpecificChunk,
+        UseMultipleChunks,
+        UseSharedChunk
+    } ChunkedCompressionFlags;
+    
+    short Empty;
+    uint64 DecompressedFileSize <format=hex>;
+    uint64 DataOffset <format=hex>;
+    uint64 ChunkDefOffset <format=hex>;
+    uint64 FileNameOffset <format=hex>;
+    uint FileNameHash <comment="FNV, not FNV1A">;
+    int CRC32Checksum <format=hex>;
+    uint Empty;
+    uint ChunkHeaderSize <format=hex>;
+} File[Header.NumFiles] <bgcolor=cYellow>;
+
+struct
+{
+    uint64 DataOffset <format=hex, fgcolor=cRed>;
+    int CompressedChunkSize <format=hex>;
+    int ChunkDecompressedSize <format=hex>;
+    uint Empty;
+    short ChunkIndex;
+    short NumFilesInChunk;
+} DirectStorageChunkDefinition[Header.NumChunks] <bgcolor=cBlue>;
+
+FSeek(Header.StringTableOffset);
+byte StringTable[Header.StringTableSize] <bgcolor=cBlack>;
