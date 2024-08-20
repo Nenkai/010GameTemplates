@@ -1,0 +1,50 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Script File
+//
+//      File: FF16 pac decryption
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+void Decrypt(int offset, int size)
+{
+    local int j = 0;
+    while (size >= 8)
+    {
+        u64 = ReadUInt64(offset + j);
+        WriteUInt64(offset + j, u64 ^ 0x49D18FC870F3824E);
+            
+        j += 8;
+        size -= 8;
+    }
+    
+    if (size >= 4)
+    {
+        local uint32 u32 = ReadUInt(offset + j);
+        WriteUInt(offset + j, u32 ^ 0x70F3824E);
+        size -= 4;
+        j += 4;
+    }
+    
+    if (size >= 2)
+    {
+        local uint16 u16 = ReadUShort(offset + j);
+        WriteUShort(offset + j, u16 ^ 0x824E);
+        size -= 2;
+        j += 2;
+    }
+    
+    if (size >= 1)
+    {
+        local byte u8 = ReadByte(offset + j);
+        WriteByte(offset + j, u8 ^ 0x4E);
+    }
+}
+
+local uint64 u64 = 0;
+
+Decrypt(0x18, 0x100);
+Decrypt(Header.StringTableOffset, Header.StringTableSize);
