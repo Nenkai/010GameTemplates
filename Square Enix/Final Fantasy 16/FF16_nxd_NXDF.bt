@@ -1,0 +1,211 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Nex File Data File (NXDF)
+//   Authors: Nenkai, yretenai (initial info)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.nxd
+//  ID Bytes: 4E 58 44 46
+//   History: 
+//------------------------------------------------
+
+// Briefly mentioned here https://cgworld.jp/article/202310-cedec-ff16-01.html
+
+struct  
+{
+    uint32 Magic <format=hex>; // NXDF
+    uint32 Version; // 1
+    enum <byte>
+    {
+        NEX_ROWTYPE_ROWS = 1,
+        NEX_ROWTYPE_ROWSETS = 2,
+        NEX_ROWTYPE_DOUBLEKEYED = 3,
+    } Type; // 1..3 array, hashset, hashmap?
+    
+    enum <byte>
+    {
+        NEX_ROWS_UNLOCALIZED = 1,
+        NEX_ROWS_LOCALIZED = 2,
+        NEX_ROWSETS_UNLOCALIZED = 3,
+        NEX_ROWSETS_LOCALIZED = 4,
+        NEX_DOUBLEKEYED_ROWS_UNLOCALIZED = 5,
+        NEX_DOUBLEKEYED_ROWS_LOCALIZED = 6
+    } Category;
+    
+    byte UsesBaseRowId; // Only for type 1. check table 26, 213, 370 - might have custom handling?
+    uint8 _reserved1_;
+    uint32 BaseRowId;
+    uint32 _reserved2_[0x4];
+    
+    // Game reads using category here
+    switch (Category)
+    {
+        case NEX_ROWS_UNLOCALIZED:
+        case NEX_ROWS_LOCALIZED:
+            struct
+            {
+                int Offset <format=hex>;
+                int Count;
+            } RowsHeader;
+            break;
+        
+        case NEX_ROWSETS_UNLOCALIZED:
+        case NEX_ROWSETS_LOCALIZED:
+            struct 
+            {
+                uint32 ThisHeaderSize <format=hex>;
+                uint32 ArrayCount;
+                uint32 reserved;
+                uint32 RowsInfoOffset <format=hex, fgcolor=cRed>;
+                uint32 TotalRowCount;
+            } RowArrayHeader;
+            break;
+            
+        case NEX_DOUBLEKEYED_ROWS_UNLOCALIZED:
+        case NEX_DOUBLEKEYED_ROWS_LOCALIZED:
+            struct 
+            {
+                uint32 ThisHeaderSize <format=hex>;
+                uint32 Count;
+                uint32 RowsInfoOffset <format=hex, fgcolor=cRed>; // -> read nxd_entry3_t[entryCount];
+                uint32 TotalRowCount <fgcolor=cGreen>;
+                uint32 reserved;
+            } Cat3Header;
+            break;
+    }
+} Header <bgcolor=cPurple>;
+
+
+if (Header.Category == NEX_ROWS_UNLOCALIZED || Header.Category == NEX_ROWS_LOCALIZED)
+{
+    FSeek(Header.RowsHeader.Offset);
+    struct 
+    {
+      uint32 RowID;
+      uint32 RowDataOffsetRelative <format=hex, fgcolor=cRed>;
+    } RowInfo[Header.RowsHeader.Count] <bgcolor=cYellow>;
+    
+    local int i = 0;
+    local int rowLen = (startof(RowInfo[1]) + RowInfo[1].RowDataOffsetRelative) -
+                       (startof(RowInfo[0]) + RowInfo[0].RowDataOffsetRelative);
+        
+    for (i = 0; i < Header.RowsHeader.Count; i++)
+    {
+        FSeek(startof(RowInfo[i]) + RowInfo[i].RowDataOffsetRelative);
+        struct
+        {
+            byte Row[rowLen];
+        } RowData <bgcolor=cBlack>;
+    }
+}
+else if (Header.Category == NEX_ROWSETS_UNLOCALIZED || Header.Category == NEX_ROWSETS_LOCALIZED)
+{    
+    FSeek(startof(Header.RowArrayHeader) + Header.RowArrayHeader.ThisHeaderSize);    
+    if (Header.RowArrayHeader.ArrayCount > 0)
+    {
+        struct
+        {
+            uint32 Id <fgcolor=cYellow>;
+            uint32 RowArrayOffset <fgcolor=cRed, format=hex>;
+            uint32 ArrayLength;
+        } RowArrayInfo[Header.RowArrayHeader.ArrayCount] <bgcolor=cBlue>;
+        
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.RowArrayHeader.ArrayCount; i++)
+            {
+                FSeek(startof(RowArrayInfo[i]) + RowArrayInfo[i].RowArrayOffset);
+                struct
+                {
+                    if (RowArrayInfo[i].ArrayLength > 0)
+                    {
+                        struct
+                        {
+                            int Id <fgcolor=cYellow>;
+                            int ArrayIndex <fgcolor=cGreen>;
+                            int RowDataOffsetRelative <format=hex, fgcolor=cRed>;
+                        } RowInfo[RowArrayInfo[i].ArrayLength] <bgcolor=cYellow>;
+                    }
+                } RowArray <optimize=false>;
+            }
+        } RowArrays;
+    }
+    
+    FSeek(Header.RowArrayHeader.RowsInfoOffset);
+    struct
+    {
+        int Id <fgcolor=cYellow>;
+        int ArrayIndex <fgcolor=cGreen>;
+        int ReverseRowDataOffsetRelative <fgcolor=cRed>;
+    } RowInfo[Header.RowArrayHeader.TotalRowCount] <bgcolor=cWhite>;
+}
+else if (Header.Category == NEX_DOUBLEKEYED_ROWS_UNLOCALIZED || Header.Category == NEX_DOUBLEKEYED_ROWS_LOCALIZED)
+{    
+    FSeek(startof(Header.Cat3Header) + Header.Cat3Header.ThisHeaderSize);    
+    if (Header.Cat3Header.Count > 0)
+    {
+        struct
+        {
+            uint32 Id <fgcolor=cYellow>;
+            uint32 RowSubSetOffset <fgcolor=cRed, format=hex>;
+            uint32 NumKeys;
+            int UnkOffset <format=hex>;
+            int UnkAlways0;
+        } RowSetInfo[Header.Cat3Header.Count] <bgcolor=cBlue>;
+        
+        struct
+        {
+            local int i = 0;
+            local int j = 0;
+            local int k = 0;
+            for (i = 0; i < Header.Cat3Header.Count; i++)
+            {
+                FSeek(startof(RowSetInfo[i]) + RowSetInfo[i].RowSubSetOffset);
+                struct
+                {
+                    if (RowSetInfo[i].NumKeys > 0)
+                    {
+                        struct
+                        {
+                            int Id <fgcolor=cYellow>;
+                            int UnkOffset <fgcolor=cRed, format=hex>;
+                            int UnkAlways0 <format=hex, fgcolor=cRed>;
+                            int RowsOffset <fgcolor=cRed, format=hex>;
+                            int NumRows;
+                        } RowSubArrayInfo[RowSetInfo[i].NumKeys] <optimize=false, bgcolor=cYellow>;
+                        
+                        
+                        for (j = 0; j < RowSetInfo[i].NumKeys; j++)
+                        {
+                            struct
+                            {
+                                FSeek(startof(RowSubArrayInfo[j]) + RowSubArrayInfo[j].RowsOffset);
+                                struct
+                                {
+                                    int Id;
+                                    int SubId;
+                                    int ArrayIndex;
+                                    int UnkAlways0;
+                                    int RowDataOffset <format=hex, fgcolor=cRed>;
+                                } RowInfo[RowSubArrayInfo[j].NumRows] <bgcolor=cGreen>;
+                            } RowInfos;
+                        }
+                    }
+                } RowSubArraysInfo <optimize=false>;
+            }
+        } RowSubArrayInfos;
+    }
+    
+    FSeek(Header.Cat3Header.RowsInfoOffset);
+    struct
+    {
+        int Id;
+        int SubId;
+        int ArrayIndex;
+        int UnkAlways0;
+        int ReverseRowDataOffsetRelative <fgcolor=cRed>;
+    } RowInfo[Header.Cat3Header.TotalRowCount] <bgcolor=cWhite>;
+}
