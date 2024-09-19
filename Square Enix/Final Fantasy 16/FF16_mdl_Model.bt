@@ -1,0 +1,321 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FFXVI Model
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .mdl
+//  ID Bytes: 4D 44 4C 20
+//   History: 
+//------------------------------------------------
+
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="Must be 'MDL '">;
+        byte Version <comment="Must be >= 28">;
+        byte Flag <comment="Must have 1">;
+        byte AlignmentMaybe;
+        byte Unk;
+        int TocSize1 <format=hex>; // Starting from 0xA8
+        int TocSize2 <format=hex>; // Starting after first string table
+        short field_0x10;
+        short field_0x12;
+        byte field_0x14_count;
+        byte field_0x15_count;
+        byte field_0x16_bitflags;
+        byte field_0x17;
+    } MainHeader <size=0xA8, bgcolor=cPurple>;
+    
+    FSeek(0xA8);
+    
+    struct
+    {
+        short A;
+        short B;
+    } field_0x14_data[MainHeader.field_0x14_count];
+
+    struct
+    {
+        short A;
+        short B;
+    } field_0x12_data[MainHeader.field_0x12];
+    
+    float Unk;
+    int Unk2;
+    float BoundaryBox[6] <bgcolor=cBlue>;
+
+    local int matPos = FTell();
+    struct
+    {
+        local int i = 0;
+        local int startStrPtrOffset = matPos + (MainHeader.field_0x10 * 0x10);
+        for (i = 0; i < MainHeader.field_0x10; i++)
+        {
+            FSeek(matPos + (i * 0x10));
+            
+            struct
+            {
+                int NameOffset <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                
+                FSeek(startStrPtrOffset + NameOffset);
+                string Name <bgcolor=cGray>;
+            } Material <comment=Name>;
+        }
+    } MaterialReferences <bgcolor=cGray>;
+    
+    FSeek(0xA8 + MainHeader.TocSize1);
+    struct
+    {
+        struct
+        {
+            // This is how the game reads stuff
+            // Refer to 140A923B8 (ffxvi.exe 1.0.0)
+            int MCEXHeaderSize;
+            short Count_0x04 <comment="confirmed read. stride = mainheader.version > 16 ? 0x60 : 0x40">;
+            short Count_0x06 <comment="confirmed read. stride = 0x10">;
+            short Count_0x08 <comment="confirmed read. stride = 0x20">;
+            short Count_0x0A <comment="confirmed read. stride = 0x10">;
+            short Count_0x0C <comment="confirmed read. stride = 0x10, 0x20 (second struct)">;
+            short Count4;
+            short Count_0x10 <comment="confirmed read. stride = 0x20 (add 3 entries?)">;
+            short Count_0x12 <comment="confirmed read. stride = mainheader.version > 14 ? 0x40 : 0x20">;
+            byte Unk;
+            byte Count_0x15 <comment="confirmed read. stride = 0x8">;
+            byte Count_0x16 <comment="confirmed read. stride = 0x50">;
+            byte field_0x17;
+            byte Count_0x18 <comment="confirmed read. stride = 0x20">;
+            byte Count_0x19 <comment="confirmed read. stride = 0x10">;
+            byte Flags_0x1A <comment="confirmed read">;
+            byte Count_0x1B <comment="confirmed read. stride = 0x10 (add 3 entries?)">;
+            int Size_0x1C <comment="confirmed read.">;
+            int Unk;
+            int StringTableSize <format=hex>;
+            byte field_0x28;
+            byte field_0x29;
+            byte field_0x2A <comment="confirmed read">;
+            byte field_0x2B;
+            int field_0x2C;
+            int field_0x30;
+            int field_0x34;
+            int field_0x38;
+            int field_0x3C;
+        } SubHeader <size=0x40, bgcolor=cPurple>;
+        
+        // Proper struct order
+        struct
+        {
+            short UnkIndex;
+            short field_0x02;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C <format=hex>;
+            int CompressedVerticesStartOffset <format=hex>; // Relative from 0xA8
+            int CompressedIndicesStartOffset <format=hex>;
+            int DecompressedVerticesSize <format=hex>;
+            int DecompressedIndicesSize <format=hex>;
+            int field_0x20 <format=hex>;
+            int NumVertices;
+            int field_0x28;
+            int field_0x2C;
+            int field_0x30;
+            int field_0x34;
+            int field_0x38;
+            int field_0x3C;
+        } MeshLODInfo[SubHeader.Count_0x12] <bgcolor=cBlack>;
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int NumVertices;
+            int field_0x0C <format=hex>;
+            int field_0x10 <format=hex>; // Relative from 0xA8
+            int field_0x14 <format=hex>;
+            int field_0x18 <format=hex>;
+            int field_0x1C <format=hex>;
+            int field_0x20 <format=hex>;
+            int field_0x24;
+            int field_0x28;
+            int field_0x2C;
+            int field_0x30;
+            int field_0x34;
+            int field_0x38;
+            int OffsetWithinDecompressedData <format=hex>;
+            int field_0x40;
+            int field_0x44;
+            int field_0x48;
+            int field_0x4C;
+            int field_0x50;
+            int field_0x54;
+            int field_0x58;
+            int field_0x5C;
+        } MeshLODInfo2[SubHeader.Count_0x04] <bgcolor=cRed>;
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+        } Struct_0x08[SubHeader.Count_0x08] <bgcolor=cAqua>;
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+        } Struct_0x0C[SubHeader.Count_0x0C] <bgcolor=cYellow>;
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+        } Struct_0x0A[SubHeader.Count_0x0A] <bgcolor=cDkYellow>;
+    
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+        } Struct_0x15[SubHeader.Count_0x15] <bgcolor=cLtYellow>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+            int field_0x20;
+            int field_0x24;
+            int field_0x28;
+            int field_0x2C;
+            int field_0x30;
+            int field_0x34;
+            int field_0x38;
+            int field_0x3C;
+            int field_0x40;
+            int field_0x44;
+            int field_0x48;
+            int field_0x4C;
+        } Struct_0x16[SubHeader.Count_0x16] <bgcolor=cRed>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+        } Struct_0x18[SubHeader.Count_0x18] <bgcolor=cDkRed>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+        } Struct_0x19[SubHeader.Count_0x19] <bgcolor=cDkGreen>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+        } Struct_0x06[SubHeader.Count_0x06] <bgcolor=cGreen>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+        } Struct_0x1B[SubHeader.Count_0x1B] <bgcolor=cLtGreen>;
+
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+        } Struct_0x10[SubHeader.Count_0x10] <bgcolor=cLtBlue>;
+
+        // Count_0x1c
+        if (SubHeader.Size_0x1C)
+        {
+            byte Data_0x1C[SubHeader.Size_0x1C];
+            FSeek(AlignValue(FTell(), 0x10));
+        }
+        
+        byte MCEXHeader[SubHeader.MCEXHeaderSize] <bgcolor=cDkPurple>;
+        FSeek(startof(MCEXHeader) + AlignValue(SubHeader.MCEXHeaderSize, 0x10));
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+        } Struct_0x0C_2[SubHeader.Count_0x0C] <bgcolor=cLtAqua>;
+
+        if (SubHeader.Count_0x0C)
+        {
+            byte Data_0x0C[0x18] <bgcolor=cDkAqua>;
+            FSeek(AlignValue(FTell(), 0x10));
+        }
+        
+        byte StringTable[SubHeader.StringTableSize] <bgcolor=cGray>;
+        FSeek(AlignValue(FTell(), 0x10));
+        
+        if (MainHeader.field_0x16_bitflags & 1)
+        {
+            byte Data_0x16_Flag1[0x18];
+            FSeek(AlignValue(FTell(), 0x10));
+        }
+        
+        if (SubHeader.Flags_0x1A & 2)
+        {
+            // short?   
+        }
+        
+        if (SubHeader.Flags_0x1A & 0x40)
+        {
+            // 0x40?
+        }
+    } TableOfContents;
+    
+} Model;
