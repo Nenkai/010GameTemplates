@@ -1,0 +1,803 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Map Binary (.mpb)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.mpb
+//  ID Bytes:
+//   History: 
+//------------------------------------------------
+
+typedef enum <int>
+{
+    kEntityType_File_Terrain = 1002,
+    kEntityType_File_EnvMaterial = 1003,
+    kEntityType_File_Texture = 1004,
+    kEntityType_File_EnvSound = 1012,
+    kEntityType_File_StageSet = 1015,
+    kEntityType_File_VFX = 1019,
+    kEntityType_File_SplineRope = 1026,
+    kEntityType_File_Model = 1028,
+    kEntityType_File_SpeedTree = 1031,
+    // is 3015 related to animals or actual entities?
+    // maybe just 3000 in general?
+    // ^ see ffxvi.exe steam 1.0.1 140229A3E
+} EntityType;
+
+////////////////////////////////
+// Entities
+///////////////////////////////
+typedef struct // 1002
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int pad;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} TerrainFile;
+
+typedef struct // 1003
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    float field_0x08;
+    float field_0x0C;
+    float field_0x10;
+    float field_0x14;
+    int offset_0x18 <format=hex, fgcolor=cRed>;
+    int field_0x1C;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} MaterialFile;
+
+typedef struct
+{
+    EntityType Type;
+    int UnkClutTexturePathOffset <fgcolor=cRed, format=hex>;
+    int field_0x08 <fgcolor=cRed, format=hex>;
+    float field_0x0C <fgcolor=cRed, format=hex>;
+
+    FSeek(startof(Type) + UnkClutTexturePathOffset); // From 0x10 confirmed
+    string ClutTexturePath <bgcolor=cGray>;
+} TextureFile;
+            
+typedef struct // 1012
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int pad;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} EnvSoundFile;
+
+typedef struct // 1015
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int offset_0x0C <format=hex, fgcolor=cRed>;
+    int field_0x10;
+    int offset_0x14 <format=hex, fgcolor=cRed>;
+    int offset_0x18 <format=hex, fgcolor=cRed>;
+    int field_0x1C;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} StageSetFile <name=FilePath>;
+        
+typedef struct // 1019
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int pad;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} VFXFile;
+       
+typedef struct // 1026
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    float field_0x08;
+    float field_0x0C;
+    float field_0x10;
+    int field_0x14;
+    int offset_0x18 <format=hex, fgcolor=cRed>;
+    int field_0x1C;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} ModelFile <name=FilePath>;
+                 
+typedef struct // 1028
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int field_0x0C;
+    // TODO: There's more
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} SplineRopeFile <name=FilePath>;
+             
+typedef struct // 1031
+{
+    EntityType Type;
+    int FilePathOffset <format=hex, fgcolor=cRed>;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int pad;
+    
+    FSeek(startof(Type) + FilePathOffset);
+    string FilePath <bgcolor=cGray>;
+} SpeedTreeFile <name=FilePath>;
+               
+typedef struct
+{
+    local int basePos = FTell();
+    
+    int field_0x00;
+    EntityType Type;
+    int UnkMgbId; // Used for searching in mgb file
+    int field_0x0C;
+    int field_0x10;
+    int field_0x14;
+    int field_0x18;
+    float field_0x1C;
+    int field_0x20;
+    float field_0x24;
+    int field_0x28;
+    float field_0x2C;
+    int field_0x30;
+    float field_0x34;
+    int UnkOffset_0x38 <fgcolor=cRed, format=hex>;
+    byte field_0x3C;
+    byte field_0x3D;
+    byte field_0x3E;
+    byte field_0x3F;
+    int field_0x40;
+    int field_0x44;
+    int field_0x48;
+    int field_0x4C;
+
+    switch (Type)
+    {            
+        ////////////////////////////////
+        // 1000s - File References
+        ////////////////////////////////
+        case kEntityType_File_Terrain:
+            TerrainFile Terrain;
+            break;
+            
+        case kEntityType_File_EnvMaterial:
+            MaterialFile Material;
+            break;
+       
+        case kEntityType_File_EnvSound:
+            EnvSoundFile EnvSound;
+            break;
+            
+        case kEntityType_File_StageSet:
+            StageSetFile StageSet;
+            break;
+            
+        case kEntityType_File_VFX:
+            VFXFile VFX;
+            break;
+            
+        case kEntityType_File_SplineRope:
+            SplineRopeFile SplineRope;
+            break;
+            
+        case kEntityType_File_Model:
+            ModelFile Model <name=FilePath>;
+            break;
+            
+        case kEntityType_File_SpeedTree:
+            SpeedTreeFile SpeedTree <name=FilePath>;
+            break;
+            
+        /////////////////////////
+        // 2000s
+        /////////////////////////
+        case 2001:
+            struct
+            {
+                // TODO: Check what's going on here
+                int randomfieldSoItDoesntSayWarningEmptyStructure;
+            } Type2001;
+            break;
+            
+        case 2002:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x00;
+                int field_0x08;
+                int field_0x0C;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                // TODO: Check more              
+            } Type2002;
+            break;
+            
+        case 2003:
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int offset_0x08 <format=hex, fgcolor=cRed>;
+                int field_0x0C;
+            } Type2003;
+            break;
+            
+        case 2004:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int offset_0x20 <format=hex, fgcolor=cRed>;
+                int offset_0x24 <format=hex, fgcolor=cRed>;
+            } Type2004;
+            break;
+            
+        case 2007:
+            struct
+            {
+                int field_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                int offset_0x10 <format=hex, fgcolor=cRed>;
+                int offset_0x14 <format=hex, fgcolor=cRed>;
+            } Type2007;
+            break;
+            
+        case 2008:
+            struct
+            {
+                float field_0x00;
+                float field_0x04;
+                float field_0x08;
+                float field_0x0C;
+                float field_0x10;
+                float field_0x14;
+                int offset_0x18 <format=hex, fgcolor=cRed>;
+                int offset_0x1C <format=hex, fgcolor=cRed>;                
+            } Type2008;
+            break;
+            
+        case 2012:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int offset_0x08 <format=hex, fgcolor=cRed>;
+                int field_0x0C;
+            } Type2012;
+            break;
+            
+        case 2013:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int offset_0x08 <format=hex, fgcolor=cRed>;
+                int field_0x0C;
+                float field_0x10;
+                float field_0x14;
+            } Type2013;
+            break;
+           
+        case 2016:
+            struct
+            {
+                int field_0x00 <format=hex, fgcolor=cRed>;
+                float field_0x04;
+                float field_0x08;
+                float field_0x08;
+                int offset_0x10 <format=hex, fgcolor=cRed>;
+                int field_0x14;
+            } Type2016;
+            break;
+             
+        case 2017:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int field_0x08;
+                // TODO: Check more fields
+            } Type2017;
+            break;
+            
+        /////////////////////////
+        // 3000s
+        /////////////////////////
+        case 3002:
+           struct
+           {
+               int offset_0x00 <format=hex, fgcolor=cRed>;
+               int field_0x04;
+               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int field_0x0C;
+           } Type3002;
+           break;
+           
+        case 3003:
+           struct
+           {
+               int offset_0x00 <format=hex, fgcolor=cRed>;
+               int field_0x04;
+               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int field_0x0C;
+           } Type3003;
+           break;
+           
+        case 3015:
+           struct
+           {
+               int field_0x00;
+               int field_0x04;
+               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int field_0x0C;
+           } Type3015;
+           break;
+           
+        case 3019:
+           struct
+           {
+               int field_0x00;
+               int field_0x04;
+               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int field_0x0C;
+           } Type3019;
+           break;
+            
+        /////////////////////////
+        // 5000s
+        /////////////////////////
+        case 5001:
+            struct
+            {
+                int field_0x00;
+                int offset_0x04 <format=hex, fgcolor=cRed>;
+                float field_0x08;
+                float field_0x0C;
+                float field_0x10;
+                int field_0x14;                      
+            } Type5001;
+            break;
+            
+        case 5005:
+            struct
+            {
+                int offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;   
+                // TODO: More fields
+            } Type5005;
+            break;
+            
+        default:
+            Warning("Unsupported entity type %d\n", Type);
+            break;
+    }
+
+    FSeek(startof(field_0x00) + UnkOffset_0x38);
+    struct
+    {
+        int field_0x00;
+        int PlacementNexId;            
+    } PlacementRelatedData <bgcolor=cBlack>;
+    
+    FSeek(startof(field_0x00) + 0x50);
+} MapEntity <name=PrintEntryName>;
+
+string PrintEntryName(MapEntity& entity)
+{
+    string s;
+    switch (entity.Type)
+    {
+        case kEntityType_File_Terrain:
+            SPrintf(s, "TerrainFile (%s)", entity.Terrain.FilePath); 
+            break;
+        case kEntityType_File_EnvMaterial:
+            SPrintf(s, "EnvMaterialFile (%s)", entity.EnvMaterial.FilePath); 
+            break;
+        case kEntityType_File_EnvSound:
+            SPrintf(s, "SoundFile (%s)", entity.EnvSound.FilePath); 
+            break;
+        case kEntityType_File_StageSet:
+            SPrintf(s, "StageSetFile (%s)", entity.StageSet.FilePath); 
+            break;
+         case kEntityType_File_VFX:
+            SPrintf(s, "VFXFile (%s)", entity.VFX.FilePath); 
+            break;
+        case kEntityType_File_Model:
+            SPrintf(s, "ModelFile (%s)", entity.Model.FilePath); 
+            break;
+        case kEntityType_File_SpeedTree:
+            SPrintf(s, "SpeedTreeFile (%s)", entity.SpeedTree.FilePath); 
+            break;
+            
+        default:
+            SPrintf(s, "UnkType (%d) ", entity.Type); 
+    }
+    
+    return s;
+}
+typedef struct
+{
+    int field_0x00;
+    int UnkIdentifier;
+    int field_0x08;
+    int field_0x0C;
+    int EntitiesOffset <format=hex>;
+    int EntityCount <fgcolor=cGreen>;
+    int field_0x18;
+    int field_0x1C;
+    int field_0x20;
+    int field_0x24;
+    int field_0x28;
+    int field_0x2C;
+    int field_0x30;
+    int field_0x34;
+    int field_0x38 <format=hex, fgcolor=cRed>;
+    
+    if (EntityCount > 0)
+    {
+        struct
+        {
+            FSeek(startof(field_0x00) + EntitiesOffset);
+            int Offsets[EntityCount] <bgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < EntityCount; i++)
+            {
+                FSeek(startof(Offsets) + Offsets[i]);
+                MapEntity entity <bgcolor=cYellow>;
+            }
+            
+            FSeek(startof(Offsets) + (EntityCount * sizeof(int)));
+        } MapEntities;
+    }
+    
+    FSeek(startof(field_0x00) + 0x3C);
+} MpbEntry2 <optimize=false>;
+
+//////////////////////////////
+// MAIN BULK
+//////////////////////////////
+struct MpbFileHeader
+{
+    int Unk;
+    int UnkOffset <fgcolor=cRed, format=hex>;
+    int UnkCount;
+    int unk_0x0C;
+    int offset_0x10 <fgcolor=cRed, format=hex>;
+    int offset_0x14 <fgcolor=cRed, format=hex>;
+} Header <bgcolor=cPurple>;
+
+FSeek(Header.UnkOffset);
+struct
+{
+    int field_0x00;
+    int field_0x04;
+    int field_0x08;
+    int field_0x0C;
+    int field_0x10;
+    int field_0x14;
+    int field_0x18;
+    int field_0x1C;
+    int field_0x20;
+    int field_0x24;
+    int Entry2Offset <fgcolor=cRed, format=hex>;
+    int Entry2Count;
+    
+    if (Entry2Count > 0)
+    {
+        FSeek(startof(field_0x00) + Entry2Offset);
+        MpbEntry2 mpbEntry2[Entry2Count] <bgcolor=cDkBlue>;
+    }
+    
+    FSeek(startof(field_0x00) + 0x30);
+} MapStruct1[Header.UnkCount] <optimize=false, bgcolor=cBlue>;
+
+FSeek(startof(Header) + Header.offset_0x10);
+struct
+{
+    int ThisStructSizeMaybe <format=hex>;
+    int empty;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int offset_0x0C <format=hex, fgcolor=cRed>;
+    int unkCount_0x10;
+    
+    FSeek(startof(ThisStructSizeMaybe) + offset_0x08);
+    struct
+    {
+        int field_0x00;
+        int field_0x04;
+        int field_0x08;
+        int field_0x0C;
+        int field_0x10;
+        int field_0x14;
+        int field_0x18 <fgcolor=cRed, format=hex>;
+        int field_0x1C <fgcolor=cRed, format=hex>;
+        int field_0x20 <fgcolor=cRed, format=hex>;
+        int field_0x24 <fgcolor=cRed, format=hex>;
+        byte pad[0x20];
+        
+        FSeek(startof(field_0x00) + field_0x18);
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08 <fgcolor=cRed, format=hex>;
+            int field_0x0C <fgcolor=cRed, format=hex>;
+            int field_0x10 <fgcolor=cRed, format=hex>;
+            byte IsNight <comment="for determining 'system/graphics/atmosphere/texture/' except if game map is 104400">;
+            byte pad[3];
+            int field_0x18 <fgcolor=cRed, format=hex>;
+            int field_0x1C <fgcolor=cRed, format=hex>;
+            byte pad_[0x20];
+        } MapStruct2Sub_0x18 <bgcolor=cDkGreen>;
+        
+        FSeek(startof(field_0x00) + field_0x1C);
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int field_0x08 <fgcolor=cRed, format=hex>;
+            int field_0x0C <fgcolor=cRed, format=hex>;
+            int field_0x10 <fgcolor=cRed, format=hex>;
+            int field_0x14 <fgcolor=cRed, format=hex>;
+            int field_0x18 <fgcolor=cRed, format=hex>;
+            float field_0x1C <fgcolor=cRed, format=hex>;
+            byte pad_[0x20];
+            
+            FSeek(startof(field_0x00) + field_0x08);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int field_0x08 <fgcolor=cRed, format=hex>;
+                int field_0x0C <fgcolor=cRed, format=hex>;
+                int field_0x10 <fgcolor=cRed, format=hex>;
+                int field_0x14 <fgcolor=cRed, format=hex>;
+                byte pad_[0x20];
+                
+                FSeek(startof(field_0x00) + field_0x08);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    float field_0x14;
+                    int field_0x18;
+                    float field_0x1C;
+                    byte pad_[0x20];
+                } MapStruct2Sub_0x1C_0x0C_0x08;
+                
+                FSeek(startof(field_0x00) + field_0x0C);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08 <fgcolor=cRed, format=hex>;
+                    float field_0x0C <fgcolor=cRed, format=hex>;
+                    int field_0x10;
+                    float field_0x14;
+                    float field_0x18;
+                    float field_0x1C;
+                    
+                    struct
+                    {
+                        EntityType Type;
+                        int AssetOffset <fgcolor=cRed, format=hex>;
+                        float field_0x08 <fgcolor=cRed, format=hex>;
+                        float field_0x0C <fgcolor=cRed, format=hex>;
+                        int GraphicsCloudSettingsNexId;
+                        float field_0x14;
+                        
+                        FSeek(startof(Type) + AssetOffset);
+                        string AssetPath;
+                        
+                        FSeek(startof(Type) + 0x18);
+                    } WeatherMap;
+                    
+                    struct
+                    {
+                        EntityType Type;
+                        int AssetOffset <fgcolor=cRed, format=hex>;
+                        float field_0x08 <fgcolor=cRed, format=hex>;
+                        float field_0x0C <fgcolor=cRed, format=hex>;
+                        float field_0x10;
+                        float field_0x14;
+                        float field_0x18;
+                        float field_0x14;
+                        float field_0x18;
+                        float field_0x1C;
+                        float field_0x20;
+                        float field_0x24;
+                        byte pad_[0x20];
+                        
+                        FSeek(startof(Type) + AssetOffset);
+                        string AssetPath;
+                        
+                        FSeek(startof(Type) + 0x50);
+                    } OcclusionMap;
+                    
+                } MapStruct2Sub_0x1C_0x0C_0x0C;
+                
+                FSeek(startof(field_0x00) + field_0x10);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08 <fgcolor=cRed, format=hex>;
+                    float field_0x0C <fgcolor=cRed, format=hex>;
+                    
+                    struct
+                    {
+                        EntityType Type;
+                        int AssetOffset <fgcolor=cRed, format=hex>;
+                        float field_0x08 <fgcolor=cRed, format=hex>;
+                        float field_0x0C <fgcolor=cRed, format=hex>;
+                        int field_0x10;
+                        float field_0x14;
+                        byte pad_[0x20];
+                        
+                        FSeek(startof(Type) + AssetOffset);
+                        string AssetPath;
+                        
+                        FSeek(startof(Type) + 0x74);
+                    } DomeCloudTexture;
+                } MapStruct2Sub_0x1C_0x0C_0x10;
+                
+                FSeek(startof(field_0x00) + field_0x14);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08;
+                    int field_0x0C;
+                    float field_0x10;
+                    float field_0x14;
+                    float field_0x18;
+                    byte pad_[0x20];
+                } MapStruct2Sub_0x1C_0x0C_0x14;
+                
+            } MapStruct2Sub_0x1C_0x08;
+            
+            FSeek(startof(field_0x00) + field_0x0C);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                float field_0x08 <fgcolor=cRed, format=hex>;
+                float field_0x0C <fgcolor=cRed, format=hex>;
+                float field_0x10 <fgcolor=cRed, format=hex>;
+                float field_0x14 <fgcolor=cRed, format=hex>;
+                
+                struct
+                {
+                    EntityType Type;
+                    int AssetOffset <fgcolor=cRed, format=hex>;
+                    byte pad_[0x20];
+                    
+                    FSeek(startof(Type) + AssetOffset);
+                    string AssetPath;
+                    
+                    FSeek(startof(Type) + 0x28);
+                } FogMaterial;
+            } MapStruct2Sub_0x1C_0x0C;
+            
+            FSeek(startof(field_0x00) + field_0x10);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                float field_0x08;
+                float field_0x0C;
+                int field_0x10;
+                float field_0x14;
+                int field_0x18;
+                float field_0x1C;
+                byte pad_[0x20];
+            } MapStruct2Sub_0x1C_0x10;
+            
+            FSeek(startof(field_0x00) + field_0x14);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                byte pad_[0x20];
+            } MapStruct2Sub_0x1C_0x14;
+            
+            FSeek(startof(field_0x00) + field_0x18);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                float field_0x08 <fgcolor=cRed, format=hex>;
+                float field_0x0C <fgcolor=cRed, format=hex>;
+                float field_0x10 <fgcolor=cRed, format=hex>;
+                float field_0x14 <fgcolor=cRed, format=hex>;
+                
+                struct
+                {
+                    EntityType Type;
+                    int AssetOffset <fgcolor=cRed, format=hex>;
+                    byte pad_[0x20];
+                    
+                    FSeek(startof(Type) + AssetOffset);
+                    string AssetPath;
+                    
+                    FSeek(startof(Type) + 0x28);
+                } FogMaterial2;
+            } MapStruct2Sub_0x1C_0x18;
+
+        } MapStruct2Sub_0x1C <bgcolor=cDkGreen>;
+        
+        FSeek(startof(field_0x00) + field_0x24);
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int offset_0x08 <fgcolor=cRed, format=hex>;
+            int offset_0x0C <fgcolor=cRed, format=hex>;
+            
+            struct
+            {
+                EntityType Type;
+                int AssetOffset <fgcolor=cRed, format=hex>;
+                int field_0x08  <format=hex>;
+                float field_0x0C;
+                byte pad_[0x20];
+                
+                FSeek(startof(Type) + AssetOffset);
+                string AssetPath;
+                
+                FSeek(startof(Type) + 0x30);
+            } ClutTexture;
+            
+            FSeek(startof(field_0x00) + offset_0x08);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                float field_0x08;
+                float field_0x0C;
+                byte pad_[0x20];
+            } MapStruct2Sub_0x24_0x08;
+        } MapStruct2Sub_0x24 <bgcolor=cDkBlue>;
+    } MapStruct2Sub <bgcolor=cGreen>;
+} MapStruct2 <bgcolor=cLtBlue>;
