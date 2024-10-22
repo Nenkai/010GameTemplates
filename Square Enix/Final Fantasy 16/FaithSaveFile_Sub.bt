@@ -1,0 +1,925 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local uint __RandomSeed = 0xDEADBABE;
+local uint __RandomBit = 0;
+local uint __RandomCount = 0;
+ 
+uint MyRandom( uint to )
+{
+    ++__RandomCount;
+    __RandomBit  = ( (__RandomSeed >> 0 ) ^ ( __RandomSeed >> 2 ) ^ ( __RandomSeed >> 3 ) ^ ( __RandomSeed >> 5 ) ) & 1;
+    __RandomSeed = ( ( ( ( __RandomBit << 15 ) | ( __RandomSeed >> 1 ) ) + ( 0xBABE / __RandomCount ) ) % to );
+
+    while( __RandomSeed < 0 )
+        __RandomSeed += to;
+
+    return __RandomSeed;
+}
+
+uint RandomColor()
+{
+    return MyRandom( 0xFFFFFFFF );
+}
+
+void SetRandomBackColor()
+{
+    SetBackColor( RandomColor() );
+}
+
+uint Align(uint x, uint alignment)
+{
+     local uint mask = ~(alignment - 1);
+     return (x + (alignment - 1)) & mask;
+}
+
+typedef struct Vec3
+{
+    float x;
+    float y;
+    float z;   
+};
+
+struct
+{
+    int size <format=hex>;
+    int crc <format=hex>;
+    uint64 version <comment="Should match 201608301">;
+    
+    while (!FEof())
+    {
+        struct
+        {
+            SetRandomBackColor();
+            
+            enum <uint>
+            {
+                PlayerData = 1,
+                PartyData = 2,
+                QuestData = 3,
+                BattleDirectorData = 4,
+                SoundConfigData = 5,
+                ItemData = 6,
+                UserData = 7,
+                MapGimmickData = 8,
+                TreasureData = 9,
+                CameraConfigData = 10,
+                PartyTalkData = 12,
+                EquipmentData = 13,
+                HudConfigData = 14,
+                SceneData = 15,
+                WorldMapConfigData = 16,
+                PadConfigData = 17,
+                SafeHouseData = 19,
+                MapDirectorData = 20,
+                ShopStockData = 21,
+                EventData = 22,
+                SideQuestBattleDirectorData = 23,
+                HowToData = 24,
+                SystemConfigData = 25,
+                MapDirectorStaticData = 26,
+                SkillData = 27,
+                SystemUserData = 28,
+                LetterListData = 29,
+                DataTelemetryData = 32,
+                SimpleEventData = 33,
+                OrchestrionData = 34,
+                ObeliskData = 35,
+                IconDiscoveryData = 37,
+                FixedPaletteListData = 38,
+                FameValueListData = 39,
+                UiData = 40,
+                ShowAreaNameData = 41,
+                LoreDictionaryListData = 42,
+                LoreQuestSequenceConditionListData = 43,
+                BGMData = 44,
+                VideoConfigData = 45,
+                RankingData = 47,
+                RecipeListData = 48,
+                ReplayData = 49,
+                ScoreAttackData = 50,
+                ScoreAttackBestData = 51,
+                TrainingData = 52,
+                CharacterSkinData = 53,
+                WeaponSkinData = 54,
+                CollectionListData = 55,
+                DLCItemListData = 56,
+                ShopListData = 57,
+                ShopItemListData = 58,
+                ContentRewardListData = 59,
+                LoreDictionaryEnemyData = 60,
+                MythrilData = 61,
+                QuestData2 = 62,
+                AbyssGateData = 63,
+                AbyssGateBestData = 64,
+                AnnounceData = 65,
+                DLCWorldmapData = 66,
+                MouseConfigData = 67,
+                DisplayConfigData = 68,
+                GraphicsConfigData = 69,
+                KeybindConfigData = 70,
+            } Type;
+            
+            if (Type == 0)
+                return;
+                
+            int Size;
+            uint64 version;
+            union
+            {
+                switch (Type)
+                {
+                    case PlayerData: // 0
+                        struct
+                        {
+                            int level_;
+                            int exp_;
+                            int childLevel_;
+                            int childExp_;
+                            int hp_;
+                            int recovery_;
+                            int lb_;
+                            int summonCurentIndex_;
+                            int learnedSummonModeFlags_;
+                            int revealedSummonModeFlags_;
+                            int summonModes_[3];
+                            int skillCommands_[22];
+                            int shortcutItems_[4];
+                            int buffIds_[12];
+                            int buffTimes_[12];
+                            int totalBattleTime_;
+                            int odinGauge_;
+                            int bahamutGauge_;
+                            int leviathanGauge_;
+                            short empty;
+                            byte isSummonPaletteInitialized_;
+                            byte summonPalettePage_;
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        byte summonModes_[0x30];
+                                        int summonCommands[16];
+                                    } data_[10];
+                                    int index[10];
+                                    uint64 initNum;
+                                    int nextIndex_;
+                                } allocator_;
+                                uint64 key_[10];
+                                int size_;
+                            } summonPalettes_;
+                        } UserData;
+                        break;
+                        
+                    case PartyData: // 2
+                        struct
+                        {
+                            int sceneId_;
+                            int mapId_;
+                            uint64 enterRange_;
+                            int partyId_;
+                            int memberCount_;
+                            struct
+                            {
+                                Vec3 Position;
+                                Vec3 Rotation;
+                            } member_[6];
+                        } PartyData;
+                        break;
+                        
+                    case QuestData: // 3
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int State;
+                                        int ActiveSequence;
+                                        int IsEndTodo;
+                                        int Flags;
+                                        int AcceptOrder;
+                                        int CompleteOrder;
+                                    } data_[320];
+                                    int index[320];
+                                    uint64 initNum;
+                                    int nextIndex_;
+                                    int pad_ <hidden=true>;
+                                } allocator_;
+                                
+                                uint64 key_[320];
+                                int size_;
+                            } Quests;
+                            int pad;
+                            int TrackingQuestIds[5];
+                            int PriorityTrackingQuestIds[5];
+                            int AcceptCount;
+                            int CompleteCount;
+                        } QuestData;
+                        break;
+                        
+                    case BattleDirectorData: // 4
+                        struct
+                        {
+                            struct
+                            {
+                                int userParam_;
+                                byte state_;
+                                byte phase_;
+                                byte pad_[2] <hidden=true>;
+                            } BattleDirectors[256];
+                        } BattleDirectorData;
+                        break;
+                        
+                    case SoundConfigData: // 5
+                        struct
+                        {
+                            int voiceLanguage_;
+                            float masterVolume_;
+                            float volumes_[4];
+                            uint flags_;
+                            byte visualizeSize_;
+                            byte visualizeTransparency_;
+                            short __pad__ <hidden=true>;
+                            float padVolume_;
+                        } SoundConfigData;
+                        break;
+                        
+                    case ItemData: // 6
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int ItemId;
+                                        int Stack;
+                                        int NewFlag;
+                                        int empty;
+                                    } data_[1200];
+                                    int index[1200];
+                                    uint64 initNum;
+                                    int nextIndex_;
+                                    int pad_ <hidden=true>;
+                                } allocator_;
+                                
+                                uint64 key_[1200];
+                                int size_;
+                            } InventoryItems;
+                            int pad_ <hidden=true>;
+                            
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int ItemId;
+                                        int Stack;
+                                        int NewFlag;
+                                        int empty;
+                                    } data_[100];
+                                    int index[100];
+                                    uint64 initNum;
+                                    int nextIndex_;
+                                    int pad_ <hidden=true>;
+                                } allocator_;
+                                
+                                uint64 key_[100];
+                                int size_;
+                            } SubInventoryItems;
+                            int pad2_ <hidden=true>;
+                        } ItemData;
+                        break;
+                        
+                    case UserData: // 7
+                        struct 
+                        {
+                            int playTime_;
+                            int mainQuestId_;
+                            byte userFlags_[0x40];
+                            int difficultyLevel_;
+                            int resultPoolExp_;
+                            int resultPoolOrb_;
+                            int flags_;
+                            time_t saveDatetimeU32_[2];
+                            int unk;
+                            int questIdForSequenceTask_;
+                        } UserData;
+                        break;
+                        
+                    case MapGimmickData: // 8
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            struct
+                                            {
+                                                int data[128];
+                                                int index[384];
+                                                uint64 initNum[256];
+                                                int nextIndex_;
+                                            } allocator_;
+                                            uint64 key_[512];
+                                            int size_[5];
+                                        } Gimmicks;
+                                        
+                                    } data_[64];
+                                    int index[64];
+                                    uint64 initNum;
+                                    uint64 nextIndex_;
+                                } allocator_;
+                                uint64 key_[64];
+                                uint64 size_;
+                            } GimmickListsNonField;
+                            
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            struct
+                                            {
+                                                int data[128];
+                                                int index[384];
+                                                uint64 initNum[256];
+                                                int nextIndex_;
+                                            } allocator_;
+                                            uint64 key_[512];
+                                            int size_[5];
+                                        } Gimmicks;
+                                        
+                                    } data_[8];
+                                    int index[8];
+                                    uint64 initNum;
+                                    uint64 nextIndex_;
+                                } allocator_;
+                                uint64 key_[8];
+                                uint64 size_;
+                            } GimmickListsField;
+                        } MapGimmickData;
+                        break;
+
+                    case TreasureData: // 9
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    int value[1024];
+                                } data_;
+                                int size_;
+                                int pad_ <hidden=true>;
+                            } treasures_;
+                        } TreasureData;
+                        break;
+                        
+                    case CameraConfigData: // 10
+                        struct
+                        {
+                            int flags_;
+                            float rotSpeed_;
+                            float tiltSpeed_;
+                        } CameraConfigData;
+                        break;
+                        
+                    case PartyTalkData: // 12
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    int value[258];
+                                } data_;
+                                int size_;
+                                int pad_;
+                            } fields_[16];
+                            struct
+                            {
+                                struct 
+                                {
+                                    int value[1042];
+                                } data_;
+                                int head_;
+                                int tail_;   
+                            } stages;
+                        } PartyTalkData;
+                        break;
+                        
+                    case EquipmentData: // 13
+                        struct
+                        {
+                            int itemArray_[6];
+                            int itemArrayBoyhood_[6];
+                            int virtualEquip_[6];
+                        } EquipmentData;
+                        break;
+                        
+                    case HudConfigData: // 14
+                        struct
+                        {
+                            int bitFlags_;
+                            byte subtitleSize_;
+                            byte screenshotImageFormat_;
+                        } HudConfigData;
+                        break;
+                        
+                    case SceneData: // 15
+                        struct
+                        {
+                            int worldmapAnchorSmobDataArray_[128];
+                            int openedWorldmapAnchorIds_[12];
+                            int lockedAnchorDataArray_[4];
+                            int currentAnchorLayoutId_;
+                            int targetEventAnchorArray_[3];
+                        } SceneData;
+                        break;
+                        
+                    case WorldMapConfigData: // 16
+                        struct
+                        {
+                            int flags_;
+                        } WorldMapConfigData;
+                        break;
+                        
+                    case PadConfigData: // 17
+                        struct
+                        {
+                            int flags_;
+                            int padPattern_;
+                            uint64 lockOnSwitchType_;
+                            int buttonType_;
+                        } PadConfigData;
+                        break;
+                        
+                    case SafeHouseData: // 19
+                        struct
+                        {
+                            int userOrchestrionBgm_;
+                            int barCount_Oneself_;
+                            int barCount_Somebody_;
+                        } SafeHouseData;
+                        break;
+                        
+                    case MapDirectorData: // 20
+                        struct
+                        {
+                            struct
+                            {
+                              short a;
+                              short b;
+                              int c;  
+                            } keyBuff_[550];
+                            
+                            uint64 blockBuff_[2000];
+                        } MapDirectorData;
+                        break;
+                        
+                     case ShopStockData: // 21
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            struct
+                                            {
+                                                int key;
+                                                struct
+                                                {
+                                                    int purchaseNumber_;
+                                                    int flags;
+                                                } value;
+                                            } data_[100];
+                                            int size_;
+                                            int pad_;
+                                        } stocks_;
+                                        
+                                        struct
+                                        {
+                                            struct
+                                            {
+                                                int key;
+                                                struct
+                                                {
+                                                    int purchaseNumber_;
+                                                    int flags;
+                                                } value;
+                                            } data_[12];
+                                            int size_;
+                                            int pad_;
+                                        } questStocks_;
+                                    } data_[100];
+                                    int index[100];
+                                    uint64 initNum;
+                                    uint64 nextIndex_;
+                                } allocator_;
+                                
+                                uint64 key_[100];
+                                int size_;
+                                int pad_ <hidden=true>;
+                            } stockLists_;
+                        } ShopStockData;
+                        break;
+                        
+                    case EventData: // 22
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    int value;
+                                } data_[5];
+                                int size_;
+                            } branchA_;
+                            
+                            struct
+                            {
+                                struct
+                                {
+                                    int value;
+                                } data_[5];
+                                int size_;
+                            } branchB_;
+                            
+                            struct
+                            {
+                                struct
+                                {
+                                    int value;
+                                } data_[128];
+                                int size_;
+                            } chapterArray_;
+                            int pad_ <hidden=true>;
+                            
+                        } EventData;
+                        break;
+                    case HowToData: // 24
+                        struct
+                        {
+                            struct
+                            {
+                                byte bits_[0x20];   
+                            } sawFlags_;
+                            
+                            struct
+                            {
+                                byte bits_[0x20];   
+                            } newFlags_;
+                        } HowToData;
+                        break;
+                        
+                    case SystemConfigData: // 25
+                        struct
+                        {
+                            int language_;
+                        } SystemConfigData;
+                        break;
+                    case MapDirectorStaticData: // 26
+                        struct
+                        {
+                            char directorState_[512];
+                            char directorUserPram_[512];
+                            int unk[512];
+                            struct
+                            {
+                                struct
+                                {
+                                    int layoutId_;
+                                    int stateBuffer_;   
+                                } stageSetInfoBuff_[64];
+                            } fieldInfoBuff_[7];
+                        } MapDirectorStaticData;
+                        break;
+                        
+                    case SkillData: // 27
+                        struct
+                        {
+                            byte skillLv_[68];
+                            struct
+                            {
+                                byte bits[0x0C];   
+                            } newFlags_;
+                            
+                            struct
+                            {
+                                byte bits[0x0C];   
+                            } protectFlags_;
+                            
+                            int pad_ <hidden=true>;
+                        } SystemUserData;
+                        break;
+                        
+                    case SystemUserData: // 28
+                        struct
+                        {
+                            int flags_;
+                        } SystemUserData;
+                        break;
+                    
+                    case LetterListData: // 29
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int flags_;
+                                        int arrivedIndex_;
+                                    } data_[128];
+                                    int index[128];
+                                    uint64 initNum;
+                                    int nextIndex_;
+                                    int pad_ <hidden=true>;
+                                } allocator_;
+                                uint64 key_[128];
+                                int size_;
+                                int pad_ <hidden=true>;
+                            } letters_;
+                            
+                            int mapIn_;
+                            int pad_ <hidden=true>;
+
+                        } LetterListData;
+                        break;
+                        
+                    case OrchestrionData: // 34
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int unk;
+                                        int flags;
+                                    } value;
+                                } data_[150];
+                                int size_;
+                                int pad_ <hidden=true>; 
+                            } orchestrionList_;
+                        } OrchestrionData;
+                        break;
+                        
+                    case ObeliskData: // 35
+                        struct
+                        {
+                            struct
+                            {
+                                byte bits[8];
+                            } flags_;
+                        } ObeliskData;
+                        break;
+                        
+                    case UiData: // 40
+                        struct
+                        {
+                            int abilitySummonNewFlags_;
+                            int journalSortProcessing_;
+                            int journalSortCompleted_;
+                            struct
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            byte val[4];
+                                        } data_[100];
+                                        int index[100];
+                                        uint64 initNum;
+                                        int nextIndex_;
+                                    } allocator_;   
+                                    uint64 key[100];
+                                    int size_;
+                                    int pad_ <hidden=true>;
+                                } situation_maps_;
+                                int pad_ <hidden=true>;
+                                
+                                struct
+                                {
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            byte val[4];
+                                        } data_[100];
+                                        int index[100];
+                                        uint64 initNum;
+                                        int nextIndex_;
+                                    } allocator_;   
+                                    uint64 key[100];
+                                    int size_;
+                                    int pad_ <hidden=true>;
+                                } characters_;
+    
+                                uint64 last_period_id_;
+                                int pad_ <hidden=true>;
+                            } chronicle_;
+                            
+                            int aretestoneScoreAttackMovieSkip_;
+                            struct
+                            {
+                                byte bits[32]; 
+                            } achieveTitleNewFlags_;
+                            
+                            uint64 fameShopRank_;
+                            int chronicleDlc2LastPeriodId_;
+                            int chronicleDlc3LastPeriodId_;
+                            struct
+                            {
+                                byte bits_[4];
+                            } flags_;
+                            int pad_ <hidden=true>;
+                            
+                        } UiData;
+                        break;
+                         
+                    case ShowAreaNameData: // 41
+                        struct
+                        {
+                            struct 
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        int unk;
+                                    } value;
+                                } data_[16];
+                                int size_;
+                                int pad_ <hidden=true>;
+                            } showAreaNameArray_;
+                            
+                            struct
+                            {
+                                byte bits_[16];
+                            } fieldmapMaskBit_;
+
+                        } ShowAreaNameData;
+                        break;
+                        
+                    case BGMData: // 44
+                        struct
+                        {
+                            int bgmChangeRangeArray_[18];
+                            int mainBgmId_;
+                            int pad_ <hidden=true>;
+                        } BGMData;
+                        break;
+                        
+                    case VideoConfigData: // 45
+                        struct
+                        {
+                            float brightness_;
+                            float contrast_;
+                            float brightnessUI_;
+                            int performanceMode_;
+                            float motionBlurIntensity_;
+                        } VideoConfigData;
+                        break;
+                        
+                    case CharacterSkinData: // 53
+                        struct
+                        {
+                            struct 
+                            {
+                                struct
+                                {
+                                    struct
+                                    {
+                                        struct
+                                        {
+                                            byte bits_[4];   
+                                        } flags_;
+                                        int skinId_;
+                                        int unk;
+                                    } value;
+                                } data_[5];
+                                int size_;
+                                int pad_ <hidden=true>;
+                            } characterSkinList_;
+                            int flags_;
+                        } CharacterSkinData;
+                        break;
+                        
+                    case AnnounceData: // 65
+                        struct
+                        {
+                            byte bits_[4];
+                            int pad_ <hidden=true>;
+                            
+                        } AnnounceData;
+                        break;
+                        
+                    case MouseConfigData: // 67
+                        struct
+                        {
+                            int flags_;
+                            float cameraRotSpeed_;
+                            float cameraTiltSpeed_;
+                        } MouseConfigData;
+                        break;
+                        
+                    case DisplayConfigData: // 68
+                        struct
+                        {
+                            int windowType_;
+                            short width_;
+                            short height_;
+                            byte monitorIndex_;
+                            byte isFullscreenHDR_;
+                            byte isFullscreenStereo_;
+                            FSeek(Align(FTell(), 0x04));
+                            int isDisableVSync_;
+                            uint64 adapterId_ <format=hex>;
+                            uint64 fullscreenOutputId_ <format=hex>;
+                            int refreshRateNumerator_;
+                            int refreshRateDenominator_;
+                        } DisplayConfigData;
+                        break;
+                        
+                    case GraphicsConfigData: // 69
+                        struct
+                        {
+                            int flags_;
+                            float colorBlindStrength_;
+                            byte colorBlindType_;
+                            byte levelOfDetailQuality_;
+                            byte unknown; // ?
+                            byte graphicsQualityPreset_;
+                            byte clutterQuality_;
+                            byte terrainQuality_;
+                            byte waterQuality_;
+                            byte textureQuality_;
+                            short shadowQuality_;
+                            byte reflexLowLatency_;
+                            byte superResolution_;
+                            byte qualityCustom_;
+                            byte qualityDLSS_;
+                            byte qualityFSR_;
+                            byte qualityXESS_;
+                            float sharpnessDLSS_;
+                            float sharpnessFSR_;
+                            float sharpnessXESS_;
+                            float sharpnessCustom_;
+                            int frameRateNumerator_;
+                            int frameRateDenominator_;
+                            byte streamingCorrectionType_;
+                        } GraphicsSettings;
+                        break;
+                        
+                    case KeybindConfigData: // 70
+                        struct
+                        {
+                            int key_custom_[64];
+                            int pad_custom_;
+                            int key_define_[128];
+                            int key_custom_;
+                        } KeybindConfigData;
+                        break;
+                }
+                FSeek(Align(FTell(), 0x08));
+                byte Data[Size - 0x18];
+            } SaveStructData;
+
+        } SaveStructHeader <name=EnumToString(Type)>;   
+    }
+} SystemData;
