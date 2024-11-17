@@ -85,6 +85,9 @@ string PrintMaterial(Material& material)
     local int strTableOffset = startof(Model.ModelHeaderUnion.ModelHeader.MaterialFilesToLoad)
         + Model.ModelFileHeaderUnion.ModelFileHeader.MaterialCount * 0x10;
         
+    if (Model.ModelFileHeaderUnion.ModelFileHeader.field_0x16_bitflags & 2)
+        strTableOffset += 0x10;
+        
     return ReadString(strTableOffset + material.PathOffset);  
 }
 
@@ -145,7 +148,19 @@ struct
             uint Magic <format=hex, comment="Must be 'MDL '">;
             byte Version <comment="Must be >= 28">;
             byte Flag <comment="Must have 1">;
-            byte UnkType <comment="Can be 15 or 16, 18, 32, 33? see: sub_140A91550 (ffxvi.exe steam 1.0.1)">;
+            
+            // Enum should be complete (hopefully)
+            enum <byte>
+            {
+                GraCommonModel = 0,
+                GraphicsModel = 11,
+                Unk15Model = 15,
+                CharaModel = 16,
+                VFXModel = 18,
+                Unk32Model = 32,
+                MapMergeGridModel = 33,  
+            } ModelType <comment="see: sub_140A91550 (ffxvi.exe steam 1.0.1)">;
+            
             byte Unk;
             uint ModelHeaderSize <format=hex>; // Starting from 0xA8
             uint MeshContentsTocSize <format=hex>; // Starting after first string table
@@ -226,6 +241,11 @@ struct
         
             local int matPos = FTell();
             Material MaterialFilesToLoad[ModelFileHeaderUnion.ModelFileHeader.MaterialCount];
+            
+            // Logic should be the other way around based on game code. Do not read bytes if flag is not present.
+            if (Model.ModelFileHeaderUnion.ModelFileHeader.field_0x16_bitflags & 2)
+                byte Unk[0x10];
+                
         } ModelHeader;
     } ModelHeaderUnion;
 
@@ -400,7 +420,8 @@ struct
             
             if (MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize)
             {
-                byte ModelExternalContent[MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize] <bgcolor=cDkPurple>;
+                // TODO.
+                byte ModelExternalContent[MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize] <comment="TODO", bgcolor=cDkPurple>;
                 FSeek(startof(ModelExternalContent) + AlignValue(MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize, 0x10));
             }
             
@@ -452,12 +473,12 @@ struct
     if (exists(ModelFileHeaderUnion.ModelFileHeader.UnkOffset1) && ModelFileHeaderUnion.ModelFileHeader.UnkOffset1)
     {
         FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.UnkOffset1);
-        byte UnkCompressedData1[ModelFileHeaderUnion.ModelFileHeader.UnkSize1] <comment="GDeflate", bgcolor=cGray>;
+        byte UnkData1[ModelFileHeaderUnion.ModelFileHeader.UnkSize1] <comment="GDeflate - may not always be compressed?", bgcolor=cGray>;
     }
     
     if (exists(ModelFileHeaderUnion.ModelFileHeader.UnkOffset2) && ModelFileHeaderUnion.ModelFileHeader.UnkOffset2)
     {
         FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.UnkOffset2);
-        byte UnkCompressedData2[ModelFileHeaderUnion.ModelFileHeader.UnkSize2] <comment="GDeflate", bgcolor=cBlack>;
+        byte UnkData2[ModelFileHeaderUnion.ModelFileHeader.UnkSize2] <comment="GDeflate - may not always be compressed?", bgcolor=cBlack>;
     }
 } Model;
