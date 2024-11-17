@@ -11,311 +11,453 @@
 //   History: 
 //------------------------------------------------
 
+/////////////////////////////////////////
+// Misc structures
+/////////////////////////////////////////
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef struct
+{
+    uint PathOffset <format=hex, fgcolor=cRed>;
+    int Padding[3];
+} Material <bgcolor=cDkYellow, read=PrintMaterial>;
+
+typedef struct
+{
+   uint NameOffset <format=hex, fgcolor=cRed>;
+   Vector3 Position;
+} Joint <bgcolor=cYellow, read=PrintJoint>;
+
+ typedef struct
+ {
+     uint NameOffset <format=hex, fgcolor=cRed>;
+     int Padding[3];
+ } MeshMaterialReference <read=PrintMeshMaterialReference>;
+ 
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    int field_0x04;
+} FaceJoint <bgcolor=cLtYellow, read=PrintFaceJoint>;
+            
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    float Unk;
+    ushort Indices1[4];
+    ushort Indices2[4];
+    float Weights1[4];
+    float Weights2[4];
+    Vector3 UnkVec1;
+    Vector3 UnkVec2;
+} MuscleJoint <bgcolor=cRed, read=PrintMuscleJoint>;
+      
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    int Padding[3];
+} AdditionalPart <bgcolor=cDkGreen, read=PrintAdditionalPart, comment="Referenced by partadditionaldataparam, eid (5000-5011 - hardcoded), footwetness">;
+           
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    int Padding[3];
+} Option <bgcolor=cGreen, read=PrintOption, comment="Addressed from modelcoordinate, max 32. index of this used as bitindex for Entries1 for display">;
+
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    int UnkIndex;
+    int UnkCount;
+    int Padding;
+} VFXEntry <bgcolor=cLtGreen, read=PrintVFX, comment="Referenced/Used from VFXB files">;
+            
+/////////////////////////////////////////
+//////// Print utils
+/////////////////////////////////////////
+string PrintMaterial(Material& material)
+{
+    local int strTableOffset = startof(Model.ModelHeaderUnion.ModelHeader.MaterialFilesToLoad)
+        + Model.ModelFileHeaderUnion.ModelFileHeader.MaterialCount * 0x10;
+        
+    return ReadString(strTableOffset + material.PathOffset);  
+}
+
+string PrintJoint(Joint& joint)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + joint.NameOffset);   
+}
+
+string PrintMeshMaterialReference(MeshMaterialReference& mat)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + mat.NameOffset);   
+}
+
+string PrintFaceJoint(FaceJoint& faceJoint)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + faceJoint.NameOffset);   
+}
+
+string PrintMuscleJoint(MuscleJoint& muscleJoint)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + muscleJoint.NameOffset);   
+}
+
+string PrintAdditionalPart(AdditionalPart& additionalPart)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + additionalPart.NameOffset);   
+}
+
+string PrintOption(Option& option)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + option.NameOffset);   
+}
+     
+string PrintVFX(VFXEntry& vfx)
+{
+    return ReadString(startof(Model.MeshContentsTocUnion.MeshContentsToc.StringTable) + vfx.NameOffset);   
+}
+   
 uint AlignValue(uint x, uint alignment)
 {
       local uint mask = ~(alignment - 1);
       return (x + (alignment - 1)) & mask;
 }
 
+/////////////////////////////////////////
+//////// Main struct
+/////////////////////////////////////////
 struct
 {
-    struct
-    {
-        uint Magic <format=hex, comment="Must be 'MDL '">;
-        byte Version <comment="Must be >= 28">;
-        byte Flag <comment="Must have 1">;
-        byte AlignmentMaybe;
-        byte Unk;
-        int TocSize1 <format=hex>; // Starting from 0xA8
-        int TocSize2 <format=hex>; // Starting after first string table
-        short field_0x10;
-        short field_0x12;
-        byte field_0x14_count;
-        byte field_0x15_count;
-        byte field_0x16_bitflags;
-        byte field_0x17;
-    } MainHeader <size=0xA8, bgcolor=cPurple>;
+    local byte version = ReadByte(0x04);
+    local int headerSize = version >= 20 ? 0xA8 : 0x98;
     
-    FSeek(0xA8);
-    
-    struct
+    union 
     {
-        short A;
-        short B;
-    } field_0x14_data[MainHeader.field_0x14_count];
-
-    struct
-    {
-        short A;
-        short B;
-    } field_0x12_data[MainHeader.field_0x12];
-    
-    float Unk;
-    int Unk2;
-    float BoundaryBox[6] <bgcolor=cBlue>;
-
-    local int matPos = FTell();
-    struct
-    {
-        local int i = 0;
-        local int startStrPtrOffset = matPos + (MainHeader.field_0x10 * 0x10);
-        for (i = 0; i < MainHeader.field_0x10; i++)
+        byte ModelFileHeaderBytes[headerSize];
+        struct
         {
-            FSeek(matPos + (i * 0x10));
+            uint Magic <format=hex, comment="Must be 'MDL '">;
+            byte Version <comment="Must be >= 28">;
+            byte Flag <comment="Must have 1">;
+            byte UnkType <comment="Can be 15 or 16, 18, 32, 33? see: sub_140A91550 (ffxvi.exe steam 1.0.1)">;
+            byte Unk;
+            uint ModelHeaderSize <format=hex>; // Starting from 0xA8
+            uint MeshContentsTocSize <format=hex>; // Starting after first string table
+            ushort MaterialCount;
+            ushort FlexVertexAttributeCount;
+            byte FlexVertexInfoCount;
+            byte MainMeshCount <comment="Should always be 8, last is the main mesh?">;
+            byte field_0x16_bitflags;
+            byte field_0x17;
             
+            uint VertexBufferOffsets[8] <format=hex, fgcolor=cRed>;
+            uint IndexBufferOffsets[8] <format=hex, fgcolor=cRed>;
+            uint VertexBufferSizes[8] <format=hex, fgcolor=cRed>;
+            uint IndexBufferSizes[8] <format=hex, fgcolor=cRed>;
+            
+            if (version >= 20)
+            {
+                uint UnkOffset1 <format=hex>;
+                uint UnkSize1 <format=hex>;
+                uint UnkOffset2 <format=hex>;  
+                uint UnkSize2 <format=hex>;
+            }
+        } ModelFileHeader <bgcolor=cPurple>;
+    } ModelFileHeaderUnion;
+
+    union 
+    {
+        byte ModelHeaderBytes[ModelFileHeaderUnion.ModelFileHeader.ModelHeaderSize];
+        struct
+        {
             struct
             {
-                int NameOffset <format=hex, fgcolor=cRed>;
-                int field_0x04;
-                int field_0x08;
-                int field_0x0C;
+                short FlexVertAttrIndexStart;
+                short FlexVertAttrCount;
+            } FlexVertexInfos[ModelFileHeaderUnion.ModelFileHeader.FlexVertexInfoCount];
+        
+            struct
+            {
+                ubyte BufferIndex;
+                ubyte FieldOffset <format=hex>;
                 
-                FSeek(startStrPtrOffset + NameOffset);
-                string Name <bgcolor=cGray>;
-            } Material <comment=Name>;
-        }
-    } MaterialReferences <bgcolor=cGray>;
+                // These enums should be complete
+                enum <ubyte>
+                {
+                    Vec2f = 34,
+                    Vec3f = 35,
+                    Vec4f = 36,
+                    HalfFloat2 = 50,
+                    HalfFloat4 = 52,
+                    UNorm8 = 68,
+                    UInt8_4 = 116, // PMOVZXBD
+                    UInt16_4 = 132, // PMOVSXWD
+                    UInt32 = 161,
+                } Encoding;
+        
+                enum <ubyte>
+                {
+                    POSITION = 0,
+                    WEIGHTS_0 = 1, 
+                    JOINTS_0 = 2,
+                    COLOR_0 = 3,
+                    UNK_ATTR_8 = 8,
+                    UNK_ATTR_9 = 9,
+                    TEXCOORD_0 = 11,
+                    TEXCOORD_1 = 12,
+                    NORMAL = 21,
+                    TANGENT = 22,
+                    BINORMAL = 23,
+                    UNK_ATTR_24 = 24,
+                    WEIGHTS_1 = 28,
+                    JOINTS_1 = 29,
+               } Attribute;
+            } FlexVertexAttributeInfos[ModelFileHeaderUnion.ModelFileHeader.FlexVertexAttributeCount];
+            
+            float BBoxRadius;
+            int Unk2;
+            float BoundaryBox[6] <bgcolor=cBlue>;
+        
+            local int matPos = FTell();
+            Material MaterialFilesToLoad[ModelFileHeaderUnion.ModelFileHeader.MaterialCount];
+        } ModelHeader;
+    } ModelHeaderUnion;
+
+    union
+    {
+        byte MeshContentsTocBytes[ModelFileHeaderUnion.ModelFileHeader.MeshContentsTocSize];
+        struct
+        {
+            union
+            {
+                local int headerSize = ModelFileHeaderUnion.ModelFileHeader.Version >= 15 ? 0x40 : 0x20;
+                
+                ubyte MeshContentsHeaderBytes[headerSize];
+                struct
+                {
+                    // This is how the game reads stuff
+                    // Refer to 140A923B8 (ffxvi.exe 1.0.0)
+                    uint ModelExternalContentSize <format=hex>;
+                    ushort SubmeshCount <comment="confirmed read. stride = mainheader.version > 16 ? 0x60 : 0x40">;
+                    ushort OptionCount <comment="confirmed read. stride = 0x10">;
+                    ushort DrawPartCount <comment="confirmed read. stride = 0x20">;
+                    ushort MaterialCount <comment="confirmed read. stride = 0x10">;
+                    
+                    // For max value: ffxvi.exe 1.0.1 steam - sub_140B8C1E8
+                    ushort JointCount <comment="max 1536. stride = 0x10, 0x20 (second struct)">;
+                    ushort Count4;
+                    ushort Entries6Count <comment="stride = 0x20">;
+                    ushort MeshBufferInfoCount <comment="stride = mainheader.version > 14 ? 0x40 : 0x20">;
+                    ubyte Unk <comment="Couldn't get a read on this">;
+                    ubyte FaceJointCount <comment="stride = 0x8">;
+                    ushort MuscleJointCount <comment="stride = 0x50">;
+                    ubyte UnkJointParamCount <comment="stride = 0x20">;
+                    ubyte AdditionalPartCount <comment="stride = 0x10">;
+                    ubyte Flags_0x1A <comment="confirmed read">;
+                    ubyte VFXEntryCount <comment="stride = 0x10">;
+                    uint ExtraData7Size <format=hex>;
+                    uint FlexVertexCount;
+                    uint StringTableSize <format=hex>;
+                    ubyte field_0x28;
+                    ubyte field_0x29;
+                    ubyte field_0x2A <comment="confirmed read">;
+                    ubyte field_0x2B;
+                    uint field_0x2C;
+                    float field_0x30;
+                    float field_0x34;
+                    uint DecompressedBuffer1Size <format=hex>;
+                    uint DecompressedBuffer2Size <format=hex>;
+                    
+                } MeshContentsHeader <bgcolor=cPurple>;
+            } MeshContentsHeaderUnion;
+            
+            // Proper struct order
+            union
+            {
+                local int size = ModelFileHeaderUnion.ModelFileHeader.Version >= 15 ? 0x40 : 0x20;
+                byte MeshBufferInfoBytes[size * MeshContentsHeaderUnion.MeshContentsHeader.MeshBufferInfoCount];
+                struct
+                {
+                    ushort SubmeshStartIndex;
+                    ushort SubmeshCount;
+                    uint unk0;
+                    uint unk1;
+                    uint TriCount;
+                    uint VertexOffset <format=hex, fgcolor=cRed>;
+                    uint FacesOffset <format=hex, fgcolor=cRed>;
+                    uint DecompressedVerticesSize <format=hex>;
+                    uint DecompressedFacesSize <format=hex>;
+                    uint DecompFacesSizeMultiplied6 <format=hex>;
+                    uint VertexCount;
+                    uint Padding[6];
+                } MeshBufferInfos[MeshContentsHeaderUnion.MeshContentsHeader.MeshBufferInfoCount] <bgcolor=cBlack>;
+            } MeshBufferInfoUnion;
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.SubmeshCount)
+            {
+                union
+                {
+                    local int size = ModelFileHeaderUnion.ModelFileHeader.Version >= 17 ? 0x60 : 0x40;
+                    byte SubmeshInfosBytes[size * MeshContentsHeaderUnion.MeshContentsHeader.SubmeshCount];
+                    struct
+                    {
+                        uint FaceIndexCount <format=hex>;
+                        uint FaceIndicesOffset;
+                        ushort VertexCount;
+                        ushort MaterialID;
+                        ushort DrawPartStartIndex;
+                        ushort DrawPartCount;
+                        byte FlexVertexInfoID; //list of attributes
+                        byte ColorSetFlagsMaybe;
+                        byte BoneSetFlags;
+                        byte TexCoordSetFlags;
+                        uint UnkFlags <format=hex>;
+                        uint unks2[6];
+                        uint padding;
+                        byte unks[3];
+                        byte UsedBufferCount;
+                        uint BufferOffsets[8] <format=hex>;
+                        ubyte Strides[8] <comment="Refer to UsedBufferCount">;
+                    } SubmeshInfos[MeshContentsHeaderUnion.MeshContentsHeader.SubmeshCount] <bgcolor=cRed>;
+                } SubmeshInfoUnion;
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.DrawPartCount)
+            {
+                struct
+                {
+                    uint FaceIndexStart;
+                    uint FaceIndexCount;
+                    uint OptionFlags <format=hex, comment="Uses Options, index turned into bitindex">;
+                    uint Padding[5];
+                } DrawParts[MeshContentsHeaderUnion.MeshContentsHeader.DrawPartCount] <bgcolor=cAqua>;
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.JointCount)
+                Joint Joints[MeshContentsHeaderUnion.MeshContentsHeader.JointCount];
     
-    FSeek(0xA8 + MainHeader.TocSize1);
-    struct
+            if (MeshContentsHeaderUnion.MeshContentsHeader.MaterialCount)
+                MeshMaterialReference MaterialReference[MeshContentsHeaderUnion.MeshContentsHeader.MaterialCount];
+     
+            if (MeshContentsHeaderUnion.MeshContentsHeader.FaceJointCount)
+                FaceJoint FaceJoints[MeshContentsHeaderUnion.MeshContentsHeader.FaceJointCount];
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.MuscleJointCount)
+                MuscleJoint MuscleJoints[MeshContentsHeaderUnion.MeshContentsHeader.MuscleJointCount];
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.UnkJointParamCount)
+            {
+                struct
+                {
+                    float field_0x00;
+                    float field_0x04;
+                    float field_0x08;
+                    float field_0x0C;
+                    float field_0x10;
+                    float field_0x14;
+                    float field_0x18;
+                    ushort UnkIndex1;
+                    byte FaceJointIndex;
+                    byte Padding;
+                } UnkJointParams[MeshContentsHeaderUnion.MeshContentsHeader.UnkJointParamCount] <bgcolor=cDkRed>;
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.AdditionalPartCount)
+                AdditionalPart AdditionalParts[MeshContentsHeaderUnion.MeshContentsHeader.AdditionalPartCount];
+    
+            if (MeshContentsHeaderUnion.MeshContentsHeader.OptionCount)
+                Option Options[MeshContentsHeaderUnion.MeshContentsHeader.OptionCount];
+    
+            if (MeshContentsHeaderUnion.MeshContentsHeader.VFXEntryCount)
+                VFXEntry VFXEntries[MeshContentsHeaderUnion.MeshContentsHeader.VFXEntryCount];
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.Entries6Count)
+            {
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                } Entries6[Toc2HeaderUnion.Toc2Header.Entries6Count] <bgcolor=cLtBlue>;
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.ExtraData7Size)
+            {
+                byte EntryData7[MeshContentsHeaderUnion.MeshContentsHeader.ExtraData7Size];
+                FSeek(AlignValue(FTell(), 0x04));
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize)
+            {
+                byte ModelExternalContent[MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize] <bgcolor=cDkPurple>;
+                FSeek(startof(ModelExternalContent) + AlignValue(MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize, 0x10));
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.JointCount)
+            {
+                struct
+                {
+                    Vector3 Min;
+                    Vector3 Max;
+                    int Padding[2];
+                } JointBoundings[MeshContentsHeaderUnion.MeshContentsHeader.JointCount] <bgcolor=cLtAqua>;
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.JointCount)
+            {
+                // handled by 48 8B C4 48 83 EC ? C5 FA 10 51 - used by not just models
+                float JointMaxBounds[6] <bgcolor=cDkAqua>;
+                FSeek(startof(JointMaxBounds) + AlignValue(0x18, 0x10));
+            }
+            
+            if (MeshContentsHeaderUnion.MeshContentsHeader.StringTableSize)
+            {
+                byte StringTable[MeshContentsHeaderUnion.MeshContentsHeader.StringTableSize] <bgcolor=cGray>;
+                FSeek(AlignValue(FTell(), 0x10));
+            }
+            
+            if (ModelFileHeaderUnion.ModelFileHeader.field_0x16_bitflags & 1)
+            {
+                byte EntryData9[0x18];
+                FSeek(AlignValue(FTell(), 0x10));
+            }
+        } MeshContentsToc;
+    } MeshContentsTocUnion;
+    
+    local int meshCnt = ModelFileHeaderUnion.ModelFileHeader.MainMeshCount;
+    local int i = 0;
+    for (i = 0; i < meshCnt; i++)
     {
         struct
         {
-            // This is how the game reads stuff
-            // Refer to 140A923B8 (ffxvi.exe 1.0.0)
-            int MCEXHeaderSize;
-            short Count_0x04 <comment="confirmed read. stride = mainheader.version > 16 ? 0x60 : 0x40">;
-            short Count_0x06 <comment="confirmed read. stride = 0x10">;
-            short Count_0x08 <comment="confirmed read. stride = 0x20">;
-            short Count_0x0A <comment="confirmed read. stride = 0x10">;
-            short Count_0x0C <comment="confirmed read. stride = 0x10, 0x20 (second struct)">;
-            short Count4;
-            short Count_0x10 <comment="confirmed read. stride = 0x20 (add 3 entries?)">;
-            short Count_0x12 <comment="confirmed read. stride = mainheader.version > 14 ? 0x40 : 0x20">;
-            byte Unk;
-            byte Count_0x15 <comment="confirmed read. stride = 0x8">;
-            byte Count_0x16 <comment="confirmed read. stride = 0x50">;
-            byte field_0x17;
-            byte Count_0x18 <comment="confirmed read. stride = 0x20">;
-            byte Count_0x19 <comment="confirmed read. stride = 0x10">;
-            byte Flags_0x1A <comment="confirmed read">;
-            byte Count_0x1B <comment="confirmed read. stride = 0x10 (add 3 entries?)">;
-            int Size_0x1C <comment="confirmed read.">;
-            int Unk;
-            int StringTableSize <format=hex>;
-            byte field_0x28;
-            byte field_0x29;
-            byte field_0x2A <comment="confirmed read">;
-            byte field_0x2B;
-            int field_0x2C;
-            int field_0x30;
-            int field_0x34;
-            int field_0x38;
-            int field_0x3C;
-        } SubHeader <size=0x40, bgcolor=cPurple>;
-        
-        // Proper struct order
-        struct
-        {
-            short UnkIndex;
-            short field_0x02;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C <format=hex>;
-            int CompressedVerticesStartOffset <format=hex>; // Relative from 0xA8
-            int CompressedIndicesStartOffset <format=hex>;
-            int DecompressedVerticesSize <format=hex>;
-            int DecompressedIndicesSize <format=hex>;
-            int field_0x20 <format=hex>;
-            int NumVertices;
-            int field_0x28;
-            int field_0x2C;
-            int field_0x30;
-            int field_0x34;
-            int field_0x38;
-            int field_0x3C;
-        } MeshLODInfo[SubHeader.Count_0x12] <bgcolor=cBlack>;
-        
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int NumVertices;
-            int field_0x0C <format=hex>;
-            int field_0x10 <format=hex>; // Relative from 0xA8
-            int field_0x14 <format=hex>;
-            int field_0x18 <format=hex>;
-            int field_0x1C <format=hex>;
-            int field_0x20 <format=hex>;
-            int field_0x24;
-            int field_0x28;
-            int field_0x2C;
-            int field_0x30;
-            int field_0x34;
-            int field_0x38;
-            int OffsetWithinDecompressedData <format=hex>;
-            int field_0x40;
-            int field_0x44;
-            int field_0x48;
-            int field_0x4C;
-            int field_0x50;
-            int field_0x54;
-            int field_0x58;
-            int field_0x5C;
-        } MeshLODInfo2[SubHeader.Count_0x04] <bgcolor=cRed>;
-        
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
-        } Struct_0x08[SubHeader.Count_0x08] <bgcolor=cAqua>;
-        
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-        } Struct_0x0C[SubHeader.Count_0x0C] <bgcolor=cYellow>;
-        
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-        } Struct_0x0A[SubHeader.Count_0x0A] <bgcolor=cDkYellow>;
+            FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.VertexBufferOffsets[i]);
+            byte CompressedVertexData[ModelFileHeaderUnion.ModelFileHeader.VertexBufferSizes[i]] <comment="GDeflate", bgcolor=cGreen>;
+            
+            FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.IndexBufferOffsets[i]);
+            byte CompressedIndicesData[ModelFileHeaderUnion.ModelFileHeader.IndexBufferSizes[i]] <comment="GDeflate", bgcolor=cBlue>;
+        } MeshBuffer;
+    }
     
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-        } Struct_0x15[SubHeader.Count_0x15] <bgcolor=cLtYellow>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
-            int field_0x20;
-            int field_0x24;
-            int field_0x28;
-            int field_0x2C;
-            int field_0x30;
-            int field_0x34;
-            int field_0x38;
-            int field_0x3C;
-            int field_0x40;
-            int field_0x44;
-            int field_0x48;
-            int field_0x4C;
-        } Struct_0x16[SubHeader.Count_0x16] <bgcolor=cRed>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
-        } Struct_0x18[SubHeader.Count_0x18] <bgcolor=cDkRed>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-        } Struct_0x19[SubHeader.Count_0x19] <bgcolor=cDkGreen>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-        } Struct_0x06[SubHeader.Count_0x06] <bgcolor=cGreen>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-        } Struct_0x1B[SubHeader.Count_0x1B] <bgcolor=cLtGreen>;
-
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
-        } Struct_0x10[SubHeader.Count_0x10] <bgcolor=cLtBlue>;
-
-        // Count_0x1c
-        if (SubHeader.Size_0x1C)
-        {
-            byte Data_0x1C[SubHeader.Size_0x1C];
-            FSeek(AlignValue(FTell(), 0x10));
-        }
-        
-        byte MCEXHeader[SubHeader.MCEXHeaderSize] <bgcolor=cDkPurple>;
-        FSeek(startof(MCEXHeader) + AlignValue(SubHeader.MCEXHeaderSize, 0x10));
-        
-        struct
-        {
-            int field_0x00;
-            int field_0x04;
-            int field_0x08;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
-        } Struct_0x0C_2[SubHeader.Count_0x0C] <bgcolor=cLtAqua>;
-
-        if (SubHeader.Count_0x0C)
-        {
-            byte Data_0x0C[0x18] <bgcolor=cDkAqua>;
-            FSeek(AlignValue(FTell(), 0x10));
-        }
-        
-        byte StringTable[SubHeader.StringTableSize] <bgcolor=cGray>;
-        FSeek(AlignValue(FTell(), 0x10));
-        
-        if (MainHeader.field_0x16_bitflags & 1)
-        {
-            byte Data_0x16_Flag1[0x18];
-            FSeek(AlignValue(FTell(), 0x10));
-        }
-        
-        if (SubHeader.Flags_0x1A & 2)
-        {
-            // short?   
-        }
-        
-        if (SubHeader.Flags_0x1A & 0x40)
-        {
-            // 0x40?
-        }
-    } TableOfContents;
+    if (exists(ModelFileHeaderUnion.ModelFileHeader.UnkOffset1) && ModelFileHeaderUnion.ModelFileHeader.UnkOffset1)
+    {
+        FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.UnkOffset1);
+        byte UnkCompressedData1[ModelFileHeaderUnion.ModelFileHeader.UnkSize1] <comment="GDeflate", bgcolor=cGray>;
+    }
     
+    if (exists(ModelFileHeaderUnion.ModelFileHeader.UnkOffset2) && ModelFileHeaderUnion.ModelFileHeader.UnkOffset2)
+    {
+        FSeek(headerSize + ModelFileHeaderUnion.ModelFileHeader.UnkOffset2);
+        byte UnkCompressedData2[ModelFileHeaderUnion.ModelFileHeader.UnkSize2] <comment="GDeflate", bgcolor=cBlack>;
+    }
 } Model;
