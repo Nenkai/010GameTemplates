@@ -195,52 +195,91 @@ struct
             {
                 short FlexVertAttrIndexStart;
                 short FlexVertAttrCount;
-            } FlexVertexInfos[ModelFileHeaderUnion.ModelFileHeader.FlexVertexInfoCount];
+            } FlexVertexInfo[ModelFileHeaderUnion.ModelFileHeader.FlexVertexInfoCount];
         
             struct
             {
                 ubyte BufferIndex;
                 ubyte FieldOffset <format=hex>;
                 
-                // These enums should be complete
+                // These enums should be complete (at least for the PC version)
+                
+                // void* result = FVFFieldToDXGI(void* a1, FlexVertexAttributeInfo* a2)
+                // ffxvi.exe 1.0.1 - 1409E7CB8
+                // sig: 89 54 24 ? 48 83 EC ? 4C 8B D9
                 enum <ubyte>
                 {
-                    Vec2f = 34,
-                    Vec3f = 35,
-                    Vec4f = 36,
-                    HalfFloat2 = 50,
-                    HalfFloat4 = 52,
-                    UNorm8 = 68,
-                    UInt8_4 = 116, // PMOVZXBD
-                    UInt16_4 = 132, // PMOVSXWD
-                    UInt32 = 161,
+                    ENCODING_SNORM16x2 = 18,   // = 37 = DXGI_FORMAT_R16G16_SNORM
+                    ENCODING_SNORM16x4 = 20,   // = 13 = DXGI_FORMAT_R16G16B16A16_SNORM
+                    ENCODING_FLOAT = 33,       // = 41 = DXGI_FORMAT_R32_FLOAT
+                    ENCODING_FLOATx2 = 34,     // = 16 = DXGI_FORMAT_R32G32_FLOAT
+                    ENCODING_FLOATx3 = 35,     // = 6  = DXGI_FORMAT_R32G32B32A32_FLOAT
+                    ENCODING_FLOATx4 = 36,     // = 2  = DXGI_FORMAT_R32G32B32A32_FLOAT
+                    ENCODING_HALFFLOATx2 = 50, // = 34 = DXGI_FORMAT_R16G16_FLOAT
+                    ENCODING_HALFFLOATx4 = 52, // = 10 = DXGI_FORMAT_R16G16B16A16_FLOAT
+                    ENCODING_UNORM8x4 = 68,    // = 28 = DXGI_FORMAT_R8G8_B8G8_UNORM
+                    ENCODING_SINT16x2 = 82,    // = 38 = DXGI_FORMAT_R16G16_SINT
+                    ENCODING_SINT16x4 = 84,    // = 14 = DXGI_FORMAT_R16G16B16A16_SINT
+                    ENCODING_UINT8x4 = 116,    // = 30 = DXGI_FORMAT_R8G8B8A8_UINT
+                    ENCODING_UINT16x2 = 130,   // = 36 = DXGI_FORMAT_R16G16_UINT
+                    ENCODING_UINT16x4 = 132,   // = 12 = DXGI_FORMAT_R16G16B16A16_UINT
+                    ENCODING_SINT32 = 145,     // = 43 = DXGI_FORMAT_R32_SINT 
+                    ENCODING_SINT32x2 = 146,   // = 18 = DXGI_FORMAT_R32G32_SINT
+                    ENCODING_SINT32x3 = 147,   // = 8  = DXGI_FORMAT_R32G32B32_SINT
+                    ENCODING_SINT32x4 = 148,   // = 4  = DXGI_FORMAT_R32G32B32A32_SINT  
+                    ENCODING_UINT32 = 161,     // = 42 = DXGI_FORMAT_R32_UINT
+                    ENCODING_UINT32x2 = 162,   // = 17 = DXGI_FORMAT_R32G32_UINT
+                    ENCODING_UINT32x3 = 163,   // = 7  = DXGI_FORMAT_R32G32B32_UINT
+                    ENCODING_UINT32x4 = 163,   // = 3  = DXGI_FORMAT_R32G32B32A32_UINT
+                    ENCODING_UNORM16x2 = 178,  // = 35 = DXGI_FORMAT_R16G16_UNORM
+                    ENCODING_UNORM16x4 = 180,  // = 11 = DXGI_FORMAT_R16G16B16A16_UNORM
                 } Encoding;
         
+                // void* result = FVFFieldTypeToDXGISemantic(uint8 type, char* outName, int* outSetIndex)
+                // ffxvi.exe 1.0.1 - 140A1234C
+                // sig: 44 0F B6 C9 41 83 F9
                 enum <ubyte>
                 {
-                    POSITION = 0,
-                    WEIGHTS_0 = 1, 
-                    JOINTS_0 = 2,
-                    COLOR_0 = 3,
-                    UNK_ATTR_8 = 8,
-                    UNK_ATTR_9 = 9,
-                    TEXCOORD_0 = 11,
-                    TEXCOORD_1 = 12,
-                    NORMAL = 21,
-                    TANGENT = 22,
-                    BINORMAL = 23,
-                    UNK_ATTR_24 = 24,
-                    WEIGHTS_1 = 28,
-                    JOINTS_1 = 29,
-               } Attribute;
-            } FlexVertexAttributeInfos[ModelFileHeaderUnion.ModelFileHeader.FlexVertexAttributeCount];
+                    REGISTER_POSITION = 0,
+                    REGISTER_BLENDWEIGHT_0 = 1, 
+                    REGISTER_BLENDINDICES_0 = 2,
+                    REGISTER_COLOR_0 = 3,
+                    REGISTER_COLOR_1 = 4,
+                    REGISTER_COLOR_2 = 5,
+                    REGISTER_COLOR_3 = 6,
+                    REGISTER_COLOR_4 = 7,
+                    REGISTER_COLOR_5 = 8,
+                    REGISTER_COLOR_6 = 9,
+                    REGISTER_COLOR_7 = 10,
+                    REGISTER_TEXCOORD_0 = 11,
+                    REGISTER_TEXCOORD_1 = 12,
+                    REGISTER_TEXCOORD_2 = 13,
+                    REGISTER_TEXCOORD_3 = 14,
+                    REGISTER_TEXCOORD_4 = 15,
+                    REGISTER_TEXCOORD_5 = 16,
+                    REGISTER_TEXCOORD_6 = 17,
+                    REGISTER_TEXCOORD_7 = 18,
+                    REGISTER_TEXCOORD_8 = 19,
+                    REGISTER_TEXCOORD_9 = 20,
+                    REGISTER_TEXCOORD_10_NORMAL = 21, // Used by normals
+                    REGISTER_TEXCOORD_11_TANGENT = 22, // Used by tangent
+                    REGISTER_TEXCOORD_12_BITANGENT = 23, // Used by bitangents
+                    REGISTER_TEXCOORD_13_UNK = 24,
+                    REGISTER_TEXCOORD_14_UNK = 25,
+                    REGISTER_TEXCOORD_15_UNK = 26,
+                    REGISTER_DEPTH = 27,
+                    REGISTER_BLENDWEIGHT_1 = 28,
+                    REGISTER_BLENDINDICES_1 = 29,
+               } AttributeRegister;
+               
+            } FlexVertexAttributeInfo[ModelFileHeaderUnion.ModelFileHeader.FlexVertexAttributeCount];
             
             float BBoxRadius;
             int Unk2;
             float BoundaryBox[6] <bgcolor=cBlue>;
         
             local int matPos = FTell();
-            Material MaterialFilesToLoad[ModelFileHeaderUnion.ModelFileHeader.MaterialCount];
+            Material MaterialFileToLoad[ModelFileHeaderUnion.ModelFileHeader.MaterialCount];
             
             // Logic should be the other way around based on game code. Do not read bytes if flag is not present.
             if (Model.ModelFileHeaderUnion.ModelFileHeader.field_0x16_bitflags & 2)
