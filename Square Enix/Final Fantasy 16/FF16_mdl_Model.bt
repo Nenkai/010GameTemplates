@@ -82,7 +82,7 @@ typedef struct
 /////////////////////////////////////////
 string PrintMaterial(Material& material)
 {
-    local int strTableOffset = startof(Model.ModelHeaderUnion.ModelHeader.MaterialFilesToLoad)
+    local int strTableOffset = startof(Model.ModelHeaderUnion.ModelHeader.MaterialFileToLoad)
         + Model.ModelFileHeaderUnion.ModelFileHeader.MaterialCount * 0x10;
         
     if (Model.ModelFileHeaderUnion.ModelFileHeader.field_0x16_bitflags & 2)
@@ -372,8 +372,7 @@ struct
                         ushort MaterialID;
                         ushort DrawPartStartIndex;
                         ushort DrawPartCount;
-                        byte FlexVertexInfoID; //list of attributes
-                        byte ColorSetFlagsMaybe;
+                        ushort FlexVertexInfoID; //list of attributes
                         byte BoneSetFlags;
                         byte TexCoordSetFlags;
                         uint UnkFlags <format=hex>;
@@ -478,7 +477,7 @@ struct
             {
                 // handled by 48 8B C4 48 83 EC ? C5 FA 10 51 - used by not just models
                 float JointMaxBounds[6] <bgcolor=cDkAqua>;
-                FSeek(startof(JointMaxBounds) + AlignValue(0x18, 0x10));
+                FSeek(startof(JointMaxBounds) + (0x18, 0x10));
             }
             
             if (MeshContentsHeaderUnion.MeshContentsHeader.StringTableSize)
