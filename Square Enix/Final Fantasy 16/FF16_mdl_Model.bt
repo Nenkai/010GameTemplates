@@ -477,7 +477,7 @@ struct
             {
                 // handled by 48 8B C4 48 83 EC ? C5 FA 10 51 - used by not just models
                 float JointMaxBounds[6] <bgcolor=cDkAqua>;
-                FSeek(startof(JointMaxBounds) + (0x18, 0x10));
+                FSeek(startof(JointMaxBounds) + AlignValue(0x18, 0x10));
             }
             
             if (MeshContentsHeaderUnion.MeshContentsHeader.StringTableSize)
