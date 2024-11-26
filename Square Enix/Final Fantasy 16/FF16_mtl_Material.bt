@@ -1,0 +1,207 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FF16 Model Material
+//   Authors: KillzXGaming, Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.mtl
+//  ID Bytes: 4D 54 4C 20
+//   History: 
+//------------------------------------------------
+struct NameOffset;
+struct NameOffset16;
+
+int Align(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
+
+    return pos + amount;
+}
+
+// TODO: Support Version 1 through 4 which has structure changes
+// Initial reader code: ffxvi.exe steam 1.0.1 - 140A8D068
+// ^ sig: 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 05 ? ? ? ? 33 ED 48 8B D9
+// head to bottom of file for useful ida structs, again ffxvi.exe 1.0.1
+
+struct MatFileHeader
+{
+    char Magic[4] <comment="Magic is unchecked">; //MTL 
+    byte Version <comment="FF16 PC: 5.">; // file is read differently if version < 3, >= 4 or >= 5
+    byte Unk;
+    byte Alignment <comment="Aligns allocated ParamSection buffer to this">;
+    byte Unk;
+    uint Body1Size <format=hex>;
+    uint Body2Size <format=hex, comment="Used by i.e gracommon/material/fog/a/mcrystal_100_flower_d_yellow.mtl">;
+    ushort NumTexturePaths;   
+    byte ParamType <comment="Seems important. Possibly the param layout preset - 8 is invalid?">;
+    byte unk <comment="Is this unused?">;
+    uint ParamSectionSize <format=hex>;
+    ushort NumConstants;
+    ushort NumShaders <comment="Usually never more than 1, if not 0, shb shaders are used">;
+    byte Unk0x1C <comment="Is this unused? Used by files but no immediate code reference">;
+    byte UnkCount0x1D <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
+    byte Unk0x1E <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
+    ubyte UnkBitFlags <format=hex>;
+} Header <bgcolor=cYellow>; // Header size is 0x28 if version == 1? otherwise 0x20
+
+union
+{
+    byte BodyBytes[Header.Body1Size];
+    struct
+    {
+        // UnkBitFlags has to be 0x20?
+        
+        if (Header.UnkBitFlags & 0x20)
+        {
+            ushort ParamSize <format=hex>;
+            ushort NumTotalTextures;
+            uint Padding;
+            
+            local uint string_table_pos = Align(startof(BodyBytes) + 8 +
+                (Header.NumTexturePaths * 8) + (Header.NumConstants * 8) + (Header.NumShaders * 8) + Header.ParamSectionSize, 0x10);
+    
+            if (Header.NumTexturePaths)
+            {
+                struct TexturePath
+                {
+                   NameOffset path;
+                   NameOffset name;
+                } TexturePaths[Header.NumTexturePaths] <optimize=false, bgcolor=cRed, read=Str(this.path.name)>;
+            }
+            
+            if (Header.NumConstants)
+            {
+                struct TextureConstant
+                {
+                    ushort flag_type; //0 or 1,
+                    NameOffset16 name;
+                    byte flags[4];
+                } TextureConstants[Header.NumConstants] <optimize=false, bgcolor=cBlue>;
+            }
+            
+            if (Header.NumShaders)
+            {
+                struct
+                {
+                    NameOffset Path;
+                    uint unk;
+                } ShaderFiles[Header.NumShaders] <optimize=false, bgcolor=cBlack>;
+            }
+        }
+        
+        union 
+        {
+            byte Bytes[Header.ParamSectionSize];
+            
+            if (Header.UnkBitFlags & 0x20)
+            {
+                struct
+                {
+                    if (ParamSize)
+                        float ParamData[ParamSize / 4] <bgcolor=cGray>;
+                        
+                    if (NumTotalTextures)
+                    {
+                        struct TextureBindInfo
+                        {
+                           byte slot;
+                           byte type;
+                        } TextureBinds[NumTotalTextures] <comment="This gets replaced at runtime, 2 each", optimize=false, bgcolor=cGreen>;
+                    }
+                    
+                    
+                } Param;
+            }
+        } ParamUnion;
+            
+    } Body1;
+} Body1Union;
+
+// Used by system/graphics/default_decal
+if (Header.Body2Size)
+    byte Body2[Header.Body2Size];
+
+typedef struct {
+    ushort nameOffset;
+    
+    local uint origin = FTell();
+    
+    FSeek(string_table_pos + nameOffset);
+    string name;
+    
+    FSeek(origin);
+} NameOffset16<read=Str(this.name)>;
+
+typedef struct {
+    uint nameOffset;
+    
+    local uint origin = FTell();
+    
+    FSeek(string_table_pos + nameOffset);
+    string name;
+    
+    FSeek(origin);
+} NameOffset<read=Str(this.name)>;
+
+/*
+00000000 struct FileFormatBase // sizeof=0x60
+00000000 {                                       // XREF: MpbFileFormat/r
+00000000                                         // MaterialFileFormat/r
+00000000     _QWORD vtable;
+00000008     _DWORD dword8;
+0000000C     volatile __int32 volatile___int32C;
+00000010     _QWORD qword10;
+00000018     _QWORD qword18;
+00000020     _QWORD qword20;
+00000028     _QWORD qword28;
+00000030     FileHandle *FileHandle;
+00000038     _QWORD Buffer;
+00000040     _QWORD qword40;
+00000048     _QWORD qword48;
+00000050     int qword50;
+00000054     int State;
+00000058     int qword58;
+0000005C     int field_5C;
+00000060 };
+
+00000000 struct MaterialFileFormat // sizeof=0xD0
+00000000 {
+00000000     FileFormatBase FormatBase;
+00000060     int field_60;
+00000064     int field_64;
+00000068     int field_68;
+0000006C     int field_6C;
+00000070     MatFileHeader MatHeader;
+00000090     _QWORD BodyBuffer;
+00000098     _QWORD UnkBuffer_0x0C;
+000000A0     _QWORD ConstantsBuffer;
+000000A8     _QWORD qwordA8;
+000000B0     _QWORD ParamSectionBuffer;
+000000B8     _DWORD dwordB8;
+000000BC     _BYTE byteBC;
+000000BD     // padding byte
+000000BE     // padding byte
+000000BF     // padding byte
+000000C0     _QWORD qwordC0;
+000000C8     _QWORD qwordC8;
+000000D0 };
+
+00000000 struct __fixed FileHandle // sizeof=0x8
+00000000 {
+00000000     FileHandleVtable *vt;
+00000008 };
+
+00000000 struct __fixed FileHandleVtable // sizeof=0x48
+00000000 {
+00000000     __int64 field_0;
+00000008     __int64 field_8;
+00000010     __int64 field_10;
+00000018     __int64 field_18;
+00000020     __int64 field_20;
+00000028     __int64 field_28;
+00000030     __int64 (__fastcall *Read)(FileHandle *, MatFileHeader *, __int64, __int64);
+00000038     __int64 field_38;
+00000040     __int64 (__fastcall *field_40)(FileHandle *);
+00000048 };
+*/
