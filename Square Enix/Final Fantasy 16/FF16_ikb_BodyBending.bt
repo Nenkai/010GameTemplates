@@ -1,0 +1,218 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: BodyBending File
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE! This file is a flatbuffer file
+// It is not supposed to be mapped out, but only did to more easily reverse up the original schema
+// You should be using the schema defined here if you intend to alter the file:
+// https://github.com/Nenkai/FF16Tools/blob/master/FF16Tools.Files.FlatBuffers/BDYB_BodyBending.fbs
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize <fgcolor=cGreen>;
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+FlatArkHeader Hdr;
+
+if (exists(Hdr.Fields.OffsetTable[1]) && Hdr.Fields.OffsetTable[1])
+    Printf("Unk F1\n");
+    
+if (exists(Hdr.Fields.OffsetTable[2]) && Hdr.Fields.OffsetTable[2])
+    Printf("Unk F2\n");
+    
+if (exists(Hdr.Fields.OffsetTable[3]) && Hdr.Fields.OffsetTable[3])
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);   
+        
+        struct
+        {
+            FlatArkFields Fields;
+            
+            if (exists(Fields.OffsetTable[1]) && Fields.OffsetTable[1])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                int F1 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                int F2 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[3]) && Fields.OffsetTable[3])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[3]);
+                int F3 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[4]) && Fields.OffsetTable[4])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[4]);
+                int F4 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[5]) && Fields.OffsetTable[5])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[5]);
+                byte F5 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[6]) && Fields.OffsetTable[6])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[6]);
+                int F6 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[7]) && Fields.OffsetTable[7])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[7]);
+                byte F7 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[8]) && Fields.OffsetTable[8])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[8]);
+                float F8 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[9]) && Fields.OffsetTable[9])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[9]);
+                int F9 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[10]) && Fields.OffsetTable[10])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[10]);
+                int F10 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[11]) && Fields.OffsetTable[11])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[11]);
+                float F11 <bgcolor=cBlue>;
+            }
+            FSeek(FileSize());
+        } Table;
+    } F3;
+}
+
+if (exists(Hdr.Fields.OffsetTable[4]) && Hdr.Fields.OffsetTable[4])
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);   
+        
+        struct
+        {
+            FlatArkFields Fields;
+            
+            if (exists(Fields.OffsetTable[1]) && Fields.OffsetTable[1])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                float F1 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                float F2 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[3]) && Fields.OffsetTable[3])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[3]);
+                byte F3 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[4]) && Fields.OffsetTable[4])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[4]);
+                byte F4 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[5]) && Fields.OffsetTable[5])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[5]);
+                byte F5 <bgcolor=cBlue>;
+            }
+            FSeek(FileSize());
+        } Table;
+    } F4;
+}
+
+if (exists(Hdr.Fields.OffsetTable[5]) && Hdr.Fields.OffsetTable[5])
+{
+    FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[5]);
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);   
+        
+        struct
+        {
+            FlatArkFields Fields;
+            
+            if (exists(Fields.OffsetTable[1]) && Fields.OffsetTable[1])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                float F1 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                float F2 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[3]) && Fields.OffsetTable[3])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[3]);
+                byte F3 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[4]) && Fields.OffsetTable[4])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[4]);
+                byte F4 <bgcolor=cBlue>;
+            }
+            
+            if (exists(Fields.OffsetTable[5]) && Fields.OffsetTable[5])
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[5]);
+                byte F5 <bgcolor=cBlue>;
+            }
+            FSeek(FileSize());
+        } Table;
+    } F5;
+}
