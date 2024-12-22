@@ -1,0 +1,206 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: GBFR CfCt CameraFade Binary
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE! This file is a flatbuffer file
+// It is not supposed to be mapped out, but only did to more easily reverse up the original schema
+// You should be using the schema defined here if you intend to alter the file:
+
+BitfieldDisablePadding();
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize <fgcolor=cGreen>;
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+typedef struct
+{
+    FlatArkFields Fields2;
+    
+    if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+    {
+        FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+        uint F1_1 : 4 <bgcolor=cBlue>;
+        uint F1_2 : 4 <bgcolor=cBlue>;
+        uint F1_3 : 4 <bgcolor=cBlue>;
+    }
+    
+    if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+    {
+        FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+        float F2 <bgcolor=cBlue, format=hex>;
+    }
+    
+    if (exists(Fields2.OffsetTable[3]) && Fields2.OffsetTable[3])
+    {
+        FSeek(startof(Fields2) + Fields2.OffsetTable[3]);
+        Vec3 F3 <bgcolor=cBlue, format=hex>;
+    }
+} SubTable;
+
+FlatArkHeader Hdr;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
+int Date <fgcolor=cRed>;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
+struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            struct
+            {
+                FlatArkFields Fields;
+                
+                if (exists(Fields.OffsetTable[1]) && Fields.OffsetTable[1])
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[1]);
+                    uint ObjId <bgcolor=cBlue, format=hex>;
+                }
+                
+                if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2])
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                    struct 
+                    {
+                        int DataOffset <format=hex, fgcolor=cRed>;
+                        FSeek(startof(DataOffset) + DataOffset);
+                        
+                        struct
+                        {
+                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                            local int j = 0;
+                            for (j = 0; j < NumEntries; j++)
+                            {
+                                FSeek(startof(Offsets[j]) + Offsets[j]);
+                                SubTable Sub;
+                            }
+                        } Table;
+                    } F2;
+
+                }
+                
+                if (exists(Fields.OffsetTable[3]) && Fields.OffsetTable[3])
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[3]);
+                    struct 
+                    {
+                        int DataOffset <format=hex, fgcolor=cRed>;
+                        FSeek(startof(DataOffset) + DataOffset);
+                        
+                        struct
+                        {
+                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                            local int j = 0;
+                            for (j = 0; j < NumEntries; j++)
+                            {
+                                FSeek(startof(Offsets[j]) + Offsets[j]);
+                                struct
+                                {
+                                    FlatArkFields Fields2;
+                                    
+                                    if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                    {
+                                        FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                        struct
+                                        {
+                                            int StrOffset <format=hex, fgcolor=cRed>;
+                                            FSeek(startof(StrOffset) + StrOffset);
+                                            int StrLength <bgcolor=cYellow, format=hex>;
+                                            char Str[StrLength] <bgcolor=cYellow, format=hex>;
+                                        } F1 <read=Str>;
+                                    }
+                                    
+                                    if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                    {
+                                        FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                        struct
+                                        {
+                                            int DataOffset <format=hex, fgcolor=cRed>;
+                                            FSeek(startof(DataOffset) + DataOffset);
+                                            
+                                            struct
+                                            {
+                                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                local int j = 0;
+                                                for (j = 0; j < NumEntries; j++)
+                                                {
+                                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                    SubTable Sub;
+                                                }
+                                            } Table;
+                                        } F2;
+                                    }
+                                } Entry;
+                            }
+                        } Table;
+                    } F3;
+                }
+                
+                if (exists(Fields.OffsetTable[4]) && Fields.OffsetTable[4])
+                {
+                    FSeek(startof(Fields) + Fields.OffsetTable[4]);
+                    struct
+                    {
+                        int DataOffset <format=hex, fgcolor=cRed>;
+                        FSeek(startof(DataOffset) + DataOffset);
+                        
+                        struct
+                        {
+                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                            local int j = 0;
+                            for (j = 0; j < NumEntries; j++)
+                            {
+                                FSeek(startof(Offsets[j]) + Offsets[j]);
+                                SubTable Sub;
+                            }
+                        } Table;
+                    } F4;
+                }
+            } Entity <read=Str("ObjId: %x", ObjId)>;
+        }
+    } Table;
+} Entities;
