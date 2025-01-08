@@ -146,9 +146,9 @@ struct
     byte TextureCount; // this * 0x20
     byte _empty_;
     ushort NumChunks; // this * 0x10 if UnkFlags & 3, or 0x18?
-    uint Unk;
-    uint Unk;
-    uint UnkFlags <format=hex>;
+    uint UnkSizeOrOffset1;
+    uint UnkSizeOrOffset2;
+    uint UnkFlags <format=hex>; // & 3, & 0x10 or 0xF?
     int Empty[4];
 } Header2 <size=0x20, bgcolor=cDkRed>;
 
