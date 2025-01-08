@@ -1,0 +1,1504 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: GBFR StPr StreamingPrefetch Binary
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE! This file is a flatbuffer file
+// It is not supposed to be mapped out, but only did to more easily reverse up the original schema
+// Also, holy fuck this flatbuffer file is massive.
+// The schema should be available in GBFRDataTools.
+
+BitfieldDisablePadding();
+
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vec4 <read=Str("<%f, %f, %f, %f>", X, Y, Z, W)>;
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize <fgcolor=cGreen>;
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+int SeekToEntryIfExists(FlatArkFields& fields, int index)
+{
+    if (exists(fields.OffsetTable[index]) && fields.OffsetTable[index])
+    {
+        FSeek(startof(fields) + fields.OffsetTable[index]);
+        return true;   
+    }
+    
+    return false;
+}
+
+typedef struct
+{
+    int StrOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(StrOffset) + StrOffset);
+    int StrLength <bgcolor=cYellow, format=hex>;
+    char Str[StrLength] <bgcolor=cYellow, format=hex>;
+} StringField <read=Str>;
+
+typedef struct
+{
+    FlatArkFields KeyParamDataFields;
+    
+    if (SeekToEntryIfExists(KeyParamDataFields, 1))
+        uint F1_Frame <bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(KeyParamDataFields, 2))
+        byte F2 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(KeyParamDataFields, 3))
+        byte F3 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(KeyParamDataFields, 4))
+        float F4 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(KeyParamDataFields, 5))
+        float F5 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(KeyParamDataFields, 6))
+        float F6 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(KeyParamDataFields, 7))
+        float F7 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(KeyParamDataFields, 8))
+        byte F8 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(KeyParamDataFields, 9))
+        uint64 F9 <format=hex, bgcolor=cBlue>;
+        
+    if ((KeyParamDataFields.OffsetTableSize / 2 - 1) > 10)
+        Printf("EventKeyParamData Larger\n");
+} EventKeyParamData;
+     
+typedef struct
+{
+    FlatArkFields TBoolFields;
+                        
+    if (SeekToEntryIfExists(TBoolFields, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(TBoolFields, 2))
+        byte F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TBool; 
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TBool Entry;
+        }
+    } EventKeyParamData_TBool_;
+} EventKeyParamData_TBoolArray;
+        
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        float F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TFloat; 
+ 
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TFloat Entry;
+        }
+    } EventKeyParamData_TFloatArray;
+
+} EventKeyParamData_TFloatArray; 
+
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        int F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TInt; 
+ 
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TInt Entry;
+        }
+    } EventKeyParamData_TIntArray;
+} EventKeyParamData_TIntArray; 
+          
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        StringField F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TString; 
+ 
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        uint64 F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_THash64; 
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_THash64 Entry;
+        }
+    } EventKeyParamData_THashArray;
+} EventKeyParamData_THash64Array;  
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TString Entry;
+        }
+    } EventKeyParamData_TStringArray;
+} EventKeyParamData_TStringArray;  
+ 
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        uint F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TUInt; 
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TUInt Entry;
+        }
+    } EventKeyParamData_TUIntArray;
+} EventKeyParamData_TUIntArray; 
+
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        uchar F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TUChar; 
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TUChar Entry;
+        }
+    } EventKeyParamData_TUCharArray;
+} EventKeyParamData_TUCharArray;
+
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+        signed char F2 <format=hex, bgcolor=cBlue>;
+} EventKeyParamData_TSChar; 
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            EventKeyParamData_TSChar Entry;
+        }
+    } EventKeyParamData_TSCharArray;
+} EventKeyParamData_TSCharArray;
+
+typedef struct
+{
+    FlatArkFields Fields4_;
+                        
+    if (SeekToEntryIfExists(Fields4_, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1_EventKeyParamData;
+    }
+    
+    if (SeekToEntryIfExists(Fields4_, 2))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);   
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    struct
+                    {
+                        int StrLength <bgcolor=cYellow, format=hex>;
+                        char Str[StrLength] <bgcolor=cYellow, format=hex>;
+                    } Strings;
+                }
+            } Array;
+        } F2_EventKeyParamData_TString;
+    }   
+} EventKeyParamData_TStringVector; 
+
+typedef struct
+{
+    FlatArkFields HolderFields;
+    
+    if (SeekToEntryIfExists(HolderFields, 1))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    EventKeyParamData_TFloat Entry;
+                }
+            } EventKeyParamData_TFloat_;
+        } F1;
+    }
+    
+    if (SeekToEntryIfExists(HolderFields, 2))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    EventKeyParamData_TFloat Entry;
+                }
+            } EventKeyParamData_TFloat_;
+        } F2;
+    }
+    
+    if (SeekToEntryIfExists(HolderFields, 3))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    EventKeyParamData_TFloat Entry;
+                }
+            } EventKeyParamData_TFloat_;
+        } F3;
+    }
+} EventKeyParamData_TFloat_Holder;
+      
+typedef struct
+{
+    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+    local int j = 0;
+    for (j = 0; j < NumEntries; j++)
+    {
+        FSeek(startof(Offsets[j]) + Offsets[j]);
+        EventKeyParamData Entry;
+    }
+} EventKeyData;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        FlatArkFields Fieldss;
+        
+        if (SeekToEntryIfExists(Fieldss, 1))
+            byte F1 <format=hex, fgcolor=cRed>;
+            
+        if (SeekToEntryIfExists(Fieldss, 2))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                struct
+                {
+                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                    local int j = 0;
+                    for (j = 0; j < NumEntries; j++)
+                    {
+                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                        struct
+                        {
+                            FlatArkFields Fieldssss;
+                            
+                            if (SeekToEntryIfExists(Fieldssss, 1))
+                            {
+                                struct
+                                {
+                                    int DataOffset <format=hex, fgcolor=cRed>;
+                                    FSeek(startof(DataOffset) + DataOffset);
+                                    
+                                    EventKeyParamData F1 <format=hex, fgcolor=cRed>;
+                                } F1;
+                            }
+
+                            if (SeekToEntryIfExists(Fieldssss, 2))
+                                EventKeyParamData_TFloatArray F2 <format=hex, fgcolor=cRed>;
+                        } Entry;
+                    }
+                } Table;
+            } F2;
+        }
+    } Table;
+} EventKeyParamData_TKeyFloatArray;
+
+typedef struct
+{
+    FlatArkFields Fields4;
+    
+    if (SeekToEntryIfExists(Fields4, 1))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (SeekToEntryIfExists(Fields4, 2))
+        StringField F2 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 3))
+        byte F3 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 4))
+        byte F4 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(Fields4, 5))
+        float F5_Frame <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(Fields4, 6))
+        float F6_Frame <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(Fields4, 7))
+        byte F7 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 8))
+        byte F8 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 9))
+        float F9_Frame <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 10))
+        float F10_Frame <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 11))
+        float F11_Frame <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(Fields4, 12))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyData Data;
+        } F12;
+    }
+    
+    if (SeekToEntryIfExists(Fields4, 13))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyData Data;
+        } F13;
+    }
+    
+    if ((Fields4.OffsetTableSize / 2 - 1) > 14)
+        Printf("EventKeyMotionData Larger\n");
+} EventKeyMotionData;
+
+typedef struct
+{
+    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+    local int j = 0;
+    for (j = 0; j < NumEntries; j++)
+    {
+        FSeek(startof(Offsets[j]) + Offsets[j]);
+        EventKeyMotionData Entry;
+    }
+} EventKeyMotionDataArray;
+
+typedef struct
+{
+    FlatArkFields WwiseEventDataFields;
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 1))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 2))
+        StringField F2_WwiseIdString;
+
+    if (SeekToEntryIfExists(WwiseEventDataFields, 3))
+        byte F3 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(WwiseEventDataFields, 4))
+        byte F4 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(WwiseEventDataFields, 5))
+        uint F5 <format=hex, bgcolor=cBlue>;
+    
+    // TODO
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 7))
+        byte F7 <format=hex, bgcolor=cBlue>;
+
+    if (SeekToEntryIfExists(WwiseEventDataFields, 8))
+        uint F8 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 9))
+        uint F9 <format=hex, bgcolor=cBlue>;
+    
+    // ALWAYS 2 entries
+    if (SeekToEntryIfExists(WwiseEventDataFields, 10))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    struct
+                    {
+                        FlatArkFields EntryFields;
+                        
+                        if (SeekToEntryIfExists(EntryFields, 1))
+                            byte F1 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(EntryFields, 2))
+                            uint F2 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(EntryFields, 3))
+                            int F3 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(EntryFields, 4))
+                            float F4 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(EntryFields, 5))
+                            float F5 <format=hex, bgcolor=cBlue>;
+                    } Entry;
+                    
+                }
+            } Array;
+        } F10;
+    }
+    
+    if ((WwiseEventDataFields.OffsetTableSize / 2 - 1) > 11)
+        Printf("EventKeySoundWwiseEventData Larger\n");
+    
+} EventKeySoundWwiseEventData;
+
+typedef struct
+{
+    FlatArkFields WwiseEventDataFields;
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 1))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (SeekToEntryIfExists(WwiseEventDataFields, 2))
+        StringField F2_StateStr; // Hashed as CRC32
+        
+    if ((WwiseEventDataFields.OffsetTableSize / 2 - 1) > 3)
+        Printf("EventKeySoundFsmStateData Larger\n");
+} EventKeySoundFsmStateData;
+
+typedef struct
+{
+    FlatArkFields WeaponDataFields;
+    
+    if (SeekToEntryIfExists(WeaponDataFields, 1))
+        uint64 F1_Hash <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(WeaponDataFields, 2))
+        StringField F2;
+    
+    if (SeekToEntryIfExists(WeaponDataFields, 3))
+        int F3 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(WeaponDataFields, 4))
+        EventKeyParamData_TBoolArray F4;
+        
+    if (SeekToEntryIfExists(WeaponDataFields, 5))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    EventKeyMotionData Entry;
+                }
+            } EventKeyMotionDataArray_;
+        } F5;
+    }
+    
+    if (SeekToEntryIfExists(WeaponDataFields, 6))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    EventKeyParamData_TStringVector Entry;
+                }
+            } EventKeyParamData_TStringVectorArray;
+        } F6;
+    }
+    
+    if ((WeaponDataFields.OffsetTableSize / 2 - 1) > 7)
+        Printf("WeaponData Larger\n");
+} WeaponData;
+
+typedef struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        FlatArkFields Fields4;
+        
+        if (SeekToEntryIfExists(Fields4, 1))
+            byte F1 <format=hex, bgcolor=cBlue>;
+
+        if (SeekToEntryIfExists(Fields4, 2))
+            StringField F2 <format=hex, bgcolor=cBlue>;
+
+        if (SeekToEntryIfExists(Fields4, 3))
+            uint64 F3 <format=hex, bgcolor=cBlue>;
+
+        if (SeekToEntryIfExists(Fields4, 4))
+            uint64 F4 <format=hex, bgcolor=cBlue>;
+        
+        if (SeekToEntryIfExists(Fields4, 5))
+            uint64 F5 <format=hex, bgcolor=cBlue>;
+
+        if (SeekToEntryIfExists(Fields4, 6))
+            uint F6 <format=hex, bgcolor=cBlue>;
+            
+        if ((Fields4.OffsetTableSize / 2 - 1) > 7)
+            Printf("Unk3Hash Larger\n");
+    } Table;
+    
+} Unk3Hash;
+        
+typedef struct
+{
+    FlatArkFields JointsDataFields;
+    
+    if (SeekToEntryIfExists(JointsDataFields, 1))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (SeekToEntryIfExists(JointsDataFields, 2))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    struct
+                    {
+                        FlatArkFields ArrayFields;
+                        
+                        if (SeekToEntryIfExists(ArrayFields, 1))
+                            byte F1 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(ArrayFields, 2))
+                            int F2 <format=hex, bgcolor=cBlue>;
+
+                        if (SeekToEntryIfExists(ArrayFields, 3))
+                            Vec3 F3 <format=hex, bgcolor=cBlue>;
+
+                        if (SeekToEntryIfExists(ArrayFields, 4))
+                            uint64 F4 <format=hex, bgcolor=cBlue>;
+                    } Entry;
+                }
+            } Table;
+        } F2;
+    }
+    
+    if ((JointsDataFields.OffsetTableSize / 2 - 1) > 3)
+        Printf("EventKeyLookAtJointsData Larger\n");
+} EventKeyLookAtJointsData;
+   
+typedef struct
+{
+    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+    local int j = 0;
+    for (j = 0; j < NumEntries; j++)
+    {
+        FSeek(startof(Offsets[j]) + Offsets[j]);
+        EventKeyLookAtJointsData Entry;
+    }
+} EventKeyLookAtJointsDataArray;
+         
+#include "Evtb_ActorData.bt";
+#include "Evtb_CameraData.bt";
+#include "Evtb_SystemData.bt";
+#include "Evtb_FilterData.bt";
+#include "Evtb_SceneObjectData.bt";
+#include "Evtb_PreloadData.bt";
+
+FlatArkHeader Hdr;
+
+if (SeekToEntryIfExists(Hdr.Fields, 1))
+    int Date <fgcolor=cRed>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 2))
+    Vec3 F2 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 3))
+    Vec3 F3 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 4))
+    int F4 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 5))
+    StringField F5 <read=Str>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 6))
+{
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);
+        
+        struct
+        {
+            FlatArkFields Fields;
+            
+            if (SeekToEntryIfExists(Fields, 1))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                        local int j = 0;
+                        for (j = 0; j < NumEntries; j++)
+                        {
+                            FSeek(startof(Offsets[j]) + Offsets[j]);
+                            struct
+                            {
+                                FlatArkFields Fields2;
+                                
+                                if (SeekToEntryIfExists(Fields2, 1))
+                                    Vec3 F1 <bgcolor=cBlue>;
+                                
+                                if (SeekToEntryIfExists(Fields2, 2))
+                                    Vec3 F2 <bgcolor=cBlue>;
+ 
+                                if (SeekToEntryIfExists(Fields2, 3))
+                                    byte F3 <bgcolor=cBlue>; // Bool
+                                
+                                if (SeekToEntryIfExists(Fields2, 4))
+                                    float F4 <bgcolor=cBlue>;
+
+                                if (SeekToEntryIfExists(Fields2, 5))
+                                    float F5 <bgcolor=cBlue>;
+
+                                if (SeekToEntryIfExists(Fields2, 6))
+                                    float F6 <bgcolor=cBlue>;
+
+                                if (SeekToEntryIfExists(Fields2, 7))
+                                    float F7 <bgcolor=cBlue>;
+ 
+                                if (SeekToEntryIfExists(Fields2, 8))
+                                    float F8 <bgcolor=cBlue>;
+                            } Entry;
+                        }
+                    } Table;
+                } F1;
+            }
+            
+            if (SeekToEntryIfExists(Fields, 2))
+                float F2_FrameStart <bgcolor=cBlue>;
+
+            if (SeekToEntryIfExists(Fields, 3))
+                float F3_FrameStart[2] <bgcolor=cBlue>;
+
+            if (SeekToEntryIfExists(Fields, 4))
+                float F4_FrameStart[2] <bgcolor=cBlue>;
+        } Table;
+    } F6;
+}
+
+if (SeekToEntryIfExists(Hdr.Fields, 7))
+    uint F7 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 8))
+    uint F8 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 9))
+    uint F9 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 10))
+    uint F10 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 11))
+    byte F11 <bgcolor=cBlue>;
+    
+if (SeekToEntryIfExists(Hdr.Fields, 12))
+    byte F12 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 13))
+    byte F13 <bgcolor=cBlue>;
+
+if (SeekToEntryIfExists(Hdr.Fields, 14))
+    Printf("Got F14\n");
+
+if (SeekToEntryIfExists(Hdr.Fields, 15))
+{
+    struct 
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);
+        
+        struct
+        {
+            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+            local int j = 0;
+            for (j = 0; j < NumEntries; j++)
+            {
+                FSeek(startof(Offsets[j]) + Offsets[j]);
+                struct
+                {
+                    FlatArkFields Fields;
+                    
+                    if (SeekToEntryIfExists(Fields, 1))
+                        uint F1_FrameStart <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 2))
+                        uint F2_FrameCount <bgcolor=cBlue>;
+
+                    if (SeekToEntryIfExists(Fields, 3))
+                        Printf("Got F15->F3\n");
+
+                    if (SeekToEntryIfExists(Fields, 4))
+                        float F4 <bgcolor=cBlue>;
+
+                    if (SeekToEntryIfExists(Fields, 5))
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            FSeek(startof(DataOffset) + DataOffset);
+                            struct
+                            {
+                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                local int j = 0;
+                                for (j = 0; j < NumEntries; j++)
+                                {
+                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                    struct
+                                    {
+                                        FlatArkFields Fields2;
+                                        
+                                        if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                
+                                                struct
+                                                {
+                                                    FlatArkFields Fields3;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 1))
+                                                        uint64 F1 <format=hex, bgcolor=cBlue>;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 2))
+                                                        uint64 F2 <format=hex, bgcolor=cBlue>;
+
+                                                    if (SeekToEntryIfExists(Fields3, 3))
+                                                        byte F3 <format=hex, bgcolor=cBlue>;
+
+                                                    if (SeekToEntryIfExists(Fields3, 4))
+                                                        int F4 <bgcolor=cBlue>;
+                                                } Table;
+                                            } F1;
+                                        }
+                                        
+                                        if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                struct
+                                                {
+                                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                    local int j = 0;
+                                                    for (j = 0; j < NumEntries; j++)
+                                                    {
+                                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                        //EventSubSequenceActorData ActorData;
+                                                    }
+                                                } Table;
+                                            } F2;
+                                        }
+                                    } Entry;
+                                }
+                            } Table;
+                        } F5_EventSubSequenceActorData;
+                    }
+                    
+                    if (SeekToEntryIfExists(Fields, 6))
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            FSeek(startof(DataOffset) + DataOffset);
+                            
+                            struct
+                            {
+                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                local int j = 0;
+                                for (j = 0; j < NumEntries; j++)
+                                {
+                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                    struct
+                                    {
+                                        FlatArkFields Fields2;
+                                        
+                                        if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                            
+                                                struct
+                                                {
+                                                    FlatArkFields Fields3;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 1))
+                                                        uint64 F1 <format=hex, bgcolor=cBlue>;
+  
+                                                    if (SeekToEntryIfExists(Fields3, 2))
+                                                        uint64 F2 <format=hex, bgcolor=cBlue>;
+
+                                                    if (SeekToEntryIfExists(Fields3, 3))
+                                                        byte F3 <format=hex, bgcolor=cBlue>;
+                                                        
+                                                    if (SeekToEntryIfExists(Fields3, 4))
+                                                        int F4 <bgcolor=cBlue>;
+                                                } Table;
+                                            } F1;
+                                        }
+                                        
+                                        if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                struct
+                                                {
+                                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                    local int j = 0;
+                                                    for (j = 0; j < NumEntries; j++)
+                                                    {
+                                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                        //EventSubSequenceCameraData Data;
+                                                    }
+                                                } Table;
+                                            } F2;
+                                        }
+                                    } EventSubSequenceCameraData_;
+                                }
+                            } Table;
+                        } F6_EventSubSequenceCameraDatas;
+                    }
+                    
+                    if (SeekToEntryIfExists(Fields, 7))
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            FSeek(startof(DataOffset) + DataOffset);
+                            
+                            struct
+                            {
+                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                local int j = 0;
+                                for (j = 0; j < NumEntries; j++)
+                                {
+                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                    struct
+                                    {
+                                        FlatArkFields Fields2;
+                                        
+                                        if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                            
+                                                struct
+                                                {
+                                                    FlatArkFields Fields3;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 1))
+                                                        uint64 F1 <format=hex, bgcolor=cBlue>;
+  
+                                                    if (SeekToEntryIfExists(Fields3, 2))
+                                                        uint64 F2 <format=hex, bgcolor=cBlue>;
+
+                                                    if (SeekToEntryIfExists(Fields3, 3))
+                                                        byte F3 <format=hex, bgcolor=cBlue>;
+                                                        
+                                                    if (SeekToEntryIfExists(Fields3, 4))
+                                                        int F4 <bgcolor=cBlue>;
+                                                } Table;
+                                            } F1;
+                                        }
+                                        
+                                        if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                struct
+                                                {
+                                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                    local int j = 0;
+                                                    for (j = 0; j < NumEntries; j++)
+                                                    {
+                                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                        EventSubSequenceSystemData Data;
+                                                    }
+                                                } Table;
+                                            } F2;
+                                        }
+                                    } EventSubSequenceSystemData_;
+                                }
+                            } EventSubSequenceSystemDataArray;
+                        } F7_EventSubSequenceSystemDatas;
+                    }
+                    
+                    if (SeekToEntryIfExists(Fields, 8))
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            FSeek(startof(DataOffset) + DataOffset);
+                            
+                            struct
+                            {
+                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                local int j = 0;
+                                for (j = 0; j < NumEntries; j++)
+                                {
+                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                    struct
+                                    {
+                                        FlatArkFields Fields2;
+                                    
+                                        if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                            
+                                                struct
+                                                {
+                                                    FlatArkFields Fields3;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 1))
+                                                        uint64 F1 <format=hex, bgcolor=cBlue>;
+  
+                                                    if (SeekToEntryIfExists(Fields3, 2))
+                                                        uint64 F2 <format=hex, bgcolor=cBlue>;
+    
+                                                    if (SeekToEntryIfExists(Fields3, 3))
+                                                        byte F3 <format=hex, bgcolor=cBlue>;
+                                                        
+                                                    if (SeekToEntryIfExists(Fields3, 4))
+                                                        int F4 <bgcolor=cBlue>;
+                                                } Table;
+                                            } F1;
+                                        }
+                                        
+                                        if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                struct
+                                                {
+                                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                    local int j = 0;
+                                                    for (j = 0; j < NumEntries; j++)
+                                                    {
+                                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                        //EventSubSequenceFilterData Data;
+                                                    }
+                                                } Table;
+                                            } F2;
+                                        }
+                                    } EventSubSequenceFilterData_;
+                                }
+                            } EventSubSequenceFilterDataArray;
+                        } F8_EventSubSequenceFilterDatas;
+                    }
+                    
+                    if (SeekToEntryIfExists(Fields, 9))
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            FSeek(startof(DataOffset) + DataOffset);
+                            
+                            struct
+                            {
+                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                local int j = 0;
+                                for (j = 0; j < NumEntries; j++)
+                                {
+                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                    struct
+                                    {
+                                        FlatArkFields Fields2;
+                                    
+                                        if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                            
+                                                struct
+                                                {
+                                                    FlatArkFields Fields3;
+                                                    
+                                                    if (SeekToEntryIfExists(Fields3, 1))
+                                                        uint64 F1 <format=hex, bgcolor=cBlue>;
+  
+                                                    if (SeekToEntryIfExists(Fields3, 2))
+                                                        uint64 F2 <format=hex, bgcolor=cBlue>;
+    
+                                                    if (SeekToEntryIfExists(Fields3, 3))
+                                                        byte F3 <format=hex, bgcolor=cBlue>;
+                                                        
+                                                    if (SeekToEntryIfExists(Fields3, 4))
+                                                        int F4 <bgcolor=cBlue>;
+                                                } Table;
+                                            } F1;
+                                        }
+                                        
+                                        if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
+                                        {
+                                            FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
+                                            struct
+                                            {
+                                                int DataOffset <format=hex, fgcolor=cRed>;
+                                                FSeek(startof(DataOffset) + DataOffset);
+                                                struct
+                                                {
+                                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                    local int j = 0;
+                                                    for (j = 0; j < NumEntries; j++)
+                                                    {
+                                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                        //EventSubSequenceSceneObjectData Data;
+                                                    }
+                                                } Table;
+                                            } F2;
+                                        }
+                                    } EventSubSequenceSceneObjectData_;
+                                }
+                            } EventSubSequenceSceneObjectDataArray;
+                        } F9_EventSubSequenceSceneObjectDatas;   
+                    }
+
+                    if (SeekToEntryIfExists(Fields, 10))
+                        Printf("Got Seq F10\n");
+                        
+                } EventSequenceData;
+            }
+        } EventSequenceDataArray;
+    } F15_EventSequenceData;
+}
+
+if (SeekToEntryIfExists(Hdr.Fields, 16))
+    byte F16 <bgcolor=cBlue>;
+    
+if (SeekToEntryIfExists(Hdr.Fields, 17))
+    byte F17 <bgcolor=cBlue>;
+    
+if (SeekToEntryIfExists(Hdr.Fields, 18))
+{
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        FSeek(startof(DataOffset) + DataOffset);
+        
+        struct
+        {
+            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+            local int j = 0;
+            for (j = 0; j < NumEntries; j++)
+            {
+                FSeek(startof(Offsets[j]) + Offsets[j]);
+                struct
+                {
+                    FlatArkFields Fields;
+                    
+                    if (SeekToEntryIfExists(Fields, 1))
+                        Vec3 F1 <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 2))
+                        Vec3 F2 <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 3))
+                        float F3 <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 4))
+                        float F4 <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 5))
+                        float F5 <bgcolor=cBlue>;
+                        
+                    if (SeekToEntryIfExists(Fields, 6))
+                        float F6 <bgcolor=cBlue>;
+                } FirstCameraComposition;
+            }
+        } Table;
+    } F18_FirstCameraCompositionArray; // Timeline::EventData::FirstCameraComposition
+}
+    
+if (SeekToEntryIfExists(Hdr.Fields, 19))
+    PreloadTextureDataSetup F19;
+
+if (SeekToEntryIfExists(Hdr.Fields, 20))
+    byte F20 <bgcolor=cBlue>;
+    
+if ((Hdr.Fields.OffsetTableSize / 2 - 1) > 21)
+   Printf("Main Header Larger\n");

@@ -1,0 +1,293 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            struct
+            {
+                FlatArkFields Fields3;
+                
+                if (SeekToEntryIfExists(Fields3, 1))
+                    int F1 <bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields3, 2))
+                {
+                    struct
+                    {
+                        int DataOffset <format=hex, fgcolor=cRed>;
+                        FSeek(startof(DataOffset) + DataOffset);
+                        
+                        struct
+                        {
+                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                            local int j = 0;
+                            for (j = 0; j < NumEntries; j++)
+                            {
+                                FSeek(startof(Offsets[j]) + Offsets[j]);
+                                struct
+                                {
+                                    FlatArkFields Fields4;
+                                    
+                                    if (SeekToEntryIfExists(Fields4, 1))
+                                        int F1 <bgcolor=cBlue>;
+                                        
+                                    if (SeekToEntryIfExists(Fields4, 2))
+                                    {
+                                        struct
+                                        {
+                                            int DataOffset <format=hex, fgcolor=cRed>;
+                                            FSeek(startof(DataOffset) + DataOffset);
+                                            
+                                            struct
+                                            {
+                                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                                local int j = 0;
+                                                for (j = 0; j < NumEntries; j++)
+                                                {
+                                                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                                                    
+                                                    struct
+                                                    {
+                                                        int StrLength <bgcolor=cYellow, format=hex>;
+                                                        char Str[StrLength] <bgcolor=cYellow, format=hex>;
+                                                    } Str<read=Str>;
+                                                }
+                                            } Table;
+                                        } F2_Array;
+                                    }
+                                        
+                                    if (SeekToEntryIfExists(Fields4, 3))
+                                        byte F3 <bgcolor=cBlue>;
+                                        
+                                    if ((Fields4.OffsetTableSize / 2 - 1) > 4)
+                                        Printf("PreloadTextureDataImpl Larger\n");
+                                } Entry;
+                            }
+                        } Array;
+                    } F2;
+                }
+            } Table;
+        }
+    } Array;
+} PreloadTextureDataImpl_Array; // Timeline::PreloadTextureDataImpl Array
+        
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            struct
+            {
+                FlatArkFields Fields3;
+
+                if (SeekToEntryIfExists(Fields3, 1))
+                    int F1 <bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields3, 2))
+                   int F2 <bgcolor=cBlue>;
+                   
+                if ((Fields3.OffsetTableSize / 2 - 1) > 3)
+                    Printf("PreloadBitKey Larger\n");
+            } PreloadBitKey;
+        }
+    } Array;
+} PreloadBitKey_Array; // Timeline::PreloadBitKey Array
+            
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            struct
+            {
+                FlatArkFields Fields3;
+
+                if (SeekToEntryIfExists(Fields3, 1))
+                    int F1 <bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields3, 2))
+                    byte F2 <bgcolor=cBlue>;
+                    
+                if ((Fields3.OffsetTableSize / 2 - 1) > 3)
+                    Printf("PreloadBoolKey Larger\n");
+            } PreloadBoolKey;
+        }
+    } Array;
+} PreloadBoolKey_Array; // Timeline::PreloadBoolKey Array
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+        local int j = 0;
+        for (j = 0; j < NumEntries; j++)
+        {
+            FSeek(startof(Offsets[j]) + Offsets[j]);
+            struct
+            {
+                FlatArkFields Fields2;
+                
+                if (SeekToEntryIfExists(Fields2, 1))
+                    uint F1 <format=hex, bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields2, 2))
+                    PreloadTextureDataImpl_Array F2;
+
+                if (SeekToEntryIfExists(Fields2, 3))
+                    PreloadBitKey_Array F3 <bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields2, 4))
+                    PreloadBoolKey_Array F4 <bgcolor=cBlue>;
+                    
+                if (SeekToEntryIfExists(Fields2, 5))
+                    int F5 <bgcolor=cBlue>;
+                    
+                if ((Fields2.OffsetTableSize / 2 - 1) > 6)
+                    Printf("PreloadTextureData Larger\n");
+
+            } Entry;
+        }
+    } Table;
+} PreloadTextureData_Array; // Timeline::PreloadTextureData
+            
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        FlatArkFields Fields;
+        
+        if (SeekToEntryIfExists(Fields, 1))
+            PreloadTextureData_Array F1_Array;
+            
+        if (SeekToEntryIfExists(Fields, 2))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                struct
+                {
+                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                    local int j = 0;
+                    for (j = 0; j < NumEntries; j++)
+                    {
+                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                        struct
+                        {
+                            FlatArkFields Fields2;
+                            
+                            if (SeekToEntryIfExists(Fields2, 1))
+                                uint F1_ObjId <format=hex, bgcolor=cBlue>;
+                                
+                            if (SeekToEntryIfExists(Fields2, 2))
+                                int F2 <bgcolor=cBlue>;
+                                
+                            if (SeekToEntryIfExists(Fields2, 3))
+                                Printf("Check PreloadRequestPriority F3\n");
+                                
+                            if (SeekToEntryIfExists(Fields2, 4))
+                                byte F4 <bgcolor=cBlue>;
+                                
+                            if ((Fields2.OffsetTableSize / 2 - 1) > 5)
+                                Printf("PreloadRequestPriority F3 Larger\n");
+                        } Entry;
+                    } // Timeline::PreloadRequestPriority?
+                } Table;
+            } F2;
+        }
+            
+        if (SeekToEntryIfExists(Fields, 3))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                struct
+                {
+                    FlatArkFields Fields2;
+                            
+                    if (SeekToEntryIfExists(Fields2, 1))
+                       int F1 <format=hex, bgcolor=cBlue>;
+                       
+                    if (SeekToEntryIfExists(Fields2, 2))
+                       int F2 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 3))
+                       float F3 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 4))
+                       float F4 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 5))
+                       int F5 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 6))
+                       int F6 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 7))
+                       float F7 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 8))
+                       float F8 <format=hex, bgcolor=cBlue>; 
+                       
+                    if (SeekToEntryIfExists(Fields2, 9))
+                       float F9 <format=hex, bgcolor=cBlue>; 
+                       
+                    if ((Fields2.OffsetTableSize / 2 - 1) > 10)
+                       Printf("PreloadTextureDataSetup F3 Larger\n");
+                       
+                } Table;
+            } F3;   
+        }
+    } Table;
+} PreloadTextureDataSetup;

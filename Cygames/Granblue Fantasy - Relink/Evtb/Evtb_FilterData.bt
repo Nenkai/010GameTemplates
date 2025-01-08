@@ -1,0 +1,2206 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields Fields5;
+         
+         if (SeekToEntryIfExists(Fields5, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(Fields5, 2))
+             EventKeyParamData_TBoolArray F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterBoolEntry;
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields FilterFloatFields;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 2))
+             EventKeyParamData_TFloatArray F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterFloatEntry;
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields Fields5;
+         
+         if (SeekToEntryIfExists(Fields5, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(Fields5, 2))
+             EventKeyParamData_TIntArray F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterIntEntry;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+     
+    struct
+    {
+        FlatArkFields Fields5;
+        
+        if (SeekToEntryIfExists(Fields5, 1))
+            byte F1 <format=hex, bgcolor=cBlue>;
+        
+        if (SeekToEntryIfExists(Fields5, 2))
+            EventKeyParamData_TSCharArray F2 <format=hex, bgcolor=cBlue>;
+    } Table;
+    
+} FilterSCharEntry;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+     
+    struct
+    {
+        FlatArkFields Fields5;
+        
+        if (SeekToEntryIfExists(Fields5, 1))
+            byte F1 <format=hex, bgcolor=cBlue>;
+        
+        if (SeekToEntryIfExists(Fields5, 2))
+            EventKeyParamData_TUCharArray F2 <format=hex, bgcolor=cBlue>;
+    } Table;
+      
+} FilterUCharEntry;
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields FilterFloatFields;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 2))
+             EventKeyParamData_TUIntArray F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterUIntEntry;
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields FilterFloatFields;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 2))
+             EventKeyParamData_THash64Array F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterHash64Entry;
+
+typedef struct
+{
+     int DataOffset <format=hex, fgcolor=cRed>;
+     FSeek(startof(DataOffset) + DataOffset);
+     
+     struct
+     {
+         FlatArkFields FilterFloatFields;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 1))
+             byte F1 <format=hex, bgcolor=cBlue>;
+         
+         if (SeekToEntryIfExists(FilterFloatFields, 2))
+             EventKeyParamData_TStringArray F2 <format=hex, bgcolor=cBlue>;
+     } Table;
+} FilterStringEntry;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+           
+    struct
+    { 
+        FlatArkFields tempfields;
+        
+        if (SeekToEntryIfExists(tempfields, 1))
+            FilterFloatEntry F1 <format=hex, bgcolor=cBlue>;
+            
+        if (SeekToEntryIfExists(tempfields, 2))
+            FilterFloatEntry F2 <format=hex, bgcolor=cBlue>;
+            
+        if (SeekToEntryIfExists(tempfields, 3))
+            FilterFloatEntry F3 <format=hex, bgcolor=cBlue>;
+    } Table;
+    
+} Unk3xFloatStruct;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+           
+    struct
+    { 
+        FlatArkFields UnkFloatFields;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 1))
+            Unk3xFloatStruct F1;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 2))
+            Unk3xFloatStruct F2;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 3))
+            Unk3xFloatStruct F3;
+    } Table;
+    
+} UnkFloatStructMap;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+           
+    struct
+    { 
+        FlatArkFields UnkFloatFields;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 1))
+            FilterFloatEntry F1;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 2))
+            FilterFloatEntry F2;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 3))
+            FilterFloatEntry F3;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 4))
+            FilterFloatEntry F4;
+    } Table;
+} Unk2xFloatStruct;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+           
+    struct
+    { 
+        FlatArkFields UnkFloatFields;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 1))
+            FilterFloatEntry F1;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 2))
+            FilterFloatEntry F2;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 3))
+            FilterFloatEntry F3;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 4))
+            FilterFloatEntry F4;
+    } Table;
+} Unk4xFloatStruct;
+        
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+           
+    struct
+    { 
+        FlatArkFields UnkFloatFields;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 1))
+            EventKeyParamData_TKeyFloatArray F1;
+        
+        if (SeekToEntryIfExists(UnkFloatFields, 2))
+            EventKeyParamData_TKeyFloatArray F2;
+            
+        if (SeekToEntryIfExists(UnkFloatFields, 3))
+            EventKeyParamData_TKeyFloatArray F3;
+    } Table;
+} Unk3xKeyArrayStruct;
+           
+typedef struct
+{
+    FlatArkFields FilterDataFields;
+    
+    if (SeekToEntryIfExists(FilterDataFields, 1))
+        Unk3Hash F1 <format=hex, bgcolor=cBlue>;
+    
+    if (SeekToEntryIfExists(FilterDataFields, 2))
+        byte F2_UnionType <format=hex, bgcolor=cBlue, fgcolor=cYellow>;
+    
+    if (SeekToEntryIfExists(FilterDataFields, 3))
+        uint64 F3 <format=hex, bgcolor=cBlue>;
+           
+    if (SeekToEntryIfExists(FilterDataFields, 4))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                FlatArkFields Fields4;
+                
+                if (SeekToEntryIfExists(Fields4, 1))
+                    FilterBoolEntry F1;
+                
+                if (SeekToEntryIfExists(Fields4, 2))
+                    FilterBoolEntry F2;
+
+                if (SeekToEntryIfExists(Fields4, 3))
+                    FilterFloatEntry F3;
+
+                if (SeekToEntryIfExists(Fields4, 4))
+                    FilterIntEntry F4;
+            } Table;
+        } F4;
+    }
+            
+    switch (F2_UnionType)
+    {
+        case 1:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe1 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                        
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterBoolEntry F6;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 7)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 2:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe2 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                             FilterFloatEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                        
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                        
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterBoolEntry F6;
+                           
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterBoolEntry F7;
+                           
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                        
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterBoolEntry F12;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 13)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 3:
+        case 4:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe3 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 2)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 5:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe4 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterIntEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterIntEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterIntEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterIntEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterIntEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            Unk3xFloatStruct F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterFloatEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            FilterFloatEntry F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterIntEntry F16;
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            Unk3xFloatStruct F17;
+                            
+                        if (SeekToEntryIfExists(Fields6, 18))
+                            FilterFloatEntry F18;
+                            
+                        if (SeekToEntryIfExists(Fields6, 19))
+                            FilterFloatEntry F19;
+                            
+                        if (SeekToEntryIfExists(Fields6, 20))
+                            FilterFloatEntry F20;
+                            
+                        if (SeekToEntryIfExists(Fields6, 21))
+                            Unk4xFloatStruct F21;
+                            
+                        if (SeekToEntryIfExists(Fields6, 22))
+                            Unk4xFloatStruct F22;
+                            
+                        if (SeekToEntryIfExists(Fields6, 23))
+                            FilterBoolEntry F23;
+                            
+                        if (SeekToEntryIfExists(Fields6, 24))
+                            FilterBoolEntry F24;
+                            
+                        // No f25, not present nor read
+
+                        if (SeekToEntryIfExists(Fields6, 26))
+                            FilterBoolEntry F26;
+                            
+                        if (SeekToEntryIfExists(Fields6, 27))
+                            FilterBoolEntry F27;
+                            
+                        if (SeekToEntryIfExists(Fields6, 28))
+                            FilterBoolEntry F28;
+                            
+                        if (SeekToEntryIfExists(Fields6, 29))
+                            FilterBoolEntry F29;
+                            
+                        if (SeekToEntryIfExists(Fields6, 30))
+                            FilterBoolEntry F30;
+                            
+                        if (SeekToEntryIfExists(Fields6, 31))
+                            FilterFloatEntry F31;
+                            
+                        if (SeekToEntryIfExists(Fields6, 32))
+                            FilterBoolEntry F32;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 33)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 6:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe5 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                        
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 2)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 7:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe34 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterBoolEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterUCharEntry F3;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 4)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 8:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe6 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 4)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+           
+        case 9:
+            break;
+            
+        case 10:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe7 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk2xFloatStruct F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        // 7 not read/used
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterUIntEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                        {
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        struct
+                                        {
+                                            FlatArkFields Fields_; // Always 3 entries
+                                            
+                                            if (SeekToEntryIfExists(Fields_, 1))
+                                                Unk4xFloatStruct F1;
+                            
+                                            if (SeekToEntryIfExists(Fields_, 2))
+                                                FilterFloatEntry F2;
+                                                
+                                            if (SeekToEntryIfExists(Fields_, 3))
+                                                FilterUIntEntry F3;
+                                                
+                                            if (SeekToEntryIfExists(Fields_, 4))
+                                                Unk2xFloatStruct F4;
+                                        } Entry;
+                                    }
+                                } Array;
+                            } F10;   
+                        }
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            Unk3xFloatStruct F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterBoolEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterBoolEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            FilterBoolEntry F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterBoolEntry F16;
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            FilterFloatEntry F17;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 18)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+
+        case 11:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe8 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterStringEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            Unk2xFloatStruct F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk2xFloatStruct F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            Unk4xFloatStruct F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterBoolEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterIntEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 10)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 12:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe9 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            Unk2xFloatStruct F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            Unk2xFloatStruct F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterUIntEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            Unk3xFloatStruct F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            Unk4xFloatStruct F10;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 11)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 13:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe10 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                           
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            EventKeyParamData_TKeyFloatArray F7;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 8)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 14:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe11 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterBoolEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 6)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 15:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe12 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 3)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+        case 16:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe13 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterSCharEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterSCharEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterSCharEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 10)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+        // gap
+        case 19:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe16 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk4xFloatStruct F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            Unk4xFloatStruct F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            Unk4xFloatStruct F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            Unk4xFloatStruct F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterFloatEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            FilterFloatEntry F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterFloatEntry F16;
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            FilterFloatEntry F17;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 18)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+        case 20:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe17 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterBoolEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterBoolEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterBoolEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterBoolEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterBoolEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterBoolEntry F14;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 15)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 21:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe33 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 3)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 22:
+            break;
+         
+        case 23:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe18 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk2xFloatStruct F3;
+                        
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterBoolEntry F4;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 5)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+               
+        case 24:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe19 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterBoolEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterBoolEntry F3;
+                        
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterBoolEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            Unk4xFloatStruct F7;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 8)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 25:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe20 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterIntEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterIntEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterBoolEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            Unk2xFloatStruct F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterBoolEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterBoolEntry F11;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 12)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 26:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe21 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 6)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 27:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe22 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterUIntEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterFloatEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            Unk3xFloatStruct F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterFloatEntry F16;
+                            
+                        // always 3 entries
+                        if (SeekToEntryIfExists(Fields6, 17))
+                        {
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        struct
+                                        {
+                                            FlatArkFields Fields7;
+                                    
+                                            if (SeekToEntryIfExists(Fields7, 1))
+                                                Unk3xFloatStruct F1;
+                                                
+                                            if (SeekToEntryIfExists(Fields7, 2))
+                                                FilterFloatEntry F2;
+                                                
+                                            if (SeekToEntryIfExists(Fields7, 3))
+                                                FilterFloatEntry F3;
+                                        } Entry;
+                                    }
+                                } Table;
+
+                            } F17;
+                        }
+
+                        if (SeekToEntryIfExists(Fields6, 18))
+                            Unk3xFloatStruct F18;
+                            
+                        if (SeekToEntryIfExists(Fields6, 19))
+                            Unk3xFloatStruct F19;
+                            
+                        if (SeekToEntryIfExists(Fields6, 20))
+                            FilterFloatEntry F20;
+                            
+                        if (SeekToEntryIfExists(Fields6, 21))
+                            FilterFloatEntry F21;
+                            
+                        if (SeekToEntryIfExists(Fields6, 22))
+                            FilterStringEntry F22;
+                            
+                        if (SeekToEntryIfExists(Fields6, 23))
+                            FilterStringEntry F23;
+                            
+                        if (SeekToEntryIfExists(Fields6, 24))
+                            FilterIntEntry F24;
+                            
+                        if (SeekToEntryIfExists(Fields6, 25))
+                            FilterStringEntry F25;
+                            
+                        if (SeekToEntryIfExists(Fields6, 26))
+                            FilterStringEntry F26;
+                            
+                        if (SeekToEntryIfExists(Fields6, 27))
+                            FilterFloatEntry F27;
+                            
+                        if (SeekToEntryIfExists(Fields6, 28))
+                            FilterFloatEntry F28;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 29)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 28:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe23 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterStringEntry F7;
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 29:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe34 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            Unk4xFloatStruct F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk2xFloatStruct F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterBoolEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterFloatEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            Unk4xFloatStruct F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            Unk4xFloatStruct F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterFloatEntry F16;
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            FilterFloatEntry F17;
+                            
+                        if (SeekToEntryIfExists(Fields6, 18))
+                            FilterFloatEntry F18;
+                            
+                        if (SeekToEntryIfExists(Fields6, 19))
+                            FilterFloatEntry F19;
+                            
+                        if (SeekToEntryIfExists(Fields6, 20))
+                            FilterFloatEntry F20;
+                            
+                        if (SeekToEntryIfExists(Fields6, 21))
+                            FilterFloatEntry F21;
+                            
+                        if (SeekToEntryIfExists(Fields6, 22))
+                            FilterFloatEntry F22;
+                            
+                        if (SeekToEntryIfExists(Fields6, 23))
+                            FilterBoolEntry F23;
+                            
+                        if (SeekToEntryIfExists(Fields6, 24))
+                            FilterBoolEntry F24;
+                            
+                        if (SeekToEntryIfExists(Fields6, 25))
+                            FilterBoolEntry F25;
+                            
+                        if (SeekToEntryIfExists(Fields6, 26))
+                            Unk4xFloatStruct F26;
+                            
+                        if (SeekToEntryIfExists(Fields6, 27))
+                            FilterFloatEntry F27;
+                            
+                        if (SeekToEntryIfExists(Fields6, 28))
+                            FilterFloatEntry F28;
+                            
+                        if (SeekToEntryIfExists(Fields6, 29))
+                            FilterFloatEntry F29;
+                            
+                        if (SeekToEntryIfExists(Fields6, 30))
+                            FilterFloatEntry F30;
+                            
+                        if (SeekToEntryIfExists(Fields6, 31))
+                            FilterFloatEntry F31;
+                            
+                        if (SeekToEntryIfExists(Fields6, 32))
+                            Unk4xFloatStruct F32;
+                            
+                        if (SeekToEntryIfExists(Fields6, 33))
+                            Unk2xFloatStruct F33;
+                            
+                        if (SeekToEntryIfExists(Fields6, 34))
+                            FilterFloatEntry F34;
+                            
+                        if (SeekToEntryIfExists(Fields6, 35))
+                            Unk2xFloatStruct F35;
+                            
+                        if (SeekToEntryIfExists(Fields6, 36))
+                            FilterFloatEntry F36;
+                            
+                        if (SeekToEntryIfExists(Fields6, 37))
+                            FilterFloatEntry F37;
+                            
+                        if (SeekToEntryIfExists(Fields6, 38))
+                            FilterFloatEntry F38;
+                            
+                        if (SeekToEntryIfExists(Fields6, 39))
+                            FilterFloatEntry F39;
+                            
+                        if (SeekToEntryIfExists(Fields6, 40))
+                            FilterFloatEntry F40;
+                            
+                        if (SeekToEntryIfExists(Fields6, 41))
+                            FilterFloatEntry F41;
+                            
+                        if (SeekToEntryIfExists(Fields6, 42))
+                            FilterFloatEntry F42;
+                            
+                        if (SeekToEntryIfExists(Fields6, 43))
+                            FilterFloatEntry F43;
+                            
+                        if (SeekToEntryIfExists(Fields6, 44))
+                            FilterBoolEntry F44;
+                            
+                        if (SeekToEntryIfExists(Fields6, 45))
+                            Unk4xFloatStruct F45;
+                            
+                        if (SeekToEntryIfExists(Fields6, 46))
+                            FilterBoolEntry F46;
+                            
+                        if (SeekToEntryIfExists(Fields6, 47))
+                            Unk4xFloatStruct F47;
+                            
+                        if (SeekToEntryIfExists(Fields6, 48))
+                            Unk4xFloatStruct F48;
+                            
+                        if (SeekToEntryIfExists(Fields6, 49))
+                            FilterBoolEntry F49;
+                            
+                        if (SeekToEntryIfExists(Fields6, 50))
+                            Unk4xFloatStruct F50;
+                            
+                        if (SeekToEntryIfExists(Fields6, 54))
+                            FilterFloatEntry F54;
+                            
+                        if (SeekToEntryIfExists(Fields6, 60))
+                            FilterFloatEntry F60;
+                           
+                        if (SeekToEntryIfExists(Fields6, 61))
+                            FilterFloatEntry F61;
+                             
+                        if (SeekToEntryIfExists(Fields6, 62))
+                            FilterFloatEntry F62;
+                            
+                        if (SeekToEntryIfExists(Fields6, 63))
+                            Unk4xFloatStruct F63;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 64)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 30:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe26 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterStringEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterBoolEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            Unk4xFloatStruct F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            Unk4xFloatStruct F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            FilterBoolEntry F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                        {
+                            struct
+                            {
+                                FlatArkFields Fields6;
+                                
+                                if (SeekToEntryIfExists(Fields6, 1))
+                                    Unk3xFloatStruct F1;
+                                
+                                if (SeekToEntryIfExists(Fields6, 2))
+                                    Unk3xFloatStruct F2;
+                                
+                                if (SeekToEntryIfExists(Fields6, 3))
+                                    Unk3xFloatStruct F3;
+                                    
+                                if (SeekToEntryIfExists(Fields6, 4))
+                                    Unk3xFloatStruct F4;
+                            } F16;   
+                        }
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            FilterBoolEntry F17;
+                            
+                        if (SeekToEntryIfExists(Fields6, 18))
+                        {
+                            struct
+                            {
+                                FlatArkFields Fields6;
+                                
+                                if (SeekToEntryIfExists(Fields6, 1))
+                                    Unk3xFloatStruct F1;
+                                
+                                if (SeekToEntryIfExists(Fields6, 2))
+                                    Unk3xFloatStruct F2;
+                                
+                                if (SeekToEntryIfExists(Fields6, 3))
+                                    Unk3xFloatStruct F3;
+                                    
+                                if (SeekToEntryIfExists(Fields6, 4))
+                                    Unk3xFloatStruct F4;
+                            } F18;   
+                        }
+                        
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 19)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 31:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe26 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterBoolEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            Unk4xFloatStruct F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            Unk4xFloatStruct F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            Unk3xFloatStruct F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterStringEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterStringEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterStringEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterBoolEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterStringEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterStringEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterFloatEntry F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            FilterFloatEntry F15;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 16)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 32:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe35 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                       
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterBoolEntry F1;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 2)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 33:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe27 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterIntEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterBoolEntry F5;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 6)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 34:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe28 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterBoolEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterFloatEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterBoolEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            Unk4xFloatStruct F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterBoolEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 11)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 35:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe29 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            FilterBoolEntry F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            FilterFloatEntry F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            FilterFloatEntry F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            FilterFloatEntry F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            EventKeyParamData_TKeyFloatArray F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            Unk3xFloatStruct F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            Unk3xFloatStruct F14;
+                            
+                        if (SeekToEntryIfExists(Fields6, 15))
+                            Unk3xKeyArrayStruct F15;
+                            
+                        if (SeekToEntryIfExists(Fields6, 16))
+                            FilterFloatEntry F16;
+                            
+                        if (SeekToEntryIfExists(Fields6, 17))
+                            FilterFloatEntry F17;
+                            
+                        if (SeekToEntryIfExists(Fields6, 18))
+                            FilterFloatEntry F18;
+                            
+                        if (SeekToEntryIfExists(Fields6, 19))
+                            FilterFloatEntry F19;
+                            
+                        if (SeekToEntryIfExists(Fields6, 20))
+                            FilterFloatEntry F20;
+                            
+                        if (SeekToEntryIfExists(Fields6, 21))
+                            FilterFloatEntry F21;
+                            
+                        if (SeekToEntryIfExists(Fields6, 22))
+                            EventKeyParamData_TKeyFloatArray F22;
+                            
+                        if (SeekToEntryIfExists(Fields6, 23))
+                            Unk3xFloatStruct F23;
+                            
+                        if (SeekToEntryIfExists(Fields6, 24))
+                            Unk3xFloatStruct F24;
+                            
+                        if (SeekToEntryIfExists(Fields6, 25))
+                            Unk3xKeyArrayStruct F25;
+                            
+                        if (SeekToEntryIfExists(Fields6, 26))
+                            FilterBoolEntry F26;
+                            
+                        if (SeekToEntryIfExists(Fields6, 27))
+                            FilterFloatEntry F27;
+                            
+                        if (SeekToEntryIfExists(Fields6, 28))
+                            FilterFloatEntry F28;
+                            
+                        if (SeekToEntryIfExists(Fields6, 29))
+                            FilterFloatEntry F29;
+                            
+                        if (SeekToEntryIfExists(Fields6, 30))
+                            FilterFloatEntry F30;
+                            
+                        if (SeekToEntryIfExists(Fields6, 31))
+                            FilterFloatEntry F31;
+                            
+                        if (SeekToEntryIfExists(Fields6, 32))
+                            FilterFloatEntry F32;
+                            
+                        if (SeekToEntryIfExists(Fields6, 33))
+                            FilterFloatEntry F33;
+                            
+                        if (SeekToEntryIfExists(Fields6, 34))
+                            FilterFloatEntry F34;
+                            
+                        if (SeekToEntryIfExists(Fields6, 35))
+                            FilterFloatEntry F35;
+                            
+                        if (SeekToEntryIfExists(Fields6, 36))
+                            FilterFloatEntry F36;
+                            
+                        if (SeekToEntryIfExists(Fields6, 37))
+                            FilterFloatEntry F37;
+                            
+                        if (SeekToEntryIfExists(Fields6, 38))
+                            FilterFloatEntry F38;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 39)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 36:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe30 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6; // Many not read, this is accurate
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            FilterFloatEntry F1;
+                            
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                            
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if (SeekToEntryIfExists(Fields6, 5))
+                            Unk4xFloatStruct F5;
+                            
+                        if (SeekToEntryIfExists(Fields6, 6))
+                            Unk4xFloatStruct F6;
+                            
+                        if (SeekToEntryIfExists(Fields6, 7))
+                            Unk4xFloatStruct F7;
+                        
+                        if (SeekToEntryIfExists(Fields6, 8))
+                            Unk4xFloatStruct F8;
+                            
+                        if (SeekToEntryIfExists(Fields6, 9))
+                            FilterFloatEntry F9;
+                            
+                        if (SeekToEntryIfExists(Fields6, 10))
+                            FilterFloatEntry F10;
+                            
+                        if (SeekToEntryIfExists(Fields6, 11))
+                            FilterFloatEntry F11;
+                            
+                        if (SeekToEntryIfExists(Fields6, 12))
+                            FilterFloatEntry F12;
+                            
+                        if (SeekToEntryIfExists(Fields6, 13))
+                            FilterFloatEntry F13;
+                            
+                        if (SeekToEntryIfExists(Fields6, 14))
+                            FilterStringEntry F14;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 15)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+            
+        case 37:
+            if (SeekToEntryIfExists(FilterDataFields, 5))
+                byte F5_MustBe31 <format=hex, bgcolor=cBlue>;
+            
+            if (SeekToEntryIfExists(FilterDataFields, 6))
+            {
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    
+                    struct
+                    {
+                        FlatArkFields Fields6;
+                        
+                        if (SeekToEntryIfExists(Fields6, 1))
+                            UnkFloatStructMap F1;
+                        
+                        if (SeekToEntryIfExists(Fields6, 2))
+                            FilterFloatEntry F2;
+                        
+                        if (SeekToEntryIfExists(Fields6, 3))
+                            FilterFloatEntry F3;
+                            
+                        if (SeekToEntryIfExists(Fields6, 4))
+                            FilterFloatEntry F4;
+                            
+                        if ((Fields6.OffsetTableSize / 2 - 1) > 5)
+                            Printf("Filter Union Type %d Larger\n", F2_UnionType);
+                    } Table;
+                } F6;
+            }
+            break;
+        default:
+            Printf("Unimplemented system data union type %d\n", F2_UnionType);
+            break; 
+    }
+    
+} EventSubSequenceFilterData;

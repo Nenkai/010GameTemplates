@@ -1,0 +1,1452 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    FlatArkFields SoundBgmEventDataFields;
+    
+    if (exists(SoundBgmEventDataFields.OffsetTable[1]) && SoundBgmEventDataFields.OffsetTable[1])
+    {
+        FSeek(startof(SoundBgmEventDataFields) + SoundBgmEventDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(SoundBgmEventDataFields.OffsetTable[2]) && SoundBgmEventDataFields.OffsetTable[2])
+    {
+        FSeek(startof(SoundBgmEventDataFields) + SoundBgmEventDataFields.OffsetTable[1]);
+        StringField F2;
+    }
+    
+    if ((SoundBgmEventDataFields.OffsetTableSize / 2 - 1) > 3)
+        Printf("EventKeySoundBgmEventData Larger\n");
+} EventKeySoundBgmEventData;
+
+typedef struct
+{
+    FlatArkFields SoundScenarioVoiceEventData;
+    
+    if (exists(SoundScenarioVoiceEventData.OffsetTable[1]) && SoundScenarioVoiceEventData.OffsetTable[1])
+    {
+        FSeek(startof(SoundScenarioVoiceEventData) + SoundScenarioVoiceEventData.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(SoundScenarioVoiceEventData.OffsetTable[2]) && SoundScenarioVoiceEventData.OffsetTable[2])
+    {
+        FSeek(startof(SoundScenarioVoiceEventData) + SoundScenarioVoiceEventData.OffsetTable[2]);
+        uint F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(SoundScenarioVoiceEventData.OffsetTable[3]) && SoundScenarioVoiceEventData.OffsetTable[3])
+    {
+        FSeek(startof(SoundScenarioVoiceEventData) + SoundScenarioVoiceEventData.OffsetTable[3]);
+        uint F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((SoundScenarioVoiceEventData.OffsetTableSize / 2 - 1) > 4)
+        Printf("EventKeySoundScenarioVoiceEventData Larger\n");
+} EventKeySoundScenarioVoiceEventData;
+
+typedef struct
+{
+    FlatArkFields SoundAdlibVoiceEventFields;
+    
+    if (exists(SoundAdlibVoiceEventFields.OffsetTable[1]) && SoundAdlibVoiceEventFields.OffsetTable[1])
+    {
+        FSeek(startof(SoundAdlibVoiceEventFields) + SoundAdlibVoiceEventFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(SoundAdlibVoiceEventFields.OffsetTable[2]) && SoundAdlibVoiceEventFields.OffsetTable[2])
+    {
+        FSeek(startof(SoundAdlibVoiceEventFields) + SoundAdlibVoiceEventFields.OffsetTable[1]);
+        StringField F2;
+    }
+    
+    if (exists(SoundAdlibVoiceEventFields.OffsetTable[3]) && SoundAdlibVoiceEventFields.OffsetTable[3])
+    {
+        FSeek(startof(SoundAdlibVoiceEventFields) + SoundAdlibVoiceEventFields.OffsetTable[3]);
+        uint F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((SoundAdlibVoiceEventFields.OffsetTableSize / 2 - 1) > 4)
+        Printf("EventKeySoundAdlibVoiceEventData Larger\n");
+} EventKeySoundAdlibVoiceEventData;
+
+typedef struct
+{
+    FlatArkFields StageEventDataFields;
+    
+    if (exists(StageEventDataFields.OffsetTable[1]) && StageEventDataFields.OffsetTable[1])
+    {
+        FSeek(startof(StageEventDataFields) + StageEventDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(StageEventDataFields.OffsetTable[2]) && StageEventDataFields.OffsetTable[2])
+    {
+        FSeek(startof(StageEventDataFields) + StageEventDataFields.OffsetTable[2]);
+        uint64 F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(StageEventDataFields.OffsetTable[3]) && StageEventDataFields.OffsetTable[3])
+    {
+        FSeek(startof(StageEventDataFields) + StageEventDataFields.OffsetTable[3]);
+        uint64 F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(StageEventDataFields.OffsetTable[4]) && StageEventDataFields.OffsetTable[4])
+    {
+        FSeek(startof(StageEventDataFields) + StageEventDataFields.OffsetTable[4]);
+        uint64 F4 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(StageEventDataFields.OffsetTable[5]) && StageEventDataFields.OffsetTable[5])
+    {
+        FSeek(startof(StageEventDataFields) + StageEventDataFields.OffsetTable[5]);
+        uint64 F5 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((StageEventDataFields.OffsetTableSize / 2 - 1) > 6)
+        Printf("EventKeyStageEventData Larger\n");
+} EventKeyStageEventData;
+
+typedef struct
+{
+    FlatArkFields GenericSignalFields;
+    
+    if (exists(GenericSignalFields.OffsetTable[1]) && GenericSignalFields.OffsetTable[1])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(GenericSignalFields.OffsetTable[2]) && GenericSignalFields.OffsetTable[2])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[2]);
+        uint64 F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(GenericSignalFields.OffsetTable[3]) && GenericSignalFields.OffsetTable[3])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[3]);
+        StringField F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(GenericSignalFields.OffsetTable[4]) && GenericSignalFields.OffsetTable[4])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[4]);
+        byte F4 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(GenericSignalFields.OffsetTable[5]) && GenericSignalFields.OffsetTable[5])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[5]);
+        int F5 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(GenericSignalFields.OffsetTable[6]) && GenericSignalFields.OffsetTable[6])
+    {
+        FSeek(startof(GenericSignalFields) + GenericSignalFields.OffsetTable[6]);
+        float F6 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((GenericSignalFields.OffsetTableSize / 2 - 1) > 7)
+        Printf("EventKeyGenericSignalData Larger\n");
+} EventKeyGenericSignalData;
+
+typedef struct
+{
+    FlatArkFields SubTitleDataFields;
+    
+    if (exists(SubTitleDataFields.OffsetTable[1]) && SubTitleDataFields.OffsetTable[1])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(SubTitleDataFields.OffsetTable[2]) && SubTitleDataFields.OffsetTable[2])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[2]);
+        uint F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(SubTitleDataFields.OffsetTable[3]) && SubTitleDataFields.OffsetTable[3])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[3]);
+        byte F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(SubTitleDataFields.OffsetTable[4]) && SubTitleDataFields.OffsetTable[4])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[4]);
+        int F4 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(SubTitleDataFields.OffsetTable[5]) && SubTitleDataFields.OffsetTable[5])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[5]);
+        float F5 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(SubTitleDataFields.OffsetTable[6]) && SubTitleDataFields.OffsetTable[6])
+    {
+        FSeek(startof(SubTitleDataFields) + SubTitleDataFields.OffsetTable[6]);
+        float F6 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((SubTitleDataFields.OffsetTableSize / 2 - 1) > 7)
+        Printf("EventKeySubTitleData Larger\n");
+} EventKeySubTitleData;
+
+typedef struct
+{
+    FlatArkFields NextSentenceDataFields;
+    
+    if (exists(NextSentenceDataFields.OffsetTable[1]) && NextSentenceDataFields.OffsetTable[1])
+    {
+        FSeek(startof(NextSentenceDataFields) + NextSentenceDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(NextSentenceDataFields.OffsetTable[2]) && NextSentenceDataFields.OffsetTable[2])
+    {
+        FSeek(startof(NextSentenceDataFields) + NextSentenceDataFields.OffsetTable[2]);
+        byte F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(NextSentenceDataFields.OffsetTable[3]) && NextSentenceDataFields.OffsetTable[3])
+    {
+        FSeek(startof(NextSentenceDataFields) + NextSentenceDataFields.OffsetTable[3]);
+        byte F3 <format=hex, bgcolor=cBlue>;
+    }
+
+    if ((NextSentenceDataFields.OffsetTableSize / 2 - 1) > 4)
+        Printf("EventKeyNextSentenceData Larger\n");
+} EventKeyNextSentenceData;
+
+typedef struct
+{
+    FlatArkFields BranchDataDataFields;
+    
+    if (exists(BranchDataDataFields.OffsetTable[1]) && BranchDataDataFields.OffsetTable[1])
+    {
+        FSeek(startof(BranchDataDataFields) + BranchDataDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(BranchDataDataFields.OffsetTable[2]) && BranchDataDataFields.OffsetTable[2])
+    {
+        FSeek(startof(BranchDataDataFields) + BranchDataDataFields.OffsetTable[2]);
+        uint F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(BranchDataDataFields.OffsetTable[3]) && BranchDataDataFields.OffsetTable[3])
+    {
+        FSeek(startof(BranchDataDataFields) + BranchDataDataFields.OffsetTable[3]);
+        uint F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(BranchDataDataFields.OffsetTable[4]) && BranchDataDataFields.OffsetTable[4])
+    {
+        FSeek(startof(BranchDataDataFields) + BranchDataDataFields.OffsetTable[4]);
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                uint Hashes[NumEntries] <format=hex, fgcolor=cRed>;
+            } HashArray;
+        } F4;
+    }
+    
+    if ((BranchDataDataFields.OffsetTableSize / 2 - 1) > 5)
+        Printf("EventKeyBranchData Larger\n");
+} EventKeyBranchData;
+
+typedef struct
+{
+    FlatArkFields SkipDataFields;
+    
+    if (exists(SkipDataFields.OffsetTable[1]) && SkipDataFields.OffsetTable[1])
+    {
+        FSeek(startof(SkipDataFields) + SkipDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(SkipDataFields.OffsetTable[2]) && SkipDataFields.OffsetTable[2])
+    {
+        FSeek(startof(SkipDataFields) + SkipDataFields.OffsetTable[2]);
+        byte F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((SkipDataFields.OffsetTableSize / 2 - 1) > 3)
+        Printf("EventKeySkipData Larger\n");
+} EventKeySkipData;
+
+typedef struct
+{
+    FlatArkFields WaitInputDataFields;
+    
+    if (exists(WaitInputDataFields.OffsetTable[1]) && WaitInputDataFields.OffsetTable[1])
+    {
+        FSeek(startof(WaitInputDataFields) + WaitInputDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if ((WaitInputDataFields.OffsetTableSize / 2 - 1) > 2)
+        Printf("EventKeyWaitInputData Larger\n");
+} EventKeyWaitInputData;
+
+typedef struct
+{
+    FlatArkFields LookBranchDataFields;
+    
+    if (exists(LookBranchDataFields.OffsetTable[1]) && LookBranchDataFields.OffsetTable[1])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(LookBranchDataFields.OffsetTable[2]) && LookBranchDataFields.OffsetTable[2])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[2]);
+        uint F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(LookBranchDataFields.OffsetTable[3]) && LookBranchDataFields.OffsetTable[3])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[3]);
+        uint F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(LookBranchDataFields.OffsetTable[4]) && LookBranchDataFields.OffsetTable[4])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[4]);
+        uint F4 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(LookBranchDataFields.OffsetTable[5]) && LookBranchDataFields.OffsetTable[5])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[5]);
+        uint F5 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(LookBranchDataFields.OffsetTable[6]) && LookBranchDataFields.OffsetTable[6])
+    {
+        FSeek(startof(LookBranchDataFields) + LookBranchDataFields.OffsetTable[6]);
+        byte F6 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((LookBranchDataFields.OffsetTableSize / 2 - 1) > 7)
+        Printf("EventKeyLookBranchData Larger\n");
+} EventKeyLookBranchData;
+
+typedef struct
+{
+    FlatArkFields DisableEndConnectionTypeDataFields;
+    
+    if (exists(DisableEndConnectionTypeDataFields.OffsetTable[1]) && DisableEndConnectionTypeDataFields.OffsetTable[1])
+    {
+        FSeek(startof(DisableEndConnectionTypeDataFields) + DisableEndConnectionTypeDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if ((DisableEndConnectionTypeDataFields.OffsetTableSize / 2 - 1) > 2)
+        Printf("EventKeyDisableEndConnectionTypeData Larger\n");
+} EventKeyDisableEndConnectionTypeData;
+
+typedef struct
+{
+    FlatArkFields FadeDataFields;
+    if (exists(FadeDataFields.OffsetTable[1]) && FadeDataFields.OffsetTable[1])
+    {
+        FSeek(startof(FadeDataFields) + FadeDataFields.OffsetTable[1]);
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData Data;
+        } F1;
+    }
+    
+    if (exists(FadeDataFields.OffsetTable[2]) && FadeDataFields.OffsetTable[2])
+    {
+        FSeek(startof(FadeDataFields) + FadeDataFields.OffsetTable[2]);
+        float F2 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(FadeDataFields.OffsetTable[3]) && FadeDataFields.OffsetTable[3])
+    {
+        FSeek(startof(FadeDataFields) + FadeDataFields.OffsetTable[3]);
+        byte F3 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if (exists(FadeDataFields.OffsetTable[4]) && FadeDataFields.OffsetTable[4])
+    {
+        FSeek(startof(FadeDataFields) + FadeDataFields.OffsetTable[4]);
+        Vec4 F4 <format=hex, bgcolor=cBlue>;
+    }
+    
+    if ((FadeDataFields.OffsetTableSize / 2 - 1) > 5)
+        Printf("EventKeyFadeData Larger\n");
+} EventKeyFadeData;
+
+typedef struct
+{
+    FlatArkFields SystemDataFields;
+    
+    if (exists(SystemDataFields.OffsetTable[1]) && SystemDataFields.OffsetTable[1])
+    {
+        FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[1]);
+        byte F1_UnionType <format=hex, bgcolor=cBlue, fgcolor=cYellow>;
+    }
+    
+    if (exists(SystemDataFields.OffsetTable[2]) && SystemDataFields.OffsetTable[2])
+    {
+        FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[2]);
+        Unk3Hash F2;
+    }
+    
+    switch (F1_UnionType)
+    {
+        case 1:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe1 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyFadeData Entry;
+                                    }
+                                } EventKeyFadeDataArray;
+                            } F2_EventKeyFadeDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 2:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe2 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySubTitleData Entry;
+                                    }
+                                } EventKeySubTitleDataArray;
+                            } F2_EventKeySubTitleDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 3:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe3 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        
+                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySoundWwiseEventData Entry;
+                                    }
+                                } EventKeySoundWwiseEventDataArray;
+                            } F2_EventKeySoundWwiseEventDataArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySoundWwiseEventData Entry;
+                                    }
+                                } EventKeySoundFsmStateDataArray;
+                            } F3_EventKeySoundFsmStateDataArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[4]) && Fields8_.OffsetTable[4])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[4]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySoundBgmEventData Entry;
+                                    }
+                                } EventKeySoundBgmEventDataArray;
+                            } F4_EventKeySoundBgmEventDataArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[5]) && Fields8_.OffsetTable[5])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[5]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySoundScenarioVoiceEventData Entry;
+                                    }
+                                } EventKeySoundScenarioVoiceEventDataArray;
+                            } F5_EventKeySoundScenarioVoiceEventDataArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[6]) && Fields8_.OffsetTable[6])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[6]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySoundScenarioVoiceEventData Entry;
+                                    }
+                                } EventKeySoundAdlibVoiceEventDataArray;
+                            } F6_EventKeySoundAdlibVoiceEventDataArray;
+                        }
+                        
+                        if ((Fields8_.OffsetTableSize / 2 - 1) > 7)
+                            Printf("Union Type %d Larger\n", F1_UnionType);
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 4:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe4 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyStageEventData Data;
+                                    }
+                                } EventKeyStageEventDataArray;
+                            } F1_EventKeyStageEventDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 5:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe5 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F1;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F2;
+                        }
+                        
+                        if ((Fields8_.OffsetTableSize / 2 - 1) > 3)
+                            Printf("Union Type %d Larger\n", F1_UnionType);
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 6:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe6 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            EventKeyParamData_TFloatArray F1_EventKeyParamData_TFloatArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 7:
+        case 8:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe7 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyLookAtJointsDataArray JointsData;
+                            } F1;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        {
+                             FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                             struct 
+                             {
+                                 int DataOffset <format=hex, fgcolor=cRed>;
+                                 FSeek(startof(DataOffset) + DataOffset);
+                                 
+                                 struct
+                                 {
+                                     int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                     int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                     local int j = 0;
+                                     for (j = 0; j < NumEntries; j++)
+                                     {
+                                         FSeek(startof(Offsets[j]) + Offsets[j]);
+                                         EventKeyParamData_TBool Entry;
+                                     }
+                                 } EventKeyParamData_TBool_;
+                             } F2;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[3]) && Fields8_.OffsetTable[3])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[3]);
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F3;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[4]) && Fields8_.OffsetTable[4])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[4]);
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F4;
+                        }
+                        
+                         if (exists(Fields8_.OffsetTable[5]) && Fields8_.OffsetTable[5])
+                         {
+                             FSeek(startof(Fields8_) + Fields8_.OffsetTable[5]);
+                             struct 
+                             {
+                                 int DataOffset <format=hex, fgcolor=cRed>;
+                                 FSeek(startof(DataOffset) + DataOffset);
+                                 
+                                 struct
+                                 {
+                                     int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                     int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                     local int j = 0;
+                                     for (j = 0; j < NumEntries; j++)
+                                     {
+                                         FSeek(startof(Offsets[j]) + Offsets[j]);
+                                         EventKeyParamData_TBool Entry;
+                                     }
+                                 } EventKeyParamData_TBool_;
+                             } F5;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[6]) && Fields8_.OffsetTable[6])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[6]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyLookAtJointsDataArray JointsData;
+                            } F6;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[7]) && Fields8_.OffsetTable[7])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[7]);
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F7;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[8]) && Fields8_.OffsetTable[8])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[8]);
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData_TFloat_Holder Map;
+                            } F8;
+                        }
+                        
+                        if ((Fields8_.OffsetTableSize / 2 - 1) > 9)
+                            Printf("Union Type %d Larger\n", F1_UnionType);
+                    } Union7_8;
+                    
+                } F4;
+            }
+            break;
+            
+        case 9:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe8 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyGenericSignalData Data;
+                                    }
+                                } EventKeyGenericSignalDataArray;
+                            } F1_EventKeyGenericSignalDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 10:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe9 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            EventKeyParamData_TFloatArray F1_EventKeyParamData_TFloatArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    FlatArkFields Fields__;
+                                    
+                                    if (exists(Fields__.OffsetTable[1]) && Fields__.OffsetTable[1])
+                                    {
+                                        FSeek(startof(Fields__) + Fields__.OffsetTable[1]);
+                                        EventKeyParamData_TFloatArray F1_EventKeyParamData_TFloatArray;
+                                    }
+                                    
+                                    if (exists(Fields__.OffsetTable[2]) && Fields__.OffsetTable[2])
+                                    {
+                                        FSeek(startof(Fields__) + Fields__.OffsetTable[2]);
+                                        EventKeyParamData_TFloatArray F2_EventKeyParamData_TFloatArray;
+                                    }
+                                    
+                                    if (exists(Fields__.OffsetTable[3]) && Fields__.OffsetTable[3])
+                                    {
+                                        FSeek(startof(Fields__) + Fields__.OffsetTable[3]);
+                                        EventKeyParamData_TFloatArray F3_EventKeyParamData_TFloatArray;
+                                    }
+                                    
+                                    if (exists(Fields__.OffsetTable[4]) && Fields__.OffsetTable[4])
+                                    {
+                                        FSeek(startof(Fields__) + Fields__.OffsetTable[4]);
+                                        EventKeyParamData_TFloatArray F4_EventKeyParamData_TFloatArray;
+                                    }
+                                    
+                                    if (exists(Fields__.OffsetTable[5]) && Fields__.OffsetTable[5])
+                                    {
+                                        FSeek(startof(Fields__) + Fields__.OffsetTable[5]);
+                                        EventKeyParamData_TFloatArray F5_EventKeyParamData_TFloatArray;
+                                    }
+                                } Table;
+                            } F2;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[3]) && Fields8_.OffsetTable[3])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[3]);
+                            EventKeyParamData_TFloatArray F3_EventKeyParamData_TFloatArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[4]) && Fields8_.OffsetTable[4])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[4]);
+                            EventKeyParamData_TFloatArray F4_EventKeyParamData_TFloatArray;
+                        }
+                        
+                        if (exists(Fields8_.OffsetTable[5]) && Fields8_.OffsetTable[5])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[5]);
+                            EventKeyParamData_TFloatArray F5_EventKeyParamData_TFloatArray;
+                        }
+                        
+                        if ((Fields8_.OffsetTableSize / 2 - 1) > 6)
+                            Printf("Union Type %d Larger\n", F1_UnionType);
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 11:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe10 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyBranchData Data;
+                                    }
+                                } EventKeyBranchDataArray;
+                            } F1_EventKeyBranchDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+           
+        case 12:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe13 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyLookBranchData Data;
+                                    }
+                                } EventKeyLookBranchDataArray;
+                            } F1_EventKeyLookBranchDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 13:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe12 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyParamData_TUInt Entry; // Hash
+                                    }
+                                } EventKeyParamData_THashArray;
+                            } F1_EventKeyParamData_THashArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+             
+        case 14:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe13 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyNextSentenceData Data;
+                                    }
+                                } EventKeyNextSentenceDataArray;
+                            } F1_EventKeyNextSentenceDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        
+        case 15:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe14 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeySkipData Data;
+                                    }
+                                } EventKeySkipDataArray;
+                            } F1_EventKeySkipDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 16:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe15 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            EventKeyParamData_TBoolArray F1_EventKeyParamData_TBoolArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 17:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe14 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyWaitInputData Data;
+                                    }
+                                } EventKeyWaitInputDataArray;
+                            } F1_EventKeyWaitInputDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        case 18:
+            if (exists(SystemDataFields.OffsetTable[3]) && SystemDataFields.OffsetTable[3])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[3]);
+                byte F3_MustBe17 <format=hex, bgcolor=cBlue>;
+            }
+            
+            if (exists(SystemDataFields.OffsetTable[4]) && SystemDataFields.OffsetTable[4])
+            {
+                FSeek(startof(SystemDataFields) + SystemDataFields.OffsetTable[4]);
+                struct
+                {
+                    int DataOffset <format=hex, fgcolor=cRed>;
+                    FSeek(startof(DataOffset) + DataOffset);
+                    struct
+                    {
+                        FlatArkFields Fields8_;
+                        if (exists(Fields8_.OffsetTable[1]) && Fields8_.OffsetTable[1])
+                        {
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[1]);
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                    local int j = 0;
+                                    for (j = 0; j < NumEntries; j++)
+                                    {
+                                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                                        EventKeyDisableEndConnectionTypeData Data;
+                                    }
+                                }EventKeyDisableEndConnectionTypeDataArray;
+                            } F1_EventKeyDisableEndConnectionTypeDataArray;
+                        }
+                    } Table;
+                } F4;
+            }
+            break;
+            
+        default:
+            Printf("Unimplemented system data union type %d\n", F1_UnionType);
+            break; 
+    }
+    
+} EventSubSequenceSystemData;

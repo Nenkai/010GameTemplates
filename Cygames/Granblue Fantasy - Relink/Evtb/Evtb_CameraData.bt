@@ -1,0 +1,286 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    FlatArkFields CameraDataFields;
+    
+    if (SeekToEntryIfExists(CameraDataFields, 1))
+        Unk3Hash F1;
+
+    if (exists(CameraDataFields.OffsetTable[2]) && CameraDataFields.OffsetTable[2])
+    {
+        Printf("Check CameraData F2\n");
+    }
+    
+    if (exists(CameraDataFields.OffsetTable[3]) && CameraDataFields.OffsetTable[3])
+    {
+        Printf("Check CameraData F3\n");
+    }
+    
+    if (SeekToEntryIfExists(CameraDataFields, 4))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData_TFloat_Holder Map;
+        } F4_EventKeyParamData_TFloat_Holder;
+    }
+    
+    if (SeekToEntryIfExists(CameraDataFields, 5))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData_TFloat_Holder Map;
+        } F5_EventKeyParamData_TFloat_Holder;
+    }
+    
+    if (SeekToEntryIfExists(CameraDataFields, 6))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData_TFloat_Holder Map;
+        } F6_EventKeyParamData_TFloat_Holder;
+    }
+    
+    if (SeekToEntryIfExists(CameraDataFields, 7))
+    {
+        struct
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            EventKeyParamData_TFloat_Holder Map;
+        } F7_EventKeyParamData_TFloat_Holder;
+    }
+    
+    if (exists(CameraDataFields.OffsetTable[8]) && CameraDataFields.OffsetTable[8])
+    {
+        Printf("Check CameraData F8\n");
+    }
+    
+    if (SeekToEntryIfExists(CameraDataFields, 9))
+        EventKeyParamData_TFloatArray F9_EventKeyParamData_TFloatArray;
+    
+    if (SeekToEntryIfExists(CameraDataFields, 10))
+        EventKeyParamData_TFloatArray F10_EventKeyParamData_TFloatArray;
+    
+    if (SeekToEntryIfExists(CameraDataFields, 11))
+        EventKeyParamData_TFloatArray F11_EventKeyParamData_TFloatArray;
+    
+    if (SeekToEntryIfExists(CameraDataFields, 12))
+        EventKeyParamData_TFloatArray F12_EventKeyParamData_TFloatArray;
+    
+    if (SeekToEntryIfExists(CameraDataFields, 13))
+    {
+        struct 
+        {
+            int DataOffset <format=hex, fgcolor=cRed>;
+            FSeek(startof(DataOffset) + DataOffset);
+            
+            struct
+            {
+                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                local int j = 0;
+                for (j = 0; j < NumEntries; j++)
+                {
+                    FSeek(startof(Offsets[j]) + Offsets[j]);
+                    struct
+                    {
+                        FlatArkFields LookAtFields;
+                        
+                        if (SeekToEntryIfExists(LookAtFields, 1))
+                        {
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                EventKeyParamData Data;
+                            } F1_EventKeyParamData;
+                        }
+                        
+                        if (SeekToEntryIfExists(LookAtFields, 2))
+                            byte F2 <format=hex, bgcolor=cBlue>;
+                        
+                        if (SeekToEntryIfExists(LookAtFields, 3))
+                        {
+                            struct 
+                            {
+                                int DataOffset <format=hex, fgcolor=cRed>;
+                                FSeek(startof(DataOffset) + DataOffset);
+                                
+                                struct
+                                {
+                                    FlatArkFields FieldsF3;
+                                    
+                                    if (SeekToEntryIfExists(FieldsF3, 1))
+                                        byte F1 <format=hex, bgcolor=cBlue>;
+                                    
+                                    if (SeekToEntryIfExists(FieldsF3, 2))
+                                        int F2 <format=hex, bgcolor=cBlue>;
+
+                                    if (SeekToEntryIfExists(FieldsF3, 3))
+                                        Vec3 F3 <format=hex, bgcolor=cBlue>;
+                                    
+                                    if (SeekToEntryIfExists(FieldsF3, 4))
+                                        uint64 F4 <format=hex, bgcolor=cBlue>;
+                                } Table;
+                            } F3;
+                        }
+                    } EventKeyCameraLookAtData;
+                }
+            } EventKeyCameraLookAtDataArray;
+        } F13_EventKeyCameraLookAtDataArray;
+        
+        if (exists(CameraDataFields.OffsetTable[14]) && CameraDataFields.OffsetTable[14])
+        {
+            FSeek(startof(CameraDataFields) + CameraDataFields.OffsetTable[14]);
+            struct 
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                struct
+                {
+                    int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                    int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                    local int j = 0;
+                    for (j = 0; j < NumEntries; j++)
+                    {
+                        FSeek(startof(Offsets[j]) + Offsets[j]);
+                        struct
+                        {
+                            FlatArkFields LookAtFields;
+                            
+                            if (SeekToEntryIfExists(LookAtFields, 1))
+                            {
+                                struct 
+                                {
+                                    int DataOffset <format=hex, fgcolor=cRed>;
+                                    FSeek(startof(DataOffset) + DataOffset);
+                                    
+                                    EventKeyParamData Data;
+                                } F1_EventKeyParamData;
+                            }
+                            
+                            if (SeekToEntryIfExists(LookAtFields, 2))
+                                byte F2 <format=hex, bgcolor=cBlue>;
+
+                            if (SeekToEntryIfExists(LookAtFields, 3))
+                            {
+                                struct 
+                                {
+                                    int DataOffset <format=hex, fgcolor=cRed>;
+                                    FSeek(startof(DataOffset) + DataOffset);
+                                    
+                                    struct
+                                    {
+                                        FlatArkFields FieldsF3;
+                                        
+                                        if (SeekToEntryIfExists(FieldsF3, 1))
+                                            byte F1 <format=hex, bgcolor=cBlue>;
+                                        
+                                        if (SeekToEntryIfExists(FieldsF3, 2))
+                                            int F2 <format=hex, bgcolor=cBlue>;
+                                        
+                                        if (SeekToEntryIfExists(FieldsF3, 3))
+                                            Vec3 F3 <format=hex, bgcolor=cBlue>;
+
+                                        if (SeekToEntryIfExists(FieldsF3, 4))
+                                            uint64 F4 <format=hex, bgcolor=cBlue>;
+                                    } Table;
+                                } F3;
+                            }
+                        } EventKeyCameraFollowData;
+                    }
+                } EventKeyCameraFollowDataArray;
+            } F14_EventKeyCameraFollowDataArray;
+        }
+        
+        if (SeekToEntryIfExists(CameraDataFields, 15))
+            EventKeyParamData_TBoolArray F15_EventKeyParamData_TBoolArray;
+        
+        if (SeekToEntryIfExists(CameraDataFields, 16))
+            EventKeyParamData_TBoolArray F16_EventKeyParamData_TBoolArray;
+
+        if (SeekToEntryIfExists(CameraDataFields, 17))
+            EventKeyParamData_TFloatArray F17_EventKeyParamData_TFloatArray;
+ 
+        if (SeekToEntryIfExists(CameraDataFields, 18))
+            EventKeyParamData_TIntArray F18_EventKeyParamData_TIntArray;
+
+        if (SeekToEntryIfExists(CameraDataFields, 19))
+            EventKeyParamData_TFloatArray F19_EventKeyParamData_TFloatArray;
+
+        if (SeekToEntryIfExists(CameraDataFields, 20))
+            EventKeyParamData_TFloatArray F20_EventKeyParamData_TFloatArray;
+        
+        if (SeekToEntryIfExists(CameraDataFields, 21))
+            EventKeyParamData_TFloatArray F21_EventKeyParamData_TFloatArray;
+        
+        if (SeekToEntryIfExists(CameraDataFields, 22))
+            EventKeyParamData_TFloatArray F22_EventKeyParamData_TFloatArray;
+        
+        if (SeekToEntryIfExists(CameraDataFields, 23))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                EventKeyParamData_TFloat_Holder Map;
+            } F23_EventKeyParamData_TFloat_Holder;
+        }
+        
+        if (SeekToEntryIfExists(CameraDataFields, 24))
+            EventKeyParamData_TFloatArray F24_EventKeyParamData_TFloatArray;
+        
+        if (SeekToEntryIfExists(CameraDataFields, 25))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                EventKeyParamData_TFloat_Holder Map;
+            } F25_EventKeyParamData_TFloat_Holder;
+        }
+        
+        if (SeekToEntryIfExists(CameraDataFields, 26))
+        {
+            struct
+            {
+                int DataOffset <format=hex, fgcolor=cRed>;
+                FSeek(startof(DataOffset) + DataOffset);
+                
+                EventKeyParamData_TFloat_Holder Map;
+            } F26_EventKeyParamData_TFloat_Holder;
+        }
+        
+        if (SeekToEntryIfExists(CameraDataFields, 27))
+            EventKeyParamData_TFloatArray F27_EventKeyParamData_TFloatArray;
+            
+        if ((CameraDataFields.OffsetTableSize / 2 - 1) > 28)
+            Printf("Union Type %d Larger\n", F1_UnionType);
+    }
+} EventSubSequenceCameraData;
