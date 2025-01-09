@@ -62,7 +62,7 @@ typedef struct
     if (exists(SoundScenarioVoiceEventData.OffsetTable[3]) && SoundScenarioVoiceEventData.OffsetTable[3])
     {
         FSeek(startof(SoundScenarioVoiceEventData) + SoundScenarioVoiceEventData.OffsetTable[3]);
-        uint F3 <format=hex, bgcolor=cBlue>;
+        byte F3 <format=hex, bgcolor=cBlue>;
     }
     
     if ((SoundScenarioVoiceEventData.OffsetTableSize / 2 - 1) > 4)
@@ -624,9 +624,9 @@ typedef struct
                             } F2_EventKeySoundWwiseEventDataArray;
                         }
                         
-                        if (exists(Fields8_.OffsetTable[2]) && Fields8_.OffsetTable[2])
+                        if (exists(Fields8_.OffsetTable[3]) && Fields8_.OffsetTable[3])
                         {
-                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[2]);
+                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[3]);
                             struct 
                             {
                                 int DataOffset <format=hex, fgcolor=cRed>;
@@ -640,7 +640,7 @@ typedef struct
                                     for (j = 0; j < NumEntries; j++)
                                     {
                                         FSeek(startof(Offsets[j]) + Offsets[j]);
-                                        EventKeySoundWwiseEventData Entry;
+                                        EventKeySoundFsmStateData Entry;
                                     }
                                 } EventKeySoundFsmStateDataArray;
                             } F3_EventKeySoundFsmStateDataArray;
@@ -834,6 +834,9 @@ typedef struct
                         }
                     } Table;
                 } F4;
+                
+                if ((Fields8_.OffsetTableSize / 2 - 1) > 2)
+                   Printf("Union Type %d Larger\n", F1_UnionType);
             }
             break;
             
@@ -1093,22 +1096,10 @@ typedef struct
                         if (exists(Fields8_.OffsetTable[3]) && Fields8_.OffsetTable[3])
                         {
                             FSeek(startof(Fields8_) + Fields8_.OffsetTable[3]);
-                            EventKeyParamData_TFloatArray F3_EventKeyParamData_TFloatArray;
+                            EventKeyParamData_TBoolArray F3_EventKeyParamData_TBoolArray;
                         }
                         
-                        if (exists(Fields8_.OffsetTable[4]) && Fields8_.OffsetTable[4])
-                        {
-                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[4]);
-                            EventKeyParamData_TFloatArray F4_EventKeyParamData_TFloatArray;
-                        }
-                        
-                        if (exists(Fields8_.OffsetTable[5]) && Fields8_.OffsetTable[5])
-                        {
-                            FSeek(startof(Fields8_) + Fields8_.OffsetTable[5]);
-                            EventKeyParamData_TFloatArray F5_EventKeyParamData_TFloatArray;
-                        }
-                        
-                        if ((Fields8_.OffsetTableSize / 2 - 1) > 6)
+                        if ((Fields8_.OffsetTableSize / 2 - 1) > 4)
                             Printf("Union Type %d Larger\n", F1_UnionType);
                     } Table;
                 } F4;

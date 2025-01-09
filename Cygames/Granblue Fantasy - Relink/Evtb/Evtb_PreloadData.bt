@@ -232,7 +232,37 @@ typedef struct
                                 int F2 <bgcolor=cBlue>;
                                 
                             if (SeekToEntryIfExists(Fields2, 3))
-                                Printf("Check PreloadRequestPriority F3\n");
+                            {
+                                struct
+                                {
+                                    int DataOffset <format=hex, fgcolor=cRed>;
+                                    FSeek(startof(DataOffset) + DataOffset);
+                                    
+                                    struct
+                                    {
+                                        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+                                        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
+                                        local int j = 0;
+                                        for (j = 0; j < NumEntries; j++)
+                                        {
+                                            FSeek(startof(Offsets[j]) + Offsets[j]);
+                                            struct
+                                            {
+                                                FlatArkFields Fields3;
+                                                
+                                                if (SeekToEntryIfExists(Fields3, 1))
+                                                    uint F1 <format=hex, bgcolor=cBlue>;
+                                                    
+                                                if (SeekToEntryIfExists(Fields3, 2))
+                                                    uint F2 <format=hex, bgcolor=cBlue>;
+                                                    
+                                                if ((Fields3.OffsetTableSize / 2 - 1) > 3)
+                                                    Printf("PreloadRequestPriority sub Larger\n");
+                                            } Entry;
+                                        }
+                                    } Table;
+                                } F3;
+                            }
                                 
                             if (SeekToEntryIfExists(Fields2, 4))
                                 byte F4 <bgcolor=cBlue>;

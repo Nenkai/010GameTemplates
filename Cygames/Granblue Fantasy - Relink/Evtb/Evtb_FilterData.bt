@@ -1489,7 +1489,7 @@ typedef struct
             
         case 29:
             if (SeekToEntryIfExists(FilterDataFields, 5))
-                byte F5_MustBe34 <format=hex, bgcolor=cBlue>;
+                byte F5_MustBe24 <format=hex, bgcolor=cBlue>;
             
             if (SeekToEntryIfExists(FilterDataFields, 6))
             {
@@ -1676,7 +1676,7 @@ typedef struct
             
         case 30:
             if (SeekToEntryIfExists(FilterDataFields, 5))
-                byte F5_MustBe26 <format=hex, bgcolor=cBlue>;
+                byte F5_MustBe25 <format=hex, bgcolor=cBlue>;
             
             if (SeekToEntryIfExists(FilterDataFields, 6))
             {
