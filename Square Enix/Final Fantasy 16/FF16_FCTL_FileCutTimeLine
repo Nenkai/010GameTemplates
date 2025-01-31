@@ -38,6 +38,8 @@
  * 'Nex::GetTableById' : 45 33 C0 89 54 24 ? 45 8B D0 4C 8B D9 49 B9 ? ? ? ? ? ? ? ? 42 0F B6 44 14 ? 48 B9 ? ? ? ? ? ? ? ? 4C 33 C8 49 FF C2 4C 0F AF C9 49 83 FA ? 72 ? 49 8B 4B ? 49 23 C9 4D 8B 4B ? 48 03 C9 49 8B 44 C9 ? 49 3B 43 ? 74 ? 4D 8B 0C C9 EB ? 49 3B C1 74 ? 48 8B 40 ? 3B 50 ? 75 ? EB ? 49 8B C0 48 85 C0 49 0F 44 43 ? 49 3B 43 ? 74 ? 4C 8B 40
  * 'Nex::SearchRowByKey1' : 48 8B 41 ? 48 85 C0 74 ? 48 83 E8 ? 74 ? 48 83 F8 ? 74 ? 45 33 C9 45 33 C0
  * 'Nex::GetRowPtr' : 48 8B 01 48 BA
+ *
+ * Also, use fgcolor=cRed for offsets, fgcolor=cGreen for counts. Helps a lot.
 */
         
 enum TimelineElementType
