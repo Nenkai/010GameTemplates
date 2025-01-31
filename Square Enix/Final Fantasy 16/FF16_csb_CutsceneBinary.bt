@@ -1,0 +1,103 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Initial loader at: ffxvi.exe steam 1.0.1 - 14066C098 
+
+typedef struct
+{
+    uint Unk;
+    uint NameOffset <format=hex, fgcolor=cRed>;
+} PackReference <read=ReadPackReference>;
+
+typedef struct
+{
+    uint NameOffset;
+} Asset <read=ReadAsset>;
+
+string ReadPackReference(PackReference& asset)
+{
+    return ReadString(startof(Cutscene.PackReferences) + asset.NameOffset);   
+}
+
+string ReadAsset(Asset& asset)
+{
+    return ReadString(startof(Cutscene.Assets) + asset.NameOffset);   
+}
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="'FCUT', unchecked">;
+        int field_0x04;
+        int field_0x08;
+        int field_0x0C;
+        int field_0x10;
+        int field_0x14;
+        int field_0x18;
+        int field_0x1C;
+    } FileHeader <bgcolor=cPurple>;
+    
+    struct
+    {
+        uint GameMapId;
+        int field_0x24;
+        uint BodySize <format=hex, comment="Starting from MainHeader">;
+        int field_0x2C;
+        int field_0x30;
+        float field_0x34;
+        float field_0x38;
+        int field_0x3C;
+        uint UnkOffset_0x40 <fgcolor=cRed, format=hex>;
+        uint UnkCount_0x40;
+        int UnkOffset_0x48 <fgcolor=cRed, format=hex>;
+        int field_0x4C;
+        uint PackReferencesOffset <fgcolor=cRed, format=hex>;
+        int PackReferenceCount;
+        uint AssetsOffset <fgcolor=cRed, format=hex>;
+        uint AssetCount;
+        int field_0x60;
+        int field_0x64;
+    } MainHeader <bgcolor=cYellow>;
+    
+    FSeek(MainHeader.UnkOffset_0x40);
+    struct
+    {
+        uint field_0x00;
+        float field_0x04;
+        float field_0x08;
+        float field_0x0C;
+        uint field_0x10;
+        float field_0x14;
+        int field_0x18;
+        int field_0x1C;
+        int field_0x20;
+        float field_0x24;
+        int field_0x28;
+        int field_0x2C;
+        int field_0x30;
+        int UnkOffset_0x34 <fgcolor=cRed, format=hex>;
+        int UnkCount_0x34;
+        int field_0x3C;
+        int field_0x40 <format=hex>;
+        int field_0x44;
+        int field_0x48;
+        int field_0x4C;
+    } Sub[MainHeader.UnkCount_0x40];
+    
+    FSeek(MainHeader.PackReferencesOffset);
+    PackReference PackReferences[MainHeader.PackReferenceCount];
+
+    FSeek(MainHeader.AssetsOffset);
+    Asset Assets[MainHeader.AssetCount];
+} Cutscene;
