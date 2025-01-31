@@ -1,0 +1,1177 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Final Fantasy 16 / FFXVI File Cut (?) EventTimeline ('FCTL')
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 46 43 54 4C
+//  ID Bytes: *.tlb
+//   History: 
+//------------------------------------------------
+
+/* File is used for *.tlb files, responsible for character/enemy/entity fight moves/timelines.
+ *
+ * Not complete, there's a LOT of different union/struct/timeline elements.
+ * 
+ * If you are expanding this to support more union types, 
+ * Make sure that byte coverage is correct, especially strings. Make sure not to miss
+ * any string offsets.
+ * 
+ * If the union has a nested struct or a string pointer, make sure to add something like
+ * -> FSeek(startof(field_0x00) + <size of main union block>);
+ * 
+ * That ensures that 010 Editor will only highlight the union bytes and not all the way to
+ * the bottom of the file when selecting unions in template results.
+ *
+ * Note: String offsets may be relative to either the parent struct's (use UnionType)
+ * or other the start of the union's actual data, or even a field before.  
+ *
+ * You might come across offsets that seeks to the file backwards too.
+ *
+ * You can try and use CE and search for file bytes (files are stored plain in memory, 
+ * same for nex/nxd tables) in order to find out what stuff does/is
+ * combined with IDA/Ghidra.
+ * 
+ * For ids, you could try using these aob sigs:
+ * 'Nex::GetTableById' : 45 33 C0 89 54 24 ? 45 8B D0 4C 8B D9 49 B9 ? ? ? ? ? ? ? ? 42 0F B6 44 14 ? 48 B9 ? ? ? ? ? ? ? ? 4C 33 C8 49 FF C2 4C 0F AF C9 49 83 FA ? 72 ? 49 8B 4B ? 49 23 C9 4D 8B 4B ? 48 03 C9 49 8B 44 C9 ? 49 3B 43 ? 74 ? 4D 8B 0C C9 EB ? 49 3B C1 74 ? 48 8B 40 ? 3B 50 ? 75 ? EB ? 49 8B C0 48 85 C0 49 0F 44 43 ? 49 3B 43 ? 74 ? 4C 8B 40
+ * 'Nex::SearchRowByKey1' : 48 8B 41 ? 48 85 C0 74 ? 48 83 E8 ? 74 ? 48 83 F8 ? 74 ? 45 33 C9 45 33 C0
+ * 'Nex::GetRowPtr' : 48 8B 01 48 BA
+*/
+        
+enum TimelineElementType
+{
+    kTimelineElem_5 = 5,
+    kTimelineElem_8 = 8,
+    kTimelineElem_10 = 10, // < check.
+    kTimelineElem_12 = 12,
+    kTimelineElem_ControlPermission = 17, 
+    kTimelineElem_23 = 23,  
+    kTimelineElem_27 = 27,
+    kTimelineElem_30 = 30,
+    kTimelineElem_31 = 31,
+    kTimelineElem_33 = 33,
+    kTimelineElem_45 = 45,
+    kTimelineElem_47 = 47,
+    kTimelineElem_49 = 49,
+    kTimelineElem_EnableDestructorCollision = 51,
+    kTimelineElem_56 = 56,
+    kTimelineElem_57 = 57,
+    kTimelineElem_60 = 60,
+    kTimelineElem_73 = 73,
+    kTimelineElem_ControlRejectionRange = 74,
+    kTimelineElem_84 = 84,
+    
+    kTimelineElem_1001 = 1001,
+    kTimelineElem_1002 = 1002,
+    kTimelineElem_1007 = 1007,
+    kTimelineElem_1009 = 1009,
+    kTimelineElem_1010 = 1010,
+    kTimelineElem_1012 = 1012,
+    kTimelineElem_1014 = 1014,
+    kTimelineElem_1016 = 1016,
+    kTimelineElem_1023 = 1023,
+    kTimelineElem_1030 = 1030,
+    kTimelineElem_1035 = 1035,
+    kTimelineElem_1047 = 1047,
+    kTimelineElem_1053 = 1053,
+    kTimelineElem_1049 = 1049,
+    kTimelineElem_1059 = 1059,
+    kTimelineElem_1064 = 1064,
+    kTimelineElem_1066 = 1066,
+    kTimelineElem_1075 = 1075,
+    kTimelineElem_1084 = 1084,
+    kTimelineElem_1097 = 1097,
+    kTimelineElem_1099 = 1099,
+    kTimelineElem_1102 = 1102,
+    kTimelineElem_1103 = 1103,
+    kTimelineElem_1107 = 1107,
+    kTimelineElem_1115 = 1115,
+    kTimelineElem_1117 = 1117,
+    kTimelineElem_1130 = 1130,
+};
+
+typedef struct
+{
+    TimelineElementType UnionType;
+    int field_0x04;
+    int field_0x08;
+    int field_0x0C;
+    
+    struct
+    {
+        switch (UnionType)
+        {
+            case 5:
+                {
+                    byte field_0x00;
+                    byte field_0x04;
+                    byte field_0x08;
+                    byte field_0x0C;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                };
+                break;
+            case 8:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    byte field_0x08;
+                    byte field_0x09;
+                    byte field_0x0A;
+                    byte field_0x0B;
+                    
+                    local int k = 0;
+                    for (k = 0; k < 8; k++)
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            int DataSize <format=hex>;
+                            float field_0x08;
+                            float field_0x0C;
+                            
+                            FSeek(startof(DataOffset) + DataOffset);
+                            byte Data[DataSize];
+                            
+                            FSeek(startof(DataOffset) + 0x10);
+                        } Entry;
+                    }
+                    
+                    int unks[12]; // TODO: Figure this out structurally?
+
+                };
+                break;
+            case 10:
+                {
+                    byte field_0x00;
+                    byte field_0x01;
+                    byte field_0x02;
+                    byte field_0x03;
+                    byte field_0x04;
+                    byte field_0x05;
+                    byte field_0x06;
+                    byte field_0x07;
+                    byte field_0x08;
+                    byte field_0x09;
+                    byte field_0x0A;
+                    byte field_0x0B;
+                    float field_0x0C;
+                    int field_0x10;
+                    float field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case 12:
+                {
+                    float field_0x00;
+                    float field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                };
+                break;
+            case kTimelineElem_ControlPermission:
+                {
+                    byte field_0x00;
+                    byte field_0x01;
+                    byte field_0x02;
+                    byte field_0x03;
+                    byte field_0x04;
+                    byte field_0x05;
+                    byte field_0x06;
+                    byte field_0x07;
+                    byte field_0x08;
+                    byte field_0x09;
+                    byte field_0x0A;
+                    byte field_0x0B;
+                    byte field_0x0C;
+                    byte field_0x0D;
+                    byte field_0x0E;
+                    byte field_0x0F;
+                    byte field_0x10;
+                    byte field_0x11;
+                    byte field_0x12;
+                    byte field_0x13;
+                    byte field_0x14;
+                    byte field_0x15;
+                    byte field_0x16;
+                    byte field_0x17;
+                    byte field_0x18;
+                    byte field_0x19;
+                    byte field_0x1A;
+                    byte field_0x1B;
+                    byte field_0x1C;
+                    byte field_0x1D;
+                    byte field_0x1E;
+                    byte field_0x1F;
+                };
+                break;
+            case 23:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                };
+                break;
+            case 27:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                };
+                break;
+                
+            case 30:
+                {
+                    int field_0x00;
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    byte field_0x0C;
+                    byte pad[3];
+                    int field_0x10;
+                    int field_0x14;
+                    double field_0x18;
+                    double field_0x20;
+                    double field_0x28;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    float field_0x3C;
+                    byte field_0x40;
+                    byte pad_[3];
+                    float field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int empty[4];
+                    
+                    FSeek(startof(field_0x00) + AnimPathOffset);
+                    string SoundPath <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x00) + 0x60);
+                };
+                break;
+            case 31:
+                {
+                    int field_0x00;
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    byte field_0x0C;
+                    byte pad[3];
+                    int field_0x10;
+                    int field_0x14;
+                    double field_0x18;
+                    double field_0x20;
+                    double field_0x28;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    float field_0x3C;
+                    byte field_0x40;
+                    byte pad_[3];
+                    float field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int empty[4];
+                    
+                    FSeek(startof(field_0x00) + AnimPathOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x00) + 0x60);
+                };
+                break;
+            case 33:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                };
+                break;
+            case kTimelineElem_45:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    float field_0x34;
+                    int field_0x38;
+                    float field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    int field_0x54;
+                    double field_0x58;
+                    int field_0x60;
+                    int field_0x64;
+                    double field_0x68;
+                    int field_0x70;
+                    int field_0x74;
+                    int field_0x78;
+                    float field_0x7C;
+                    int field_0x80;
+                    int field_0x84;
+                    int field_0x88;
+                    int field_0x8C;
+                    int field_0x90;
+                    int field_0x94;
+                    int field_0x98;
+                    int field_0x9C;
+                };
+                break;
+            case 47:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case 49:
+                {
+                    int MSeqInputId;
+                };
+                break;
+            case 56:
+            case 57:
+                {
+                    int CameraFCurveId;
+                    int UnkOffset1 <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int UnkOffset2 <format=hex, fgcolor=cRed>;
+                    int field_0x10;
+                    int UnkOffset3 <format=hex, fgcolor=cRed>;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    
+                    FSeek(startof(UnionType) + UnkOffset1);
+                    string Name1 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkOffset2);
+                    string Name2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkOffset3);
+                    string Name3 <bgcolor=cGray>;
+                };
+                break;
+            case kTimelineElem_EnableDestructorCollision:
+                {
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x04;
+                    
+                    FSeek(startof(UnionType) + AnimPathOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(AnimPathOffset) + 0x08);
+                };
+                break;
+            case 60:
+                {
+                    int field_0x00;
+                    int UnkName1Offset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int UnkName2Offset <format=hex, fgcolor=cRed>;
+                    int field_0x10;
+                    int UnkName3Offset <format=hex, fgcolor=cRed>;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    int field_0x3C;
+                    
+                    FSeek(startof(UnionType) + UnkName1Offset);
+                    string Name1 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkName2Offset);
+                    string Name2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkName3Offset);
+                    string Name3 <bgcolor=cGray>;
+                    FSeek(startof(field_0x00) + 0x40);
+                };
+                break;
+            case 73:
+                {
+                    int field_0x00;
+                    int UnkName1Offset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int UnkName2Offset <format=hex, fgcolor=cRed>;
+                    int field_0x10;
+                    int UnkName3Offset <format=hex, fgcolor=cRed>;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    int field_0x3C;
+                    
+                    FSeek(startof(UnionType) + UnkName1Offset);
+                    string Name1 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkName2Offset);
+                    string Name2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkName3Offset);
+                    string Name3 <bgcolor=cGray>;
+                    FSeek(startof(field_0x00) + 0x40);
+                };
+                break;
+            case 84:
+                {
+                    local int k = 0;
+                    for (k = 0; k < 9; k++)
+                    {
+                        struct
+                        {
+                            int DataOffset <format=hex, fgcolor=cRed>;
+                            int DataSize <format=hex>;
+                            float field_0x08;
+                            float field_0x0C;
+                            
+                            FSeek(startof(DataOffset) + DataOffset);
+                            byte Data[DataSize];
+                            
+                            FSeek(startof(DataOffset) + 0x10);
+                        } Entry;
+                    }
+                    
+                    int Unk;
+                    int unks[4];
+                };
+                break;
+            case kTimelineElem_ControlRejectionRange:
+                {
+                    int field_0x00;
+                    byte field_0x04;
+                    byte field_0x05;
+                    byte field_0x06;
+                    byte field_0x07;
+                    byte field_0x08;
+                    byte field_0x09;
+                    byte field_0x0A;
+                    byte field_0x0B;
+                    byte field_0x0C;
+                    byte field_0x0D;
+                    byte field_0x0E;
+                    byte field_0x0F;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                };
+                break;
+            case 1001:
+                {
+                    int field_0x00;
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    
+                    FSeek(startof(field_0x00) + AnimPathOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x00) + 0x2C);
+                };
+                break;
+            case 1002:
+                {
+                    int AttackParamId;
+                    int Name <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int UnkName2Offset <format=hex, fgcolor=cRed>;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    
+                    FSeek(startof(UnionType) + Name);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkName2Offset);
+                    string Path2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(AttackParamId) + 0x28);
+                };
+                break;
+                
+            case 1004:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case 1005:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+                
+            case 1007:
+            case 1009:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                };
+                break;
+                
+            case 1010:
+                {
+                    int field_0x00;
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    float field_0x14;
+                    float field_0x18;
+                    int field_0x1C;
+                    float field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                };
+                break;
+            case 1012:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    
+                    FSeek(startof(field_0x00) + 0x28);
+                };
+                break;
+            case 1014:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                };
+                break;
+            case 1016:
+                {
+                    byte field_0x00;
+                    byte field_0x01;
+                    byte field_0x02;
+                    byte field_0x03;
+                    byte field_0x04;
+                    byte field_0x05;
+                    byte field_0x06;
+                    byte field_0x07;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                };
+                break;
+            case 1023:
+                {
+                    int Offset_0x00;
+                    int Count_0x00;
+                    int field_0x08;
+                    int field_0x0C;
+                    
+                    int field_0x10;
+                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
+                    
+                    int field_0x18; 
+                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
+                    
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    int field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    int field_0x54;
+                    
+                    FSeek(startof(Offset_0x00) + Offset_0x00);
+                    struct
+                    {
+                        int Active;
+                        int UnkIdSlot;
+                        int EidId1 <comment="This is used if EidId2 is 0.">;
+                        int EidId2;
+                        double field_0x10;
+                        double field_0x18;
+                        double field_0x20;
+                        double field_0x28;
+                        float field_0x30;
+                        float field_0x34;
+                        int pad[8];
+                    } Sub[Count_0x00];
+                    
+                    FSeek(startof(field_0x10) + VFXFileNameOffset);
+                    string VFXPath <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x18) + UnkNameOffset2);
+                    string UnkName2 <bgcolor=cGray>;
+                };
+                break;
+            case 1030:
+                {
+                    int Offset_0x00 <format=hex, fgcolor=cRed>;
+                    int Count_0x00 <fgcolor=cGreen>;
+                    int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
+                    int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
+                    
+                    int field_0x10;
+                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
+                    
+                    int field_0x18; 
+                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
+                    
+                    int field_0x20;
+                    byte field_0x24;
+                    byte field_0x25;
+                    byte field_0x26;
+                    byte field_0x27;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int UnkNameOffset3 <format=hex, fgcolor=cRed, comment="Relative to Union">;
+                    int field_0x38;
+                    int field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    
+                    FSeek(startof(Offset_0x00) + Offset_0x00);
+                    struct
+                    {
+                        int Active;
+                        int UnkIdSlot;
+                        int EidId1 <comment="This is used if EidId2 is 0.">;
+                        int EidId2;
+                        double field_0x10;
+                        double field_0x18;
+                        double field_0x20;
+                        double field_0x28;
+                        float field_0x30;
+                        float field_0x34;
+                        int pad[8];
+                    } Sub[Count_0x00];
+                    
+                    FSeek(startof(field_0x10) + VFXFileNameOffset);
+                    string VFXPath <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x18) + UnkNameOffset2);
+                    string UnkName2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + UnkNameOffset3);
+                    string UnkName3 <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x54);
+                }
+                break;
+            case 1035:
+                {
+                    int field_0x00;
+                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    
+                    FSeek(startof(field_0x00) + AnimPathOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x00) + 0x20);
+                };
+                break;
+            case 1047:
+                {
+                    int SummonPartsPatternId;
+                    float field_0x04;
+                    float field_0x08;
+                    byte field_0x0C;
+                    byte field_0x0D;
+                    byte field_0x0E;
+                    byte field_0x0F;
+                    int field_0x10;
+                };
+                break;
+            case 1049:
+                {
+                    int Offset_0x00 <format=hex, fgcolor=cRed>;
+                    int Count_0x00 <fgcolor=cGreen>;
+                    int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
+                    int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
+                    
+                    int field_0x10;
+                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
+                    
+                    int field_0x18; 
+                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
+                    
+                    int field_0x20;
+                    byte field_0x24;
+                    byte field_0x25;
+                    byte field_0x26;
+                    byte field_0x27;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34 <format=hex, fgcolor=cRed, comment="Relative to Union">;
+                    int field_0x38;
+                    int field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    int field_0x54;
+                    int field_0x58;
+                    int field_0x5C;
+                    float field_0x60;
+                    int field_0x64;
+                    int field_0x68;
+                    int field_0x6C;
+                    FSeek(startof(Offset_0x00) + Offset_0x00);
+                    struct
+                    {
+                        int Active;
+                        int UnkIdSlot;
+                        int EidId1 <comment="This is used if EidId2 is 0.">;
+                        int EidId2;
+                        double field_0x10;
+                        double field_0x18;
+                        double field_0x20;
+                        double field_0x28;
+                        float field_0x30;
+                        float field_0x34;
+                        int pad[8];
+                    } Sub[Count_0x00];
+                    
+                    FSeek(startof(field_0x10) + VFXFileNameOffset);
+                    string VFXPath <bgcolor=cGray>;
+                    
+                    FSeek(startof(field_0x18) + UnkNameOffset2);
+                    string UnkName2 <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x70);
+                };
+                break;
+            case 1053:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case 1059:
+                {
+                    int NameOffset <format=hex, fgcolor=cRed>;
+                    float field_0x04;
+                    
+                    FSeek(startof(UnionType) + NameOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(NameOffset) + 0x08);
+                };
+                break;
+            case 1064:
+                {
+                    int field_0x00;
+                    int Offset_0x04 <format=hex, fgcolor=cRed>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    
+                    FSeek(startof(UnionType) + Offset_0x04);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(UnionType) + 0x1C);
+                };
+                break;
+            case 1066:
+                {
+                    int field_0x00;
+                };
+                break;
+            case 1075:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+             case 1084:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case kTimelineElem_1097:
+                {
+                    int Offset_0x00 <format=hex>;
+                    int field_0x04;
+                    int field_0x08;
+                    
+                    FSeek(startof(UnionType) + Offset_0x00);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x0C);
+                };
+                break;
+            case kTimelineElem_1099:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    float field_0x14;
+                    int field_0x18;
+                    float field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                };
+                break;
+            case 1102:
+                {
+                    int Offset_0x00 <format=hex>;
+                    int field_0x04;
+                    
+                    FSeek(startof(UnionType) + Offset_0x00);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x08);
+                };
+                break;
+            case 1103:
+                {
+                    int Offset_0x00 <format=hex>;
+                    int field_0x04;
+                    
+                    FSeek(startof(UnionType) + Offset_0x00);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x08);
+                };
+                break;
+            case 1107:
+                {
+                    int Offset_0x00 <format=hex>;
+                    int field_0x04;
+                    
+                    FSeek(startof(UnionType) + Offset_0x00);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(Offset_0x00) + 0x08);
+                };
+                break;
+            case 1115:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    float field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    float field_0x14;
+                    int field_0x18;
+                    float field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    int field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    int field_0x54;
+                };
+                break;
+            case 1117:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                };
+                break;
+            case 1130:
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                };
+                break;
+            default:
+                Printf("Unsupported UnionType %d\n", UnionType);
+                break;   
+        }
+    } ElementData <bgcolor=cBlack>;
+} TimelineElementDataUnion;
+
+typedef struct
+{
+    int field_0x00;
+    int UnkNameOffset <format=hex, fgcolor=cRed>;
+    int TimelineElemUnionTypeOrLayerId <comment="Not sure which.">; // Game hashes this with FNV1A for some reason
+    int FrameStart;
+    int NumFrames;
+    int field_0x14;
+    byte field_0x18;
+    byte field_0x19;
+    byte field_0x1A;
+    byte field_0x1B;
+    int Offset_0x1C <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(field_0x00) + UnkNameOffset);
+    string Name <bgcolor=cGray>;
+    
+    FSeek(startof(field_0x00) + Offset_0x1C);
+    TimelineElementDataUnion DataUnion <bgcolor=cDkGreen>;
+    
+    // Fix
+    FSeek(startof(field_0x00) + 0x20);
+} TimelineElement <bgcolor=cRed, read=Str("[%d->%d] Type %s", FrameStart, FrameStart+NumFrames, 
+    EnumToString(DataUnion.UnionType) == "" ? Str("%d", DataUnion.UnionType) : EnumToString(DataUnion.UnionType))>;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int UnkType; // 1001 or 1002 explicitly checked on update loop. If 1001 & 1002, size = 0x18?
+        int Pad[9];
+    } Sub;
+} Struct_0x1C_0x14 <bgcolor=cRed>;
+
+typedef struct
+{
+    int Index;
+    int AssetArrayListOffset <format=hex, fgcolor=cRed>;
+    int NumAssets <fgcolor=cGreen>;
+    
+    if (NumAssets)
+    {
+        FSeek(startof(Index) + AssetArrayListOffset);
+        int AssetEntryOffsets[NumAssets];
+        
+        local int j = 0;
+        for (j = 0; j < NumAssets; j++)
+        {
+            FSeek(startof(AssetEntryOffsets) + AssetEntryOffsets[j]);
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                int field_0x10;
+                int field_0x14 <format=hex, fgcolor=cRed>;
+                int field_0x18 <format=hex, fgcolor=cRed>;   
+                
+                FSeek(startof(field_0x00) + field_0x14);
+                string FileName <bgcolor=cGray>;
+                
+                FSeek(startof(field_0x00) + field_0x18);
+                string Path <bgcolor=cGray>;
+        
+                FSeek(startof(field_0x00) + 0x1C);
+            } Asset <bgcolor=cDkBlue, read=Path>;
+        }
+
+        // Fix
+        FSeek(startof(Index) + 0x0C);
+    }
+
+
+} AssetGroup <bgcolor=cRed>;
+            
+struct
+{
+    struct
+    {
+        int Magic;
+        int Version;
+        int c;
+        int d;
+        int e;
+        int f;
+        int field_0x18 <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cBlack>;
+    
+    // 0x98 = stride of 0x58
+    
+    FSeek(Header.field_0x18);
+    
+    struct
+    {
+        int field_0x00 <fgcolor=cGreen>;
+        int TimelineElementsOffset <format=hex, fgcolor=cRed>;
+        int TimelineElementCount <fgcolor=cGreen>;
+        int field_0x0C <format=hex, fgcolor=cRed>;
+        int Count_0x0C <fgcolor=cGreen>;
+        int field_0x14 <format=hex, fgcolor=cRed>;
+        int Count_0x14 <fgcolor=cGreen>;
+        int TotalFrames;
+        int Empty;
+        
+        local int i = 0;
+        struct
+        {
+            for (i = 0; i < TimelineElementCount; i++)
+            {
+                FSeek(startof(Timeline) + TimelineElementsOffset + (i * 0x20));
+                TimelineElement Elements <bgcolor=cBlue>;
+            }
+        } TimelineElementList;
+        
+        struct
+        {
+            for (i = 0; i < Count_0x0C; i++)
+            {
+                FSeek(startof(Timeline) + field_0x0C + (i * 0x0C));
+                AssetGroup AssetGroup_ <bgcolor=cRed>;
+            }
+        } AssetGroups;
+        
+        struct
+        {
+            for (i = 0; i < Count_0x14; i++)
+            {
+                FSeek(startof(Timeline) + field_0x14 + (i * 0x2C));
+                Struct_0x1C_0x14 Struct_0x1C_0x14_ <bgcolor=cPurple>;
+            }
+        } Struct_0x1C_0x14Array;
+    } Timeline <bgcolor=cYellow>;
+} FCTL;
