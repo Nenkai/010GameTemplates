@@ -1,0 +1,214 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short UnkIndex;
+    short Unk;
+    int TotalSizeOfAllChunks <format=hex>;
+    short ZlibChunkLengths[5] <format=hex>;
+    short UnkOtherZlibChunkLength <format=hex>;
+    short UnkOtherZlibChunkLength2 <format=hex>; 
+    short Padding;
+    
+    int ChunkOffset <format=hex, comment="Relative to after the first group of zlib chunks (if present)">;
+    int Padding;
+} ZlibChunkInfos;
+    
+struct
+{
+    uint Magic <comment="Has to match 'GID '">;
+    byte Version <comment="Minimum 5">;
+    byte Flags <comment="Has to be 1">;
+    byte Unk;
+    byte pad;
+    uint64 TocSize <format=hex>;
+    uint64 Toc2 <format=hex>;
+} Header;
+
+union
+{
+    byte TocData[Header.TocSize];
+    struct
+    {        
+        struct
+        {
+            short field_0x00;
+            short pad <hidden=true>;
+            short field_0x04;
+            short pad <hidden=true>;
+            short field_0x08;
+            short pad <hidden=true>;
+            short field_0x0C;
+            short pad <hidden=true>;
+            short field_0x10;
+            short pad <hidden=true>;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;  
+        } entries[6];
+    } Toc1;
+} Toc1Union <bgcolor=cBlue>;
+
+union
+{
+    byte TocData[Header.Toc2];   
+    struct
+    {
+        struct
+        {
+            float BBoxMinX;
+            float BBoxMinY;
+            float BBoxMinZ;
+            float BBoxMaxX;
+            float BBoxMaxY;
+            float BBoxMaxZ;
+            float field_0x18;
+            float field_0x1C;
+        } Part1;
+        
+        struct
+        {
+            float field_0x00; 
+            float field_0x04; 
+            float field_0x08; 
+            float field_0x0C; 
+            int field_0x10; 
+            int field_0x14; 
+            int field_0x18; 
+            int field_0x1C; 
+            int field_0x20; 
+            int field_0x24; 
+            int GridX; 
+            int GridY; 
+            int GridZ; 
+            int field_0x34; 
+        } Part2;
+        
+        struct
+        {
+            int A;
+            int Size_0x04;
+        } Part3;
+        
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+            int SizeOfZlibChunkInfos;
+            int field_0x0C;
+            int field_0x10;
+            int field_0x14;
+            int field_0x18;
+            int field_0x1C;
+        } Part4;
+        
+        struct
+        {
+            int a;
+            int b;
+            int c;
+            int d;
+        } Part5[Part2.GridX * Part2.GridY * Part2.GridZ];
+        
+        if (Header.Version >= 9)
+        {
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int MainZlibChunkGroupSize <format=hex>;
+                int field_0x0C;
+                int field_0x10;
+                int MainZlibChunkGroupInfoCount;
+                byte field_0x18 <comment="Should always not be 0 otherwise error">;
+                byte field_0x19;
+                byte field_0x1A;
+                byte field_0x1B;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+                int field_0x28;
+                int field_0x2C;
+            } Part6;
+            
+            if (Part6.field_0x00)
+            {
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                } Part7[Part6.field_0x10];
+            }
+            
+            if (Part6.field_0x04)
+            {
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
+                    int field_0x30;
+                    int field_0x34;
+                    int field_0x38;
+                    int field_0x3C;
+                    int field_0x40;
+                    int field_0x44;
+                    int field_0x48;
+                    int field_0x4C;
+                    int field_0x50;
+                    int field_0x54;
+                    int field_0x58;
+                } Part8[Part6.field_0x00];
+            }
+            
+            if (Part6.MainZlibChunkGroupInfoCount)
+            {
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                } Part9[Part6.field_0x04];
+            }
+            
+            ZlibChunkInfos MainZlibChunkGroupInfos[Part6.MainZlibChunkGroupInfoCount];
+        }
+    } Toc2;
+} Toc2Union <bgcolor=cGreen>;
+
+
+
+byte UnkData1[Toc2Union.Toc2.Part3.Size_0x04] <bgcolor=cBlack>;
+
+union
+{
+    
+    byte ZlibChunkInfoBytes[Toc2Union.Toc2.Part4.SizeOfZlibChunkInfos] <bgcolor=cDkGray>;
+    ZlibChunkInfos ChunkInfos[2550];
+} ZlibChunkInfoUnion;
+
+if (Header.Version >= 9)
+    byte MainZlibChunkGroupData[Toc2Union.Toc2.Part6.MainZlibChunkGroupSize];
+
+
