@@ -1,0 +1,450 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short Length;
+    if (Length > 0)
+        char String[Length];
+} Str;
+
+typedef enum<short>
+{
+    FLIPPABLE = 0x01,
+    EDITABLE = 0x02,
+    SEEDLESS = 0x04,
+    PERMANENT = 0x08,
+    DROPLESS = 0x10,
+    NOSELF = 0x20,
+    NOSHADOW = 0x40,
+    WORLDLOCKED = 0x80,
+    BETA = 0x100,
+    AUTOPICKUP = 0x200,
+    MOD = 0x400,
+    RANDGROW = 0x800,
+    PUBLIC = 0x1000,
+    FOREGROUND = 0x2000,
+    HOLIDAY = 0x4000,
+    UNTRADEABLE = 0x8000,
+} ItemProperties;
+
+typedef enum<byte>
+{
+    TYPE_FIST,
+    TYPE_WRENCH,
+    TYPE_USER_DOOR,
+    TYPE_LOCK,
+    TYPE_GEMS,
+    TYPE_TREASURE,
+    TYPE_DEADLY,
+    TYPE_TRAMPOLINE,
+    TYPE_CONSUMABLE,
+    TYPE_GATEWAY,
+    TYPE_SIGN,
+    TYPE_SFX_WITH_EXTRA_FRAME,
+    TYPE_BOOMBOX,
+    TYPE_DOOR,
+    TYPE_PLATFORM,
+    TYPE_BEDROCK,
+    TYPE_LAVA,
+    TYPE_NORMAL,
+    TYPE_BACKGROUND,
+    TYPE_SEED,
+    TYPE_CLOTHES,
+    TYPE_NORMAL_WITH_EXTRA_FRAME,
+    TYPE_BACKGD_SFX_EXTRA_FRAME,
+    TYPE_BACK_BOOMBOX,
+    TYPE_BOUNCY,
+    TYPE_POINTY,
+    TYPE_PORTAL,
+    TYPE_CHECKPOINT,
+    TYPE_MUSICNOTE,
+    TYPE_ICE,
+    //30
+    TYPE_SWITCHEROO = 31,
+    TYPE_CHEST,
+    TYPE_MAILBOX,
+    TYPE_BULLETIN,
+    TYPE_PINATA,
+    TYPE_DICE,
+    TYPE_COMPONENT,
+    TYPE_PROVIDER,
+    TYPE_LAB,
+    TYPE_ACHIEVEMENT,
+    TYPE_WEATHER_MACHINE,
+    TYPE_SCOREBOARD,
+    TYPE_SUNGATE,
+    TYPE_PROFILE,
+    TYPE_DEADLY_IF_ON,
+    TYPE_HEARTMONITOR,
+    TYPE_DONATION_BOX,
+    TYPE_TOYBOX,
+    TYPE_MANNEQUIN,
+    TYPE_CAMERA,
+    TYPE_MAGICEGG,
+    TYPE_TEAM,
+    TYPE_GAME_GEN,
+    TYPE_XENONITE,
+    TYPE_DRESSUP,
+    TYPE_CRYSTAL,
+    TYPE_BURGLAR,
+    TYPE_COMPACTOR,
+    TYPE_SPOTLIGHT,
+    TYPE_WIND,
+    TYPE_DISPLAY_BLOCK,
+    TYPE_VENDING,
+    TYPE_FISHTANK,
+    TYPE_PETFISH,
+    TYPE_SOLAR,
+    TYPE_FORGE,
+    TYPE_GIVING_TREE,
+    TYPE_GIVING_TREE_STUMP,
+    TYPE_STEAMPUNK,
+    TYPE_STEAM_LAVA_IF_ON,
+    TYPE_STEAM_ORGAN,
+    TYPE_TAMAGOTCHI,
+    TYPE_SEWING,
+    TYPE_FLAG,
+    TYPE_LOBSTER_TRAP,
+    TYPE_ARTCANVAS,
+    TYPE_BATTLE_CAGE,
+    TYPE_PET_TRAINER,
+    TYPE_STEAM_ENGINE,
+    TYPE_LOCK_BOT,
+    TYPE_WEATHER_SPECIAL,
+    TYPE_SPIRIT_STORAGE,
+    TYPE_DISPLAY_SHELF,
+    TYPE_VIP_DOOR,
+    TYPE_CHAL_TIMER,
+    TYPE_CHAL_FLAG,
+    TYPE_FISH_MOUNT,
+    TYPE_PORTRAIT,
+    TYPE_WEATHER_SPECIAL2,
+    TYPE_FOSSIL,
+    TYPE_FOSSIL_PREP,
+    TYPE_DNA_MACHINE,
+    TYPE_BLASTER,
+    TYPE_VALHOWLA,
+    TYPE_CHEMSYNTH,
+    TYPE_CHEMTANK,
+    TYPE_STORAGE,
+    TYPE_OVEN,
+    TYPE_SUPER_MUSIC,
+    TYPE_GEIGERCHARGE,
+    TYPE_ADVENTURE_RESET,
+    TYPE_TOMB_ROBBER,
+    TYPE_FACTION,
+    TYPE_RED_FACTION,
+    TYPE_GREEN_FACTION,
+    TYPE_BLUE_FACTION,
+    TYPE_ARTIFACT,
+    TYPE_TRAMPOLINE_MOMENTUM,
+    TYPE_FISHGOTCHI_TANK,
+    TYPE_FISHING_BLOCK,
+    TYPE_ITEM_SUCKER,
+    TYPE_ITEM_PLANTER,
+    TYPE_ROBOT,
+    TYPE_COMMAND,
+    TYPE_TICKET,
+    TYPE_STATS_BLOCK,
+    TYPE_FIELD_NODE,
+    TYPE_OUIJA_BOARD,
+    TYPE_ARCHITECT_MACHINE,
+    TYPE_STARSHIP,
+    TYPE_AUTODELETE,
+    TYPE_BOOMBOX2,
+    TYPE_AUTO_ACTION_BREAK,
+    TYPE_AUTO_ACTION_HARVEST,
+    TYPE_AUTO_ACTION_HARVEST_SUCK,
+    TYPE_LIGHTNING_IF_ON,
+    TYPE_PHASED_BLOCK,
+    TYPE_MUD,
+    TYPE_ROOT_CUTTING,
+    TYPE_PASSWORD_STORAGE,
+} ItemCategory;
+
+typedef enum<byte>
+{
+    MATERIAL_WOOD,
+    MATERIAL_GLASS,
+    MATERIAL_ROCK,
+    MATERIAL_METAL,
+    Unknown
+} ItemMaterial;
+
+typedef enum<byte>
+{
+    VISUAL_EFFECT_NONE,
+    VISUAL_EFFECT_FLAME_LICK,
+    VISUAL_EFFECT_SMOKING,
+    VISUAL_EFFECT_GLOW_TINT,
+    VISUAL_EFFECT_ANIM,
+    VISUAL_EFFECT_BUBBLES,
+    VISUAL_EFFECT_PET,
+    VISUAL_EFFECT_PET_ANIM,
+    VISUAL_EFFECT_NO_ARMS,
+    VISUAL_EFFECT_WAVEY,
+    VISUAL_EFFECT_WAVEY_ANIM,
+    VISUAL_EFFECT_BOTHARMS,
+    VISUAL_EFFECT_LOWHAIR,
+    VISUAL_EFFECT_UNDERFACE,
+    VISUAL_EFFECT_SKINTINT,
+    VISUAL_EFFECT_MASK,
+    VISUAL_EFFECT_ANIM_MASK,
+    VISUAL_EFFECT_LOWHAIR_MASK,
+    VISUAL_EFFECT_GHOST,
+    VISUAL_EFFECT_PULSE,
+    VISUAL_EFFECT_COLORIZE,
+    VISUAL_EFFECT_COLORIZE_TO_SHIRT,
+    VISUAL_EFFECT_COLORIZE_ANIM,
+    VISUAL_EFFECT_HIGHFACE,
+    VISUAL_EFFECT_HIGHFACE_ANIM,
+    VISUAL_EFFECT_RAINBOW_SHIFT,
+    VISUAL_EFFECT_BACKFORE,
+    VISUAL_EFFECT_COLORIZE_WITH_SKIN,
+    VISUAL_EFFECT_NO_RENDER,
+    VISUAL_EFFECT_SPIN,
+    VISUAL_EFFECT_OFFHAND,
+    VISUAL_EFFECT_WINGED,
+    VISUAL_EFFECT_SINK,
+    VISUAL_EFFECT_DARKNESS,
+    VISUAL_EFFECT_LIGHTSOURCE,
+    VISUAL_EFFECT_LIGHT_IF_ON,
+    VISUAL_EFFECT_DISCOLOR,
+    VISUAL_EFFECT_STEP_SPIN,
+    VISUAL_EFFECT_PETCOLORED,
+    VISUAL_EFFECT_SILKFOOT,
+    VISUAL_EFFECT_TILTY,
+    VISUAL_EFFECT_TILTY_DARK,
+    VISUAL_EFFECT_NEXT_FRAME_IF_ON,
+    VISUAL_EFFECT_WOBBLE,
+    VISUAL_EFFECT_SCROLL,
+    VISUAL_EFFECT_LIGHTSOURCE_PULSE,
+    VISUAL_EFFECT_BUBBLE_MACHINE,
+    VISUAL_EFFECT_VERYLOWHAIR,
+    VISUAL_EFFECT_VERYLOWHAIR_MASK
+} VisualRenderType;
+
+typedef enum<byte>
+{
+    HAT,
+    SHIRT,
+    PANTS,
+    SHOES,
+    FACEITEM,
+    HAND,
+    BACK,
+    HAIR,
+    CHESTITEM,
+} ItemClothingType;
+
+typedef enum<byte>
+{
+    TILE_COLLISION_NONE,
+    TILE_COLLISION_SOLID,
+    TILE_COLLISION_JUMP_THROUGH,
+    TILE_COLLISION_GATEWAY,
+    TILE_COLLISION_IF_OFF,
+    TILE_COLLISION_ONE_WAY,
+    TILE_COLLISION_VIP,
+    TILE_COLLISION_JUMP_DOWN,
+    TILE_COLLISION_ADVENTURE,
+    TILE_COLLISION_IF_ON,
+    TILE_COLLISION_FACTION,
+    TILE_COLLISION_GUILD,
+    TILE_COLLISION_CLOUD
+} ItemCollisionType;
+
+typedef enum<byte>
+{
+    STORAGE_SINGLE_FRAME_ALONE,
+    STORAGE_SINGLE_FRAME,
+    STORAGE_SMART_EDGE,
+    STORAGE_SMART_EDGE_HORIZ,
+    STORAGE_SMART_CLING,
+    STORAGE_SMART_OUTER,
+    STORAGE_RANDOM,
+    STORAGE_SMART_EDGE_VERT,
+    STORAGE_SMART_EDGE_HORIZ_CAVE,
+    STORAGE_SMART_CLING2,
+    STORAGE_SMART_EDGE_DIAGON,
+} ItemTextureType;
+
+typedef enum 
+{
+    MULTI_ANIM_START = 0x1,
+    PING_PONG_ANIM = 0x02,
+    OVERLAY_OBJECT = 0x04,
+    OFFSET_UP = 0x08,
+    DUAL_LAYER = 0x10,
+    MULTI_ANIM_END = 0x20,
+    USE_SKIN_TINT = 0x80,
+    SEED_TINT_LAYER1 = 0x100,
+    SEED_TINT_LAYER2 = 0x200,
+    RAINBOW_TINT_LAYER1 = 0x400,
+    RAINBOW_TINT_LAYER2 = 0x800,
+    GLOW = 0x1000,
+    NO_ARMS = 0x2000,
+    FRONT_ARM_PUNCH = 0x4000,
+    RENDER_OFFHAND = 0x8000,
+    SLOWFALL_OBJECT = 0x10000,
+    REPLACEMENT_SPRITE = 0x20000,
+    ORB_FLOAT = 0x40000,
+} ItemAnimationType;
+
+typedef enum<int>
+{
+    ROBOT_DEADLY = 0x1,
+    ROBOT_SHOOT_LEFT = 0x2,
+    ROBOT_SHOOT_RIGHT = 0x4,
+    ROBOT_SHOOT_DOWN = 0x8,
+    ROBOT_SHOOT_UP = 0x10,
+    ROBOT_CAN_SHOOT = 0x20,
+    ROBOT_LAVA = 0x40,
+    ROBOT_POINTY = 0x80,
+    ROBOT_SHOOT_DEADLY = 0x100,
+    GUILD_ITEM = 0x200,
+    GUILD_FLAG = 0x400,
+    STARSHIP_HELM = 0x800,
+    STARSHIP_REACTOR = 0x1000,
+    STARSHIP_VIEWSCREEN = 0x2000,
+    SMOD = 0x4000,
+    TILE_DEADLY_IF_ON = 0x8000,
+    LONG_HAND_ITEM64x32 = 0x10000,
+    GEMLESS = 0x20000,
+    TRANSMUTABLE = 0x40000,
+} Properties2;
+
+struct
+{
+    struct 
+    {
+        byte Version;
+        byte Empty;
+        short TotalItems;
+        byte padding[2];
+    } Header <bgcolor=cPurple>;
+
+    struct
+    {
+        int ID <fgcolor=cGreen>;
+        ItemProperties Properties <format=hex>;
+        ItemCategory Category;
+        ItemMaterial Material;
+        Str ItemName;
+        Str TexturePath;
+        uint TextureFileHash <format=hex>;
+        VisualRenderType RenderType;
+        int CookingTime;
+        byte TextureX;
+        byte TextureY;
+        ItemTextureType TextureType;
+        byte Unknown;
+        ItemCollisionType CollisionType;
+        byte Hardness;
+        int HealTimeSecond;
+        byte ClothingType;
+        short Rarity;
+        byte MaxCanHold;
+
+        Str AltFileLocation;
+        uint AltFileHash <format=hex>;
+
+        int AnimationMS;
+        
+        if (Header.Version > 5)
+        {
+            Str PetBattleName;
+            Str PetBattlePrefix;
+            Str PetBattleSuffix;
+            Str PetBattleAbility;
+        }
+
+        byte SeedBaseStyle;
+        byte SeedOverlayStyle;
+        byte TreeBaseStyle;
+        byte TreeOverlayStyle;
+
+        uint SeedColor <format=hex>;
+        uint OverlayColor <format=hex>;
+
+        int _empty_;
+        int GrowTime;
+
+        if (Header.Version >= 7)
+        {
+            ItemAnimationType AnimationType;
+            Str AnimationLocations;
+            Str AnimationTexturePath;
+            Str AnimationLocations2;
+        }
+
+        if (Header.Version >= 8)
+        {
+            uint DualLayerX;
+            uint DualLayerY;
+        }
+
+        if (Header.Version >= 9)
+        {
+            Properties2 Properties;
+            uint ClientData[15];
+        }
+
+        if (Header.Version >= 10)
+        {
+            int ExtractorGravityRange;
+            int StorageBoxSize;
+        }
+
+        if (Header.Version >= 11)
+        {
+            Str CustomizedPunchInfo;
+        }
+
+        if (Header.Version >= 12)
+        {
+            int Unk_Version12;
+            byte UnkData_Version12[9];
+        }
+
+        if (Header.Version >= 13)
+        {
+            int Unk_Version13;
+        }
+
+        if (Header.Version >= 14)
+        {
+            int Unk_Version14;
+        }
+
+        if (Header.Version >= 15)
+        {
+            struct
+            {
+                int a;
+                byte unk;
+                byte unk2;
+                short c;
+                int c;
+                byte unk;
+                int unk;
+                int unk2;
+                int unk3;
+                Str SitTextureName;
+            } Ver15Stuff;
+            
+        }
+
+    } Item[Header.TotalItems] <optimize=false, bgcolor=cDkGray>;
+} Items;
