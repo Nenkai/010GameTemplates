@@ -1,15 +1,134 @@
 //------------------------------------------------
 //--- 010 Editor v15.0 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: FF16 GID File
+//   Authors: Nenkai
 //   Version: 
-//   Purpose: 
+//   Purpose: I have NO clue. Running without this file just seems to screw up the lighting.
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+
+
+typedef enum<uint>
+{
+    // 8 bpp
+    R8_TYPELESS = 0x10130,
+    R8_UNORM = 0x11130,
+    A8_UNORM = 0x11131,
+    R8_SNORM = 0x13130,
+    R8_UINT = 0x14130,
+    R8_SINT = 0x15130,
+
+    // 16 bpp
+    R16_TYPELESS = 0x20140,
+    R16_UNORM = 0x21140,
+    R16_SNORM = 0x23140,
+    R16_UINT = 0x24140,
+    R16_SINT = 0x25140,
+    R16_FLOAT = 0x26140,
+    D16_UNORM = 0x29140,
+
+    // 8+8 bpp
+    R8G8_TYPELESS = 0x30240,
+    R8G8_UNORM = 0x31240,
+    R8G8_UINT = 0x34240,
+    R8G8_SNORM = 0x33240,
+    R8G8_SINT = 0x35240,
+
+    // 32 bpp
+    R32_TYPELESS = 0x40150,
+    R32_UINT = 0x44150,
+    R32_SINT = 0x45150,
+    R32_FLOAT = 0x46150,
+    D32_FLOAT = 0x49150,
+
+    // 16+16 bpp
+    R16G16_TYPELESS = 0x50250,
+    R16G16_UNORM = 0x51250,
+    R16G16_SNORM = 0x53250,
+    R16G16_UINT = 0x54250,
+    R16G16_SINT = 0x55250,
+    R16G16_FLOAT = 0x56250,
+
+    // 11+11+10 bpp
+    R11G11B10_FLOAT = 0x76350,
+
+    // 11+10+10+2 bpp
+    R10G10B10A2_TYPELESS = 0x80450,
+    R10G10B10A2_UNORM = 0x81450,
+    R10G10B10A2_UINT = 0x84450,
+
+    // 8+8+8+8 bpp
+    R8G8B8A8_TYPELESS = 0xA0450,
+    R8G8B8A8_UNORM = 0xA1450,
+    R8G8B8A8_UNORM_SRGB = 0xA2450,
+    R8G8B8A8_UINT = 0xA4450,
+    R8G8B8A8_SNORM = 0xA3450,
+    R8G8B8A8_SINT = 0xA5450,
+
+    // 32+32 bpp
+    R32G32_TYPELESS = 0xB0260,
+    R32G32_FLOAT = 0xB6260,
+    R32G32_UINT = 0xB4260,
+    R32G32_SINT = 0xB5260,
+
+    // 16+16+16+16 bpp
+    R16G16B16A16_TYPELESS = 0xC0460,
+    R16G16B16A16_FLOAT = 0xC6460,
+    R16G16B16A16_UNORM = 0xC1460,
+    R16G16B16A16_UINT = 0xC4460,
+    R16G16B16A16_SNORM = 0xC3460,
+    R16G16B16A16_SINT = 0xC5460,
+
+    // 32+32+32 bpp
+    R32G32B32_TYPELESS = 0xD0380,
+    R32G32B32_FLOAT = 0xD6380,
+    R32G32B32_UINT = 0xD4380,
+    R32G32B32_SINT = 0xD5380,
+
+    // 32+32+32+32 bpp
+    R32G32B32A32_TYPELESS = 0xE0470,
+    R32G32B32A32_UINT = 0xE4470,
+    R32G32B32A32_SINT = 0xE5470,
+    R32G32B32A32_FLOAT = 0xE6470,
+
+    // 32+8+24bpp
+    R32G8X24_TYPELESS = 0xF0360,
+    X32_TYPELESS_G8X24_UINT = 0xF4160,
+    R32_FLOAT_X8X24_TYPELESS = 0xF6160,
+    D32_FLOAT_S8X24_UINT = 0xF9260,
+
+    // bc1
+    BC1_UNORM = 0x107420,
+    BC1_UNORM_SRGB = 0x108420,
+
+    // bc2
+    BC2_UNORM = 0x117430,
+    BC2_UNORM_SRGB = 0x118430,
+
+    // bc3
+    BC3_UNORM = 0x127430,
+    BC3_UNORM_SRGB = 0x128430,
+
+    // bc4
+    BC4_UNORM = 0x137120,
+    BC4_SNORM = 0x137121,
+
+    // bc5
+    BC5_UNORM = 0x147230,
+    BC5_SNORM = 0x147231,
+
+    // bc6
+    BC6H_UF16 = 0x157330,
+    BC6H_SF16 = 0x157331,
+
+    // bc7
+    BC7_UNORM = 0x167430,
+    BC7_UNORM_SRGB = 0x168430,
+} TexturePixelFormat;
 
 typedef struct
 {
@@ -25,6 +144,16 @@ typedef struct
     int Padding;
 } ZlibChunkInfos;
     
+typedef struct
+{
+    uint Magic <format=hex>;
+    uint DataOffset <format=hex>;
+    uint DecompressedSize <format=hex>;
+    uint Flags <format=hex>;
+    uint Unk;
+    uint Unk2;
+} ZlibHdr;
+        
 struct
 {
     uint Magic <comment="Has to match 'GID '">;
@@ -43,20 +172,20 @@ union
     {        
         struct
         {
-            short field_0x00;
+            short Width;
             short pad <hidden=true>;
-            short field_0x04;
+            short Height;
             short pad <hidden=true>;
             short field_0x08;
             short pad <hidden=true>;
-            short field_0x0C;
+            short MipmapCount;
             short pad <hidden=true>;
-            short field_0x10;
+            short Depth; // Is mipmap/depth swapped?
             short pad <hidden=true>;
             int field_0x14;
             int field_0x18;
-            int field_0x1C;  
-        } entries[6];
+            TexturePixelFormat PixelFormat <format=hex>;  
+        } entries[7];
     } Toc1;
 } Toc1Union <bgcolor=cBlue>;
 
@@ -103,14 +232,12 @@ union
         
         struct
         {
-            int field_0x00;
-            int field_0x04;
-            int SizeOfZlibChunkInfos;
-            int field_0x0C;
-            int field_0x10;
-            int field_0x14;
-            int field_0x18;
-            int field_0x1C;
+            uint64 Part5Size <format=hex>;
+            int SizeOfZlibChunkInfos <format=hex>;
+            int _pad_;
+            uint64 SizeMainZlibChunkInfos <format=hex>;
+            int UnkDecompressedChunkSize1 <format=hex>;
+            int UnkDecompressedChunkSize2 <format=hex>;
         } Part4;
         
         struct
@@ -125,13 +252,13 @@ union
         {
             struct
             {
-                int field_0x00;
-                int field_0x04;
-                int MainZlibChunkGroupSize <format=hex>;
+                int Part8Count;
+                int Part9Count;
+                int SubZlibChunkGroupSize <format=hex>;
                 int field_0x0C;
-                int field_0x10;
-                int MainZlibChunkGroupInfoCount;
-                byte field_0x18 <comment="Should always not be 0 otherwise error">;
+                int Part7Count;
+                int SubZlibChunkGroupInfoCount;
+                byte MustNotBeZero <comment="Should always not be 0 otherwise error">;
                 byte field_0x19;
                 byte field_0x1A;
                 byte field_0x1B;
@@ -142,7 +269,7 @@ union
                 int field_0x2C;
             } Part6;
             
-            if (Part6.field_0x00)
+            if (Part6.Part7Count)
             {
                 struct
                 {
@@ -150,10 +277,10 @@ union
                     int field_0x04;
                     int field_0x08;
                     int field_0x0C;
-                } Part7[Part6.field_0x10];
+                } Part7[Part6.Part7Count];
             }
             
-            if (Part6.field_0x04)
+            if (Part6.Part9Count)
             {
                 struct
                 {
@@ -180,35 +307,42 @@ union
                     int field_0x50;
                     int field_0x54;
                     int field_0x58;
-                } Part8[Part6.field_0x00];
+                } Part8[Part6.Part8Count];
             }
             
-            if (Part6.MainZlibChunkGroupInfoCount)
+            if (Part6.SubZlibChunkGroupInfoCount)
             {
                 struct
                 {
                     int field_0x00;
                     int field_0x04;
-                } Part9[Part6.field_0x04];
+                } Part9[Part6.Part9Count];
             }
             
-            ZlibChunkInfos MainZlibChunkGroupInfos[Part6.MainZlibChunkGroupInfoCount];
+            ZlibChunkInfos SubZlibChunkGroupInfos[Part6.SubZlibChunkGroupInfoCount];
         }
     } Toc2;
 } Toc2Union <bgcolor=cGreen>;
-
-
 
 byte UnkData1[Toc2Union.Toc2.Part3.Size_0x04] <bgcolor=cBlack>;
 
 union
 {
-    
     byte ZlibChunkInfoBytes[Toc2Union.Toc2.Part4.SizeOfZlibChunkInfos] <bgcolor=cDkGray>;
-    ZlibChunkInfos ChunkInfos[2550];
-} ZlibChunkInfoUnion;
+    ZlibChunkInfos ChunkInfos[Toc2Union.Toc2.Part4.SizeOfZlibChunkInfos / 0x20];
+} MainZlibChunkInfoUnion;
 
 if (Header.Version >= 9)
-    byte MainZlibChunkGroupData[Toc2Union.Toc2.Part6.MainZlibChunkGroupSize];
+{
+    union
+    {
+        byte Bytes[Toc2Union.Toc2.Part6.SubZlibChunkGroupSize];
+        ZlibHdr Zlib;
+    } SubZlibChunkGroupData;
+}
 
+union
+{
+    byte Bytes[Toc2Union.Toc2.Part4.SizeMainZlibChunkInfos];
+} MainZlibChunkGroupData;
 
