@@ -4,12 +4,26 @@
 //      File: Map Binary (.mpb)
 //   Authors: Nenkai
 //   Version: 
-//   Purpose: 
+//   Purpose: Loads all entities (models, stagesets (prefabs), and triggers).
 //  Category: 
 // File Mask: *.mpb
 //  ID Bytes:
 //   History: 
 //------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3 <read=Str("%f, %f, %f", X, Y, Z)>;
+
+typedef struct
+{
+    double X;
+    double Y;
+    double Z;
+} Vec3Double <read=Str("%f, %f, %f", X, Y, Z)>;
 
 typedef enum <int>
 {
@@ -22,10 +36,44 @@ typedef enum <int>
     kEntityType_File_SplineRope = 1026,
     kEntityType_File_Model = 1028,
     kEntityType_File_SpeedTree = 1031,
-    // is 3015 related to animals or actual entities?
+    kEntityType_File_1033 = 1033,
+
+    kEntityType_LightingDataMaybe = 2001,
+    kEntityType_State = 2004,
+    kEntityType_2007 = 2007,
+    kEntityType_2008 = 2008,
+    
+    kEntityType_BNpc = 3001,
+    kEntityType_ENpc = 3002,
+    kEntityType_Gimmick = 3003,
+    kEntityType_Animal = 3015,
+    kEntityType_QuestCharaLayout = 3019,
     // maybe just 3000 in general?
     // ^ see ffxvi.exe steam 1.0.1 140229A3E
+    
+    kEntityType_NmbFile = 5001,
+    kEntityType_5004 = 5004,
+    kEntityType_5013 = 5013,
+    kEntityType_5016 = 5016,
+    kEntityType_5017 = 5017,
+    kEntityType_5020 = 5020,
+    kEntityType_5027 = 5027,
+    kEntityType_5028 = 5028,
 } EntityType;
+
+typedef enum <int>
+{
+    kStateEntityType_205 = 205,
+    kStateEntityType_206 = 206,
+    kStateEntityType_207 = 207,
+    kStateEntityType_209 = 209,
+    kStateEntityType_210 = 210,
+    kStateEntityType_211 = 211,
+    kStateEntityType_212 = 212,
+    kStateEntityType_216 = 216,
+    kStateEntityType_217 = 217,
+    kStateEntityType_218 = 218,
+} StateEntityType;
 
 ////////////////////////////////
 // Entities
@@ -39,6 +87,34 @@ typedef struct // 1002
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    FSeek(startof(parentof(this)) + offset_0x08);
+    struct
+    {
+        int field_0x00;
+        int field_0x04;
+        int field_0x08;
+        float field_0x0C;
+        float field_0x10;
+        float field_0x14;
+        float field_0x18;
+        float field_0x1C;
+        float field_0x20;
+        float field_0x24;
+        float field_0x28;
+        float field_0x2C;
+        float field_0x30;
+        int field_0x34;
+        int field_0x38;
+        int field_0x3C;
+        int field_0x40;
+        int field_0x44;
+        int field_0x48;
+        int field_0x4C;
+        int field_0x50;
+        int field_0x54;
+        int field_0x58;
+    } SubTerrainData;
 } TerrainFile;
 
 typedef struct // 1003
@@ -49,11 +125,24 @@ typedef struct // 1003
     float field_0x0C;
     float field_0x10;
     float field_0x14;
-    int offset_0x18 <format=hex, fgcolor=cRed>;
+    int ParamsOffset <format=hex, fgcolor=cRed>;
     int field_0x1C;
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        int test;
+        int Type; // 1 or 2 - following data depends on the type here?
+        byte UnkMode;
+        byte pad[3];
+        int unks[3];
+        int UnkType;
+    } Params;
+    
+    FSeek(startof(Type) + 0x20);
 } MaterialFile;
 
 typedef struct
@@ -71,18 +160,57 @@ typedef struct // 1012
 {
     EntityType Type;
     int FilePathOffset <format=hex, fgcolor=cRed>;
-    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int ParamsOffset <format=hex, fgcolor=cRed>;
     int pad;
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        int field_0x00;
+        int Type;
+        int field_0x08;
+        float field_0x0C;
+        int field_0x10;
+        int field_0x14;
+        float field_0x18;
+        int field_0x1C;
+        int field_0x20;
+        int Offset_0x24 <fgcolor=cRed, format=hex>;
+        int Count_0x28 <fgcolor=cGreen>;
+        int field_0x2C;
+        float field_0x30;
+        byte field_0x34;
+        byte field_0x35;
+        byte field_0x36;
+        byte field_0x37;
+        float field_0x38;
+        float field_0x3C;
+        float field_0x40;
+        int field_0x44;
+        int field_0x48;
+        int field_0x4C;
+        int field_0x50;
+        int field_0x54;
+        int field_0x58;
+        int field_0x5C;
+        int field_0x60;
+        
+        if (Count_0x28)
+        {
+            FSeek(startof(field_0x00) + Offset_0x24);
+            Vec3 Entries[Count_0x28];
+        }
+    } Params;
 } EnvSoundFile;
 
 typedef struct // 1015
 {
     EntityType Type;
     int FilePathOffset <format=hex, fgcolor=cRed>;
-    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int ParamsOffset <format=hex, fgcolor=cRed>;
     int offset_0x0C <format=hex, fgcolor=cRed>;
     int field_0x10;
     int offset_0x14 <format=hex, fgcolor=cRed>;
@@ -91,20 +219,54 @@ typedef struct // 1015
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    // TODO
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        int field_0x00;
+        int field_0x04;
+        int VFXDataOffset <format=hex, fgcolor=cRed>;
+        int field_0x0C;
+        int field_0x10;
+        int field_0x14;
+        int field_0x18;
+        int field_0x1C;
+        int field_0x20;
+        int field_0x24;
+        
+        FSeek(startof(this) + VFXDataOffset);
+        struct
+        {
+            Vec3 Position;
+            Vec3 Rotation; // ?
+            Vec3 Size;
+            int _pad_;
+        } VFXData;
+    } Params;
 } StageSetFile <name=FilePath>;
         
 typedef struct // 1019
 {
     EntityType Type;
     int FilePathOffset <format=hex, fgcolor=cRed>;
-    int offset_0x08 <format=hex, fgcolor=cRed>;
-    int pad;
+    int ParamsOffset <format=hex, fgcolor=cRed>;
+    int field_0x0C;
+    int field_0x10 <format=hex>;
+    int field_0x14;
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
-} VFXFile;
+    
+    // TODO
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        int a;
+    } Params;
+} VFXFile <name=FilePath>;
        
-typedef struct // 1026
+typedef struct // 1028
 {
     EntityType Type;
     int FilePathOffset <format=hex, fgcolor=cRed>;
@@ -112,23 +274,73 @@ typedef struct // 1026
     float field_0x0C;
     float field_0x10;
     int field_0x14;
-    int offset_0x18 <format=hex, fgcolor=cRed>;
+    int ParamsOffset <format=hex, fgcolor=cRed>;
     int field_0x1C;
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        int field_0x00;
+        int Type;
+        byte field_0x08;
+        byte bool_0x09;
+        byte Unk[0x0E];
+        byte bool_0x18;
+        byte bool_0x19;
+        ubyte field_0x1A;
+        ubyte field_0x1B;
+        byte Unk2[0x04];
+        int NameOffset <format=hex, fgcolor=cRed>;
+        byte bool_0x24;
+        byte bool_0x25;
+        byte bool_0x26;
+        byte field_0x27;
+        byte field_0x28;
+        byte field_0x29;
+        byte field_0x2A;
+        byte bool_0x2B; // Bool
+        int UnkType0x2C;
+        
+        FSeek(startof(Unk2) + NameOffset); // Not sure if it really starts from here
+        string Name;
+    } Params;
+    
+    FSeek(startof(Type) + 0x20);
 } ModelFile <name=FilePath>;
                  
 typedef struct // 1028
 {
     EntityType Type;
     int FilePathOffset <format=hex, fgcolor=cRed>;
-    int offset_0x08 <format=hex, fgcolor=cRed>;
-    int field_0x0C;
-    // TODO: There's more
+    int ParamsOffset <format=hex, fgcolor=cRed>;
+    int offset_0x0C <format=hex, fgcolor=cRed>;
+    int offset_0x10 <format=hex, fgcolor=cRed>;
+    int pad;
     
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
+    
+    // TODO
+    FSeek(startof(parentof(this)) + ParamsOffset);
+    struct
+    {
+        float field_0x00;
+        float field_0x04;
+        float field_0x08;
+        float field_0x0C;
+        int field_0x10;
+        int field_0x14;
+        int field_0x18;
+        int field_0x1C;
+        int field_0x20;
+        int field_0x24;
+        int field_0x28;
+        int field_0x2C;
+    } Params;
+    
 } SplineRopeFile <name=FilePath>;
              
 typedef struct // 1031
@@ -141,69 +353,601 @@ typedef struct // 1031
     FSeek(startof(Type) + FilePathOffset);
     string FilePath <bgcolor=cGray>;
 } SpeedTreeFile <name=FilePath>;
-               
+            
 typedef struct
 {
-    local int basePos = FTell();
-    
     int field_0x00;
-    EntityType Type;
-    int UnkMgbId; // Used for searching in mgb file
+    StateEntityType SubEntityType;
+    int NameOffset <format=hex, fgcolor=cRed>;
     int field_0x0C;
     int field_0x10;
     int field_0x14;
     int field_0x18;
-    float field_0x1C;
+    int field_0x1C;
     int field_0x20;
-    float field_0x24;
+    int field_0x24;
     int field_0x28;
-    float field_0x2C;
-    int field_0x30;
-    float field_0x34;
-    int UnkOffset_0x38 <fgcolor=cRed, format=hex>;
+               
+    switch (SubEntityType)
+    {
+        case 102:
+            struct
+            {
+                int GameMapId;
+                int LayoutNamedInstanceId;
+                int Pad[8];
+            } SubData102;
+            break;
+        case 103:
+            struct
+            {
+                int GameMapId;
+                int LayoutNamedInstanceId;
+                int Pad[8];
+            } SubData102;
+            break;
+        case 105:
+            struct
+            {
+                // Does something with collisionlayerpreset id 35
+                // ffxvi.exe 1.0.1 steam - sub_140227190
+                // 40 53 48 83 EC ? 48 8B DA BA ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B C3 48 83 C4 ? 5B C3 CC 48 89 5C 24 ? 57 48 83 EC ? 48 83 A1 ? ? ? ? ? 48 8D 05 ? ? ? ? 48 89 01 8B DA 48 8B F9 E8 ? ? ? ? F6 C3 ? 74 ? BA ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 5C 24 ? 48 8B C7 48 83 C4 ? 5F C3 CC CC 48 8D 81
+                
+                // TODO
+                int A;
+                int B;
+                int Pad[6];
+                
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+            } SubData105;
+            break;
+        case 107:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData107;
+            break;
+        case 108:
+            struct
+            {
+                // Does something with collisionlayerpreset id 34
+                // ffxvi.exe 1.0.1 steam - sub_140227200
+                // 40 53 48 83 EC ? 48 8B DA BA ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B C3 48 83 C4 ? 5B C3 CC C5 FA 10 41
+                int UnkLayoutNamedInstanceId;
+                int pad[8];
+            } SubData108;
+            break;
+        case 110:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int BgmChangeDefineId;
+            } SubData110;
+            break;
+        case 111:
+            struct
+            {
+                int field_0x00;
+                int field_0x04;
+                int field_0x08;
+                int field_0x0C;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+                int field_0x28;
+                int field_0x2C;
+                int field_0x30;
+                int field_0x34;
+                int field_0x38;
+                int field_0x3C;
+                int field_0x40;
+                int field_0x44;
+                int field_0x48;
+                int field_0x4C;
+            } SubData111;
+            break;
+        case 116:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData116;
+            break;
+        case 117:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int a;
+                int UnkLayoutNamedInstanceId;
+            } SubData117;
+            break;
+        case 118:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                float field_0x00;
+                float field_0x04;
+                int _pad_[6];
+            } SubData118;
+            break;
+        case 119:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData119;
+            break;
+        case 121:
+            struct
+            {
+                int pad[8];
+            } SubData121;
+            break;
+        case 126:
+            struct
+            {
+                int UnkLayoutNamedInstanceId;
+                int pad[8];
+            } SubData126;
+            break;
+        case 131:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData131;
+            break;
+        case 134:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData134;
+            break;
+        case 138: // Set/Remove UserSituationFlag
+            struct
+            {
+                int UserSituationFlagId;
+                enum <int> { Remove = 0, Add = 1 } UserSituationFlagAction;
+                int Unk;
+                int Unk2;
+                int pad[8];
+            } SubData138;
+            break;
+        case 142:
+            struct
+            {
+                // Does something with collisionlayerpreset id 43
+                // ffxvi.exe 1.0.1 steam - sub_14022766C
+                // 40 53 48 83 EC ? 48 8B DA BA ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B C3 48 83 C4 ? 5B C3 CC 48 89 5C 24 ? 57 48 83 EC ? 48 8D 05 ? ? ? ? 8B DA 48 89 01 48 8B F9 E8 ? ? ? ? F6 C3 ? 74 ? BA ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 5C 24 ? 48 8B C7 48 83 C4 ? 5F C3 CC CC 48 89 5C 24 ? 57 48 83 EC ? 48 8D 05 ? ? ? ? 8B DA 48 89 01 48 8B F9 E8 ? ? ? ? F6 C3 ? 74 ? BA ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 5C 24 ? 48 8B C7 48 83 C4 ? 5F C3 CC CC 48 89 5C 24 ? 57 48 83 EC ? 48 8D 05 ? ? ? ? 8B DA 48 89 01 48 8B F9 E8 ? ? ? ? F6 C3 ? 74 ? BA ? ? ? ? 48 8B CF E8 ? ? ? ? 48 8B 5C 24 ? 48 8B C7 48 83 C4 ? 5F C3 CC CC 48 89 5C 24 ? 57 48 83 EC ? 48 83 A1
+                
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int _pad_[8];
+            } SubData142;
+            break;
+        case 143:
+            struct
+            {
+                int field_0x00;
+                int Offset_0x04 <format=hex, fgcolor=cRed>;
+                int Count_0x08 <format=hex, fgcolor=cGreen>;
+                
+                int _pad_[8];
+                
+                local int k = 0;
+                for (k = 0; k < Count_0x08; k++)
+                {
+                    FSeek(startof(parentof(this)) + Offset_0x04 + (k * 0x2C));
+                    struct
+                    {
+                        int field_0x00;
+                        int FileOffset <format=hex, fgcolor=cRed>;
+                        int field_0x08;
+                        float field_0x0C;
+                        int field_0x10;
+                        int field_0x14;
+                        int field_0x18;
+                        int field_0x1C;
+                        int field_0x20;
+                        int field_0x24;
+                        int field_0x28;
+                        
+                        FSeek(startof(this) + FileOffset);
+                        string Path <bgcolor=cGray>;
+                    } Entry <read=Path>;
+                }
+            } SubData143;
+            break;
+        case 144:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData144;
+            break;
+        case 146:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int a;
+            } SubData146;
+            break;
+        case 148:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData148;
+            break;
+        case 151: // SpecialArea
+            struct
+            {
+                int SpecialAreaId;
+                int field_0x04;
+                byte UnkFlag;
+                byte pad[3];
+                int UnkCount <comment="Used from specialarea->Unk9 if this is -1">;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+            } SubData151;
+            break;
+        case 152:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData152;
+            break;
+        case 157:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData157;
+            break;
+        case 156:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                // related to systemassistguidancepermissi?
+                int todo;
+            } SubData156;
+            break;
+        case 161:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData161;
+            break;
+        case 162:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int Offset_0x00 <format=hex, fgcolor=cRed>;
+                int field_0x04;
+                int Offset_0x08 <format=hex, fgcolor=cRed>;
+                int field_0x0C;
+                float field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+                
+                // sub_1406926F8
+                // 48 89 5C 24 ? 57 48 83 EC ? 45 33 DB 48 8B FA
+                FSeek(startof(parentof(this)) + Offset_0x08);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int Offset_0x18 <format=hex, fgcolor=cRed>;
+                    int Offset_0x1C <format=hex, fgcolor=cRed>;
+                    int pad[8];
+                } Params <bgcolor=cAqua>;
+            } SubData162;
+            break;
+        case 164:
+            struct
+            {
+                int unk;
+                int _pad_[7];
+            } SubData164;
+            break;
+        case 167:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData167;
+            break;
+        case 172:
+            struct
+            {
+                float Vals[4];
+                int _pad_[8];
+            } SubData172;
+            break;
+        case 173:
+            struct
+            {
+                int _pad_[8];
+            } SubData173;
+            break;
+        case 179:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                byte UnkType;
+                byte _pad_[0x23];
+            } SubData179;
+            break;
+        case 180:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData180;
+            break;
+        case 182:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData182;
+            break;
+        case 183:
+            struct
+            {
+                int AreaDefineId;
+                int _pad_[8];
+            } SubData183;
+            break;
+        case 187:
+            struct
+            {
+                int Unk;
+                int _pad_[8];
+            } SubData187;
+            break;
+        case 188:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int CustomSpeedId;
+            } SubData188;
+            break;
+        case 189:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                
+                float field_0x00;
+                int Offset_0x04 <format=hex, fgcolor=cRed>;
+                int UnkType0x08;
+                float field_0x0C;
+                int field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+
+                // sub_140690D64
+                // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B F2 48 8B F9 48 63 52
+                FSeek(startof(parentof(this)) + Offset_0x04);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18 <format=hex, fgcolor=cRed>;
+                    int field_0x1C <format=hex, fgcolor=cRed>;
+                    int field_0x20 <format=hex, fgcolor=cRed>;
+                    int field_0x24 <format=hex, fgcolor=cRed>;
+                    int field_0x28 <format=hex, fgcolor=cRed>;
+                    int field_0x2C <format=hex, fgcolor=cRed>;
+                    int pad[8];
+                } Params <bgcolor=cAqua>;
+            } SubData189;
+            break;
+        case 190:
+            struct
+            {
+                int Unks[8];
+            } SubData190;
+            break;
+        case 193:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData193;
+            break;
+        case 194:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData194;
+            break;
+        case 195:
+            struct
+            {
+                int UnkNamedLayoutInstanceId;
+                int field_0x04;
+                int pad[8];
+            } SubData195;
+            break;
+        case 196:
+            struct
+            {
+                int todo;
+                int pad[8];
+            } SubData196;
+            break;
+        case 199:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData199;
+            break;
+        case 200:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData200;
+            break;
+        case 202:
+            struct
+            {
+                int _pad_[8];
+            } SubData202;
+            break;
+        case 203:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData203;
+            break;
+        case 204:
+            struct
+            {
+                int pad[8];
+            } SubData204;
+            break;
+        case 205:
+            struct
+            {
+                float unk;
+                int unk;
+                int pad[8];
+            } SubData205;
+            break;
+        case 206:
+            struct
+            {
+                float unk;
+                int pad[8];
+            } SubData206;
+            break;
+        case 209:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData209;
+            break;
+        case 210:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData210;
+            break;
+        case 211:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData211;
+            break;
+        case 212:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData212;
+            break;
+        case 217:
+            struct
+            {
+                Printf("TODO: SubEntity %d\n", SubEntityType);
+                int todo;
+            } SubData217;
+            break;
+        default:
+            Printf("Unknown sub-entity type %d\n", SubEntityType);
+            break;
+    }
+    
+    FSeek(startof(this) + NameOffset);
+    string Name;
+} SubEntityInfo  <bgcolor=cDkAqua>;
+                   
+typedef struct
+{
+    local int basePos = FTell();
+    
+    int MaybeUnusedId;
+    EntityType Type;
+    int ThisLayoutNamedInstanceId; // Used for searching in mgb file
+    int ParentGroupId;
+    Vec3Double Position;
+    Vec3 Rotation;
+    float Scale;
+    int PlacementRelatedDataOffset <fgcolor=cRed, format=hex>;
     byte field_0x3C;
     byte field_0x3D;
     byte field_0x3E;
     byte field_0x3F;
     int field_0x40;
-    int field_0x44;
-    int field_0x48;
-    int field_0x4C;
-
+    int UnkLayoutNamedInstanceId;
+    int pad[2];
+                 
     switch (Type)
     {            
         ////////////////////////////////
         // 1000s - File References
         ////////////////////////////////
-        case kEntityType_File_Terrain:
+        case kEntityType_File_Terrain: // 1002
             TerrainFile Terrain;
             break;
             
-        case kEntityType_File_EnvMaterial:
+        case kEntityType_File_EnvMaterial: // 1003
             MaterialFile Material;
             break;
        
-        case kEntityType_File_EnvSound:
+        case kEntityType_File_EnvSound: // 1012
             EnvSoundFile EnvSound;
             break;
             
-        case kEntityType_File_StageSet:
+        case kEntityType_File_StageSet: // 1015
             StageSetFile StageSet;
             break;
             
-        case kEntityType_File_VFX:
+        case kEntityType_File_VFX: // 1019
             VFXFile VFX;
             break;
             
-        case kEntityType_File_SplineRope:
+        case kEntityType_File_SplineRope: // 1026
             SplineRopeFile SplineRope;
             break;
             
-        case kEntityType_File_Model:
+        case kEntityType_File_Model: // 1028
             ModelFile Model <name=FilePath>;
             break;
             
-        case kEntityType_File_SpeedTree:
+        case kEntityType_File_SpeedTree: // 1031
             SpeedTreeFile SpeedTree <name=FilePath>;
             break;
             
@@ -213,8 +957,58 @@ typedef struct
         case 2001:
             struct
             {
-                // TODO: Check what's going on here
-                int randomfieldSoItDoesntSayWarningEmptyStructure;
+                // For some reason there's an hardcoded check on id 75549693.
+                // ffxvi.exe steam 1.0.1 - sub_14022C650
+                // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 05 ? ? ? ? 48 8B F9 4C 8B 05 ? ? ? ? 48 8B F2
+                
+                int Type;
+                uint ColorMaybe <format=hex>;
+                int field_0x08;
+                float field_0x0C;
+                int field_0x10;
+                float field_0x14;
+                float field_0x18;
+                float field_0x1C;
+                float field_0x20;
+                int field_0x24;
+                float field_0x28;
+                float field_0x2C;
+                int field_0x30;
+                int LightShakingParamId;
+                int field_0x38;
+                int field_0x3C;
+                int offset_0x40 <format=hex, fgcolor=cRed>;
+                int offset_0x44 <format=hex, fgcolor=cRed>;
+                
+                FSeek(startof(parentof(this)) + offset_0x40);
+                struct
+                {
+                    float field_0x00;
+                    float field_0x04;
+                    float field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    float field_0x18;
+                    float field_0x1C;
+                    float field_0x20;
+                    int field_0x24;
+                } Params <bgcolor=cDkYellow>;
+                
+                FSeek(startof(parentof(this)) + offset_0x44);
+                struct
+                {
+                    int field_0x00;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    float field_0x24;
+                } Params2 <bgcolor=cRed>;
             } Type2001;
             break;
             
@@ -247,27 +1041,73 @@ typedef struct
             struct
             {
                 int offset_0x00 <format=hex, fgcolor=cRed>;
-                int field_0x04;
+                int pad[7];
+                int SubEntityOffset <format=hex, fgcolor=cRed>;
+                int offset_0x24 <format=hex, fgcolor=cRed>;
+                   
+                FSeek(startof(parentof(this)) + offset_0x24);
+                int Unks0x24[16] <bgcolor=cBlack>;
+                
+                FSeek(startof(parentof(this)) + SubEntityOffset);
+                SubEntityInfo SubInfo;
+            } Type2004;
+            break;
+            
+        case 2017:
+            struct
+            {
+                int SubEntityOffset <format=hex, fgcolor=cRed>;
+                int Offset_0x04;
                 int field_0x08;
                 int field_0x0C;
-                int field_0x10;
-                int field_0x14;
-                int field_0x18;
-                int field_0x1C;
-                int offset_0x20 <format=hex, fgcolor=cRed>;
-                int offset_0x24 <format=hex, fgcolor=cRed>;
-            } Type2004;
+                Vec3Double Position;
+                int field_0x28;
+                float field_0x2C;
+                int field_0x30;
+                float field_0x34;
+                int field_0x38 <format=hex>;
+                int field_0x3C;
+                int field_0x40;
+                int field_0x44;
+                Vec3Double field_0x48;
+
+                FSeek(startof(this) + Offset_0x04);
+                struct
+                {
+                    int a;
+                    int b;
+                    int c;
+                    int d;
+                    int e;
+                    int f;
+                    int g;
+                } Unks[field_0x08] <bgcolor=cSilver>;
+                
+                // TODO: Figure field_0x38
+                
+                FSeek(startof(parentof(this)) + SubEntityOffset);
+                SubEntityInfo SubInfo;
+            } Type2017;
             break;
             
         case 2007:
             struct
             {
+                // TODO other offsets
                 int field_0x00 <format=hex, fgcolor=cRed>;
                 int field_0x04;
                 int field_0x08;
                 int field_0x0C;
                 int offset_0x10 <format=hex, fgcolor=cRed>;
                 int offset_0x14 <format=hex, fgcolor=cRed>;
+                
+                FSeek(startof(parentof(this)) + offset_0x14);
+                struct
+                {
+                    int field_0x00;
+                    int NavPowerObstacleDatId;
+                    int Pad[8];
+                } Params0x14;
             } Type2007;
             break;
             
@@ -291,7 +1131,7 @@ typedef struct
                 int offset_0x00 <format=hex, fgcolor=cRed>;
                 int field_0x04;
                 int offset_0x08 <format=hex, fgcolor=cRed>;
-                int field_0x0C;
+                byte field_0x0C;
             } Type2012;
             break;
             
@@ -319,63 +1159,160 @@ typedef struct
             } Type2016;
             break;
              
-        case 2017:
-            struct
-            {
-                int offset_0x00 <format=hex, fgcolor=cRed>;
-                int field_0x04;
-                int field_0x08;
-                // TODO: Check more fields
-            } Type2017;
-            break;
-            
         /////////////////////////
         // 3000s
         /////////////////////////
-        case 3002:
+        case kEntityType_BNpc:
            struct
            {
-               int offset_0x00 <format=hex, fgcolor=cRed>;
+               int BNpcId;
                int field_0x04;
-               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int ParamsOffset <format=hex, fgcolor=cRed>;
                int field_0x0C;
-           } Type3002;
+
+               // TODO finish params
+               FSeek(startof(parentof(this)) + ParamsOffset);
+               struct
+               {
+                   int field_0x00;
+                   int field_0x04;
+               } Params;
+               
+               FSeek(startof(this) + 0x10);
+           } Type3001;
            break;
            
-        case 3003:
+        case kEntityType_ENpc:
            struct
            {
-               int offset_0x00 <format=hex, fgcolor=cRed>;
+               int ENpcId;
                int field_0x04;
-               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int ParamsOffset <format=hex, fgcolor=cRed>;
                int field_0x0C;
+               
+               FSeek(startof(parentof(this)) + ParamsOffset);
+               struct
+               {
+                   int field_0x00;
+                   int UnkLayoutNamedInstanceId;
+                   int field_0x08;
+                   int EventIdleStateId;
+                   int field_0x10;
+                   int field_0x14;
+                   int field_0x18;
+                   int field_0x1C;
+                   int field_0x20;
+                   int ENpcDecorateParamId;
+                   int field_0x28;
+                   int field_0x2C;
+                   byte field_0x30;
+                   byte field_0x31;
+                   byte field_0x32;
+                   byte field_0x33;
+                   int field_0x34;
+                   int CharaTimelineVariationId;
+                   int field_0x3C;
+                   byte CrystalElementId;
+                   byte pad[3];
+                   int field_0x44;
+                   int field_0x48;
+                   int field_0x4C;
+                   int field_0x50;
+                   int field_0x54;
+                   float field_0x58;
+                   byte field_0x5C;
+                   byte field_0x5D;
+                   byte field_0x5E;
+                   byte field_0x5F;
+                   int field_0x60;
+                   int field_0x64;
+                   int field_0x68;
+                   int field_0x6C;
+                   int field_0x70;
+                   int field_0x74;
+                   int field_0x78;
+                   int field_0x7C;
+                   int field_0x80;
+               } Params;
+           } Type3002;
+           break;
+        case kEntityType_Gimmick:
+           struct
+           {
+               // There's a check on GimmickId >= 1000.
+               // ffxvi.exe steam 1.0.1 - sub_14022C390
+               // 48 8B 81 ? ? ? ? 81 78 ? ? ? ? ? 0F 93 C0
+               int GimmickBaseId;
+               int field_0x04;
+               int ParamsOffset <format=hex, fgcolor=cRed>;
+               int field_0x0C;
+               
+               FSeek(startof(parentof(this)) + ParamsOffset);
+               struct
+               {
+                   int field_0x00;
+                   int field_0x04;
+               } Params;
+               
+               FSeek(startof(this) + 0x10);
            } Type3003;
            break;
            
-        case 3015:
+        case kEntityType_Animal:
            struct
            {
-               int field_0x00;
+               int AnimalBaseId;
                int field_0x04;
-               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int ParamsOffset <format=hex, fgcolor=cRed>;
                int field_0x0C;
+               
+               FSeek(startof(parentof(this)) + ParamsOffset);
+               struct
+               {
+                   int field_0x00;
+                   int field_0x04;
+                   int field_0x08;
+                   int field_0x0C;
+                   int field_0x10;
+                   int field_0x14;
+                   int field_0x18;
+                   int field_0x1C;
+                   int field_0x20;
+                   int field_0x24;
+               } Params;
+               
+               FSeek(startof(this) + 0x10);
            } Type3015;
            break;
            
-        case 3019:
+        case kEntityType_QuestCharaLayout: // 3019
            struct
            {
-               int field_0x00;
-               int field_0x04;
-               int offset_0x08 <format=hex, fgcolor=cRed>;
+               int QuestCharaLayoutId;
+               int QuestCharaLayoutIdKey2;
+               int ParamsOffset <format=hex, fgcolor=cRed>;
                int field_0x0C;
+               
+               FSeek(startof(parentof(this)) + ParamsOffset);
+               struct
+               {
+                   int field_0x00;
+                   int field_0x04;
+                   int field_0x08;
+                   int field_0x0C;
+                   int field_0x10;
+                   int field_0x14;
+                   int field_0x18;
+                   int field_0x1C;
+                   int field_0x20;
+               } Params;
            } Type3019;
            break;
             
         /////////////////////////
         // 5000s
         /////////////////////////
-        case 5001:
+        case kEntityType_NmbFile:
             struct
             {
                 int field_0x00;
@@ -383,7 +1320,10 @@ typedef struct
                 float field_0x08;
                 float field_0x0C;
                 float field_0x10;
-                int field_0x14;                      
+                int field_0x14;       
+                
+                FSeek(startof(field_0x00) + offset_0x04);
+                string Path;  
             } Type5001;
             break;
             
@@ -403,91 +1343,103 @@ typedef struct
             break;
             
         default:
-            Warning("Unsupported entity type %d\n", Type);
+            Printf("Unsupported entity type %d\n", Type);
             break;
     }
 
-    FSeek(startof(field_0x00) + UnkOffset_0x38);
+    FSeek(startof(MaybeUnusedId) + PlacementRelatedDataOffset);
     struct
     {
         int field_0x00;
-        int PlacementNexId;            
-    } PlacementRelatedData <bgcolor=cBlack>;
+        int PlacementNexId;
+        int pad1[8];
+    } PlacementRelatedData <bgcolor=cDkPurple>;
     
-    FSeek(startof(field_0x00) + 0x50);
-} MapEntity <name=PrintEntryName>;
+    FSeek(startof(MaybeUnusedId) + 0x50);
+} MapEntity <name=Str("Entity [%d] ", ThisLayoutNamedInstanceId), read=PrintEntryName>;
 
 string PrintEntryName(MapEntity& entity)
 {
-    string s;
     switch (entity.Type)
     {
         case kEntityType_File_Terrain:
-            SPrintf(s, "TerrainFile (%s)", entity.Terrain.FilePath); 
-            break;
+            return Str("TerrainFile (%s) ", entity.Terrain.FilePath); 
         case kEntityType_File_EnvMaterial:
-            SPrintf(s, "EnvMaterialFile (%s)", entity.EnvMaterial.FilePath); 
-            break;
+            return Str("EnvMaterialFile (%s) ", entity.Material.FilePath); 
         case kEntityType_File_EnvSound:
-            SPrintf(s, "SoundFile (%s)", entity.EnvSound.FilePath); 
-            break;
+            return Str("SoundFile (%s) ", entity.EnvSound.FilePath); 
         case kEntityType_File_StageSet:
-            SPrintf(s, "StageSetFile (%s)", entity.StageSet.FilePath); 
-            break;
+            return Str("StageSetFile (%s) ", entity.StageSet.FilePath); 
          case kEntityType_File_VFX:
-            SPrintf(s, "VFXFile (%s)", entity.VFX.FilePath); 
-            break;
+            return Str("VFXFile (%s) ", entity.VFX.FilePath); 
         case kEntityType_File_Model:
-            SPrintf(s, "ModelFile (%s)", entity.Model.FilePath); 
-            break;
+            return Str("ModelFile (%s) ", entity.Model.FilePath); 
         case kEntityType_File_SpeedTree:
-            SPrintf(s, "SpeedTreeFile (%s)", entity.SpeedTree.FilePath); 
-            break;
+            return Str("SpeedTreeFile (%s) ", entity.SpeedTree.FilePath); 
+
+        case kEntityType_LightingDataMaybe:
+            return Str("LightingDataMaybe (%d)", entity.Type);
+
+        case kEntityType_BNpc:
+            return Str("ENpc (%d): %d ", entity.Type, entity.Type3001.BNpcId);
+        case kEntityType_ENpc:
+            return Str("ENpc (%d): %d ", entity.Type, entity.Type3002.ENpcId);
+        case kEntityType_Gimmick:
+            return Str("Gimmick (%d): %d ", entity.Type, entity.Type3003.GimmickBaseId);
+        case kEntityType_Animal:
+            return Str("Animal (%d): %d ", entity.Type, entity.Type3015.AnimalBaseId);
+        case kEntityType_QuestCharaLayout:
+            return Str("QuestCharaLayout (%d): %d:%d ", entity.Type, entity.Type3019.QuestCharaLayoutId, 
+            entity.Type3019.QuestCharaLayoutIdKey2);
             
+        case kEntityType_NmbFile:
+            return Str("NmbFile (%d): %s", entity.Type, entity.Type5001.Path);
         default:
-            SPrintf(s, "UnkType (%d) ", entity.Type); 
+            return Str("UnkType (%d) ", entity.Type); 
     }
-    
-    return s;
 }
 typedef struct
 {
-    int field_0x00;
-    int UnkIdentifier;
+    int UnkIdentifierUnused;
+    int GroupIdentifier;
     int field_0x08;
     int field_0x0C;
     int EntitiesOffset <format=hex>;
     int EntityCount <fgcolor=cGreen>;
-    int field_0x18;
-    int field_0x1C;
-    int field_0x20;
-    int field_0x24;
-    int field_0x28;
-    int field_0x2C;
-    int field_0x30;
-    int field_0x34;
-    int field_0x38 <format=hex, fgcolor=cRed>;
+    int DLCFlags;
+    int _pad_[7];
+    int GroupConditionDataOffset <format=hex, fgcolor=cRed>;
     
     if (EntityCount > 0)
     {
         struct
         {
-            FSeek(startof(field_0x00) + EntitiesOffset);
+            FSeek(startof(UnkIdentifierUnused) + EntitiesOffset);
             int Offsets[EntityCount] <bgcolor=cRed>;
             
             local int i = 0;
             for (i = 0; i < EntityCount; i++)
             {
                 FSeek(startof(Offsets) + Offsets[i]);
-                MapEntity entity <bgcolor=cYellow>;
+                MapEntity Entity <bgcolor=cYellow>;
             }
             
             FSeek(startof(Offsets) + (EntityCount * sizeof(int)));
-        } MapEntities;
+        } Entities <read=Str("%d Entities", parentof(this).EntityCount)>;
     }
     
-    FSeek(startof(field_0x00) + 0x3C);
-} MpbEntry2 <optimize=false>;
+    FSeek(startof(UnkIdentifierUnused) + GroupConditionDataOffset);
+    struct
+    {
+        int field_0x00;
+        int PlacementId;
+        int field_0x08;           
+        int field_0x0C;
+        int pad[7];
+    } GroupConditionData;
+    
+    FSeek(startof(UnkIdentifierUnused) + 0x3C);
+} EntityGroup <optimize=false, name=Str("EntityGroup [%d] ", GroupIdentifier), read=Str("%d Entities", EntityCount)>;
 
 //////////////////////////////
 // MAIN BULK
@@ -495,14 +1447,14 @@ typedef struct
 struct MpbFileHeader
 {
     int Unk;
-    int UnkOffset <fgcolor=cRed, format=hex>;
-    int UnkCount;
+    int EntityGroupListOffset <fgcolor=cRed, format=hex>;
+    int EntityGroupListCount;
     int unk_0x0C;
     int offset_0x10 <fgcolor=cRed, format=hex>;
     int offset_0x14 <fgcolor=cRed, format=hex>;
 } Header <bgcolor=cPurple>;
 
-FSeek(Header.UnkOffset);
+FSeek(Header.EntityGroupListOffset);
 struct
 {
     int field_0x00;
@@ -515,17 +1467,17 @@ struct
     int field_0x1C;
     int field_0x20;
     int field_0x24;
-    int Entry2Offset <fgcolor=cRed, format=hex>;
-    int Entry2Count;
+    int EntityGroupOffsets <fgcolor=cRed, format=hex>;
+    int EntityGroupCount;
     
-    if (Entry2Count > 0)
+    if (EntityGroupCount > 0)
     {
-        FSeek(startof(field_0x00) + Entry2Offset);
-        MpbEntry2 mpbEntry2[Entry2Count] <bgcolor=cDkBlue>;
+        FSeek(startof(field_0x00) + EntityGroupOffsets);
+        EntityGroup EntityGroups[EntityGroupCount] <bgcolor=cDkBlue>;
     }
     
     FSeek(startof(field_0x00) + 0x30);
-} MapStruct1[Header.UnkCount] <optimize=false, bgcolor=cBlue>;
+} EntityGroupList[Header.EntityGroupListCount] <read=Str("%d Group(s)", EntityGroupCount), optimize=false, bgcolor=cBlue>;
 
 FSeek(startof(Header) + Header.offset_0x10);
 struct
