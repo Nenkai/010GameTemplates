@@ -1,17 +1,213 @@
 //------------------------------------------------
 //--- 010 Editor v15.0 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: File Cutscene
+//   Authors: Nenkai
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
-//  ID Bytes: 
+// File Mask: .csb
+//  ID Bytes: 46 43 55 54
 //   History: 
 //------------------------------------------------
 
 // Initial loader at: ffxvi.exe steam 1.0.1 - 14066C098 
+enum TimelineElementType
+{
+    kTimelineElem_5 = 5,
+    kTimelineElem_CameraAnimationRange = 8,
+    kTimelineElem_BattleCondition = 10, // < check.
+    kTimelineElem_BulletTimeRange = 12,
+    kTimelineElem_ControlPermission = 17, 
+    kTimelineElem_23 = 23,  
+    kTimelineElem_27 = 27,
+    kTimelineElem_30 = 30,
+    kTimelineElem_PlaySoundTrigger = 31,
+    kTimelineElem_AttachWeaponTemporaryRange = 33,
+    kTimelineElem_ModelSE = 45,
+    kTimelineElem_BattleMessageRange = 47,
+    kTimelineElem_BonamikOffRange = 48,
+    kTimelineElem_49 = 49,
+    kTimelineElem_EnableDestructorCollision = 51,
+    kTimelineElem_56 = 56,
+    kTimelineElem_PadVibration = 57,
+    kTimelineElem_60 = 60,
+    kTimelineElem_73 = 73,
+    kTimelineElem_WaterDropTransition = 75,
+    kTimelineElem_ControlRejectionRange = 74,
+    kTimelineElem_84 = 84,
+    kTimelineElem_Motion = 3003,
+    kTimelineElem_FadeRange_Type = 3008,
+    kTimelineElem_ActorPositionTrigger = 3009,
+    kTimelineElem_VoiceRange = 3016,
+    kTimelineElem_VisibleTriggerMaybe = 3018,
+    kTimelineElem_SceneCaptionTrigger = 3022,
+    kTimelineElem_ModelVfxKick = 3030,
+    kTimelineElem_ChangeBgmTrigger = 3079,
+    kTimelineElem_ChangeSoundVolume = 3080,
+    kTimelineElem_CaptionTrigger = 3086,
+    kTimelineElem_ChangeMaterialRange = 3103,
+    kTimelineElem_Wind = 3106,
+    kTimelineElem_SlowSpeedRange = 3115,
+    kTimelineElem_VertexAnimationControlRange = 3135,
+    kTimelineElem_LoreWorldViewNaviStartupType = 3151,
+};
+
+// Some names from: https://youtube.com/watch?v=xQpTI_8B_W8
+// Mirror: https://gdcvault.com/play/1034705/Autodesk-Developer-Summit-FINAL-FANTASY
+// Some entities are shared from chara timelines
+
+// - ActorBindRange
+// - ActorPositionTrigger
+// - ActorScaleRange
+// 8:45 can't read 2 entries
+// - AlphaRange
+// - AttachWeaponTemporaryRange
+// - Attack
+// - BattleHudGroupHideRange
+// - BattleCondition
+// - BattleMessage
+// - BattleMessageRange
+// - BulletTimeRange
+// - BloodSplashRangeClip
+// - BonamikIgnoreCheckGroundRange
+// - BonamikOffRange
+// - BonamikParamRange
+// - BonamikResetTrigger
+// - ChangeBgmTrigger
+// - CameraAnimationRange
+// - CameraDofRange
+// - CameraFCurveTrigger
+// - CameraRollRange
+// - CameraSequenceRange
+// - CameraVibrationLoopRangeClip
+// - CameraVibrationTrigger
+// - CaptionTrigger
+// - CartCameraRange (or Cast)
+// - ChangeBgmTrigger
+// - ChanceDownTrigger
+// - ChangeBehaviorTrigger
+// - ChangeFightingStanceTrigger
+// - ChangeMapTrigger
+// - ChangeMaterialRange
+// - ChangeNearCameraFadingDistance
+// - ChangePartAdditionalDataRangeClip
+// - ChangePartAdditionalDataTriggerClip
+// - ChangePartState
+// - ChangePartStateTrigger
+// - ChangeSeedTrigger
+// - ChangeSeadExternalParameterRange
+// - ChangeSoundReverbRange
+// - ChangeSoundVolumeRange
+// - ChangeSoundVolumeTrigger
+// - ChangeSoundFootCollisionMaterial
+// - ChangeSurfaceRange
+// - ChangeSurfaceTrigger
+// - CharaCollisionControlRange
+// - CharaInvisibleRange
+// - CharaInvisibleTrigger
+// - CircleDynamicWaveTrigger
+// - CleanBloodSplashTrigger
+// - CollisionEnableTrigger
+// - ConstraintRange
+// - ConstraintTrigger
+// - ContentRange
+// - ContentTrigger
+// - ControlPermissionRange
+// - ControlUnbindRange
+// - DamageUnbindRange
+// - DirectorChangeBgmParam
+// - DisableBattleVoiceRange
+// - DisableCharaCollisionGroupRange
+// - DisableEnvironmentalSoundUntilNextMapTrigger
+// - DisableFootEffectRange
+// - DisableJumpParagraphRange
+// - DisableNearCameraFadeCollisionRangeClip
+// - DisableReceiveCollisionRange
+// - DisableSpecialShadow
+// - DisableTargetRange
+// - DisappearSealRange
+// - DoonMashingRange
+// - DoonMashingStartRange
+// - DoonRange
+// - DummyHudParamTrigger
+// - EnableAttackNoticeCollisionRange
+// - EnableDestructorCollisionRange
+// - EnableJustAttackCollisionRange
+// - EnableReceiveCollisionRange
+// - EnableTargetCollisionRange
+// - EventActionTrigger
+// - EventDynamicResolutionClip
+// - EventIdleStateTrigger
+// - FadeRange
+// - FadeRange_Type
+// - FixedEmissiveBoost
+// - GrassBake
+// - HowToTrigger
+// - HudHideRange
+// - ItemGetLogTriggerClip
+// - JumpParagraphRange
+// - Kd/OffRange
+// - LandSuspendRange
+// - LegIKPittariModeRangeClip
+// - LoreWorldViewNaviStartupType
+// - MagicClearAllTrigger
+// - MagicCreateTrigger
+// - MagicNotifyTrigger
+// - MagiTrigger
+// - MapDirectorFlagTrigger
+// - MapDirectorNotifyTrigger
+// - ModelVfxKick
+// - MonstatTrigger
+// - MotionLayerPlayRateRange
+// - MseqInputOffRange
+// - NarrowList
+// - PadVibrationLoopRangeClip
+// - PadVibrationTrigger
+// - PlayActionTrigger
+// - PlayBattleTalkTrigger
+// - PlaySoundTrigger
+// - QueryMovieTrigger
+// - ResultTriger
+// - ScenarioBranchTrigger
+// - ScreenEffectRange
+// - SeaWave
+// - ShowUIRange
+// - SimpleEventSequenceDelayNotifyRangeClip
+// - SimpleEventSequenceNotifyStartRange
+// - SimpleEventSequenceNotifyStartTrigger
+// - SlowSpeedRange
+// - SplineRopeAdjustWaveRange
+// - StartAstralProjectionTrigger
+// - StrikeTrigger
+// - StopAstralProjectionTrigger
+// - Test
+// - TestRange
+// - TestTrigger
+// - ToolContentsGraphicsSettings
+// - VfxTrigger
+// - VoiceRange
+// - VertexAnimationControlRange
+// - VisibleTrigger
+// - WeaponDisappearRange
+// - Wind
+
+// 3912 - VfxTrigger?
+// 3018 - VisibleTrigger?
+
+typedef struct
+{
+    double X;
+    double Y;
+    double Z;
+} Vec3Double <read=Str("%f, %f, %f", X, Y, Z)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3f <read=Str("%f, %f, %f", X, Y, Z)>;
 
 typedef struct
 {
@@ -55,8 +251,8 @@ struct
         uint BodySize <format=hex, comment="Starting from MainHeader">;
         int field_0x2C;
         int field_0x30;
-        float field_0x34;
-        float field_0x38;
+        float ColorTemperature;
+        float Tint;
         int field_0x3C;
         uint UnkOffset_0x40 <fgcolor=cRed, format=hex>;
         uint UnkCount_0x40;
@@ -70,30 +266,341 @@ struct
         int field_0x64;
     } MainHeader <bgcolor=cYellow>;
     
-    FSeek(MainHeader.UnkOffset_0x40);
+    local int i = 0;
+    for (i = 0; i < MainHeader.UnkCount_0x40; i++)
+    {
+        FSeek(MainHeader.UnkOffset_0x40 + (i * 0x50));
+        struct
+        {
+            Vec3Double Translation;
+            Vec3f Rotation;
+            float field_0x24;
+            int field_0x28;
+            int TimelineInfoOffset <fgcolor=cRed, format=hex>;
+            int field_0x30;
+            int UnkOffset_0x34 <fgcolor=cRed, format=hex>;
+            int UnkCount_0x34;
+            int field_0x3C;
+            int field_0x40 <format=hex>;
+            int field_0x44;
+            int field_0x48;
+            int field_0x4C;
+            
+            FSeek(startof(this) + TimelineInfoOffset);
+            struct
+            {
+                int field_0x00;
+                int TimelineElementsOffset <fgcolor=cRed, format=hex>;
+                int TimelineElementCount <fgcolor=cGreen>;
+                int field_0x0C <fgcolor=cRed, format=hex>;
+                int field_0x10;
+                int field_0x14 <fgcolor=cRed, format=hex>;
+                int field_0x18;
+                int FrameCount;
+                int unk;
+                
+                local int j = 0;
+                for (j = 0; j < TimelineElementCount; j++)
+                {
+                    FSeek(startof(this) + TimelineElementsOffset + (j * 0x20));
+                    struct
+                    {
+                        int field_0x00;
+                        int NameOffset <fgcolor=cRed, format=hex>;
+                        TimelineElementType ElementType;
+                        int FrameStart;
+                        int FrameDuration;
+                        int field_0x14;
+                        byte g;
+                        byte h;
+                        byte pad[2];
+                        int field_0x1C <format=hex>;
+                        
+                        FSeek(startof(this) + field_0x1C);
+                        struct
+                        {
+                            int Type;
+                            int field_0x04;
+                            int field_0x08;
+                            int field_0x0C;
+                            
+                            switch (Type)
+                            {
+                                case 31:
+                                    struct
+                                    {
+                                        int field_0x00;
+                                        int SoundFilePathOffset <fgcolor=cRed, format=hex>;
+                                        int field_0x08;
+                                        int field_0x0C;
+                                        
+                                        FSeek(startof(this) + SoundFilePathOffset);
+                                        string Path;
+                                    } Type31 <bgcolor=cBlack>;
+                                    break;
+                                case 75:
+                                    struct
+                                    {
+                                        int todo;
+                                    } Type3009 <bgcolor=cBlack>;
+                                    break;
+                                case 3001:
+                                    struct
+                                    {
+                                        int UnkOffset1 <fgcolor=cRed, format=hex>;
+                                        int UnkOffset2 <fgcolor=cRed, format=hex>;
+                                        
+                                        /*
+                                        FSeek(startof(this) + UnkOffset1);
+                                        struct
+                                        {
+                                            int SubCount;
+                                            struct
+                                            {
+                                                int A;
+                                                int B;
+                                                
+                                                switch (A)
+                                                {
+                                                    case 0:
+                                                        float v4[4];
+                                                        break;
+                                                    case 1:
+                                                        float v4[1];
+                                                        break;
+                                                    case 2:
+                                                        int a;
+                                                        float v[1];
+                                                        break;
+                                                    case 3:
+                                                        Vec3f v3;
+                                                        break;
+                                                }
+                                            } Sub1[SubCount] <optimize=false>;
+                                        } Ent;
+                                        */
+
+                                        FSeek(startof(this) + UnkOffset2);
+                                        int test;
+                                    } Type3001 <bgcolor=cBlack>;
+                                    break;
+                                case 3002:
+                                    struct
+                                    {
+                                        int field_0x00;
+                                        int field_0x04;
+                                        int field_0x08;
+                                        int UnkOffset <fgcolor=cRed, format=hex>;
+                                        int _pad_[3];
+                                        
+                                        FSeek(startof(parentof(this)) + UnkOffset);
+                                        string Path;
+                                        
+                                        FSeek(startof(this) + 0x1C);
+                                    } Type3002 <bgcolor=cBlack>;
+                                    break;
+                                case 3003:
+                                    struct
+                                    {
+                                        int field_0x00;
+                                        int SoundFilePathOffset <fgcolor=cRed, format=hex>;
+                                        int field_0x08;
+                                        int field_0x0C;
+                                        
+                                        FSeek(startof(this) + SoundFilePathOffset);
+                                        string Path;
+                                    } Type3003 <bgcolor=cBlack>;
+                                    break;
+                                case 3030:
+                                    struct
+                                    {
+                                        int field_0x00;
+
+                                    } Type3030 <bgcolor=cBlack>;
+                                    break;
+                                case kTimelineElem_ActorPositionTrigger: // 3009
+                                    struct
+                                    {
+                                        Vec3Double Transition;
+                                        Vec3f Rotation;
+                                        float Unk;
+                                        int pad[6];
+                                    } Type3009 <bgcolor=cBlack>;
+                                    break;
+                                case kTimelineElem_ChangeMaterialRange: // 3103
+                                    struct
+                                    {
+                                        int field_0x00;
+                                        int MaterialOffset <fgcolor=cRed, format=hex>;
+                                        int field_0x08 <fgcolor=cRed, format=hex>;
+                                        int field_0x0C;
+                                        
+                                        FSeek(startof(this) + MaterialOffset);
+                                        string Path;
+                                        
+                                        FSeek(startof(parentof(this)) + field_0x08);
+                                        string Name;
+                                    } Type3103 <bgcolor=cBlack>;
+                                    break;
+                                    
+                                default:
+                                    break;
+                            }
+                            
+                        } TimelineElementData <bgcolor=cDkPurple>;
+                        
+                        FSeek(startof(this) + NameOffset);
+                        string Name <bgcolor=cGray>;
+                        
+                    } TimelineElement <bgcolor=cRed, read=Str("[%d->%d] %s (%d)", FrameStart, FrameStart+FrameDuration, 
+                        (EnumToString(ElementType) == "" ? Str("%d", ElementType) : EnumToString(ElementType)), ElementType)>;
+                }
+                
+                FSeek(startof(this) + 0x24);
+            } TimelineInfo;
+            
+            
+            FSeek(startof(this) + 0x50);
+        } Timeline <bgcolor=cBlue>;
+    }
+    
+    FSeek(startof(this) + MainHeader.UnkOffset_0x48);
     struct
     {
-        uint field_0x00;
-        float field_0x04;
-        float field_0x08;
-        float field_0x0C;
-        uint field_0x10;
-        float field_0x14;
-        int field_0x18;
-        int field_0x1C;
-        int field_0x20;
-        float field_0x24;
-        int field_0x28;
-        int field_0x2C;
-        int field_0x30;
-        int UnkOffset_0x34 <fgcolor=cRed, format=hex>;
-        int UnkCount_0x34;
-        int field_0x3C;
-        int field_0x40 <format=hex>;
-        int field_0x44;
-        int field_0x48;
-        int field_0x4C;
-    } Sub[MainHeader.UnkCount_0x40];
+        int Offsets[MainHeader.field_0x4C] <bgcolor=cWhite>;
+        local int j = 0;
+        for (j = 0; j < MainHeader.field_0x4C; j++)
+        {
+            FSeek(startof(this) + Offsets[j]);
+            struct
+            {
+                int Type <fgcolor=cYellow>;
+                int _reserved_[9];
+                
+                switch (Type)
+                {
+                    case 3001:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3001 <bgcolor=cBlack>; 
+                        break;
+                    case 3003:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3003 <bgcolor=cBlack>; 
+                        break;
+                    case 3004:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3004 <bgcolor=cBlack>;
+                        break;
+                    case 3005:
+                        struct 
+                        {
+                            int IdKind;
+                            int ID;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3005 <bgcolor=cBlack>;  
+                        break;
+                    case 3006:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3006 <bgcolor=cBlack>;  
+                        break;
+                    case 3007:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3007 <bgcolor=cBlack>;  
+                        break;
+                    case 3012:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3012 <bgcolor=cBlack>;  
+                        break;
+                    case 3014:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3014 <bgcolor=cBlack>;  
+                        break;
+                    case 3015:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3015 <bgcolor=cBlack>;  
+                        break;
+                    case 3017:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                            int Unk;
+                        } Type3017 <bgcolor=cBlack>;  
+                        break;
+                    case 3023:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3023 <bgcolor=cBlack>;  
+                        break;
+                    case 3025:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3025 <bgcolor=cBlack>;  
+                        break;
+                    case 3026:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3026 <bgcolor=cBlack>;  
+                        break;
+                    case 3027:
+                        struct 
+                        {
+                            int Unk;
+                        } Type3027 <bgcolor=cBlack>;  
+                        break;
+                    case 3029:
+                        struct 
+                        {
+                            int Unk;
+                            int Unk;
+                        } Type3029 <bgcolor=cBlack>;  
+                        break;
+                }
+            } CutsceneElement <bgcolor=cGreen, read=Type>;
+        }
+        
+        FSeek(startof(Offsets) + MainHeader.field_0x4C * sizeof(int));
+    } CutsceneElements;
     
     FSeek(MainHeader.PackReferencesOffset);
     PackReference PackReferences[MainHeader.PackReferenceCount];
@@ -101,3 +608,5 @@ struct
     FSeek(MainHeader.AssetsOffset);
     Asset Assets[MainHeader.AssetCount];
 } Cutscene;
+
+Printf("NOTE: this cutscene template is heavily TODO/Not complete");
