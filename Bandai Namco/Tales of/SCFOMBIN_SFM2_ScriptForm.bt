@@ -1,0 +1,395 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: SCFOMBIN/SFM2 Tales of Script
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// NOTE! Not fully updated compared to the disassembler
+// https://github.com/Nenkai/TalesScriptForm
+
+// Ignore this section
+local uint __RandomSeed = 0xDEADBABE;
+local uint __RandomBit = 0;
+local uint __RandomCount = 0;
+ 
+uint MyRandom( uint to )
+{
+    ++__RandomCount;
+    __RandomBit  = ( (__RandomSeed >> 0 ) ^ ( __RandomSeed >> 2 ) ^ ( __RandomSeed >> 3 ) ^ ( __RandomSeed >> 5 ) ) & 1;
+    __RandomSeed = ( ( ( ( __RandomBit << 15 ) | ( __RandomSeed >> 1 ) ) + ( 0xBABE / __RandomCount ) ) % to );
+
+    while( __RandomSeed < 0 )
+        __RandomSeed += to;
+
+    return __RandomSeed;
+}
+
+uint RandomColor()
+{
+    return MyRandom( 0xFFFFFFFF );
+}
+
+void SetRandomBackColor()
+{
+    SetBackColor( RandomColor() );
+}
+
+///////////////////////////////////////////////////
+// TEMPLATE START
+///////////////////////////////////////////////////
+
+typedef uint Offset32 <format=hex, fgcolor=cRed>;
+
+if (ReadByte(0x2C))
+    BigEndian();
+
+// NOTE: ToV DE first loads: chara/TITLE.DAT/0002 (?)/E_A101_TITLE.TXV/File 102 (0102)
+// NOTE 2: Stack size is hardcoded to 0x800
+
+typedef enum <byte>
+{
+// [0] = GlobalCodeOffsetPtr
+// [1] = ArrayPoolPtr
+// [2] = StringTablePtr
+// [3] = StackPtr (current)
+// [4] = StackStartPtr, we go backwards to grow
+// [5] = Unk5 table
+// [6] = Unk6 table
+// [7] = Unk7 table
+    
+    CONST_CODE = 0,
+    CONST_ARRAY_POOL_PTR = 1,
+    CONST_STRING_PTR = 2,
+    CONST_STACK_PTR = 3,
+    CONST_STACK_START = 4,
+    CONST_FIELD_UNK5 = 5, // 0x34 in SFM2
+    CONST_FIELD_UNK6 = 6, // 0x38 in SFM2
+    CONST_FIELD_UNK7 = 7, // 0x3C in SFM2
+} ConstantType;
+
+LittleEndian();
+BitfieldLeftToRight();
+
+if (ReadUInt() == 0x324D4653)
+{
+    struct
+    {
+        int Magic <format=hex>;
+        int Version;
+        int FileSize <format=hex>;
+        int ScriptBodySize <format=hex>;
+        int field_0x10;
+        int field_0x14;
+        int CodeOffset <format=hex>;
+        int StringTableOffset <format=hex>;
+        int DataOffset <format=hex>;
+        int MainCodeOffset <format=hex>;
+        uint FinalizerInfoSectionSize <format=hex>;
+        Offset32 FinalizerInfosOffset;
+        int field_0x2C;
+        int field_0x30;
+        int Unk5;
+        int Unk6;
+        int Unk7;
+    } Header;
+}
+else
+{
+    if (ReadByte(0x2C) == 1)
+        BigEndian();
+    else
+        LittleEndian();
+        
+    struct
+    {
+        char Magic[8];
+        uint Version;
+        uint FileSize <format=hex>;
+        uint ScriptBodySize <format=hex>;
+        uint field_0x14;
+        Offset32 field_0x18;
+        Offset32 CodeOffset;
+        Offset32 StringTableOffset;
+        Offset32 DataOffset;
+        Offset32 MainCodeOffset;
+        byte IsBigEndian;
+        byte Unk[2];
+        byte Unk;
+        uint field_0x30;
+        uint field_0x34;
+        uint field_0x38;
+        uint field_0x3C;
+        uint FinalizerInfoSectionSize <format=hex>;
+        Offset32 FinalizerInfosOffset;
+        uint UnkSize_0x48 <format=hex>;
+        Offset32 Unk5;
+        uint Unk6;
+        uint Unk7;
+
+        FSeek(Unk5);
+        byte UnkData[UnkSize_0x48] <bgcolor=cBlack>;
+    } Header;
+}
+
+FSeek(Header.FinalizerInfosOffset);
+struct
+{
+    short Index; // 0 = entrypoint
+    short Unk;
+    Offset32 CodeOffset;    
+} Entry[Header.FinalizerInfoSectionSize / 0x08];
+        
+FSeek(Header.CodeOffset + Header.MainCodeOffset);
+
+// 2 = byte
+// 3 = byte
+// 3 = short
+// 4 = short
+// 5 = int
+// 6 = int
+    
+struct
+{
+    local int exit = 0;
+    while (!exit)
+    {
+        struct
+        {
+            // - = Push
+            // + = Pop
+
+            byte InstructionSize : 4;
+            enum <byte>
+            {
+                // Pops one int value (syscall number as lower 24 bits) + num of arguments.
+                SCFOM_INST_SYSCALL = 0,
+                
+                SCFOM_CALL = 1,
+                
+                // InstPtr = StartCodePtr + (uint)&Data[1]
+                SCFOM_JUMP = 2,
+                
+                // Pop stack value
+                // if value == Data[0], skip
+                // otherwise, InstPtr = StartCodePtr + (uint)&Data[1]
+                SCFOM_JUMP_IF = 3,
+                
+                SCFOM_EXIT = 4,
+                
+                // *StackPtr = value
+                // NOTE: data size must be 2 (byte), 3 (short), 5 (int), 9 (long).
+                SCFOM_INST_PUSH_INT = 6,
+                
+                // StackPtr -= 8
+                // *Stackptr = *ConstantTable[index] + offset
+                // NOTE: data size must be 3 (byte), 4 (short), 6 (int).
+                SCFOM_INST_PUSH_CONST = 7,
+                
+                // StackPtr -= 8
+                // *StackPtr = Registers[index] - if instruction size is 1, index = 0
+                SCFOM_INST_PUSH_FROM_REGISTER = 8,
+                
+                // *StackPtr = Registers[index] - if instruction size is 1, index = 0
+                // StackPtr += 8
+                SCFOM_INST_ASSIGN_POP_TO_REGISTER = 9,
+                
+                // *StackPtr += value
+                // NOTE: value can be negative, += is pop, -= is push
+                SCFOM_INST_STACK_SEEK = 10,
+                
+                // Grabs 3 bytes, following bits for each byte:
+                // 6 bit: calcFlag, 5 bit = unk, 5 bit = unk2
+                // unk/unk2 may be for signedness?
+                // calcFlag is used as operation type, no more than 36
+                SCFOM_INST_OPERATOR = 11,
+                
+                SCFOM_INST_CAST2 = 11,
+            } Type : 4;
+            
+            if (Type == SCFOM_EXIT)
+            {
+                exit = true;
+                return;   
+            }
+            
+            union
+            {
+                byte Bytes[InstructionSize - 1];
+                switch (Type)
+                {
+                    case SCFOM_INST_SYSCALL: // 0
+                        struct
+                        {
+                            if (Header.Version >= 30000)
+                            {
+                                byte NumArgs : 4;
+                                byte Flags : 4; // 0x40 = returning?
+                            }
+                            else
+                            {
+                                byte NumArgs;
+                                short SyscallNumber;
+                            }
+                        } Data0;
+                        break;
+                        
+                    case 1:
+                        struct
+                        {
+                            byte Bits;
+                        } Data1;
+                        break;
+                        
+                    case 3:
+                        struct
+                        {
+                            byte Flag;
+                            Offset32 CodeOffset <format=hex>;
+                        } Data3;
+                        break;
+                    case 5:
+                        struct
+                        {
+                            byte Type;
+                        } Data5;
+                        break;
+                    case 6: // PushInteger?
+                        struct
+                        {
+                            switch (InstructionSize)
+                            {
+                                case 2: byte Value; break;
+                                case 3: short Value; break;
+                                case 5: int Value; break;
+                                case 9: long Value; break;
+                            }
+                        } Data6;
+                        break;
+                        
+                    case SCFOM_INST_PUSH_CONST: // 7
+                        struct 
+                        {
+                            byte      : 3;
+                            ConstantType Type : 5;
+                            
+                            switch (InstructionSize)
+                            {
+                                case 3: signed byte Offset; break;
+                                case 4: short Offset; break;
+                                case 6: int Offset; break;
+                            }
+                            
+                            if (Type == CONST_STRING_PTR)
+                            {
+                                local int tPos = FTell();
+                                FSeek(Header.StringTableOffset + Offset);
+                                string str <bgcolor=cLtGray>;
+                                
+                                FSeek(tPos);
+                            }
+                        } Data7;
+                        break;
+                        
+                    case 8:
+                        struct 
+                        {
+                            if (InstructionSize > 1)
+                                byte RegisterIndex;
+                        } Data8;
+                        break;
+                        
+                    case 9:
+                        struct 
+                        {
+                            if (InstructionSize > 1)
+                                byte RegisterIndex;
+                        } Data9;
+                        break;
+                        
+                    case 10: // AdvanceStack?
+                        struct
+                        {
+                            switch (InstructionSize)
+                            {
+                                case 2: byte Value; break;
+                                case 3: short Value; break;
+                                case 5: int Value; break;
+                            }
+                        } Data10;
+                        break;
+                        
+                    case 11:
+                        struct
+                        {
+                            enum <byte>
+                            {
+                                OP_ADD = 0,
+                                OP_SUB = 1,
+                                OP_MULT = 2,
+                                OP_DIV = 3,
+                                OP_MOD = 4,
+                                OP_BITWISE_AND = 5,
+                                OP_BITWISE_OR = 6,
+                                OP_BITWISE_XOR = 7,
+                                OP_LOGICAL_RIGHT_SHIFT = 8,
+                                OP_LOGICAL_LEFT_SHIFT = 9,
+                                OP_ROTATE_RIGHT = 10,
+                                OP_ROTATE_LEFT = 11, // same OP_LOGICAL_LEFT_SHIFT?, no rotating
+                                OP_UNARY_MINUS = 12,
+                                OP_UNARY_BITWISE_NOT = 13,
+                                OP_UNARY_14 = 14, //????: (unsigned int)(int)(float)(*(float *)&a1->Left * 100000000.0) == 0;
+                                OP_PLUS_15 = 15,
+                                OP_BINARY_ASSIGN_PLUS = 16, // +=
+                                OP_EQ = 17,
+                                OP_NEQ = 18,
+                                OP_GREATER_EQ_TO = 19,
+                                OP_LESSER_EQ_TO = 20,
+                                OP_GREATER_THAN = 21,
+                                OP_LESSER_THAN = 22,
+                                OP_ASSIGN = 23,
+                                OP_24 = 24, // Double increment?
+                                
+                                // Signed?
+                                OP_25 = 25, // Plus again?
+                                OP_26 = 26, // Minus again?
+                                OP_27 = 27, // Mult again?
+                                OP_28 = 28, // Div again?
+                                OP_29 = 29, // Mod again?
+                                OP_30 = 30, // And again?
+                                OP_31 = 31, // Or again?
+                                OP_32 = 32, // Xor again?
+                                OP_33 = 33, // Right shift?
+                                OP_34 = 34, // Left shift?
+                                OP_35 = 35, // Right shift 2?
+                                OP_36 = 36, // Left shift 2?
+                                
+                                OP_37 = 37,
+                                OP_38 = 38,
+                            } calcFlag : 6;
+                            
+                            byte          : 2;
+                            byte calcFlag2 : 5;
+                            byte          : 3;
+                            
+                            if (Header.Version >= 30000)
+                            {
+                                byte calcFlag3 : 5;
+                                byte          : 3;
+                            }
+                        } Data11;
+                        
+                    default:
+                        break;
+                }
+            } Data;
+            
+        } inst <bgcolor=RandomColor(), read=Str("%s (%d)\n", EnumToString(Type) == "" ? Str("%d", Type) : EnumToString(Type), Type)>;
+    }
+} Main;
