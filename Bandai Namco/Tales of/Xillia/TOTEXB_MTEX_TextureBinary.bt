@@ -1,0 +1,123 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Tales of Xillia/Xillia 2 PS3 Texture Binary Header
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: PS3 Texture header which is then mapped to a CellGcmTexture
+//  Category: 
+// File Mask: *.totexb
+//  ID Bytes: 4D 54 45 58
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef enum <ubyte> CELL_GCM_TEXTURE_FORMAT
+{
+    /// <summary>
+    /// Swizzled
+    /// </summary>
+    CELL_GCM_TEXTURE_SZ = 0,
+
+    /// <summary>
+    /// Linear
+    /// </summary>
+    CELL_GCM_TEXTURE_LN = 0x20,
+
+    CELL_GCM_TEXTURE_B8 = 0x81,
+    CELL_GCM_TEXTURE_A1R5G5B5 = 0x82,
+    CELL_GCM_TEXTURE_A4R4G4B4 = 0x83,
+    CELL_GCM_TEXTURE_R5G6B5 = 0x84,
+    CELL_GCM_TEXTURE_A8R8G8B8 = 0x85,
+    CELL_GCM_TEXTURE_COMPRESSED_DXT1 = 0x86,
+    CELL_GCM_TEXTURE_COMPRESSED_DXT23 = 0x87,
+    CELL_GCM_TEXTURE_COMPRESSED_DXT45 = 0x88,
+    CELL_GCM_TEXTURE_G8B8 = 0x8B,
+    CELL_GCM_TEXTURE_R6G5B5 = 0x8F,
+    CELL_GCM_TEXTURE_DEPTH24_D8 = 0x90,
+    CELL_GCM_TEXTURE_DEPTH24_D8_FLOAT = 0x91,
+    CELL_GCM_TEXTURE_DEPTH16 = 0x92,
+    CELL_GCM_TEXTURE_DEPTH16_FLOAT = 0x93,
+    CELL_GCM_TEXTURE_X16 = 0x94,
+    CELL_GCM_TEXTURE_Y16_X16 = 0x95,
+    CELL_GCM_TEXTURE_R5G5B5A1 = 0x97,
+    CELL_GCM_TEXTURE_COMPRESSED_HILO8 = 0x98,
+    CELL_GCM_TEXTURE_COMPRESSED_HILO_S8 = 0x99,
+    CELL_GCM_TEXTURE_W16_Z16_Y16_X16_FLOAT = 0x9A,
+    CELL_GCM_TEXTURE_W32_Z32_Y32_X32_FLOAT = 0x9B,
+    CELL_GCM_TEXTURE_X32_FLOAT = 0x9C,
+    CELL_GCM_TEXTURE_D1R5G5B5 = 0x9D,
+    CELL_GCM_TEXTURE_D8R8G8B8 = 0x9E,
+    CELL_GCM_TEXTURE_Y16_X16_FLOAT = 0x9F,
+    CELL_GCM_TEXTURE_COMPRESSED_B8R8_G8R8 = 0xAD,
+    CELL_GCM_TEXTURE_COMPRESSED_R8B8_R8G8 = 0xAE,
+} CELL_GCM_TEXTURE_FORMAT;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_UNSIGNED_REMAP_NORMAL,
+    CELL_GCM_TEXTURE_UNSIGNED_REMAP_BIASED,
+} CELL_GCM_TEXTURE_UNSIGNED_REMAP;
+
+typedef enum <byte>
+{
+  CELL_GCM_TEXTURE_REMAP_FROM_A = 0,
+	CELL_GCM_TEXTURE_REMAP_FROM_R = 1,
+	CELL_GCM_TEXTURE_REMAP_FROM_G = 2,
+	CELL_GCM_TEXTURE_REMAP_FROM_B = 3,
+} CELL_GCM_TEXTURE_REMAP_FROM;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_REMAP_ORDER_XYXY = 0,
+    CELL_GCM_TEXTURE_REMAP_ORDER_XXXY = 1,
+} CELL_GCM_TEXTURE_REMAP_ORDER;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_REMAP_ZERO,
+    CELL_GCM_TEXTURE_REMAP_ONE,
+    CELL_GCM_TEXTURE_REMAP_REMAP,
+} CELL_GCM_TEXTURE_REMAP_OUT;
+
+// Relevant funcs (ToX1): 0x07b07f8 CTextureImpl::MapToCellGcmHeader(char* this, char* header, int address)
+// (this + 0x50) = CellGcmTexture
+
+struct
+{
+    char Magic[4];
+    int FileSize;
+    int DataSize;
+    byte Is3D; // If this = 0, value = 2, if this set to 1, value = 3
+    byte NumMipmap;
+    ushort Width;
+    ushort Height;
+    ushort Depth;
+    CELL_GCM_TEXTURE_FORMAT Format <format=hex>;
+    
+    /*
+    // Checks if 0x86<->0x88 (DXT) or 0xA6<->0xA8 (DXT swizzled)
+    if (((((format_ << 0x20) >> 0x27) << 7 | format_ & 0x1f) + 0x7a & 0xff) < 3) 
+    {
+      (param_1->CellGcmTexture).pitch = (uVar1 + 3 & 0xfffc) * (uint)hdrPtr->UnkPitch;
+      cellGcmAddressToOffset(address,offset);
+      (param_1->CellGcmTexture).offset = offset[0];
+      return;
+    }
+    (param_1->CellGcmTexture).pitch = (uint)uVar1 * (uint)hdrPtr->UnkPitch; */
+    byte UnkPitch;
+    
+    struct
+    {
+        CELL_GCM_TEXTURE_REMAP_OUT OutB : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutG : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutR : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutA : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InB : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InG : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InR : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InA : 2;
+    } remap;
+    int _empty_;
+} TalesofTextureBinary;
