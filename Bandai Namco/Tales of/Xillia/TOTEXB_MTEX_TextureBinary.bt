@@ -105,7 +105,7 @@ struct
       (param_1->CellGcmTexture).offset = offset[0];
       return;
     }
-    (param_1->CellGcmTexture).pitch = (uint)uVar1 * (uint)hdrPtr->UnkPitch; */
+    (param_1->CellGcmTexture).pitch = (uint)width * (uint)hdrPtr->UnkPitch; */
     byte UnkPitch;
     
     struct
