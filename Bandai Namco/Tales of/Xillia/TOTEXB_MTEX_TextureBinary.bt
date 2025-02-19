@@ -100,7 +100,7 @@ struct
     // Checks if 0x86<->0x88 (DXT) or 0xA6<->0xA8 (DXT swizzled)
     if (((((format_ << 0x20) >> 0x27) << 7 | format_ & 0x1f) + 0x7a & 0xff) < 3) 
     {
-      (param_1->CellGcmTexture).pitch = (uVar1 + 3 & 0xfffc) * (uint)hdrPtr->UnkPitch;
+      (param_1->CellGcmTexture).pitch = (width + 3 & 0xfffc) * (uint)hdrPtr->UnkPitch;
       cellGcmAddressToOffset(address,offset);
       (param_1->CellGcmTexture).offset = offset[0];
       return;
