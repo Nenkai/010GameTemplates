@@ -1,0 +1,134 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Tales of Vesperia FPS4 Package File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.svo,*.dat
+//  ID Bytes: 46 50 53 34
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef enum<ushort>
+{
+                                           // Attr Sizes
+    kFPS4AttrHasFileOffset               = 1 << 0, // 4 (uint)
+    kFPS4AttrHasFileSize1                = 1 << 1, // 4 (uint)
+    kFPS4AttrHasFileSize2                = 1 << 2, // 4 (uint) - Difference between the two is unknown
+    kFPS4AttrHasFileNames                = 1 << 3, // 0x20 (char[32])
+    kFPS4AttrHasAttribute5               = 1 << 4, // 4 - Appears unused
+    kFPS4AttrHasFileType                 = 1 << 5, // 4 (char[4]) - Often used for searching for certain files (looping through files + 
+    kFPS4AttrHasMetadata                 = 1 << 6, // 4 (uint string offset)
+    kFPS4AttrHasUseExternalFilePtrFlag   = 1 << 7, // 4 (bool) - Seperate ptr, Won't multiply by 0x80
+    kFPS4AttrHasAttribute9               = 1 << 8, // 4 (uint) - Has accessor, but unused
+} FPS4Attributes <read=ReadFlags>;
+
+string ReadFlags( FPS4Attributes &f )
+{
+    string str;
+    if(f & kFPS4AttrHasFileOffset )
+        str += EnumToString(kFPS4AttrHasFileOffset) + " | ";
+    if(f & kFPS4AttrHasFileSize1 )    
+        str += EnumToString(kFPS4AttrHasFileSize1) + " | ";
+    if(f & kFPS4AttrHasFileSize2)    
+        str += EnumToString(kFPS4AttrHasFileSize2) + " | ";
+    if(f & kFPS4AttrHasFileNames)    
+        str += EnumToString(kFPS4AttrHasFileNames) + " | ";
+    if(f & kFPS4AttrHasAttribute5)    
+        str += EnumToString(kFPS4AttrHasAttribute5) + " | ";
+    if(f & kFPS4AttrHasFileType)    
+        str += EnumToString(kFPS4AttrHasFileType) + " | ";
+    if(f & kFPS4AttrHasMetadata)    
+        str += EnumToString(kFPS4AttrHasMetadata) + " | ";
+    if(f & kFPS4AttrHasUseExternalFilePtrFlag)    
+        str += EnumToString(kFPS4AttrHasUseExternalFilePtrFlag) + " | ";
+    if(f & kFPS4AttrHasAttribute9)    
+        str += EnumToString(kFPS4AttrHasAttribute9) + " | ";
+    return str;
+}
+
+struct
+{
+    struct
+    {
+        char Magic[4] <comment="Checked">;
+        uint NumFiles;
+        uint FileListOffset <format=hex, fgcolor=cRed>;
+        uint field_0x0C;
+        ushort FileInfoStructSize <format=hex>;
+        FPS4Attributes Attributes;
+        byte UseExternallyProvidedFilePointer <comment="When the FPS4's data is split aside, pointer/size provided in the ctor.">;
+        byte IsOrderedByFileNameForBSearch <comment="Whether files are ordered, used for bsearching.">;
+        signed byte UseSectorOffsetIfMinus1 <comment="No multiplying data by 0x80 if 0">;
+        byte pad;
+        uint PackageNameOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple>;
+    
+    struct
+    {
+        if (Header.Attributes & kFPS4AttrHasFileOffset)
+            int SectorOffset <comment="1 sector = 0x80", fgcolor=cRed>;
+        if (Header.Attributes & kFPS4AttrHasFileSize1)
+            int FileSize1 <format=hex>;
+        if (Header.Attributes & kFPS4AttrHasFileSize2)
+            int FileSize2 <format=hex>;
+        if (Header.Attributes & kFPS4AttrHasFileNames)
+            char FileName[32] <comment="Must be uppercase">;
+        if (Header.Attributes & kFPS4AttrHasAttribute5)
+            int Unused5;
+        if (Header.Attributes & kFPS4AttrHasFileType)
+            char FileType[4];
+        if (Header.Attributes & kFPS4AttrHasMetadata)
+            int MetadataOffset;
+        if (Header.Attributes & kFPS4AttrHasUseExternalFilePtrFlag)
+            int UseExternalFilePtrFlag <comment="Seperate from one in header. If true, not using sectors (no * 0x80)">;
+        if (Header.Attributes & kFPS4AttrHasAttribute9)
+            int UnkAttribute9;
+    } FileInfos[Header.NumFiles] <bgcolor=cDkPurple>;
+        
+    FSeek(Header.PackageNameOffset);
+    string PackageName <bgcolor=cLtGray, comment="Sometimes checked against specific names. Shift-JIS?">;
+} FPS4;
+
+/////////////////////////////////////
+// Extra notes
+/////////////////////////////////////
+
+// It is suspected that this file uses some sort of of library for 
+// generating this file and its attribute accessors
+// Why? because it's trying to access int attributes 4 times for *each byte* for some odd reason.
+
+// Data always starts at 0x800, and should always be aligned to 0x80 when using sectors
+
+// Useful sigs (TOV_DE.exe):
+// void FPS4::FPS4 - 33 C0 48 89 01 48 89 41 ? 48 89 41 ? 48 8B C1 C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 49 8B D8
+// void FPS4::CreateWithBuffers(FPS4* this, char* fps4Buffer, char* a3Buffer, char* a4Buffer, bool doEndianSwapIfNeeded) - 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 49 8B D8 49 8B F1
+// void FPS4::SetPointerAndDoEndianSwap(FPS4* this, char* fps4Buffer, bool doEndianSwapIfNeeded) - 40 53 45 33 DB
+// ^ the pointer is assigned to the structure first, THEN the magic check is made, if matches, endian swap (if asked)
+// no real magic check otherwise, lmao.
+
+// char* FPS4::GetPackageName(FPS4* this) - 48 8B 11 8B 42
+// bool FPS4::HasFileIndex(FPS4* this, uint fileIndex) - 48 83 EC ? 48 8B 01 F6 40
+// char* FPS4::GetFileDataPtrByIndex(FPS4* this, uint fileIndex) - 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B 39 48 8B F1
+// uint FPS4::GetFileOffsetRawByIndex(FPS4* this, uint fileIndex) - 4C 8B 01 41 3B 50 ? 72 ? 33 C0 C3 41 F6 40
+// uint FPS4::GetFileOffsetOrSectorOffsetByIndex(FPS4* this, uint fileIndex) - 40 53 48 83 EC ? 48 8B 19 44 8B CA
+
+// uint FPS4::GetFileSizeByIndex(FPS4* this, uint fileIndex) - 40 53 41 57 48 83 EC ? 4C 8B 19 8B DA 45 8B 7B ? 41 8D 47 ? 3B D0 72 ? 33 C0 48 83 C4 ? 41 5F 5B C3 4C 89 64 24 ? 45 0F B7 63 ? 41 F6 C4 ? 75 ? 33 C0 4C 8B 64 24 ? 48 83 C4 ? 41 5F 5B C3 80 3D ? ? ? ? ? 0F 84 ? ? ? ? 48 89 6C 24 ? 4C 8D 05 ? ? ? ? 45 33 C9 48 89 74 24 ? 48 89 7C 24 ? BA ? ? ? ? 41 3B DF 72 ? 41 8B E9 EB ? 41 0F B7 43 ? 8B CA 41 8B 6B ? 4D 8B D0 0F AF C3 41 0F B7 FC 49 03 C3 48 03 E8 85 F9 74 ? 49 63 02 48 03 E8 49 83 C2 ? 03 C9 83 F9 ? 7C ? 41 3B DF 72 ? 49 8B F1 EB ? 41 0F B7 43 ? 8B CA 41 8B 73 ? 4D 8B D0 0F AF C3 41 0F B7 FC 49 03 C3 48 03 F0 0F 1F 40 ? 85 F9 74 ? 49 63 02 48 03 F0 49 83 C2 ? 03 C9 83 F9 ? 7C ? 41 3B DF 72 ? 49 8B F9 EB ? 41 0F B7 43 ? 8B CA 41 8B 7B ? 4D 8B D0 0F AF C3 4C 89 34 24 45 0F B7 F4 49 03 C3 48 03 F8 66 90 44 85 F1 74 ? 49 63 02 48 03 F8 49 83 C2 ? 03 C9 83 F9 ? 7C ? 4C 8B 34 24 41 3B DF 73 ? 41 0F B7 43 ? 45 8B 4B ? 0F AF C3 41 0F B7 CC 49 03 C3 4C 03 C8 85 CA 74 ? 49 63 00 4C 03 C8 49 83 C0 ? 03 D2 83 FA ? 7C ? 8B 0F 41 8B 01 81 E1 ? ? ? ? 48 8B 7C 24 ? 4C 8B 64 24 ? C1 E0 ? 0B C8 8B 06 48 8B 74 24 ? C1 E8 ? 25 ? ? ? ? C1 E1 ? 0B C8 0F B6 45 ? 48 8B 6C 24 ? 0B C8 8B C1 48 83 C4 ? 41 5F 5B C3 41 3B DF 72 ? 4C 8B 64 24 ? 45 33 C9 41 8B 09 8B C1 48 83 C4 ? 41 5F 5B C3 41 0F B7 43 ? 4C 8D 05 ? ? ? ? 45 8B 4B ? BA ? ? ? ? 0F AF C3 41 0F B7 CC 49 03 C3 4C 03 C8 0F 1F 80 ? ? ? ? 85 CA 74 ? 49 63 00 4C 03 C8 49 83 C0 ? 03 D2 83 FA ? 7C ? 41 8B 09 8B C1 4C 8B 64 24 ? 48 83 C4 ? 41 5F 5B C3 CC CC CC CC CC CC CC CC CC 40 53
+// ^ Attribute 0x02
+
+// uint FPS4::GetFileSizeByIndex_2(FPS4* this, uint fileIndex) - 40 53 41 57 48 83 EC ? 4C 8B 19 8B DA 45 8B 7B ? 41 8D 47 ? 3B D0 72 ? 33 C0 48 83 C4 ? 41 5F 5B C3 4C 89 64 24 ? 45 0F B7 63 ? 41 F6 C4 ? 75 ? 33 C0 4C 8B 64 24 ? 48 83 C4 ? 41 5F 5B C3 80 3D ? ? ? ? ? 0F 84 ? ? ? ? 48 89 6C 24 ? 4C 8D 05 ? ? ? ? 45 33 C9 48 89 74 24 ? 48 89 7C 24 ? BA ? ? ? ? 41 3B DF 72 ? 41 8B E9 EB ? 41 0F B7 43 ? 8B CA 41 8B 6B ? 4D 8B D0 0F AF C3 41 0F B7 FC 49 03 C3 48 03 E8 85 F9 74 ? 49 63 02 48 03 E8 49 83 C2 ? 03 C9 83 F9 ? 7C ? 41 3B DF 72 ? 49 8B F1 EB ? 41 0F B7 43 ? 8B CA 41 8B 73 ? 4D 8B D0 0F AF C3 41 0F B7 FC 49 03 C3 48 03 F0 0F 1F 40 ? 85 F9 74 ? 49 63 02 48 03 F0 49 83 C2 ? 03 C9 83 F9 ? 7C ? 41 3B DF 72 ? 49 8B F9 EB ? 41 0F B7 43 ? 8B CA 41 8B 7B ? 4D 8B D0 0F AF C3 4C 89 34 24 45 0F B7 F4 49 03 C3 48 03 F8 66 90 44 85 F1 74 ? 49 63 02 48 03 F8 49 83 C2 ? 03 C9 83 F9 ? 7C ? 4C 8B 34 24 41 3B DF 73 ? 41 0F B7 43 ? 45 8B 4B ? 0F AF C3 41 0F B7 CC 49 03 C3 4C 03 C8 85 CA 74 ? 49 63 00 4C 03 C8 49 83 C0 ? 03 D2 83 FA ? 7C ? 8B 0F 41 8B 01 81 E1 ? ? ? ? 48 8B 7C 24 ? 4C 8B 64 24 ? C1 E0 ? 0B C8 8B 06 48 8B 74 24 ? C1 E8 ? 25 ? ? ? ? C1 E1 ? 0B C8 0F B6 45 ? 48 8B 6C 24 ? 0B C8 8B C1 48 83 C4 ? 41 5F 5B C3 41 3B DF 72 ? 4C 8B 64 24 ? 45 33 C9 41 8B 09 8B C1 48 83 C4 ? 41 5F 5B C3 41 0F B7 43 ? 4C 8D 05 ? ? ? ? 45 8B 4B ? BA ? ? ? ? 0F AF C3 41 0F B7 CC 49 03 C3 4C 03 C8 0F 1F 80 ? ? ? ? 85 CA 74 ? 49 63 00 4C 03 C8 49 83 C0 ? 03 D2 83 FA ? 7C ? 41 8B 09 8B C1 4C 8B 64 24 ? 48 83 C4 ? 41 5F 5B C3 CC CC CC CC CC CC CC CC CC 4C 8B 01
+// ^ Attribute 0x04
+
+// char* FPS4::GetFileNameByIndex(FPS4* this, uint fileIndex) - 4C 8B 01 41 8B 48 ? 8D 41 ? 3B D0 72 ? 33 C0 C3 45 0F B7 50 ? 41 F6 C2 ? 74 ? 3B D1 72 ? 45 33 C9 41 8B C1 C3 41 0F B7 40 ? B9 ? ? ? ? 45 8B 48 ? 0F AF C2 49 03 C0 4C 8D 05 ? ? ? ? 4C 03 C8 41 0F B7 C2 0F 1F 80 ? ? ? ? 85 C1 74 ? 49 63 10 4C 03 CA 49 83 C0 ? 03 C9 83 F9 ? 7C ? 49 8B C1 C3 CC CC CC CC CC CC CC 4C 8B 01 41 8B 48 ? 8D 41 ? 3B D0 72 ? 33 C0 C3 45 0F B7 50 ? 41 F6 C2 ? 74 ? 3B D1 72 ? 45 33 C9 41 8B C1 C3 41 0F B7 40 ? B9 ? ? ? ? 45 8B 48 ? 0F AF C2 49 03 C0 4C 8D 05 ? ? ? ? 4C 03 C8 41 0F B7 C2 0F 1F 80 ? ? ? ? 85 C1 74 ? 49 63 10 4C 03 CA 49 83 C0 ? 03 C9 83 F9 ? 7C ? 49 8B C1 C3 CC CC CC CC CC CC CC 4C 8B 01
+// char* FPS4::GetFileTypeStringByIndex(FPS4* this, uint fileIndex) - 4C 8B 01 41 8B 48 ? 8D 41 ? 3B D0 72 ? 33 C0 C3 45 0F B7 50 ? 41 F6 C2 ? 74 ? 3B D1 72 ? 45 33 C9 41 8B C1 C3 41 0F B7 40 ? B9 ? ? ? ? 45 8B 48 ? 0F AF C2 49 03 C0 4C 8D 05 ? ? ? ? 4C 03 C8 41 0F B7 C2 0F 1F 80 ? ? ? ? 85 C1 74 ? 49 63 10 4C 03 CA 49 83 C0 ? 03 C9 83 F9 ? 7C ? 49 8B C1 C3 CC CC CC CC CC CC CC 40 57
+// char* FPS4::GetFileMetaPtrByIndex(FPS4* this, uint fileIndex) - 40 57 41 57 48 83 EC ? 48 8B 39
+// uint FPS4::GetFileUseExternalFilePtrFlagByIndex(FPS4* this, uint fileIndex) - 40 53 57 41 57 48 8B 19
+// uint FPS4::GetFileAttribute9ByIndex(FPS4* this, uint fileIndex) - 40 53 57 41 57 48 83 EC ? 48 8B 39
+// ^ Attribute 0x100
+
+// uint FPS4::GetFileIndexByName(FPS4* this, char* name, int len) - 40 53 41 57 48 83 EC ? 48 8B 05
+// ^ does a bsearch if IsOrderedByFileNameForBSearch is true, otherwise linear search
