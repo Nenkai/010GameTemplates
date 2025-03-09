@@ -1,0 +1,243 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: WWE 2K22 .tex
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Texture (Only V10 tested).
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+uint AlignValue(uint x, uint alignment)
+{
+     local uint mask = ~(alignment - 1);
+     return (x + (alignment - 1)) & mask;
+}
+
+void Align(uint alignment)
+{
+     local uint offset = AlignValue(FTell(), alignment);
+     FSeek(offset);
+}
+
+// WEngine::GEBaseFmt
+typedef enum <uint>
+{
+    GEBaseFmt_Invalid = 0xFFFFFFFF,
+    GEBaseFmt_BC1 = 0x7FD9CD97,             // 1
+    GEBaseFmt_BC4 = 0x4A28D98B,             // 2
+    GEBaseFmt_BC2 = 0x6C893E63,             // 3
+    GEBaseFmt_BC3 = 0x9EE2BD60,             // 4
+    GEBaseFmt_BC5 = 0xB8435A88,             // 5
+    GEBaseFmt_BC6 = 0x85121088,             // 6
+    GEBaseFmt_BC7 = 0x59782A7F,             // 7
+    GEBaseFmt_R8 = 0xD34782C5,              // 8
+    // A8                                   // 9                            
+    GEBaseFmt_10 = 0xE5238BD5,              // 10
+    GEBaseFmt_R16 = 0x3C26D39D,             // 11
+    GEBaseFmt_R8_G8_B8_A8 = 0x767C77E0,     // 12
+    GEBaseFmt_R16_G16 = 0xA453BBA5,         // 13
+    GEBaseFmt_R32 = 0xDCF9746C,             // 14
+    GEBaseFmt_R10_G10_B10_A2 = 0x6706FB25,  // 15
+    GEBaseFmt_R11_G11_B10 = 0xFA0EA0DB,     // 16
+    GEBaseFmt_R16_G16_B16_A16 = 0x6426214C, // 18
+    GEBaseFmt_R32_G32 = 0x7F450227,         // 20
+    GEBaseFmt_R32_G32_B32 = 0x25207D67,     // 21
+    GEBaseFmt_R32_G32_B32_A32 = 0x99F9905E, // 22
+    GEBaseFmt_23 = 0x9D355800,              // 23
+    GEBaseFmt_D32 = 0x7DEAFFF1,             // 24
+    GEBaseFmt_R32_G8_X24 = 0xF9522E43,      // 25
+} GEBaseFmt <format=hex>;
+
+// WEngine::GEType
+typedef enum <uint>
+{
+    GEType_Invalid = 0xFFFFFFFF, // 0 = TYPELESS
+    GEType_Float = 0x47B58E5F, // 1
+    GEType_UNorm = 0x5C0D3942,  // 2
+    GEType_SNorm = 0xCC6A58AA, // 3
+    GEType_UInt = 0x2938935, // 4
+    GEType_SInt = 0x0C6D69B47, // 5
+    GEType_UF16 = 0x0C9D983AA, // 6
+    GEType_SF16 = 0x0D9C91D8, // 7
+} GEType <format=hex>;
+
+
+/* 
+Internally:
+struct GEFormat
+{
+    GEBaseFmt BaseFmt : 11; // Not hash
+    GEType Type : 4; // Not hash
+    IsSRGB : 1;
+}
+
+// from WEngine::GEFormat::SetFromDXGI
+switch ( dxgiFormat )
+{
+    case DXGI_FORMAT_R32G32B32A32_FLOAT:
+      *this_ = 0x816;
+      break;
+    case DXGI_FORMAT_R32G32B32A32_UINT:
+      *this_ = 0x2016;
+      break;
+    case DXGI_FORMAT_R32G32B32_FLOAT:
+      *this_ = 0x815;
+      break;
+    case DXGI_FORMAT_R16G16B16A16_FLOAT:
+      *this_ = 0x812;
+      break;
+    case DXGI_FORMAT_R32G32_FLOAT:
+      *this_ = 0x814;
+      break;
+    case DXGI_FORMAT_R32G8X24_TYPELESS:
+    case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+      *this_ = 0x819;
+      break;
+    case DXGI_FORMAT_R10G10B10A2_UNORM:
+      *this_ = 0x100F;
+      break;
+    case DXGI_FORMAT_R11G11B10_FLOAT:
+      *this_ = 0x810;
+      break;
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+      *this_ = 0x100C;
+      break;
+    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+      *this_ = 0x900C;
+      break;
+    case DXGI_FORMAT_R16G16_FLOAT:
+      *this_ = 0x80D;
+      break;
+    case DXGI_FORMAT_D32_FLOAT:
+      *this_ = 0x818;
+      break;
+    case DXGI_FORMAT_R32_FLOAT:
+      *this_ = 0x80E;
+      break;
+    case DXGI_FORMAT_R16_TYPELESS:
+      *this_ = 0xB;
+      break;
+    case DXGI_FORMAT_D16_UNORM:
+      *this_ = 0x1017;
+      break;
+    case DXGI_FORMAT_R8_TYPELESS:
+      *this_ = 8;
+      break;
+    case DXGI_FORMAT_R8_UNORM:
+      *this_ = 0x1008;
+      break;
+    case DXGI_FORMAT_A8_UNORM:
+      *this_ = 0x1009;
+      break;
+    case DXGI_FORMAT_BC1_TYPELESS:
+      *this_ = 1;
+      break;
+    case DXGI_FORMAT_BC1_UNORM:
+      *this_ = 0x1001;
+      break;
+    case DXGI_FORMAT_BC1_UNORM_SRGB:
+      *this_ = 0x9001;
+      break;
+    case DXGI_FORMAT_BC2_TYPELESS:
+      *this_ = 3;
+      break;
+    case DXGI_FORMAT_BC2_UNORM:
+      *this_ = 0x1003;
+      break;
+    case DXGI_FORMAT_BC2_UNORM_SRGB:
+      *this_ = 0x9003;
+      break;
+    case DXGI_FORMAT_BC3_TYPELESS:
+      *this_ = 4;
+      break;
+    case DXGI_FORMAT_BC3_UNORM:
+      *this_ = 0x1004;
+      break;
+    case DXGI_FORMAT_BC3_UNORM_SRGB:
+      *this_ = 0x9004;
+      break;
+    case DXGI_FORMAT_BC4_TYPELESS:
+      *this_ = 2;
+      break;
+    case DXGI_FORMAT_BC4_UNORM:
+      *this_ = 0x1002;
+      break;
+    case DXGI_FORMAT_BC4_SNORM:
+      *this_ = 0x1802;
+      break;
+    case DXGI_FORMAT_BC5_TYPELESS:
+      *this_ = 5;
+      break;
+    case DXGI_FORMAT_BC5_UNORM:
+      *this_ = 0x1005;
+      break;
+    case DXGI_FORMAT_BC5_SNORM:
+      *this_ = 0x1805;
+      break;
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+      *this_ = 0x1011;
+      break;
+    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+      *this_ = 0x9011;
+      break;
+    case DXGI_FORMAT_BC6H_TYPELESS:
+      *this_ = 6;
+      break;
+    case DXGI_FORMAT_BC6H_UF16:
+      *this_ = 0x3006;
+      break;
+    case DXGI_FORMAT_BC6H_SF16:
+      *this_ = 0x3806;
+      break;
+    case DXGI_FORMAT_BC7_TYPELESS:
+      *this_ = 7;
+      break;
+    case DXGI_FORMAT_BC7_UNORM:
+      *this_ = 0x1007;
+      break;
+    case DXGI_FORMAT_BC7_UNORM_SRGB:
+      *this_ = 0x9007;
+      break;
+}
+*/
+
+struct
+{
+    struct
+    {
+        char Magic[4];
+        if (Magic != "AAAA")
+        {
+            Printf("ERROR: Not a valid tex file.");
+            Warning("ERROR: Not a valid tex file.");
+            return;   
+        }
+        
+        uint Version;
+        ushort Width;
+        ushort Height;
+        ushort Depth;
+        ubyte Unk;
+        ubyte Unk;
+        ushort A;
+        ushort B;
+        ushort C;
+        ushort D;
+        GEBaseFmt FormatIdHash; // Not sure how these are hashed
+        GEType DataTypeIdHash;
+        byte IsSRGB;
+        Align(4); // game does that
+        
+    } Header <bgcolor=cPurple>;
+    
+    // WEngine::DecodePixelData
+    int DataSize <fgcolor=cYellow, format=hex>;
+    int CRN; // Is this an offset? May point to CRN! (crunch?) - handled by WEngine::Uncrunch
+    
+    byte Data[DataSize] <bgcolor=cGray>;
+    string FormatName;
+} CTexture;
