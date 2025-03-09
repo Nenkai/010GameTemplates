@@ -210,7 +210,7 @@ struct
     struct
     {
         char Magic[4];
-        if (Magic != "AAAA")
+        if (Magic != "TEX!")
         {
             Printf("ERROR: Not a valid tex file.");
             Warning("ERROR: Not a valid tex file.");
