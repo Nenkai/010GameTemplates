@@ -1,0 +1,30 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Xenoblade Chronicles X: Definitive Edition Ard2
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.arh
+//  ID Bytes: 61 72 68 32
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        uint Magic <comment="'arh2'">;
+        uint NumFiles;
+        uint FileAlignment;
+        uint Pad;
+    } Header;
+    
+    struct
+    {
+        uint64 Hash <comment="XXHash64", format=hex>;
+        uint DiskSize <format=hex>;
+        uint CompressedSize <format=hex>;
+    } FileInfo[Header.NumFiles];
+} ArchiveHeader2;
