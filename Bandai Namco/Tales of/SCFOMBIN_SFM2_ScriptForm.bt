@@ -77,7 +77,21 @@ typedef enum <byte>
 LittleEndian();
 BitfieldLeftToRight();
 
-if (ReadUInt() == 0x324D4653)
+if (ReadUInt() == 0x5F4D4653)
+{
+    struct
+    {
+        int Magic <format=hex>;
+        int Version;
+        int FileSize <format=hex>;
+        int ScriptBodySize <format=hex>;
+        int field_0x10;
+        int CodeOffset <format=hex>;
+        int StringTableOffset <format=hex>;
+        int MainCodeOffset <format=hex>;
+    } Header;
+}
+else if (ReadUInt() == 0x324D4653) // SFM2
 {
     struct
     {
@@ -138,14 +152,16 @@ else
     } Header;
 }
 
-FSeek(Header.FinalizerInfosOffset);
-struct
+if (exists(Header.FinalizerInfosOffset))
 {
-    short Index; // 0 = entrypoint
-    short Unk;
-    Offset32 CodeOffset;    
-} Entry[Header.FinalizerInfoSectionSize / 0x08];
-        
+    FSeek(Header.FinalizerInfosOffset);
+    struct
+    {
+        short Index; // 0 = entrypoint
+        short Unk;
+        Offset32 CodeOffset;    
+    } Entry[Header.FinalizerInfoSectionSize / 0x08];
+}
 FSeek(Header.CodeOffset + Header.MainCodeOffset);
 
 // 2 = byte
