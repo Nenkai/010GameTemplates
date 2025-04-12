@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Magic Entity Dependency File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: .dep
+//   History: 
+//------------------------------------------------
+
+// ffxvi.exe 1.0.3
+// Model::GetMagicDepIdsForMagicPath
+// 48 89 4C 24 ? 53 48 83 EC ? 48 8D 4C 24
+
+typedef enum<int>
+{
+    Empty = 0,
+    WeaponBase = 1, // v11[1] & 0xFFFFFF | 0x3000000 => EntityType 3 = WeaponBase
+    BNpc = 2, // v11[1] & 0xFFFFFF | 0x1000000 => EntityType 1 = BNpc
+} eDepType;
+
+struct
+{
+    struct
+    {
+        int Empty;
+        int Count <comment="No more than 32.">;
+    } Header <bgcolor=cPurple>;
+    
+    local int i = 0;
+    for (i = 0; i < Header.Count; i++)
+    {
+        FSeek(0x08 + (i * 0x0C));
+        struct
+        {
+            int Index;
+            int EntityIdOffset <format=hex, fgcolor=cRed>;
+            int UnkUnused;
+            
+            FSeek(startof(this) + EntityIdOffset);
+            struct
+            {
+                eDepType EntityType;
+                int EntityId : 24;
+            } EntityData <bgcolor=cYellow>;
+        } DepEntry <bgcolor=cGreen>;   
+    }
+} DependFile;
