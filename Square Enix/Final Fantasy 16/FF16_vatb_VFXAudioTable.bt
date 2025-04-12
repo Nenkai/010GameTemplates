@@ -1,0 +1,59 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: VFX Audio Table Binary (.vatb)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.vatb
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int Id;
+    int PathOffset <format=hex, fgcolor=cRed>;
+    
+    local int cPos = FTell();
+    FSeek(startof(this) + PathOffset);
+    string Path <bgcolor=cGray>;
+    
+    FSeek(cPos);
+} KeyPathPair <read=Str("[%d] %s", Id, Path), bgcolor=cBlue>;
+
+struct
+{
+    struct
+    {
+        int HeaderSize;
+        int EntryCount <fgcolor=cGreen>;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(Header.HeaderSize);
+    local int i = 0;
+    for (i = 0; i < Header.EntryCount; i++)
+    {
+        FSeek(Header.HeaderSize + (i * 0x20));
+        struct
+        {
+            int ID;
+            int NameOffset <format=hex, fgcolor=cRed>;
+            int VFXFileOffset <format=hex, fgcolor=cRed>;
+            int field_0x0C;
+            uint64 Flags;
+            int AudioFileOffset <format=hex, fgcolor=cRed>;
+            int field_0x1C;
+            
+            FSeek(startof(this) + NameOffset);
+            string Name <bgcolor=cGray>;
+            
+            FSeek(startof(this) + VFXFileOffset);
+            KeyPathPair VFXFile;
+
+            FSeek(startof(this) + AudioFileOffset);
+            KeyPathPair AudioFile;
+        } Entry <read=Name, bgcolor=cYellow>;   
+    }
+} Vatb <open=true>;
