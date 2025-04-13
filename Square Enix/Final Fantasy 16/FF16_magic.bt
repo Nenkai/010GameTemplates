@@ -1,0 +1,143 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FF16 Magic File (chara/<code>/magic/<code>.magic within chara/<code>/pack)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Not a single clue lol.
+//  Category: 
+// File Mask: *.magic
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Useful sigs:
+// MagicFile::ProcessUnk(__int64 a1, FileFormatBase **a2, char a3): 48 8B C4 48 89 58 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 45 33 F6 48 89 55
+// MagicFile::GetSubEntryMaybe: 4C 8B 19 45 33 C9
+// MagicFile::HasUnkSubDataEntry(__int64 subEntriesOffset, MagicFileSubEntryResult *result): 48 8B C4 48 89 58 ? 48 89 68 ? 48 89 70 ? 48 89 48 ? 57 48 8B 0A
+// MagicFile::HandleSubEntry: 40 55 53 56 57 41 54 41 56 41 57 48 8B EC 48 83 EC ? 48 8D 59
+
+/*
+struct __fixed MagicFileSubEntryResult
+{
+    __int64 Offset;
+    __int64 field_8;                        
+};
+
+struct FileFormatBase
+{
+  FileFormatBase_vt *vtable;
+  _DWORD dword8;
+  volatile int RefCount;
+  _QWORD qword10;
+  char *FileName;
+  _QWORD qword20;
+  _QWORD qword28;
+  _QWORD qword30;
+  _QWORD Buffer;
+  _QWORD FileSize;
+  _QWORD qword48;
+  int qword50;
+  int State;
+  int qword58;
+  int field_5C;
+};
+*/
+
+typedef struct
+{
+    int Id;
+    int DataOffset <fgcolor=cRed, format=hex>;
+    int DataSize <comment="Size of the struct specified by DataOffset", format=hex>;
+    
+    FSeek(startof(this) + DataOffset);
+    struct
+    {
+        int TotalOperations;
+        local int op = 0;
+        while (op < TotalOperations)
+        {
+            struct
+            {
+                // Appears to actually be some sort of engine type
+                // Different class/object is initiated depending on this
+                int OperationGroupType;
+                int Count;
+                
+                struct
+                {
+                    // Also handled differently.
+                    // i.e for OperationGroupType = 4448
+                    // Refer to 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? B8 ? ? ? ? C5 F8 29 74 24 for types
+                    // (this is a method for object 4448, refer to xref of that function for the relevant vtable)
+                    int OperationType;
+                    int DataSize <format=hex>;
+                    byte Data[DataSize] <bgcolor=cBlack>;
+                } Operation[Count] <read=Str("Type: %d", OperationType), optimize=false, bgcolor=0x006688>;
+            } OperationGroup <read=Str("Type: %d, Count: %d", OperationGroupType, Count)>;
+            
+            op += OperationGroup.Count;
+        }
+        
+    } OperationGroups <bgcolor=cDkGreen>;
+} SubEntryList <read=Str("ID: %d", Id), bgcolor=cGreen>;
+
+struct
+{
+    struct
+    {
+        int Version;
+        int NumSections;
+    } MainHeader <bgcolor=cPurple>;
+    
+    // Note: The game does not use NumSections (other than check for not zero)
+    // or even seem to split this 'sub-header' into multiple sections
+    // We do here, for convenience.
+    struct
+    {
+        int Index;
+        int Offset <format=hex, fgcolor=cRed>;
+        int Size <format=hex>;
+    } Sections[MainHeader.NumSections] <bgcolor=cDkPurple>;
+
+    FSeek(startof(Sections[0]) + Sections[0].Offset);
+    struct
+    {
+        int EntryCount <fgcolor=cGreen>;
+        local int i = 0;
+        for (i = 0; i < EntryCount; i++)
+        {
+            FSeek(startof(EntryCount) + (i * 0x0C) + 4);
+            struct
+            {
+                int Id;
+                int DataOffset <fgcolor=cRed, format=hex>;
+                int DataSize <comment="Size of the struct specified by DataOffset", format=hex>;
+                
+                FSeek(startof(this) + DataOffset);
+                struct
+                {
+                    float field_0x00;
+                    if (MainHeader.Version >= 5)
+                        int Unk;
+                    
+                    struct
+                    {
+                        int SubEntryListCount;
+                        
+                        local int j = 0;
+                        for (j = 0; j < SubEntryListCount; j++)
+                        {
+                            FSeek(startof(this) + 4 + (j * 0x0C));
+                            SubEntryList list <bgcolor=cGreen>;
+                        }
+                    } DataSub;
+                } DataStruct;
+                
+            } Entries <read=Str("ID: %d", Id), bgcolor=cBlue>;
+        }
+    } MainSectionData <open=true>;
+    
+    FSeek(startof(Sections[1]) + Sections[1].Offset);
+    byte Section1Data[Sections[1].Size];
+} MagicFile <open=true>;
