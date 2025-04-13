@@ -1,0 +1,387 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: CharaCollisionBinary (ccb) - chara/<char code>/collision
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.ccb
+//  ID Bytes: 43 43 43 42
+//   History: 
+//------------------------------------------------
+
+typedef uint Offset32 <fgcolor=cRed, format=hex>;
+
+// Useful sigs:
+// ModelHandling::GetCcbFilesFromModelRowAndLoadThem - 48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC ? 4C 8B 81 ? ? ? ? 48 8B F1
+// CCBFile::InitEntries1(char* a1, FileFormatBase* file) - 48 8B C4 48 89 58 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? C5 F8 29 70 ? C5 F8 29 78 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B 7A
+// ^ call to Nex::RowGetPtr is model table
+// Nex::RowGetPtr - E8 ? ? ? ? 48 85 C0 74 ? 4D 39 30 7C ? 49 8B C8 E8 ? ? ? ? EB ? 48 8D 05 ? ? ? ? 8A 98
+
+/*
+struct FileFormatBase
+{
+  FileFormatBase_vt *vtable;
+  _DWORD dword8;
+  volatile int RefCount;
+  _QWORD qword10;
+  char *FileName;
+  _QWORD qword20;
+  _QWORD qword28;
+  _QWORD qword30;
+  _QWORD Buffer;
+  _QWORD FileSize;
+  _QWORD qword48;
+  int qword50;
+  int State;
+  int qword58;
+  int field_5C;
+};
+*/
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="'CCCB', Not checked.">;
+        uint Version;
+        uint Reserved[4];
+        Offset32 NameOffset;
+        Offset32 Offset1;
+        uint Count1;
+        Offset32 Offset2;
+        uint Count2;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(startof(Header) + Header.NameOffset);
+    string Name <bgcolor=cGray>;
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < Header.Count1; i++)
+        {
+            FSeek(startof(CharaCollisionBinary) + Header.Offset1 + (i * 0x5C));
+            struct
+            {
+                int Id;
+                Offset32 DebugNameOffset;
+                Offset32 NameOffset;
+                int field_0x0C;
+                int UnkType;
+                int field_0x14;
+                int field_0x18;
+                int Data0x20Type;
+                Offset32 Offset0x20;
+                Offset32 JointNameOffset;
+                Offset32 UnkStrOffset_0x28;
+                float field_0x2C;
+                float field_0x30;
+                float field_0x34;
+                float field_0x38;
+                int field_0x3C;
+                int field_0x40;
+                int field_0x44;
+                int field_0x48;
+                int field_0x4C;
+                int field_0x50;
+                Offset32 Offset0x54;
+                int field_0x58;
+                
+                FSeek(startof(this) + DebugNameOffset);
+                string DebugName <bgcolor=cGray>;
+                
+                FSeek(startof(this) + NameOffset);
+                string Name <bgcolor=cGray, comment="Used for identification - matched to chara timelines? Defaults to '_noname' if not set">;
+                
+                FSeek(startof(this) + Offset0x20);
+                struct
+                {
+                    int Type;
+                    
+                    switch (Type)
+                    {
+                        case 2:
+                            int Data2[13];
+                            break;
+                            
+                        case 3:
+                            int Data2[14];
+                            break;
+                            
+                        default:
+                            Printf("Unk Data0x20Type %d\n", Type);
+                            break;
+                    }
+                } Data0x20 <bgcolor=cBlue>;
+                
+                FSeek(startof(this) + JointNameOffset);
+                string JointName <bgcolor=cGray>;
+                
+                FSeek(startof(this) + UnkStrOffset_0x28);
+                string Name0x28 <bgcolor=cGray>;
+                
+                FSeek(startof(this) + Offset0x54);
+                struct
+                {
+                    int Type;
+                    int CollisionId;
+                    
+                    switch (CollisionId)
+                    {
+                        case 1:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            break;
+                            
+                        case 2:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            int field_0x30;
+                            int field_0x34;
+                            int field_0x38;
+                            int field_0x3C;
+                            break;
+                            
+                        case 3:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                            
+                        case 4:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                            
+                        case 5:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            break;
+                        case 6:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 7:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 8:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            int field_0x30;
+                            int field_0x34;
+                            break;
+                        case 9:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 10:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 14:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x0C;
+                            int field_0x0C;
+                            int field_0x0C;
+                            int field_0x0C;
+                            int field_0x0C;
+                            break;
+                        case 15:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 16:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 17:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            int field_0x30;
+                            int field_0x34;
+                            break;
+                        case 18:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 19:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 20:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 21:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 22:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 23:
+                            int field_0x08;
+                            int field_0x0C;
+                            break;
+                        case 24:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 25:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        case 26:
+                            int field_0x08;
+                            int field_0x0C;
+                            int field_0x10;
+                            int field_0x14;
+                            int field_0x18;
+                            int field_0x1C;
+                            int field_0x20;
+                            int field_0x24;
+                            int field_0x28;
+                            int field_0x2C;
+                            break;
+                        default:
+                            Printf("Unhandled CollisionId %d\n", CollisionId);
+                            break;   
+                    }
+                } Data0x54 <bgcolor=cDkBlue>;
+            } Entry <read=Str("%s (J: %s)", Name, JointName), bgcolor=cRed>;   
+        }
+    } UnkList1 <read=Str("%d entries", CharaCollisionBinary.Header.Count1)>;
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < Header.Count2; i++)
+        {
+            FSeek(startof(CharaCollisionBinary) + Header.Offset2 + (i * 0x40));
+            struct
+            {
+                int Id;
+                Offset32 JointNameOffset;
+                float field_0x08;
+                float field_0x0C;
+                float field_0x10;
+                int field_0x14;
+                int field_0x18;
+                int field_0x1C;
+                int field_0x20;
+                int field_0x24;
+                int field_0x28;
+                int field_0x2C;
+                int field_0x30;
+                int field_0x34;
+                int field_0x38;
+                int field_0x3C;
+                
+                FSeek(startof(this) + JointNameOffset);
+                string JointName <bgcolor=cGray>;
+            } Entry <optimize=false ,read=Str("%d - %s", Id, JointName), bgcolor=cWhite>;
+        }
+
+    } UnkList2 <read=Str("%d entries", CharaCollisionBinary.Header.Count2)>;
+} CharaCollisionBinary <open=true>;
