@@ -1,0 +1,30 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FF16 CharaTimeline Id List
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Id reference list for all charatimelines used by a specific character/model
+//  Category: 
+// File Mask: *.idl
+//  ID Bytes: 69 64 6C 74
+//   History: 
+//------------------------------------------------
+
+// These files are present under timeline.pac
+// i.e chara/c1001/pack/timeline/t001/common or wep_swd_emp, etc
+
+struct
+{
+    struct
+    {
+        uint Magic;
+        uint NumFiles;
+    } Header <bgcolor=cPurple>; 
+    
+    struct
+    {
+        uint Id <fgcolor=cYellow>;
+        char Str[0x80];
+    } TimelineFileRef[Header.NumFiles] <bgcolor=cDkPurple, read=Str("[%d] %s", Id, Str)>;
+} CharaTimelineIdList <open=true>;
