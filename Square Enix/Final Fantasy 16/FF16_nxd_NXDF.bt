@@ -20,18 +20,18 @@ struct
     enum <byte>
     {
         NEX_ROWTYPE_ROWS = 1,
-        NEX_ROWTYPE_ROWSETS = 2,
-        NEX_ROWTYPE_DOUBLEKEYED = 3,
-    } Type; // 1..3 array, hashset, hashmap?
+        NEX_ROWTYPE_DOUBLEKEYED = 2,
+        NEX_ROWTYPE_TRIPLEKEYED = 3,
+    } Type;
     
     enum <byte>
     {
         NEX_ROWS_UNLOCALIZED = 1,
         NEX_ROWS_LOCALIZED = 2,
-        NEX_ROWSETS_UNLOCALIZED = 3,
-        NEX_ROWSETS_LOCALIZED = 4,
-        NEX_DOUBLEKEYED_ROWS_UNLOCALIZED = 5,
-        NEX_DOUBLEKEYED_ROWS_LOCALIZED = 6
+        NEX_DOUBLEKEYED_UNLOCALIZED = 3,
+        NEX_DOUBLEKEYED_LOCALIZED = 4,
+        NEX_TRIPLEKEYED_UNLOCALIZED = 5,
+        NEX_TRIPLEKEYED_LOCALIZED = 6
     } Category;
     
     byte UsesBaseRowId; // Only for type 1. check table 26, 213, 370 - might have custom handling?
@@ -51,8 +51,8 @@ struct
             } RowsHeader;
             break;
         
-        case NEX_ROWSETS_UNLOCALIZED:
-        case NEX_ROWSETS_LOCALIZED:
+        case NEX_DOUBLEKEYED_UNLOCALIZED:
+        case NEX_DOUBLEKEYED_LOCALIZED:
             struct 
             {
                 uint32 ThisHeaderSize <format=hex>;
@@ -63,8 +63,8 @@ struct
             } RowArrayHeader;
             break;
             
-        case NEX_DOUBLEKEYED_ROWS_UNLOCALIZED:
-        case NEX_DOUBLEKEYED_ROWS_LOCALIZED:
+        case NEX_TRIPLEKEYED_UNLOCALIZED:
+        case NEX_TRIPLEKEYED_LOCALIZED:
             struct 
             {
                 uint32 ThisHeaderSize <format=hex>;
@@ -100,7 +100,7 @@ if (Header.Category == NEX_ROWS_UNLOCALIZED || Header.Category == NEX_ROWS_LOCAL
         } RowData <bgcolor=cBlack>;
     }
 }
-else if (Header.Category == NEX_ROWSETS_UNLOCALIZED || Header.Category == NEX_ROWSETS_LOCALIZED)
+else if (Header.Category == NEX_DOUBLEKEYED_UNLOCALIZED || Header.Category == NEX_DOUBLEKEYED_LOCALIZED)
 {    
     FSeek(startof(Header.RowArrayHeader) + Header.RowArrayHeader.ThisHeaderSize);    
     if (Header.RowArrayHeader.ArrayCount > 0)
@@ -142,7 +142,7 @@ else if (Header.Category == NEX_ROWSETS_UNLOCALIZED || Header.Category == NEX_RO
         int ReverseRowDataOffsetRelative <fgcolor=cRed>;
     } RowInfo[Header.RowArrayHeader.TotalRowCount] <bgcolor=cWhite>;
 }
-else if (Header.Category == NEX_DOUBLEKEYED_ROWS_UNLOCALIZED || Header.Category == NEX_DOUBLEKEYED_ROWS_LOCALIZED)
+else if (Header.Category == NEX_TRIPLEKEYED_UNLOCALIZED || Header.Category == NEX_TRIPLEKEYED_LOCALIZED)
 {    
     FSeek(startof(Header.Cat3Header) + Header.Cat3Header.ThisHeaderSize);    
     if (Header.Cat3Header.Count > 0)
