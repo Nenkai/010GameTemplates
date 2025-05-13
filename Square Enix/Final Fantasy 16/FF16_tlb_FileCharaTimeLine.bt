@@ -671,7 +671,6 @@ typedef struct
                     int field_0x48;
                     int field_0x4C;
                     int field_0x50;
-                    int field_0x54;
                     
                     FSeek(startof(Offset_0x00) + Offset_0x00);
                     struct
@@ -999,10 +998,10 @@ typedef struct
                     float field_0x1C;
                     int field_0x20;
                     int field_0x24;
-                    int field_0x28;
+                    float field_0x28;
                     int field_0x2C;
                     int field_0x30;
-                    int field_0x34;
+                    float field_0x34;
                     int field_0x38;
                     int field_0x3C;
                     int field_0x40;
