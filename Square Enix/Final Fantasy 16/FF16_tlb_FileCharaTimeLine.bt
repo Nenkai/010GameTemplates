@@ -46,6 +46,7 @@ enum TimelineElementType
 {
     kTimelineElem_5 = 5,
     kTimelineElem_CameraAnimationRange = 8,
+    kTimelineElem_9 = 9,  
     kTimelineElem_BattleCondition = 10, // < check.
     kTimelineElem_BulletTimeRange = 12,
     kTimelineElem_ControlPermission = 17, 
@@ -145,6 +146,22 @@ typedef struct
                     
                     int unks[12]; // TODO: Figure this out structurally?
 
+                };
+                break;
+             case kTimelineElem_9: // 9
+                {
+                    int AttackParamId;
+                    int field_0x04;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    int field_0x14;
+                    int field_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    int field_0x24;
+                    int field_0x28;
+                    int field_0x2C;
                 };
                 break;
             case kTimelineElem_BattleCondition: // 10
@@ -322,26 +339,6 @@ typedef struct
                     float field_0x3C;
                     int field_0x40;
                     int field_0x44;
-                    int field_0x48;
-                    int field_0x4C;
-                    int field_0x50;
-                    int field_0x54;
-                    double field_0x58;
-                    int field_0x60;
-                    int field_0x64;
-                    double field_0x68;
-                    int field_0x70;
-                    int field_0x74;
-                    int field_0x78;
-                    float field_0x7C;
-                    int field_0x80;
-                    int field_0x84;
-                    int field_0x88;
-                    int field_0x8C;
-                    int field_0x90;
-                    int field_0x94;
-                    int field_0x98;
-                    int field_0x9C;
                 };
                 break;
             case kTimelineElem_BattleMessageRange: // 47
@@ -811,13 +808,7 @@ typedef struct
                     int field_0x48;
                     int field_0x4C;
                     int field_0x50;
-                    int field_0x54;
-                    int field_0x58;
-                    int field_0x5C;
-                    float field_0x60;
-                    int field_0x64;
-                    int field_0x68;
-                    int field_0x6C;
+
                     FSeek(startof(Offset_0x00) + Offset_0x00);
                     struct
                     {
@@ -860,6 +851,7 @@ typedef struct
                 {
                     int NameOffset <format=hex, fgcolor=cRed>;
                     int field_0x04;
+                    int Pad[2];
                     
                     FSeek(startof(UnionType) + NameOffset);
                     string Path <bgcolor=cGray>;
