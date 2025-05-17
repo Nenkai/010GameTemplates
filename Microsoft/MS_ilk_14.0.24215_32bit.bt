@@ -15,8 +15,8 @@ typedef __uint64 ULONGLONG;
 typedef byte BOOL;
 
 /* May need to be updated
-Info taken from https://github.com/Paolo-Maffei/OpenNT/blob/master/sdktools/vctools/link/coff/globals.h#L145
-But it's 30 years old at the time of writing this template
+Some structures below taken from https://github.com/Paolo-Maffei/OpenNT/blob/master/sdktools/vctools/link/coff/globals.h#L145
+But it's 30 years old at the time of writing this template, which is absolutely out of date and only very barely relevant
 
 enum DEBUG_INFO {
     None,
