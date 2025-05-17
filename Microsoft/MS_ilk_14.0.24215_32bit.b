@@ -1,0 +1,439 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Microsoft Incremental Linker (ILK) file
+//   Authors: Nenkai
+//   Version: 14.0.24215 (32bit)
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef __uint64 ULONGLONG;
+typedef byte BOOL;
+
+/* May need to be updated
+Info taken from https://github.com/Paolo-Maffei/OpenNT/blob/master/sdktools/vctools/link/coff/globals.h#L145
+But it's 30 years old at the time of writing this template
+
+enum DEBUG_INFO {
+    None,
+    Minimal,
+    Partial,
+    Full
+};
+
+enum DEBUG_TYPE {
+    NoDebug = 0,
+    CoffDebug = 1,
+    CvDebug = 2,
+    FpoDebug = 4,
+    FixupDebug = 8,
+    MiscDebug = 16
+};
+
+enum FORCE_TYPE {
+    ftNone = 0,
+    ftUnresolved = 1,
+    ftMultiple = 2
+};
+
+typedef struct LIBSWITCH {
+    //char *DllName;                      // for .def only
+    //char *DllExtension;                 // for .def only
+    //BOOL List;
+    //BOOL DefFile;
+};
+
+typedef struct LINKSWITCH 
+{
+    BOOL Out;
+    BOOL Base;
+    BOOL Heap;
+    BOOL Stack;
+#ifdef NT_BUILD
+    BOOL fCallTree;
+#endif
+    BOOL fChecksum;
+    BOOL fDriver;
+    BOOL fFixed;
+    BOOL fMacBundle;
+    BOOL fMap;
+    BOOL fMapLines;
+    BOOL fMiscInRData;
+    BOOL fNewGlue;                     // UNDONE: Temporary.  Always on for VC++ 5.0
+    BOOL fNewRelocs;                   // UNDONE: Temporary for testing PE VxDs
+    BOOL fNoDefaultLibs;
+    BOOL fNoEntry;
+    BOOL fNoPack;
+    BOOL fNoPagedCode;
+    BOOL fNotifyFullBuild;
+    BOOL fOptIdata;
+    BOOL fOrder;
+    BOOL fPadMipsCode;
+    BOOL fPE;
+    BOOL fProfile;
+    BOOL fROM;
+    BOOL fTCE;
+    DWORD GpSize;
+    DEBUG_INFO DebugInfo;
+    DEBUG_TYPE DebugType;
+    FORCE_TYPE Force;
+    //char *szMacCreator;
+    //char *szMacType;
+};
+
+enum DUMP_RAW_DISPLAY_TYPE {
+    Bytes,
+    Shorts,
+    Longs
+};
+
+typedef struct DUMPSWITCH {
+    WORD LinkerMember;
+    WORD RawDisplaySize;
+    WORD SymbolType;
+    DUMP_RAW_DISPLAY_TYPE RawDisplayType;
+    BOOL Headers;
+    BOOL Relocations;
+    BOOL Linenumbers;
+    BOOL Symbols;
+    BOOL BaseRelocations;
+    BOOL Imports;
+    BOOL Exports;
+    BOOL RawData;
+    BOOL Summary;
+    BOOL ArchiveMembers;
+    BOOL FpoData;
+    BOOL PData;
+    BOOL OmapTo;
+    BOOL OmapFrom;
+    BOOL Fixup;
+    BOOL SymbolMap;
+    BOOL Warnings;
+    BOOL Disasm;
+    BOOL Directives;
+};
+
+typedef struct SWITCH {
+    LINKSWITCH Link;
+    LIBSWITCH Lib;
+    DUMPSWITCH Dump;
+};
+*/
+
+typedef struct _IMAGE_FILE_HEADER {
+    USHORT  Machine <format=hex>;
+    USHORT  NumberOfSections;
+    time_t   TimeDateStamp;
+    ULONG   PointerToSymbolTable;
+    ULONG   NumberOfSymbols;
+    USHORT  SizeOfOptionalHeader;
+    USHORT  Characteristics;
+} IMAGE_FILE_HEADER;
+
+typedef struct _IMAGE_DATA_DIRECTORY {
+  DWORD VirtualAddress;
+  DWORD Size;
+} IMAGE_DATA_DIRECTORY;
+
+typedef struct _IMAGE_OPTIONAL_HEADER64 {
+  WORD                 Magic;
+  BYTE                 MajorLinkerVersion;
+  BYTE                 MinorLinkerVersion;
+  DWORD                SizeOfCode;
+  DWORD                SizeOfInitializedData;
+  DWORD                SizeOfUninitializedData;
+  DWORD                AddressOfEntryPoint;
+  DWORD                BaseOfCode;
+  ULONGLONG            ImageBase <format=hex>;
+  DWORD                SectionAlignment;
+  DWORD                FileAlignment;
+  WORD                 MajorOperatingSystemVersion;
+  WORD                 MinorOperatingSystemVersion;
+  WORD                 MajorImageVersion;
+  WORD                 MinorImageVersion;
+  WORD                 MajorSubsystemVersion;
+  WORD                 MinorSubsystemVersion;
+  DWORD                Win32VersionValue;
+  DWORD                SizeOfImage;
+  DWORD                SizeOfHeaders <format=hex>;
+  DWORD                CheckSum;
+  WORD                 Subsystem;
+  WORD                 DllCharacteristics;
+  ULONGLONG            SizeOfStackReserve <format=hex>;
+  ULONGLONG            SizeOfStackCommit <format=hex>;
+  ULONGLONG            SizeOfHeapReserve <format=hex>;
+  ULONGLONG            SizeOfHeapCommit <format=hex>;
+  DWORD                LoaderFlags;
+  DWORD                NumberOfRvaAndSizes;
+  IMAGE_DATA_DIRECTORY DataDirectory[16];
+} IMAGE_OPTIONAL_HEADER64 <bgcolor=cDkPurple>;
+
+typedef __int64 PVOID;
+
+typedef struct
+{
+    DWORD Address;
+} POINTER <read=Str("%Xh", Address - ImageFile.image.pvBase)>;
+
+typedef struct
+{
+    byte Data[0x80];
+} DosHeaderArray;
+
+typedef struct _IMAGE_DOS_HEADER {      // MS-DOS EXE header
+    WORD   e_magic;                     // Magic number: 0x5A4D or MZ
+    WORD   e_cblp;                      // Bytes on last page of file
+    WORD   e_cp;                        // Pages in file
+    WORD   e_crlc;                      // Relocations
+    WORD   e_cparhdr;                   // Size of header, in paragraphs
+    WORD   e_minalloc;                  // Min - extra paragraphs needed
+    WORD   e_maxalloc;                  // Max - extra paragraphs needed
+    WORD   e_ss;                        // Initial (relative) SS value
+    WORD   e_sp;                        // Initial SP value
+    WORD   e_csum;                      // Checksum
+    WORD   e_ip;                        // Initial IP value
+    WORD   e_cs;                        // Initial (relative) CS value
+    WORD   e_lfarlc;                    // File address of relocation table
+    WORD   e_ovno;                      // Overlay number
+    WORD   e_res[4];                    // Reserved words
+    WORD   e_oemid;                     // OEM identifier
+    WORD   e_oeminfo;                   // OEM information
+    WORD   e_res2[10];                  // Reserved words
+    LONG   e_lfanew;                    // Offset to NT header
+  } IMAGE_DOS_HEADER;
+  
+// Will change very frequently
+// This was written against a 32BIT ilk of version 14.0.24215
+// 64bit will require further support!
+
+// This file seems to update pretty often and is accordingly undocumented
+// So it needs to be adjusted per linker version.
+
+// 14.0.24210 & 14.0.24215 (32bit) -> 0x4E8
+// VS2022 Preview 17.14 (64bit) -> 0x15xx or something
+typedef struct _IMAGE
+{
+    CHAR                     Sig[32];           // ilink db signature - Microsoft Linker Database
+    WORD                     HeaderSize <format=hex>; // guessed
+    
+    WORD                     Machine <format=hex>; // guessed
+    WORD                     MajVersNum;        // major version number
+    WORD                     MinVersNum;        // minor version number
+    WORD                     BuildVersNum;      // guessed
+    WORD                     RevVersNum;        // guessed
+    DWORD                    pvBase;            // base at which to load image (nenkai: very important to calculate pointers)
+    DWORD                    cbExe;             // size of EXE
+    DWORD                    tsExe;             // timestamp of EXE
+    DWORD                    unk2;
+    DWORD                    unk3;
+    IMAGE_FILE_HEADER        ImgFileHdr;        // image header
+    IMAGE_OPTIONAL_HEADER64  ImgOptHdr;         // optional image header
+    int pad; // TODO fix
+    byte SWITCH_[0xD8] <bgcolor=cBlue>; //SWITCH                   Switch;              // switches used to build image
+    byte SWITCH_INFO_[0x40] <bgcolor=cLtBlue>;
+    
+    POINTER Field_0x260;
+    POINTER Field_0x264;
+    POINTER Field_0x268;
+    POINTER Field_0x26C;
+    int Field_0x270;
+    POINTER Field_0x274;
+    POINTER Field_0x278;
+    POINTER pExternalSymbolTable;
+    POINTER Field_0x280;
+    IMAGE_DOS_HEADER DosHeaderArray_;
+    
+} IMAGE;
+
+void SeekTo(POINTER& ptr)
+{
+    FSeek(ptr.Address - ImageFile.image.pvBase);
+}
+
+union
+{
+    IMAGE image;
+    byte HeaderBytes[image.HeaderSize];
+} ImageFile <open=true>;
+
+SeekTo(ImageFile.image.pExternalSymbolTable);
+
+// All of this is guessed
+struct
+{
+    POINTER TablePointer;
+    int TableSize <format=hex>;
+    int field_0x08;
+    POINTER field_0x0C;
+    int field_0x10;
+    int field_0x14;
+    int field_0x18;
+    int field_0x1C;
+    int field_0x20;
+    POINTER field_0x24;
+    
+    SeekTo(field_0x0C);
+    struct
+    {
+        DWORD field_0x00;
+        DWORD field_0x04;
+        DWORD TotalHashEntries;
+        DWORD NumKeyStrings;
+        DWORD field_0x10;
+        DWORD NumPointersPerPool;
+        DWORD MaxPoolSize;
+        WORD Flags;
+        byte field_0x1E;
+        byte field_0x1F;
+        DWORD field_0x20;
+        POINTER PoolPointersPointer;
+        
+        local int cnt = TotalHashEntries / MaxPoolSize;
+        if (TotalHashEntries % MaxPoolSize > 0)
+            cnt++;
+
+        SeekTo(PoolPointersPointer);
+        struct
+        {
+            union
+            {
+                POINTER UnkPointers[cnt];
+                POINTER TotalStorage[512];
+            } PointersUnion;
+        } PoolPointers <bgcolor=cDkGreen>;
+        
+        local int i = 0;
+        for (i = 0; i < cnt; i++)
+        {
+            SeekTo(PoolPointers.PointersUnion.UnkPointers[i]);
+            struct
+            {
+                local int thisCnt = i != cnt - 1 ? MaxPoolSize : TotalHashEntries % MaxPoolSize;
+                local int j = 0;
+                
+                local int basePoss;
+                for (j = 0; j < thisCnt; j++)
+                {
+                    struct
+                    {
+                        basePoss = FTell();
+                        POINTER KVPointer;
+                        if (KVPointer.Address != 0)
+                        {
+                            SeekTo(KVPointer);
+                            
+                            local int doThing = true;
+                            while (doThing)
+                            {
+                                struct
+                                {
+                                    local int cPos = FTell();
+                                    
+                                    POINTER KeyPointer <bgcolor=cWhite>;
+                                    POINTER NextKey <bgcolor=cWhite>;
+                                    
+                                    SeekTo(KeyPointer);
+                                    struct
+                                    {
+                                        int Flags;
+                                        int StringOffset <format=hex, comment="Relative to string table">;
+                                        int Field_0x08;
+                                        int Field_0x0C;
+                                        POINTER Field_0x10;
+                                        ushort Field_0x14;
+                                        ushort Field_0x16;
+                                        ushort Field_0x18;
+                                        byte Field_0x1A;
+                                        byte Field_0x1B_Flags;
+                                        int RelativeExeOffset <comment="Relative to ImageBase", format=hex>;
+                                        POINTER Field_0x20;
+                                        int Field_0x24;
+                                        POINTER Field_0x28;
+                                        int Field_0x2C;
+                                        
+                                        local int cPos = FTell();
+                                        SeekTo(TablePointer);
+                                        FSkip(StringOffset);
+                                        local string name = ReadString(FTell());
+                                        FSeek(cPos);
+                                    } EXTERNAL <bgcolor=cDkYellow, read=name>;
+                                } Entry <comment="Externals with same hash", read=EXTERNAL.name>;
+                                
+                                if (Entry.NextKey.Address != 0)
+                                    SeekTo(Entry.NextKey);
+                                else
+                                {
+                                    doThing = false;   
+                                }
+                            }
+                        }
+                        
+                        FSeek(basePoss + 0x04);
+                    } HashEntries;
+                    
+                }
+                    
+            } HashTablePool <bgcolor=cRed>;
+        }
+    } HT <comment="Hash Table", bgcolor=cDkYellow>;
+    
+    SeekTo(TablePointer);
+    struct
+    {
+        string str;
+    } Strs[HT.NumKeyStrings] <bgcolor=cGray, read=str, optimize=false>;
+    
+} ST <comment="Symbol Table", bgcolor=cYellow>;
+
+// Useful functions from link.exe: 
+// FValidILKFile (use this one to make sure you have the right link.exe)
+// ST::* (string table functions)
+// Init_HT - init hash table
+// PelementLookup_HT - looks up an entry in the string table
+
+// When the ilk needs to fetch an entry, it will hash a string
+// and find its corresponding structure in a custom hash map of sorts
+
+// 32 bit hashing (C# code):
+/*
+void Main()
+{
+	string str = "?InitializeServer@@YA_NPAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAV12@11111@Z";
+	uint hash = 0;
+	for (int i = 0; i < str.Length; i++)
+		hash += 0x40001u * str[i] + (hash ^ (hash >> 1));
+		
+	uint v12 = hash % 0x40000003;
+
+	uint htField0x00 = 9620;
+	uint htField0x04 = 16384;
+	uint test = 0;
+	if (htField0x04 == 4096)
+		test = v12 & 0xFFF;
+	else
+		test = v12 % htField0x04;
+		
+	if (test < htField0x00)
+		test = v12 % (2 * htField0x04);
+	
+	uint htMaxPoolSize = 4096; // field0x18
+	uint poolIndex = 0;
+	uint entryIndex = 0;
+	if (htMaxPoolSize == 4096)
+	{
+		poolIndex = test >> 12;
+		entryIndex = test & 0xFFF;
+	}
+	else
+	{
+		poolIndex = test / htMaxPoolSize;
+		entryIndex = test % htMaxPoolSize;
+	}
+
+	Console.WriteLine($"Pool{poolIndex}->Entry{entryIndex}");
+}
+*/
