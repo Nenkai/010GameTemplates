@@ -326,8 +326,8 @@ struct
                         {
                             SeekTo(KVPointer);
                             
-                            local int doThing = true;
-                            while (doThing)
+                            local int process = true;
+                            while (process)
                             {
                                 struct
                                 {
@@ -367,7 +367,7 @@ struct
                                     SeekTo(Entry.NextKey);
                                 else
                                 {
-                                    doThing = false;   
+                                    process = false;   
                                 }
                             }
                         }
