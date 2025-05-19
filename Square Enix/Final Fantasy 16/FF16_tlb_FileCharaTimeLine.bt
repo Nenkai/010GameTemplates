@@ -1068,10 +1068,10 @@ typedef struct
     
     struct
     {
-        int UnkType; // 1001 or 1002 explicitly checked on update loop. If 1001 & 1002, size = 0x18?
+        int Type; // 1001 or 1002 explicitly checked on update loop. If 1001 & 1002, size = 0x18?
         int Pad[9];
     } Sub;
-} Struct_0x1C_0x14 <bgcolor=cRed>;
+} MemoryType <bgcolor=cRed>;
 
 typedef struct
 {
@@ -1121,26 +1121,23 @@ struct
     {
         int Magic;
         int Version;
-        int c;
-        int d;
-        int e;
-        int f;
-        int field_0x18 <format=hex, fgcolor=cRed>;
+        int Padding[4];
+        int TimelineOffset <format=hex, fgcolor=cRed>;
     } Header <bgcolor=cBlack>;
     
     // 0x98 = stride of 0x58
     
-    FSeek(Header.field_0x18);
+    FSeek(Header.TimelineOffset);
     
     struct
     {
         int field_0x00 <fgcolor=cGreen>;
         int TimelineElementsOffset <format=hex, fgcolor=cRed>;
         int TimelineElementCount <fgcolor=cGreen>;
-        int field_0x0C <format=hex, fgcolor=cRed>;
-        int Count_0x0C <fgcolor=cGreen>;
-        int field_0x14 <format=hex, fgcolor=cRed>;
-        int Count_0x14 <fgcolor=cGreen>;
+        int AssetGroupsOffset <format=hex, fgcolor=cRed>;
+        int AssetGroupCount <fgcolor=cGreen>;
+        int MemoryTypeArrayOffset <format=hex, fgcolor=cRed>;
+        int MemoryTypeArrayCount <fgcolor=cGreen>;
         int TotalFrames;
         int Empty;
         
@@ -1156,20 +1153,20 @@ struct
         
         struct
         {
-            for (i = 0; i < Count_0x0C; i++)
+            for (i = 0; i < AssetGroupCount; i++)
             {
-                FSeek(startof(Timeline) + field_0x0C + (i * 0x0C));
+                FSeek(startof(Timeline) + AssetGroupsOffset + (i * 0x0C));
                 AssetGroup AssetGroup_ <bgcolor=cRed>;
             }
         } AssetGroups;
         
         struct
         {
-            for (i = 0; i < Count_0x14; i++)
+            for (i = 0; i < MemoryTypeArrayCount; i++)
             {
-                FSeek(startof(Timeline) + field_0x14 + (i * 0x2C));
-                Struct_0x1C_0x14 Struct_0x1C_0x14_ <bgcolor=cPurple>;
+                FSeek(startof(Timeline) + MemoryTypeArrayOffset + (i * 0x2C));
+                MemoryType MemoryType_ <bgcolor=cPurple>;
             }
-        } Struct_0x1C_0x14Array;
+        } MemoryTypeArray;
     } Timeline <bgcolor=cYellow>;
 } CharaTimelineFile <open=true>;
