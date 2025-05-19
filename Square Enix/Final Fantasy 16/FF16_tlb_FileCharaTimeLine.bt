@@ -42,6 +42,38 @@
  * Also, use fgcolor=cRed for offsets, fgcolor=cGreen for counts. Helps a lot.
 */
         
+// 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? B8 ? ? ? ? C7 44 24 ? ? ? ? ? 89 44 24
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    int DataSize <format=hex>;
+    float field_0x08;
+    float field_0x0C;
+    
+    FSeek(startof(DataOffset) + DataOffset);
+    union
+    {
+        byte DataBytes[DataSize];
+        struct
+        {
+            int GroupCount;
+            struct
+            {
+                int FloatCount;
+                float field_0x04;
+                float b[FloatCount];
+            } Entry[GroupCount] <optimize=false>;
+        } Data;
+    } DataUnion;
+    
+    FSeek(startof(DataOffset) + 0x10);
+} AnimPathData; // Keyframe?
+                
+// idlist init & file handles open: 48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 80 B9        
+// CharaTimeline initializer: 48 89 5C 24 ? 4C 89 4C 24 ? 4C 89 44 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ? 4D 8B F9
+// Element creator (ranges): 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 41 8B 48 ? B8 ? ? ? ? 49 8B F8
+// Element creator (triggers): 40 53 48 83 EC ? 41 8B 48 ? B8 ? ? ? ? 48 8B DA 3B C8 0F 8F ? ? ? ? 0F 84 ? ? ? ? 83 F9 ? 0F 8F ? ? ? ? 0F 84 ? ? ? ? 83 F9 ? 0F 8F ? ? ? ? 0F 84 ? ? ? ? 83 E9 ? 0F 84 ? ? ? ? 83 E9 ? 0F 84 ? ? ? ? 83 E9 ? 0F 84 ? ? ? ? 83 E9 ? 0F 84 ? ? ? ? 83 E9 ? 74
+
 enum TimelineElementType
 {    
     kTimelineElem_1 = 1,                               // Range
@@ -270,151 +302,171 @@ typedef struct
     {
         switch (UnionType)
         {
-            case 5:
+            case kTimelineElem_5:
                 {
-                    byte field_0x00;
-                    byte field_0x04;
-                    byte field_0x08;
-                    byte field_0x0C;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B E9 E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 0F 84 ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B F0 48 85 C0 0F 84 ? ? ? ? 48 8B 4D ? 48 63 79 ? 48 03 F9 8B 57
+                    byte Bool_0x00;
+                    byte Bool_0x01;
+                    byte Bool_0x02;
+                    byte pad[1];
+                    int CharaCollisionShapeId;
+                    byte pad_[8];
                 };
                 break;
             case kTimelineElem_CameraAnimationRange: // 8
                 {
-                    int field_0x00;
+                    // E9 ? ? ? ? CC CC CC 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 48 8B EC 48 83 EC ? C5 F8 29 70
+                    int NumFrames;
                     int field_0x04;
                     byte field_0x08;
                     byte field_0x09;
                     byte field_0x0A;
                     byte field_0x0B;
-                    
-                    local int k = 0;
-                    for (k = 0; k < 8; k++)
-                    {
-                        struct
-                        {
-                            int DataOffset <format=hex, fgcolor=cRed>;
-                            int DataSize <format=hex>;
-                            float field_0x08;
-                            float field_0x0C;
-                            
-                            FSeek(startof(DataOffset) + DataOffset);
-                            byte Data[DataSize];
-                            
-                            FSeek(startof(DataOffset) + 0x10);
-                        } Entry;
-                    }
-                    
-                    int unks[12]; // TODO: Figure this out structurally?
-
+                    AnimPathData field_0x0C;
+                    AnimPathData field_0x1C;
+                    AnimPathData field_0x2C;
+                    AnimPathData field_0x3C;
+                    AnimPathData field_0x4C;
+                    AnimPathData field_0x5C;
+                    AnimPathData field_0x6C;
+                    AnimPathData field_0x7C;
+                    int field_0x8C;
+                    int field_0x90;
+                    float field_0x94;
+                    int field_0x98;
+                    float field_0x9C;
+                    byte field_0xA0;
+                    byte field_0xA1;
+                    byte field_0xA2;
+                    byte field_0xA3;
+                    int FramesMaybeField_0xA4;
+                    int field_0xA8;
+                    float field_0xAC;
+                    byte field_0xB0;
+                    byte field_0xB1;
+                    byte field_0xB2;
+                    byte field_0xB3;
+                    float field_0xB4;
+                    float field_0xB8;
+                    byte field_0xBC;
+                    byte pad[3];
                 };
                 break;
              case kTimelineElem_9: // 9
                 {
+                    // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 4C 8B F9
                     int AttackParamId;
-                    int field_0x04;
+                    int UnkType; // Goes up to 9
                     int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
-                    int field_0x28;
-                    int field_0x2C;
+                    int EidId;
+                    byte pad[0x20];
                 };
                 break;
             case kTimelineElem_BattleCondition: // 10
                 {
-                    byte field_0x00;
-                    byte field_0x01;
-                    byte field_0x02;
-                    byte field_0x03;
-                    byte field_0x04;
-                    byte field_0x05;
-                    byte field_0x06;
-                    byte field_0x07;
-                    byte field_0x08;
-                    byte field_0x09;
-                    byte field_0x0A;
-                    byte field_0x0B;
+                    // Verified in code
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? C5 F8 29 74 24 ? 48 8B F1
+                    byte Bool_0x00; // 0x40
+                    byte Bool_0x01; // 0x01
+                    byte Bool_0x02; // 0x02
+                    byte Bool_0x03; // 0x04
+                    byte Bool_0x04; // 0x08
+                    byte Bool_0x05; // 0x10
+                    byte Bool_0x06; // 0x20
+                    byte Bool_0x07; // 0x80
+                    byte Bool_0x08; // 0x100
+                    byte pad[0x03];
                     float field_0x0C;
                     int field_0x10;
                     float field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    byte pad2[0x0C];
                 };
                 break;
-            case kTimelineElem_BulletTimeRange: // 12
+            case kTimelineElem_11:
                 {
-                    float field_0x00;
-                    float field_0x04;
+                    // 48 89 5C 24 ? 57 48 83 EC ? 4C 8B 41 ? 48 8B F9 C5 F8 29 74 24 ? C5 FA 10 35
+                    int field_0x00;
+                    int field_0x04;
                     int field_0x08;
                     int field_0x0C;
                     int field_0x10;
                     int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
+                }
+                break;
+            case kTimelineElem_BulletTimeRange: // 12
+                {
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 8D 4B
+                    float field_0x00;
+                    float field_0x04;
+                    byte Bool_0x08;
+                    byte Bool_0x09;
+                    byte Bool_0x0A;
+                    byte Bool_0x0B;
+                    byte Bool_0x0C;
+                    byte Bool_0x0D;
+                    byte Bool_0x0E;
+                    byte Bool_0x0F;
+                    int VATBEntryIndexMaybe;
+                    byte Bool_0x14;
+                    byte pad[0x13];
                 };
                 break;
             case kTimelineElem_ControlPermission:
                 {
-                    byte field_0x00;
-                    byte field_0x01;
-                    byte field_0x02;
-                    byte field_0x03;
-                    byte field_0x04;
-                    byte field_0x05;
-                    byte field_0x06;
-                    byte field_0x07;
-                    byte field_0x08;
-                    byte field_0x09;
-                    byte field_0x0A;
-                    byte field_0x0B;
-                    byte field_0x0C;
-                    byte field_0x0D;
-                    byte field_0x0E;
-                    byte field_0x0F;
-                    byte field_0x10;
-                    byte field_0x11;
-                    byte field_0x12;
-                    byte field_0x13;
-                    byte field_0x14;
-                    byte field_0x15;
-                    byte field_0x16;
-                    byte field_0x17;
-                    byte field_0x18;
-                    byte field_0x19;
-                    byte field_0x1A;
-                    byte field_0x1B;
-                    byte field_0x1C;
-                    byte field_0x1D;
-                    byte field_0x1E;
-                    byte field_0x1F;
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B D9 E8 ? ? ? ? 8A D0
+                    byte Bool0_0x02; // 0x02
+                    byte Bool0_0x400; // 0x400
+                    byte Bool0_0x80; // 0x80
+                    byte Bool0_0x100; // 0x100
+                    byte Bool0_0x04; // 0x04
+                    byte Bool0_0x08; // 0x08
+                    byte Bool0_0x200; // 0x200
+                    byte Bool0_0x10; // 0x10
+                    byte Bool0_0x20; // 0x20
+                    byte Bool0_0x800; // 0x800
+                    byte Bool0_0x1000; // 0x1000
+                    byte Bool0_0x2000; // 0x2000
+                    byte Bool0_0x4000; // 0x4000
+                    byte Bool0_0x8000; // 0x8000
+                    byte Unk;
+                    byte Pad;
+                    byte Bool1_0x02; // 0x02
+                    byte Bool1_0x400; // 0x400
+                    byte Unk;
+                    byte Bool1_0x80; // 0x80
+                    byte Bool1_0x100; // 0x100
+                    byte Bool1_0x4; // 0x04
+                    byte Bool1_0x08; // 0x08
+                    byte Bool1_0x200; // 0x200
+                    byte Bool1_0x10; // 0x10
+                    byte Bool1_0x20; // 0x20
+                    byte Bool1_0x800; // 0x800
+                    byte Bool1_0x1000; // 0x1000
+                    byte Bool1_0x2000; // 0x2000
+                    byte Bool1_0x4000; // 0x4000
+                    byte Bool1_0x8000; // 0x8000
+                    byte pad_;
                 };
                 break;
             case 23:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
+                    // Verified in code
+                    // 40 53 48 83 EC ? 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? 83 88
+                    byte pad[0x20];
                 };
                 break;
-            case 27:
+            case kTimelineElem_24:
                 {
-                    int field_0x00;
-                    int field_0x04;
+                    // Verified in code
+                    // 40 53 48 83 EC ? E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? 48 83 88
+                    byte pad[0x20];
+                };
+                break;
+            case 27: // Sound related?
+                {
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 4C 8B 43
+                    byte Bool_0x00;
+                    byte pad[0x07];
                 };
                 break;
                 
@@ -449,21 +501,22 @@ typedef struct
                 break;
             case kTimelineElem_PlaySoundTrigger: // 31
                 {
+                    // 48 8B C4 48 89 58 ? 55 56 57 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 83 65
                     int field_0x00;
                     int SoundPathOffset <format=hex, fgcolor=cRed>;
                     int field_0x08;
                     byte field_0x0C;
                     byte pad[3];
                     int field_0x10;
-                    int field_0x14;
+                    int SabEntryIndexMaybe;
                     double field_0x18;
                     double field_0x20;
                     double field_0x28;
                     int field_0x30;
-                    int field_0x34;
+                    int PlayVfxTriggerSetId;
                     int field_0x38;
                     float field_0x3C;
-                    byte field_0x40;
+                    byte Bool_0x40;
                     byte pad_[3];
                     float field_0x44;
                     int field_0x48;
@@ -478,46 +531,53 @@ typedef struct
                 break;
             case kTimelineElem_AttachWeaponTemporaryRange: // 33
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B F9 E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? 48 8B 80
                     int field_0x00;
                     int field_0x04;
                 };
                 break;
             case kTimelineElem_ModelSE:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
+                    // Verified in game code
+                    int SEIndex; // SE Index in sab file?
+                    byte bool_0x04;
+                    byte pad[3];
+                    int SoundPathOffset <format=hex, fgcolor=cRed>;
                     int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
+                    double field_0x10;
+                    double field_0x18;
+                    double field_0x20;
                     int field_0x28;
-                    int field_0x2C;
-                    int field_0x30;
+                    float field_0x2C;
+                    float field_0x30;
                     float field_0x34;
                     int field_0x38;
                     float field_0x3C;
                     int field_0x40;
                     int field_0x44;
+                    
+                    FSeek(startof(field_0x00) + SoundPathOffset);
+                    string Path <bgcolor=cGray>;
+                    
+                    FSeek(startof(SEIndex) + 0x58);
                 };
                 break;
             case kTimelineElem_BattleMessageRange: // 47
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 41 ? 48 8B F9 48 63 58
                     int BattleMessageId;
                     int pad[8];
                 };
                 break;
-            case 49:
+            case kTimelineElem_49:
                 {
                     int MSeqInputId;
                 };
                 break;
-            case 56:
+            case kTimelineElem_56: // Also pad vibration
             case kTimelineElem_PadVibration: // 57
                 {
+                    // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 48 8B D9 E8 ? ? ? ? 33 FF
                     int CameraFCurveId;
                     int UnkOffset1 <format=hex, fgcolor=cRed>;
                     int field_0x08;
@@ -526,11 +586,10 @@ typedef struct
                     int UnkOffset3 <format=hex, fgcolor=cRed>;
                     int field_0x18;
                     int field_0x1C;
-                    int field_0x20;
+                    float field_0x20;
                     int field_0x24;
-                    int field_0x28;
-                    int field_0x2C;
-                    int field_0x30;
+                    double field_0x28;
+                    float field_0x30;
                     int field_0x34;
                     
                     FSeek(startof(UnionType) + UnkOffset1);
@@ -545,8 +604,10 @@ typedef struct
                 break;
             case kTimelineElem_EnableDestructorCollision:
                 {
+                    // Verified in code
+                    // 48 89 5C 24 ? 57 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 84 24 ? ? ? ? 48 8B F9 E8 ? ? ? ? 33 DB 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? 48 8B 15 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 8C D1 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 4F ? 44 8D 4B ? 4C 8D 44 24 ? 48 63 51 ? 48 03 D1 48 8B C8 E8 ? ? ? ? 48 8B F8 48 85 C0 74 ? 48 8B 4C DC ? 83 79 ? ? 75 ? 48 83 C1 ? 41 B0
                     int AnimPathOffset <format=hex, fgcolor=cRed>;
-                    int field_0x04;
+                    byte pad[4];
                     
                     FSeek(startof(UnionType) + AnimPathOffset);
                     string Path <bgcolor=cGray>;
@@ -637,9 +698,10 @@ typedef struct
                     int unks[4];
                 };
                 break;
-            case kTimelineElem_ControlRejectionRange:
+            case kTimelineElem_ControlRejectionRange: // 74
                 {
-                    int field_0x00;
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B E9 E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 0F 84 ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B F0 48 85 C0 0F 84 ? ? ? ? 48 8B 4D ? 48 63 79 ? 48 03 F9 8B 47
+                    int field_0x00; // checks for 1? 
                     byte field_0x04;
                     byte field_0x05;
                     byte field_0x06;
@@ -652,24 +714,27 @@ typedef struct
                     byte field_0x0D;
                     byte field_0x0E;
                     byte field_0x0F;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
+                    byte field_0x10;
+                    byte field_0x11;
+                    byte field_0x12; // Might be aside
+                    byte pad[0x09];
                 };
                 break;
-            case 1001:
+            case kTimelineElem_1001: // Seems shared across timelines - 1033, 1060, 1035
                 {
+                    // Verified in code
                     int field_0x00;
                     int AnimPathOffset <format=hex, fgcolor=cRed>;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
-                    int field_0x28;
+                    byte Bool_0x08;
+                    byte Bool_0x09;
+                    byte Bool_0x0A;
+                    byte pad[1];
+                    float Float_0x0C;
+                    byte Bool_0x10;
+                    byte Bool_0x11;
+                    byte Bool_0x12;
+                    byte pad;
+                    byte Padding[0x18];
                     
                     FSeek(startof(field_0x00) + AnimPathOffset);
                     string Path <bgcolor=cGray>;
@@ -679,41 +744,40 @@ typedef struct
                 break;
             case 1002:
                 {
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 48 8B E9 E8
                     int AttackParamId;
-                    int Name <format=hex, fgcolor=cRed>;
-                    int field_0x08;
+                    int NameOffset <format=hex, fgcolor=cRed>;
+                    byte field_0x08;
+                    byte pad[3];
                     int field_0x0C;
                     int UnkName2Offset <format=hex, fgcolor=cRed>;
                     int field_0x14;
-                    int field_0x18;
+                    byte field_0x18;
+                    byte pad_[0x03];
                     int field_0x1C;
                     int field_0x20;
                     int field_0x24;
                     
-                    FSeek(startof(UnionType) + Name);
-                    string Path <bgcolor=cGray>;
+                    FSeek(startof(UnionType) + NameOffset);
+                    string Name <bgcolor=cGray>;
                     
                     FSeek(startof(UnionType) + UnkName2Offset);
-                    string Path2 <bgcolor=cGray>;
+                    string Name2 <bgcolor=cGray>;
                     
                     FSeek(startof(AttackParamId) + 0x28);
                 };
                 break;
                 
-            case 1004:
+            case kTimelineElem_1004:
                 {
+                    // 40 53 48 83 EC ? 48 8B D9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 8B 4B ? 8B 51 ? 89 90
                     int field_0x00;
-                    int field_0x04;
+                    float field_0x04;
                     float field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    byte pad[0x18];
                 };
                 break;
-            case 1005:
+            case 1005: // Unsupported? vtable has no exec entry
                 {
                     int field_0x00;
                     int field_0x04;
@@ -728,85 +792,75 @@ typedef struct
                 break;
                 
             case 1007:
+                {
+                    byte Flag;
+                    byte pad[0x1F];
+                };
+                break;
+                
+            case 1008:
+                // 40 53 48 83 EC ? 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B 40 ? E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? B2
+                break;
             case 1009:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
+                    // 48 83 EC ? 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 15 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 8C D1 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 88 ? ? ? ? 48 8B 01 FF 50 ? 48 83 C4 ? C3 48 83 EC
+                    byte pad[0x20];
                 };
                 break;
                 
             case kTimelineElem_TurnToTarget: // 1010
                 {
-                    int field_0x00;
-                    int AnimPathOffset <format=hex, fgcolor=cRed>;
-                    int field_0x08;
-                    int field_0x0C;
+                    // 40 53 48 83 EC ? 4C 8B 41 ? 48 8B D9 C5 F8 29 74 24 ? 41 8B 48
+                    int Type; // 0, 1, 2
+                    int TargetType <format=hex, fgcolor=cRed>; // 0, 1, 2
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B EA 48 8B 51
+                    int LayoutInstanceId; // when target type 1? layout instance id?
+                    float field_0x0C;
                     int field_0x10;
                     float field_0x14;
                     float field_0x18;
-                    int field_0x1C;
+                    int UnkType;
                     float field_0x20;
-                    int field_0x24;
-                    int field_0x28;
-                    int field_0x2C;
-                    int field_0x30;
-                    int field_0x34;
-                    int field_0x38;
+                    byte pad[0x18];
                 };
                 break;
             case kTimelineElem_MagicCreate: // 1012
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
-                    
-                    FSeek(startof(field_0x00) + 0x28);
+                    // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B 41
+                    int Unused;
+                    int UnkId; // hardcoded checks on 1602/1603 and 821/822
+                    byte Bool_0x08;
+                    byte field_0x09;
+                    byte pad[0x1E];                    
+                    FSeek(startof(Unused) + 0x28);
                 };
                 break;
             case 1014:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? 4C 8B 05 ? ? ? ? 48 8B 15 ? ? ? ? 4A 8B 8C C2 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 88
+                    int UnkType; // No more than 0x1F (bitset)
+                    byte pad[0x1C];
                 };
                 break;
             case kTimelineElem_PrecedeInputUnk: // 1016
                 {
+                    // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 15
                     byte field_0x00;
                     byte field_0x01;
                     byte field_0x02;
                     byte field_0x03;
                     byte field_0x04;
                     byte field_0x05;
-                    byte field_0x06;
-                    byte field_0x07;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
+                    byte pad[2];
+                    int Unk1;
+                    int Unk2;
+                    int Unk3;
+                    byte pad_[8];
                 };
                 break;
-            case 1023:
+            case kTimelineElem_1023:
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 4C 8B F1
                     int Offset_0x00;
                     int Count_0x00;
                     int field_0x08;
@@ -823,7 +877,7 @@ typedef struct
                     int field_0x28;
                     int field_0x2C;
                     int field_0x30;
-                    int field_0x34;
+                    int PlayVfxTriggerSetIdMaybe;
                     int field_0x38;
                     int field_0x3C;
                     int field_0x40;
@@ -857,6 +911,7 @@ typedef struct
                 break;
             case 1030:
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 48 8B EC 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B F9
                     int Offset_0x00 <format=hex, fgcolor=cRed>;
                     int Count_0x00 <fgcolor=cGreen>;
                     int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
@@ -868,7 +923,8 @@ typedef struct
                     int field_0x18; 
                     int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
                     
-                    int field_0x20;
+                    byte Flags_0x20;
+                    byte pad[3];
                     byte field_0x24;
                     byte field_0x25;
                     byte field_0x26;
@@ -876,8 +932,8 @@ typedef struct
                     int field_0x28;
                     int field_0x2C;
                     int field_0x30;
-                    int UnkNameOffset3 <format=hex, fgcolor=cRed, comment="Relative to Union">;
-                    int field_0x38;
+                    int UnkNameOffset3 <format=hex, fgcolor=cRed, comment="Relative to Union">; // vatb
+                    int PlayVfxTriggerSetIdMaybe;
                     int field_0x3C;
                     int field_0x40;
                     int field_0x44;
@@ -913,16 +969,21 @@ typedef struct
                     FSeek(startof(Offset_0x00) + 0x54);
                 }
                 break;
-            case 1035:
+            case 1035: // Inherits from 1001?
                 {
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 8B 83 ? ? ? ? 8A 50 ? F6 DA 1B C0 83 C0 ? 89 83 ? ? ? ? 48 83 C4 ? 5B C3 CC 83 A1 ? ? ? ? ? E9 ? ? ? ? 48 8B 91
                     int field_0x00;
                     int AnimPathOffset <format=hex, fgcolor=cRed>;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
+                    byte Bool_0x08;
+                    byte Bool_0x09;
+                    byte Bool_0x0A;
+                    byte pad[1];
+                    float Float_0x0C;
+                    byte Bool_0x10;
+                    byte Bool_0x11;
+                    byte Bool_0x12;
+                    byte pad;
+                    byte Padding[0x18];
                     
                     FSeek(startof(field_0x00) + AnimPathOffset);
                     string Path <bgcolor=cGray>;
@@ -932,6 +993,7 @@ typedef struct
                 break;
             case kTimelineElem_SummonPartsVisibleRange: // 1047
                 {
+                    // 48 8B C4 48 89 58 ? 48 89 70 ? 55 57 41 54 41 56 41 57 48 8B EC 48 83 EC ? C5 F8 29 70 ? C5 F8 29 78 ? C5 78 29 40
                     int SummonPartsPatternId;
                     float field_0x04;
                     float field_0x08;
@@ -939,7 +1001,7 @@ typedef struct
                     byte field_0x0D;
                     byte field_0x0E;
                     byte field_0x0F;
-                    int field_0x10;
+                    float field_0x10;
                 };
                 break;
             case 1049:
@@ -999,19 +1061,23 @@ typedef struct
                 break;
             case kTimelineElem_BattleVoiceTrigger: // 1053
                 {
+                    // 40 53 48 83 EC ? 48 8B D9 48 83 C1 ? E8 ? ? ? ? 48 85 C0 74 ? 48 8B C8 E8 ? ? ? ? 48 8B 0D
                     int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    int BattleVoiceCategoryId;
+                    byte pad[0x1C];
+                };
+                break;
+            case kTimelineElem_1056:
+                {
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? C5 F8 57 C0
+                    // 40 53 48 83 EC ? 80 79 ? ? 48 8B D9 75 ? E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? C5 F8 57 C0
+                    int FrameCountMaybe;
+                    int FrameCount2Maybe;
                 };
                 break;
             case kTimelineElem_DisableReceiver: // 1058
                 {
+                    // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? 4C 8B 05 ? ? ? ? 48 8B 15 ? ? ? ? 4A 8B 8C C2 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 4B ? 80 79 ? ? 74 ? 33 D2
                     int NameOffset <format=hex, fgcolor=cRed>;
                     int field_0x04;
                     int Pad[2];
@@ -1024,6 +1090,7 @@ typedef struct
                 break;
             case 1059:
                 {
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8
                     int NameOffset <format=hex, fgcolor=cRed>;
                     float field_0x04;
                     
@@ -1035,83 +1102,85 @@ typedef struct
                 break;
             case 1064:
                 {
-                    int field_0x00;
-                    int Offset_0x04 <format=hex, fgcolor=cRed>;
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC ? 48 8B E9 48 83 C1
+                    int UnkIdUnused;
+                    int NameOffset <format=hex, fgcolor=cRed>;
                     int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
+                    byte pad[0x10];
                     
-                    FSeek(startof(UnionType) + Offset_0x04);
-                    string Path <bgcolor=cGray>;
+                    FSeek(startof(UnionType) + NameOffset);
+                    string Name <bgcolor=cGray>;
                     
                     FSeek(startof(UnionType) + 0x1C);
                 };
                 break;
             case 1066:
                 {
+                    // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B 40 ? E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? 48 8B 4F ? 48 8B 90
                     int field_0x00;
                 };
                 break;
             case 1075:
                 {
+                    // 48 8B C4 48 89 58 ? 48 89 68 ? 48 89 70 ? 57 48 83 EC ? 48 8B F1 C5 F8 29 70 ? 48 83 C1
                     int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    byte Pad[0x20];
                 };
                 break;
-             case 1084:
+             case kTimelineElem_1084:
                 {
+                    // 40 53 48 83 EC ? 48 8B D9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 0D ? ? ? ? 8B 91 ? ? ? ? 39 50 ? 75 ? 48 8B 43 ? 48 81 C1
+                    int UnkType;
+                    byte Pad[0x20];
+                };
+                break;
+            case kTimelineElem_1088:
+                {
+                    // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B E9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8
                     int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
+                    float field_0x04;
+                    float field_0x08;
                     int field_0x0C;
                     int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    float field_0x14;
+                    float field_0x18;
+                    byte field_0x1C;
+                    byte pad[0x03];
                 };
                 break;
             case kTimelineElem_DisableCharaUnk: // 1097
                 {
-                    int Offset_0x00 <format=hex>;
-                    int field_0x04;
-                    int field_0x08;
+                    // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 4C 8B 05 ? ? ? ? 48 8B 15 ? ? ? ? 4A 8B 8C C2 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 4C 8B C8
+                    int NameOffset <format=hex>;
+                    byte Bool_0x04;
+                    byte pad[7];
+
+                    FSeek(startof(UnionType) + NameOffset);
+                    string Name <bgcolor=cGray>;
                     
-                    FSeek(startof(UnionType) + Offset_0x00);
-                    string Path <bgcolor=cGray>;
-                    
-                    FSeek(startof(Offset_0x00) + 0x0C);
+                    FSeek(startof(NameOffset) + 0x0C);
                 };
                 break;
             case kTimelineElem_1099:
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 48 8B EC 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B D9 48 83 C1
                     int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
+                    byte Bool_0x04;  // Uses CameraTransition id 507 if this is false
+                    byte pad[3];
+                    float field_0x08;
+                    int UnkFrames1;
+                    int UnkFrames2;
                     float field_0x14;
-                    int field_0x18;
+                    float field_0x18;
                     float field_0x1C;
-                    int field_0x20;
-                    int field_0x24;
-                    int field_0x28;
-                    int field_0x2C;
+                    byte pad[0x10];
                 };
                 break;
             case 1102:
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B F9 E8 ? ? ? ? 48 8B 57
                     int Offset_0x00 <format=hex>;
-                    int field_0x04;
+                    byte pad[4];
                     
                     FSeek(startof(UnionType) + Offset_0x00);
                     string Path <bgcolor=cGray>;
@@ -1121,8 +1190,9 @@ typedef struct
                 break;
             case 1103:
                 {
+                    // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? C5 F8 29 7C 24 ? 48 8B F9 E8 ? ? ? ? 48 8B 57
                     int Offset_0x00 <format=hex>;
-                    int field_0x04;
+                    byte pad[4];
                     
                     FSeek(startof(UnionType) + Offset_0x00);
                     string Path <bgcolor=cGray>;
@@ -1133,7 +1203,7 @@ typedef struct
             case 1107:
                 {
                     int Offset_0x00 <format=hex>;
-                    int field_0x04;
+                    byte pad[4];
                     
                     FSeek(startof(UnionType) + Offset_0x00);
                     string Path <bgcolor=cGray>;
@@ -1143,7 +1213,8 @@ typedef struct
                 break;
             case 1115:
                 {
-                    int field_0x00;
+                    // 40 53 48 83 EC ? 48 8B D9 B0
+                    int FramesMaybe;
                     int field_0x04;
                     float field_0x08;
                     int field_0x0C;
@@ -1155,41 +1226,25 @@ typedef struct
                     int field_0x24;
                     float field_0x28;
                     int field_0x2C;
-                    int field_0x30;
+                    byte field_0x30;
+                    byte pad[3];
                     float field_0x34;
-                    int field_0x38;
-                    int field_0x3C;
-                    int field_0x40;
-                    int field_0x44;
-                    int field_0x48;
-                    int field_0x4C;
-                    int field_0x50;
-                    int field_0x54;
+                    byte field_0x38;
+                    byte field_0x39;
+                    byte pad_[0x1E];
                 };
                 break;
-            case 1117:
+            case kTimelineElem_1117:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
-                    int field_0x20;
+                    // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8B 5C 24
+                    int UnkId; // has hardcoded check on id 79 and 80
+                    byte pad[0x20];
                 };
                 break;
             case 1130:
                 {
-                    int field_0x00;
-                    int field_0x04;
-                    int field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    int field_0x14;
-                    int field_0x18;
-                    int field_0x1C;
+                    // 48 8B 05 ? ? ? ? C6 40 ? ? C3 48 8B 05
+                    byte pad[0x20];
                 };
                 break;
             default:
