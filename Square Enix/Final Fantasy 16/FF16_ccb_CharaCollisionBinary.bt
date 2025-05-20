@@ -12,6 +12,12 @@
 //------------------------------------------------
 
 typedef uint Offset32 <fgcolor=cRed, format=hex>;
+typedef struct 
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
 
 // Useful sigs:
 // ModelHandling::GetCcbFilesFromModelRowAndLoadThem - 48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 83 EC ? 4C 8B 81 ? ? ? ? 48 8B F1
@@ -50,8 +56,8 @@ struct
         Offset32 NameOffset;
         Offset32 Offset1;
         uint Count1;
-        Offset32 Offset2;
-        uint Count2;
+        Offset32 EidDefListOffset;
+        uint EidDefCount;
     } Header <bgcolor=cPurple>;
     
     FSeek(startof(Header) + Header.NameOffset);
@@ -356,32 +362,24 @@ struct
     struct
     {
         local int i = 0;
-        for (i = 0; i < Header.Count2; i++)
+        for (i = 0; i < Header.EidDefCount; i++)
         {
-            FSeek(startof(CharaCollisionBinary) + Header.Offset2 + (i * 0x40));
+            FSeek(startof(CharaCollisionBinary) + Header.EidDefListOffset + (i * 0x40));
             struct
             {
-                int Id;
+                // Read at 48 63 43 ? 48 03 C6 48 03 C3 74
+                // Nearly same as entries in model (.mdl) files, inside MCEX as Type9
+                int EidId;
                 Offset32 JointNameOffset;
-                float field_0x08;
-                float field_0x0C;
-                float field_0x10;
-                int field_0x14;
-                int field_0x18;
-                int field_0x1C;
+                Vector3 field_0x08;
+                Vector3 field_0x14;
                 int field_0x20;
-                int field_0x24;
-                int field_0x28;
-                int field_0x2C;
-                int field_0x30;
-                int field_0x34;
-                int field_0x38;
-                int field_0x3C;
+                byte pad[0x1C];
                 
                 FSeek(startof(this) + JointNameOffset);
                 string JointName <bgcolor=cGray>;
-            } Entry <optimize=false ,read=Str("%d - %s", Id, JointName), bgcolor=cWhite>;
+            } EidDef <optimize=false ,read=Str("%d - %s", EidId, JointName), bgcolor=cWhite>;
         }
 
-    } UnkList2 <read=Str("%d entries", CharaCollisionBinary.Header.Count2)>;
+    } EidDefList <read=Str("%d entries", CharaCollisionBinary.Header.EidDefCount)>;
 } CharaCollisionBinary <open=true>;
