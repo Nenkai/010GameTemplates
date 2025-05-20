@@ -16,6 +16,12 @@
 /////////////////////////////////////////
 typedef struct
 {
+    int Type;
+    int PathOffset;
+} AssetRef;
+                                
+typedef struct
+{
     float X;
     float Y;
     float Z;
@@ -458,9 +464,179 @@ struct
             
             if (MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize)
             {
-                // TODO.
-                byte ModelExternalContent[MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize] <comment="TODO", bgcolor=cDkPurple>;
-                FSeek(startof(ModelExternalContent) + AlignValue(MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize, 0x10));
+                // MCEX Initter: 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 54 41 55 41 56 41 57 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 85 ? ? ? ? 4C 8B 89
+                union
+                {
+                    byte ModelExternalContentBytes[MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize] <comment="TODO">;
+                    struct
+                    {
+                        int Magic <format=hex>;
+                        int field_0x04;
+                        int field_0x08;
+                        int field_0x0C;
+                        int field_0x10;
+                        int field_0x14;
+                        int field_0x18;
+                        int field_0x1C;
+                        int Offset <format=hex>;
+                        int Count;
+                        
+                        FSeek(startof(this) + Offset);
+                        int DataOffsets[Count];
+                            
+                        local int j = 0;
+                        for (j = 0; j < Count; j++)
+                        {
+                            // 48 8B 81 ? ? ? ? 33 D2 EB
+                            FSeek(startof(DataOffsets) + DataOffsets[j]);
+                            
+                            local int typeNum = ReadInt();
+                            if (typeNum == 1)
+                            {
+                                struct
+                                {
+                                    // NOTE: not read in full yet
+                                    int Type;
+                                    int field_0x04;
+                                    int field_0x08;
+                                    int field_0x0C;
+                                    int Offset0x10 <format=hex, fgcolor=cRed>;
+                                    int Count0x14; // Related to eid? when type = 9?
+                                    int field_0x18;
+                                    int field_0x1C <format=hex, fgcolor=cRed>;
+                                    int field_0x20;
+                                    int field_0x24;
+                                    AssetRef AssetRef0x28; // 1009
+                                    int field_0x30;
+                                    float field_0x34;
+                                    int field_0x38;
+                                    int PhysicsObjectSoundId;
+                                    int field_0x40;
+                                    AssetRef AssetRef0x44; // 1007
+                                    byte field_0x4C;
+                                    byte field_0x4D;
+                                    byte field_0x4E;
+                                    byte field_0x4F;
+                                    int field_0x50;
+                                    int field_0x54;
+                                    int field_0x58;
+                                    int field_0x5C;
+                                    int field_0x60;
+                                    int UnkHavokFileHeaderOffset <format=hex, fgcolor=cRed>;
+                                    int UnkHavokFileHeaderSize <format=hex>;
+                                    int UnkHavokFileHeaderOffset2 <format=hex, fgcolor=cRed>;
+                                    int UnkHavokFileHeaderSize2 <format=hex>;
+                                    int UnkHavokFileHeaderOffset3 <format=hex, fgcolor=cRed>;
+                                    int UnkHavokFileHeaderSize3 <format=hex>;
+                                    int UnkBonamikBinaryHeaderOffset <format=hex, fgcolor=cRed>;
+                                    int UnkBonamikBinaryHeaderSize <format=hex>;
+                                    int field_0x84 <format=hex, fgcolor=cRed>;
+                                    int field_0x88 <format=hex, fgcolor=cRed>;
+                                    
+                                    if (UnkHavokFileHeaderSize)
+                                    {
+                                        FSeek(startof(this) + UnkHavokFileHeaderOffset);
+                                        byte UnkHavokFileHeader[UnkHavokFileHeaderSize] <bgcolor=cYellow>;
+                                    }
+                                    
+                                    if (UnkHavokFileHeaderSize2)
+                                    {
+                                        FSeek(startof(this) + UnkHavokFileHeaderOffset2);
+                                        byte UnkHavokFileHeader2[UnkHavokFileHeaderSize2] <bgcolor=cYellow>;
+                                    }
+                                    
+                                    if (UnkHavokFileHeaderSize3)
+                                    {
+                                        FSeek(startof(this) + UnkHavokFileHeaderOffset3);
+                                        byte UnkHavokFileHeader3[UnkHavokFileHeaderSize3] <bgcolor=cYellow>;
+                                    }
+                                    
+                                    if (UnkBonamikBinaryHeaderOffset)
+                                    {
+                                        FSeek(startof(this) + UnkBonamikBinaryHeaderOffset);
+                                        byte UnkBonamikBinaryHeader[UnkBonamikBinaryHeaderSize] <bgcolor=cYellow>;
+                                    }
+                                    
+                                    FSeek(startof(Offset0x10) + Offset0x10);
+                                    struct
+                                    {
+                                         int Offsets0x10[Count0x14] <format=hex, fgcolor=cRed>;
+                                         local int j = 0;
+                                         for (j = 0; j < Count0x14; j++)
+                                         {
+                                              FSeek(startof(Offsets0x10) + Offsets0x10[j]);
+                                              struct
+                                              {
+                                                   int DataOffset <format=hex, fgcolor=cRed>;
+                                                   
+                                                   FSeek(startof(DataOffset) + DataOffset);
+                                                   struct
+                                                   {
+                                                        int field_0x00;
+                                                        int CollisionLayerPresetId; // 1, 3, 6, 15, 21 handled separately
+                                                        int field_0x08;
+                                                        int field_0x0C;
+                                                        int field_0x10;
+                                                        int field_0x14;
+                                                        int field_0x18;
+                                                        int field_0x1C;
+                                                        int field_0x20;
+                                                        int field_0x24;
+                                                        int field_0x28;
+                                                        int field_0x2C;
+                                                        int field_0x30;
+                                                        int field_0x34;
+                                                        int field_0x38;
+                                                        int field_0x3C;
+                                                   } EntryData <bgcolor=cDkRed>;
+                                                   
+                                                   FSeek(DataOffset + 0x04);
+                                              } Entry;
+                                         }
+                                    } Struct_0x10 <bgcolor=cRed>;
+                                } Type1;
+                            }
+                            else if (typeNum == 9)
+                            {
+                                struct
+                                {
+                                    int Type;
+                                    int Count_0x04;
+                                    int field_0x08;
+                                    int field_0x0C;
+                                    int EidDefOffset <format=hex, fgcolor=cRed>;
+                                    int EidDefCount;
+                                    
+                                    local int j = 0;
+                                    for (j = 0; j < EidDefCount; j++)
+                                    {
+                                        FSeek(startof(this) + EidDefOffset + (j * 0x2C));
+                                        struct
+                                        {
+                                            // E8 ? ? ? ? 48 8D 4C 24 ? 4D 8B C6
+                                            int Unused;
+                                            int Unused2;
+                                            int UnkNameOffset <format=hex, fgcolor=cRed>;
+                                            float field_0x0C;
+                                            float field_0x10;
+                                            float field_0x14;
+                                            int field_0x18;
+                                            float field_0x1C;
+                                            float field_0x20;
+                                            int EidId_Definition; // Set it as eid of this value
+                                            int field_0x28;
+                                            
+                                            FSeek(startof(this) + UnkNameOffset);
+                                            string Name;
+                                        } EidDataDef <bgcolor=cRed>;
+                                    }
+                                } Type9;
+                            }
+                        }
+                        
+                    } ModelExternalContent <bgcolor=cDkPurple>;
+                } ModelExternalContentUnion;
+                FSeek(startof(ModelExternalContentUnion) + AlignValue(MeshContentsHeaderUnion.MeshContentsHeader.ModelExternalContentSize, 0x10));
             }
             
             if (MeshContentsHeaderUnion.MeshContentsHeader.JointCount)
