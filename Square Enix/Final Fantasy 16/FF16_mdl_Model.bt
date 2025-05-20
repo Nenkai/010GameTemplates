@@ -25,7 +25,7 @@ typedef struct
     float X;
     float Y;
     float Z;
-} Vector3;
+} Vector3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
 
 typedef struct
 {
@@ -614,21 +614,18 @@ struct
                                         struct
                                         {
                                             // E8 ? ? ? ? 48 8D 4C 24 ? 4D 8B C6
+                                            // nearly same as entries in chara collision files (.ccb)
                                             int Unused;
                                             int Unused2;
-                                            int UnkNameOffset <format=hex, fgcolor=cRed>;
-                                            float field_0x0C;
-                                            float field_0x10;
-                                            float field_0x14;
-                                            int field_0x18;
-                                            float field_0x1C;
-                                            float field_0x20;
-                                            int EidId_Definition; // Set it as eid of this value
+                                            int JointNameOffset <format=hex, fgcolor=cRed>;
+                                            Vector3 field_0x0C;
+                                            Vector3 field_0x18;
+                                            int EidId; // Set it as eid of this value
                                             int field_0x28;
                                             
-                                            FSeek(startof(this) + UnkNameOffset);
+                                            FSeek(startof(this) + JointNameOffset);
                                             string Name;
-                                        } EidDataDef <bgcolor=cRed>;
+                                        } EidDataDef <read=EidId, bgcolor=cRed>;
                                     }
                                 } Type9;
                             }
