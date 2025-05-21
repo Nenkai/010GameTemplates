@@ -355,7 +355,9 @@ struct
                             break;   
                     }
                 } Data0x54 <bgcolor=cDkBlue>;
-            } Entry <read=Str("%s (J: %s)", Name, JointName), bgcolor=cRed>;   
+                FSeek(FileSize()); // Fix annoying 'Invalid structure. Ending position was in front of starting position.'
+                
+            } Entry <read=Str("[%d] %s (J: %s)", Id, Name, JointName), bgcolor=cRed>;
         }
     } UnkList1 <read=Str("%d entries", CharaCollisionBinary.Header.Count1)>;
     
