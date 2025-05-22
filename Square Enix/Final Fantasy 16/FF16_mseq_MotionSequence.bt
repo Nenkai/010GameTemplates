@@ -1,0 +1,91 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FF16 Motion Sequence (MSeq) file
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: No clue. Only mapped the structure.
+//  Category: 
+// File Mask: *.mseq
+//  ID Bytes: 6D 73 65 71
+//   History: 
+//------------------------------------------------
+
+typedef int Offset32 <format=hex, fgcolor=cRed>;
+struct
+{
+    // Initial init: 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 83 61 ? ? 48 8B F9
+    struct
+    {
+        uint Magic <comment="Game doesn't check this", format=hex>;
+        uint VersionDate <comment="Game doesn't check this">;
+        byte pad[0x18];
+        int Count <comment="Should be always 1">;
+        Offset32 Offset;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(Header.Offset);
+
+    struct
+    {
+        int Unk;
+        int EntryCount;
+        Offset32 EntryOffsets[EntryCount];
+        
+        local int i = 0;
+        for (i = 0; i < EntryCount; i++)
+        {
+            FSeek(startof(this) + EntryOffsets[i]);
+            struct
+            {
+                int MotionLayerSetId;
+                int EntryCount;
+                Offset32 EntryOffsets[EntryCount];
+                
+                local int j = 0;
+                for (j = 0; j < EntryCount; j++)
+                {
+                    FSeek(startof(this) + EntryOffsets[j]);
+                    struct
+                    {
+                        int Key;
+                        int Count;
+                        int Unk;
+                        Offset32 EntryOffsets[Count];
+                        
+                        local int k = 0;
+                        for (k = 0; k < Count; k++)
+                        {
+                            FSeek(startof(this) + EntryOffsets[k]);
+                            struct
+                            {
+                                int Count;
+                                int field_0x04;
+                                int field_0x08;
+                                Offset32 EntryOffsets[Count];
+                                
+                                local int l = 0;
+                                for (l = 0; l < Count; l++)
+                                {
+                                    FSeek(startof(this) + EntryOffsets[l]);
+                                    struct
+                                    {
+                                        // Type executor: 48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 81 EC ? ? ? ? C5 F8 29 74 24 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 4C 8B 5A
+                                        int Type; // Opcode kinda thing
+                                        int DataSizeInt;
+                                        int Empty;
+                                        
+                                        int Data[DataSizeInt] <bgcolor=cGray>;
+                                        
+                                        // NOTE: Type4 has an id to charatimeline?
+                                    } SubSubEntry <read=Str("%d", Type), bgcolor=cBlack>;
+                                }
+                            } SubEntry <bgcolor=cDkGreen>;
+                        }
+                    } Entry <bgcolor=cDkYellow, read=Key>;
+                }
+                
+            } Group <bgcolor=cBlue, read=Str("MotionLayerSet: %d", MotionLayerSetId)>;
+        }
+    } Entries;
+} MSeqFile <open=true>;
