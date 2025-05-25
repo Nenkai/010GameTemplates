@@ -1,0 +1,1023 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Final Fantasy XVI UI Binary
+//   Authors: AlexCup, Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: UI
+// File Mask: *.uib
+//  ID Bytes: 55 49 42 00
+//   History: 
+//------------------------------------------------
+
+const uint64 Sky_400<hidden=true> = 0xF8BD38;
+const uint64 Sky_500<hidden=true> = 0xE9A50E;
+const uint64 Sky_700<hidden=true> = 0xC78402;
+const uint64 Sky_800<hidden=true> = 0x855907;
+const uint64 Sky_900<hidden=true> = 0x6E4A0C;
+
+const uint64 Teal_400<hidden=true> = 0xA6B814;
+const uint64 Teal_500<hidden=true> = 0x88940D;
+const uint64 Teal_700<hidden=true> = 0x6E760F;
+const uint64 Teal_800<hidden=true> = 0x595E11;
+const uint64 Teal_900<hidden=true> = 0x4A4E13;
+
+const uint64 Green_400<hidden=true> = 0x5EC522;
+const uint64 Green_500<hidden=true> = 0x5EC522;
+const uint64 Green_700<hidden=true> = 0x518D2D;
+const uint64 Green_800<hidden=true> = 0x346516;
+const uint64 Green_900<hidden=true> = 0x42652C;
+
+const uint64 Amber_400<hidden=true> = 0x24BFFB;
+const uint64 Amber_500<hidden=true> = 0x0B9EF5;
+const uint64 Amber_600<hidden=true> = 0x0677D9;
+const uint64 Amber_700<hidden=true> = 0x0953B4;
+const uint64 Amber_800<hidden=true> = 0x0E4092;
+const uint64 Amber_900<hidden=true> = 0x0F3578;
+
+const uint64 Red_400<hidden=true> = 0x7171F8;
+const uint64 Red_500<hidden=true> = 0x4444EF;
+const uint64 Red_600<hidden=true> = 0x2626DC;
+const uint64 Red_700<hidden=true> = 0x1C1CB9;
+const uint64 Red_800<hidden=true> = 0x1B1B99;
+const uint64 Red_900<hidden=true> = 0x1D1D7F;
+
+struct MemberList;
+struct BezierNode;
+struct AssetEntry;
+
+typedef struct TColor{
+    ubyte r;
+    ubyte g;
+    ubyte b;
+    ubyte a;
+    
+    local uint full_color<format=hex> = a;
+    full_color = full_color << 8;
+    full_color |= b;
+    full_color = full_color << 8;
+    full_color |= g;
+    full_color = full_color << 8;
+    full_color |= r;
+} Color <bgcolor=(this.full_color & 0xFFFFFF), read=Str("r%u, g%u, b%u, a%u", this.r, this.g, this.b, this.a)>;
+
+typedef int OffsetT <fgcolor=cRed, format=hex>;
+
+typedef struct TPoint{
+    int x, y;
+} Point <read=Str("%d, %d", this.x, this.y)>;
+
+typedef struct TVector2{
+    float x, y;
+} Vector2 <read = Str("%f, %f", this.x, this.y)>;
+
+enum BlendMode
+{
+    kNormal = 0,
+    kDarken = 1,
+    kMultiply = 2,
+    kColorBurn = 3,
+    kLinearBurn = 4,
+    kLighten = 5,
+    kScreen = 6,
+    kColorDodge = 7,
+    kLinearDodge = 8,
+    kOverlay = 9,
+    kSoftLight = 10,
+    kHardLight = 11,
+    kVividLight = 12,
+    kLinearLight = 13,
+    kHdrBlend = 14,
+    kHdrLowBlend = 15,
+    kHdrHighBlend = 16,
+};
+
+enum LayerEffect{
+    kColorFilter,
+    kChromaticAberration,
+    kBlur,
+    kDropShadow,
+    kGlow,
+    kRadialBlur,
+    kBackgroundBlur,
+    kAlphaMask,
+    kImageMask,
+    kAntiAliasing,
+};
+
+enum MemberType
+{
+    kGroup = 1,
+    kImage = 2,
+    kText = 3,
+    kUnknown4 = 4,
+    kUnknown5 = 5,
+    kRectangle = 6,
+    kEllipse = 7,
+    kBezier = 8,
+    kUnknown9 = 9,
+    kGroupRef = 10,
+    kEffect = 11,
+    kUnknown12 = 12,
+    kMask = 13
+};
+
+typedef struct TMemberStruct_0
+{
+    int field_0x0; // Maybe timeline item index
+    OffsetT NameOffset;
+    int TimelineElementType; // Maybe timeline item type + flags
+    int FrameStart <bgcolor=cLtRed>;
+    int NumFrames <fgcolor=0x8affff>;
+    int ItemIndex <fgcolor=cGreen>; // Index of group member this item affects
+    ubyte bool_0;
+    ubyte bool_1;
+    byte pad_[2];
+    OffsetT DataOffset <bgcolor=cDkRed>;
+    
+    FSeek(startof(this) + DataOffset);
+    
+    struct 
+    {
+        int TimelineElementType;
+        switch(TimelineElementType)
+        {
+            // 5009: Likely for keyframes
+            // 5027: For beziers     
+              
+            // Handled at
+            // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 8B 42
+            
+            // Anything >= 5031 is handled at
+            // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 8B 42
+            
+            case 5027: { 
+                int stuff[20]<bgcolor=cGray>;
+                int offset;
+                int count;
+                
+                FSeek(startof(this) + offset);
+                BezierNode nodes[count];
+                break;
+            }
+            case 5028:{
+                byte data[0x2C]<bgcolor=cGray>;
+                int offset<fgcolor=cRed>;
+                FSeek(startof(this) + offset);
+                string string_data;
+                break;
+            }
+            default:
+            {
+                Printf("Unimplemented timeline element type %d\n", TimelineElementType);
+                byte pad[0x2C];
+                int field_0x1;
+                break;
+            }
+        }
+    } member_data<bgcolor=cDkGreen>;
+    
+    FSeek(startof(this) + NameOffset);
+    string Name;
+    
+    FSeek(startof(this) + 0x20);
+} MemberStruct_0<bgcolor=cRed, name = Str("%d: Item %d ", this.TimelineElementType, this.ItemIndex)>;
+
+typedef struct TMemberStruct_1(int count)
+{
+    local int cnt <hidden=true> = count;
+    OffsetT Offsets[count]<bgcolor=Teal_400>;
+    
+    local int i <hidden=true>;
+    for( i = 0 ; i < count ; i++ )
+    {
+        FSeek( startof(Offsets) + Offsets[i] );
+        struct
+        {
+            int Type;
+            byte pad[0x24];
+            
+            // 40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 83 3A
+            switch (Type)
+            {
+                case 4001: // Setup image?
+                    {
+                        OffsetT name_offset<bgcolor=cDkRed>;
+                        FSeek(startof(this) + name_offset);
+                        string name<bgcolor=cNone>;
+                        FSeek(startof(this) + 0x2C);
+                    }
+                    break;
+                    
+                case 4002: // Start? - E8 ? ? ? ? EB ? 49 63 50
+                    break;
+                    
+                default:
+                    Printf("Unresolved timeline setup elem %d\n", Type);
+                    break;
+            }
+
+        } Member<name = (exists(this.name) ? this.name : ""), read=Str("Type: %d", this.Type)>;
+    }
+} MemberStruct_1<bgcolor=cPurple, read=Str("Members: %d", this.cnt)>;
+
+typedef struct TTimelineMember
+{
+    OffsetT NameOffset;
+    uint flags <format=hex>;
+    
+    // This is its own structure as per
+    // 40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 44 24 ? 83 3A
+    struct
+    {
+        int Type;
+        OffsetT ElementsOffset;
+        int ElementCount <fgcolor=cGreen>;
+        OffsetT UnkOffset;
+        int UnkCount <fgcolor=cGreen>;
+        OffsetT MembersOffset;
+        int MemberCount <fgcolor=cGreen>;
+        
+        if (ElementCount)
+        {
+            FSeek(startof(this) + ElementsOffset);
+            MemberStruct_0 timeline_elements[ElementCount]<optimize=false>;
+        }
+        
+        FSeek(startof(this) + UnkOffset);
+        struct
+        {
+            int Index;
+            OffsetT UnkOffset;
+            int UnkCount <fgcolor=cGreen>;
+        } what_even[UnkCount]<bgcolor=cGreen>;
+        
+        FSeek(startof(this) + MembersOffset);
+        MemberStruct_1 TimelineMembers(MemberCount);
+    } TimelineInfo;
+    FSeek(startof(this) + 0x24);
+    
+    int FrameCount;
+    int Field_0x28;
+    int Field_0x2C;
+    OffsetT StrOffset_0x30 <fgcolor=cRed>;
+    OffsetT AssetsOffset <fgcolor=cRed>;
+    int Field_0x38;
+    OffsetT StrOffset_0x3C <fgcolor=cRed>;
+    byte _pad[0x20];
+    
+    FSeek(startof(this) + NameOffset);
+    string Name <bgcolor=Sky_500>;
+    
+    FSeek(startof(this) + StrOffset_0x30);
+    string Name0x30;
+    
+    FSeek(startof(this) + AssetsOffset);
+    AssetEntry UiAsset;
+    
+    FSeek(startof(this) + StrOffset_0x3C);
+    string Name0x3C;
+
+    FSeek(startof(this) + 0x60);
+} TimelineMember<name = this.Name>;
+
+typedef struct TMemberDataBase{
+    int field_0x00;
+    int field_0x04;
+    Color color;
+    Color field_0x0C;
+    float field_0x10;
+    int field_0x14;
+    int field_0x18;
+    byte Bool_0x19;
+    byte Bool_0x1A;
+    byte Bool_0x1B;
+    byte Bool_0x1C;
+    int field_0x20;
+    int field_0x24;
+    int field_0x28;
+    int field_0x2C;
+    int pad[4];
+} MemberDataBase;
+
+typedef struct TGroup // 1
+{
+    MemberDataBase Base;
+    byte pad[0x20] <fgcolor=cDkGray>;
+} Group;
+
+typedef struct TImage // 2
+{
+    MemberDataBase Base;
+    OffsetT TextureInfosOffset;
+    int TextureInfoCount <fgcolor=cGreen>;
+    byte _pad[0x20];
+    int Type_0x68; // Type0-3
+    int Field_0x70;
+    int Field_0x74;
+    byte _pad2[0x20];
+    
+    FSeek(startof(this) + TextureInfosOffset);
+    struct
+    {
+        OffsetT ResourceInfoOffset;
+        int Unused;
+        int field_0x08;
+        byte pad[0x20];
+        
+        FSeek(startof(this) + ResourceInfoOffset);
+        AssetEntry ResourceInfo;
+    } TextureInfos;  
+} Image;
+
+typedef struct TText // 3
+{
+    MemberDataBase Base;
+    int UiKeyId <comment="from 'ui' nex table - may be set manually externally?">;
+    int UnkStrOffset0x44 <format=hex, fgcolor=cRed>;
+    int FontSize;
+    byte Byte0x4C;   // Sometimes 1 in some uib, not clear what it does
+    byte Byte0x4D;
+    byte Byte0x4E;
+    byte pad0x4F;
+    int spacing;
+    int line_height;
+    enum <int>
+    {
+        kVerticalTextAlignment_Top = 0,
+        kVerticalTextAlignment_Center = 1,
+        kVerticalTextAlignment_Bottom = 2,
+        kVerticalTextAlignment_StretchToFit = 3,
+    } vertical_alignment;
+    
+    enum <int> 
+    {
+         kHorizontalTextAlignment_Left = 0,
+         kHorizontalTextAlignment_Center = 1,
+         kHorizontalTextAlignment_Right = 2,
+         kHorizontalTextAlignment_StretchToFit = 3,
+         kHorizontalTextAlignment_Unk4 = 4,
+    } horizontal_alignment;
+    enum <int>
+    {
+        Text0x60_Type0 = 0,
+        Text0x60_Type1 = 1,
+        Text0x60_Type2 = 2,
+        Text0x60_Type3 = 3,
+    } UnkType_0x60;
+    byte pad[0x0C];
+    int Field_0x70;
+    byte pad2[0x0C];
+
+    FSeek(startof(Base) + UnkStrOffset0x44);
+    string unk_str;
+    
+    FSeek(startof(Base) + 0x80);
+} Text;
+
+typedef struct TUnknown4 // 4
+{
+    MemberDataBase Base;
+    OffsetT TextureInfosOffset;
+    int TextureInfoCount <fgcolor=cGreen>;
+    byte _pad[0x20];
+    int Type_0x68; // Type0-3
+    int Field_0x6C;
+    int Field_0x70;
+    int Field_0x74;
+    int Field_0x78; // Type0-3
+    int Field_0x7C;
+    byte _pad2[0x0C];
+    
+    FSeek(startof(this) + TextureInfosOffset);
+    
+    struct
+    {
+        OffsetT ResourceInfoOffset;
+        int Unused;
+        int field_0x08;
+        byte pad[0x20];
+        
+        FSeek(startof(this) + ResourceInfoOffset);
+        AssetEntry ResourceInfo;
+    } TextureInfos;  
+} TextureUnk4;
+
+typedef struct TUnknown5
+{
+    MemberDataBase Base;
+    OffsetT TextureInfosOffset;
+    int TextureInfoCount <fgcolor=cGreen>;
+    byte _pad[0x20];
+    OffsetT UnkStrOffset0x68;
+    OffsetT UnkStrOffset0x6C;
+    int Field_0x70;
+    int Field_0x74;
+    int Field_0x78;
+    int Type_0x7C; // Type0-3
+    int Field_0x80;
+    byte _pad2[0x08];
+    
+    FSeek(startof(this) + TextureInfosOffset);
+    struct
+    {
+        OffsetT ResourceInfoOffset;
+        int Unused;
+        int field_0x08;
+        byte pad[0x20];
+        
+        FSeek(startof(this) + ResourceInfoOffset);
+        AssetEntry ResourceInfo;
+    } TextureInfos;
+    
+    FSeek(startof(this) + UnkStrOffset0x68);
+    string Str0x68;
+    
+    FSeek(startof(this) + UnkStrOffset0x6C);
+    string Str0x6C;
+} Unknown5;
+
+typedef struct TRectangle // 6
+{
+    MemberDataBase Base;
+    int Field_0x40;
+    int Field_0x44;
+    int Field_0x48;
+    int Field_0x4C;
+    byte pad[0x10];
+} Rectangle;
+
+typedef struct TEllipse // 7
+{
+    MemberDataBase Base;
+    int Field_0x40;
+    float Field_0x44;
+    int Field_0x48;
+    int Field_0x4C;
+    OffsetT TextureInfosOffset;
+    int TextureInfoCount <fgcolor=cGreen>;
+    byte _pad2[0x08];
+    
+    FSeek(startof(this) + TextureInfosOffset);
+    struct
+    {
+        OffsetT ResourceInfoOffset;
+        int Unused;
+        int field_0x08;
+        byte pad[0x20];
+        
+        FSeek(startof(this) + ResourceInfoOffset);
+        AssetEntry ResourceInfo;
+    } TextureInfos;
+} Ellipse;
+
+typedef struct TBezierNode
+{
+    Point origin;
+    Point handle_a;
+    Point handle_b;
+    float Field_0x18;
+    byte padding[0x1C];
+} BezierNode<bgcolor=cDkBlue, read=BezierNodeRead>;
+
+string BezierNodeRead(BezierNode& input)
+{
+    return Str("Origin: %d, %d", input.origin.x, input.origin.y);
+}
+
+typedef struct TBezier{
+    MemberDataBase Base;
+    int Field_0x40;
+    int Field_0x44;
+    int Type_0x48; // 0-2
+    int Type_0x4C; // 0-2
+    int Type_0x50; // 0-2
+    int Field_0x54;
+    int Field_0x58;
+    float Field_0x5C;
+    float Field_0x60;
+    byte Field_0x64;
+    byte Field_0x65;
+    byte pad[2];
+    int Field_0x68; // Type 0-1
+    float Field_0x6C;
+    float Field_0x70;
+    float Field_0x74;
+    float Field_0x78;
+    float Field_0x7C;
+    OffsetT NodesOffset;
+    int NodesCount <fgcolor=cGreen>;
+
+    FSeek(startof(this) + NodesOffset);
+    BezierNode Nodes[NodesCount];
+} Bezier;
+
+typedef struct TUnknown9
+{
+    MemberDataBase Base;
+    byte pad[0x20];
+} Unknown9;
+
+typedef struct TGroupRef{
+    MemberDataBase Base;
+    int Unused0x40;
+    int Field_0x44;
+    int Field_0x48;
+    int Field_0x4C;
+    int Field_0x50;
+    int Field_0x54;
+    int Field_0x58;
+    int Field_0x5C;
+    int Field_0x60;
+    int Field_0x64;
+    int Field_0x68;
+    int Unused_0x6C;
+    int Field_0x70;
+    int Field_0x74;
+    int Field_0x78;
+    int Field_0x7C;
+    int Field_0x80;
+    int Field_0x84;
+    int Type_0x88; // Type0-3
+    int Type_0x8C; // Type0-4
+    byte pad[0x18];
+} GroupRef;
+
+typedef struct TEffect
+{
+    MemberDataBase Base;
+    byte _pad[0x20];
+} Effect;
+
+typedef struct TMask // 13
+{
+    MemberDataBase Base;
+    OffsetT TextureInfosOffset;
+    int TextureInfoCount <fgcolor=cGreen>;
+    byte Pad[0x40];
+    
+    FSeek(startof(this) + TextureInfosOffset);
+    struct
+    {
+        OffsetT ResourceInfoOffset;
+        int Unused;
+        int field_0x08;
+        byte pad[0x20];
+        
+        FSeek(startof(this) + ResourceInfoOffset);
+        AssetEntry ResourceInfo;
+    } TextureInfos;  
+} Mask;
+
+typedef struct TMember
+{
+    // 48 8B C4 48 89 58 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? C5 F8 29 78 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B DA
+    
+    MemberType Type;
+    OffsetT NameOffset <bgcolor=cWhite>;
+    Point Origin;
+    float Rotation;
+    Vector2 Scale;
+    Point AnchorPoint;
+    int UnkBool;
+    byte pad0[0x1C];
+    Point Size;
+    int DataOffset <format=hex, fgcolor=cRed>;
+    int field_0x50;
+    byte pad1[0x1C];
+    
+    // Yes i know. lots of weird padding.
+    // Trust me it's correct though.
+    if (Type == kGroupRef)
+    {
+        OffsetT GroupRefNameOffset;
+        OffsetT GroupRefAssetOffset <bgcolor=cGreen>;
+        byte pad2[0x08];
+    }
+    else if (Type == kText)
+    {
+        int TextField_0x70;
+        byte pad2[0x1C];   
+    }
+    else if (Type == kGroup)
+    {
+       byte pad2[0x20];
+       OffsetT GroupChildrenOffset;
+       uint GroupChildCount <bgcolor=cGreen>;
+    }
+    else if (Type == kEffect)
+    {
+         byte pad2[0x04];
+         OffsetT EffectAssetOffset;
+         byte pad2_2[0x1C];
+    }
+    else if (Type == kImage)
+    {
+        byte pad2[0x2C];   
+    }
+    else if (Type == kRectangle)
+    {
+        byte pad2[0x20];   
+    }
+    else if (Type == kEllipse)
+    {
+        byte pad2[0x20];   
+    }
+    else if (Type == kMask)
+    {
+        byte pad2[0x2C];
+        OffsetT MaskUiAssetOffset;
+        OffsetT MaskNameUnkOffset;
+        byte pad3[0x18];
+    }
+    
+    if (Type != kGroup && Type != kMask)
+        byte pad3[0x20];
+    
+    FSeek(startof(this) + DataOffset);
+    switch(Type)
+    {
+        case kGroup:
+            Group GroupData <bgcolor=cPurple, comment="Group of elements">; break;
+        case kImage:
+            Image ImageData <bgcolor=cPurple>; break;
+        case kText:
+            Text TextData <bgcolor=cPurple>; break;  
+        case kUnknown4:
+            TextureUnk4 TextureUnk4Data <bgcolor=cPurple>; break;   
+        case kUnknown5: // frytext.uib
+            Unknown5 Unknown5Data <bgcolor=cPurple>; break;  
+        case kRectangle:
+            Rectangle RectangleData <bgcolor=cPurple>; break;
+        case kEllipse:
+            Ellipse EllipseData <bgcolor=cPurple>; break;
+        case kBezier:
+            Bezier BezierData <bgcolor=cPurple>; break;
+        case kUnknown9:
+            Unknown9 Unknown9Data <bgcolor=cPurple>; break;  
+        case kGroupRef:
+            GroupRef GroupRefData <bgcolor=cPurple, comment="Reference to layer">; break;
+        case kEffect:
+            Effect EffectData <bgcolor=cPurple>; break;  
+        case kMask:
+            Mask MaskData <bgcolor=cPurple>; break;
+        default:
+            break;
+    }
+        
+    FSeek(startof(this) + NameOffset);
+    string Name <bgcolor=cWhite>;
+    
+    if (Type == kGroup)
+    {
+        FSeek(startof(this) + GroupChildrenOffset);
+        MemberList GroupChildren(GroupChildCount);
+    }
+    else if (Type == kGroupRef)
+    {
+        FSeek(startof(this) + GroupRefNameOffset);
+        string GroupRefName;
+        
+        FSeek(startof(this) + GroupRefAssetOffset);
+        AssetEntry GroupRefAssetEntry;
+    }
+    else if (Type == kEffect)
+    {
+        FSeek(startof(this) + EffectAssetOffset);
+        AssetEntry EffectAssetEntry;
+    }
+    else if (Type == kMask)
+    {
+        FSeek(startof(this) + MaskUiAssetOffset);
+        AssetEntry MaskAssetEntry;
+        
+        FSeek(startof(this) + MaskNameUnkOffset);
+        string MaskNameUnk;
+    }
+    
+} Member  <name = Str("%s @ %d,%d (%dx%d) ", this.Name, this.Origin.x, this.Origin.y, this.Size.x, this.Size.y), 
+            read=EnumToString(this.Type), 
+            bgcolor=cDkRed>;
+
+typedef struct TMemberList(uint count){
+    local uint cnt<hidden=true> = count;
+    OffsetT offsets[count];
+    
+    local int cpos = FTell();
+    local int i<hidden=true>;
+    for(i = 0 ; i < count; i++)
+    {
+        FSeek(startof(this) + offsets[i]);
+        Member member<bgcolor=cLtPurple>;
+    }
+    
+    FSeek(cpos);
+} MemberList <read=Str("Members: %d", this.cnt)>;
+
+typedef struct TLayerProperties
+{
+    // Mainly read from 48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 63 72
+    
+    int type;
+    int name_offset_offset<format=hex, fgcolor=cRed>;
+    int name_count<fgcolor=cGreen>;
+    // 74 ? 41 2B C1 74 ? 41 3B C1 75
+    enum <int>
+    {
+        SubType0 = 0,
+        SubType1 = 1,
+        SubType2 = 2,
+    } UnkSubType;
+    
+    BlendMode BlendMode_;
+    uint UnkColor;
+    int unknowns_0[1];
+    int UnkPercentage0;
+    int UnkPercentage1;
+    int UnkPercentage2;
+    int field_0x28;
+    float field_0x2C;
+    float field_0x30;
+    float field_0x34;
+    float field_0x38;
+    float field_0x3C;
+    float field_0x40;
+    float field_0x44;
+    float field_0x48;
+    int field_0x4C;
+    float field_0x50;
+    float field_0x54;
+    float field_0x58;
+    float field_0x5C;
+    short field_0x60;
+    byte field_0x62;
+    byte field_0x63;
+    float field_0x64;
+    enum <int>
+    {
+        Unk0x68_Type0 = 0,
+        Unk0x68_Type1 = 1,
+        Unk0x68_Type2 = 2,
+    } Type_0x68;
+    float field_0x6C;
+    float field_0x70;
+    byte field_0x74[4];
+    float field_0x78;
+    float field_0x7C[4];
+    enum <int>
+    {
+        Unk0x8C_Type0 = 0,
+        Unk0x8C_Type1 = 1,
+        Unk0x8C_Type2 = 2,
+        Unk0x8C_Type3 = 3,
+    } Type_0x8C;
+    float field_0x90;
+    float field_0x94;
+    int offset_0x98 <format=hex, fgcolor=cRed>;
+    float field_0x9C;
+    float field_0xA0;
+    float field_0xA4;
+    int offset_0xA8 <format=hex, fgcolor=cRed>;
+    int count_0xAC <fgcolor=cGreen>;
+    int field_0xB0;
+    int field_0xB4;
+    int field_0xB8;
+    float field_0xBC;
+    float field_0xC0;
+    float field_0xC4;
+    float field_0xC8;
+    float field_0xCC;
+    float field_0xD0;
+    float field_0xD4;
+    float field_0xD8;
+    float field_0xDC;
+    float field_0xE0;
+    float field_0xE4;
+    float field_0xE8;
+    float field_0xEC;
+    int field_0xF0;
+    int field_0xF4;
+    int sub_type_0xF8; // Used if type == 1?
+    int field_0xFC; // Used if type == 1?
+    int field_0x100;
+    int field_0x104;
+    
+    switch (type)
+    {
+        case 1:
+            int field_0x108; // Type 1-5
+            int field_0x10C; // Type 1-5
+            break;
+            
+        case 8:
+            int field_0x08; // Same as 15->0x134?
+            break;
+            
+        case 15:
+            float Type15_field_0x108;
+            float Type15_field_0x10C;
+            float Type15_field_0x110;
+            float Type15_field_0x114;
+            float Type15_field_0x118;
+            float Type15_field_0x11C;
+            int Type15_field_0x120;
+            int Type15_field_0x124;
+            int Type15_field_0x128;
+            float Type15_field_0x12C;
+            float Type15_field_0x130;
+            float Type15_field_0x134;
+            float Type15_field_0x138;
+            float Type15_field_0x13C;
+            float Type15_field_0x140;
+            float Type15_field_0x144;
+            float Type15_field_0x148;
+            float Type15_field_0x14C;
+            float Type15_field_0x150;
+            int Type15_field_0x154;
+            int Type15_field_0x158;
+            break;
+    }
+    
+    byte padding[0x20] <fgcolor=cDkGray>;
+    local int endPos = FTell();
+    struct
+    {
+        FSeek(startof(type) + name_offset_offset);
+        int str_offset[name_count] <format=hex, fgcolor=cRed>;
+    
+        local int i = 0;
+        for (i = 0; i < name_count; i++)
+        {
+            FSeek(startof(str_offset) + str_offset[i]);
+            struct
+            {
+                string str;
+            } Name <name=str>;
+        }
+        
+        FSeek(startof(str_offset) + (name_count * 4));
+    } names <bgcolor=cGray>;
+    
+    FSeek(startof(type) + offset_0x98);
+    AssetEntry struct_0x98 <bgcolor=cDkRed>;
+    
+    if(count_0xAC > 0)
+    {
+        struct
+        {
+            FSeek(startof(type) + offset_0xA8);
+            int offset_0<fgcolor=cRed, format=hex>;
+            int field_1;
+            uint field_2 <format=hex>;
+            
+            byte padding[0x20] <fgcolor=cDkGray>;
+            FSeek(startof(offset_0) + offset_0);
+            AssetEntry test;
+        } struct_0xA8 <bgcolor=cDkPurple>;
+    }
+    
+    
+    FSeek(endPos);
+} LayerProperties <bgcolor=cRed>;
+
+typedef struct TGroupEntry{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    Point Size;
+    uint LayerPropertiesOffset <format=hex, fgcolor=cRed>;
+    OffsetT MembersOffset;
+    uint MemberCount <bgcolor=cGreen>;
+    OffsetT TimelineMembersOffset;
+    uint TimelineMemberCount <bgcolor=cGreen>;
+    byte _pad[0x20] <fgcolor=cDkGray>;
+    
+    FSeek(startof(this) + NameOffset);
+    string Name <bgcolor=cPurple>;
+    
+    FSeek(startof(this) + LayerPropertiesOffset);
+    LayerProperties LayerProperties_;
+    
+    if (MemberCount)
+    {
+        FSeek(startof(this) + MembersOffset);
+        MemberList Members(MemberCount);
+    }
+    
+    if (TimelineMemberCount)
+    {
+        FSeek(startof(this) + TimelineMembersOffset);
+        TimelineMember Timeline[TimelineMemberCount] <optimize=false>;
+    }
+    
+    FSeek(startof(NameOffset) + 0x40);
+} GroupEntry <name = Str("%s (%dx%d) ", this.Name, this.Size.x, this.Size.y),
+                read=GroupRead>;
+                
+string GroupRead(GroupEntry& input)
+{
+    local int count = input.MemberCount;
+    local string blend_mode = EnumToString(input.LayerProperties_.BlendMode_);
+    return Str("Members: %d, Blend Mode: %s", count, blend_mode);
+}
+
+typedef struct TAssetEntry{
+    enum 
+    {
+        kInvalid,
+        kTexture,
+        kUi,
+        kVfx,
+    } Type;
+    
+    OffsetT TexturePathOffset;
+    OffsetT NameInfoOffset;
+    byte pad[0x20] <bgcolor=cBlack, fgcolor=cDkGray>;
+    
+    FSeek(startof(this) + TexturePathOffset);
+    string StrData <bgcolor=Amber_700>;
+    
+    FSeek(startof(this) + NameInfoOffset);
+    struct
+    {
+        int unknown <format=hex>;
+        int PartPathOffset <format=hex, fgcolor=cRed>;
+
+        FSeek(startof(this) + PartPathOffset);
+        string StrData <bgcolor=Amber_400>;
+        
+        FSeek(startof(this) + 0x08);
+    } NameInfo <read=this.StrData, bgcolor=cLtBlue>;
+
+    FSeek(startof(this) + 0x2C);
+} AssetEntry;
+
+typedef struct(int count)
+{
+    local int cnt = count;
+    if (count)
+    {
+        OffsetT Offsets[count];
+        local int i<hidden=true>;
+        for(i = 0; i < count; i++)
+        {
+            FSeek(startof(this) + Offsets[i]);
+            AssetEntry DataEntry;
+        }
+    }
+} DataList <read = Str("%d entries", cnt)>;
+
+
+//////////////////////////////////////////////////
+// START
+/////////////////////////////////////////////////
+struct TUIBHeader
+{
+    uint Magic<format=hex, comment="'UIB\\0', checked">;
+    uint Version<comment="FF16: Version 10 expected">;
+    byte reserved[16];
+    uint TOCOffset <format=hex>;
+    byte _empty_[16];
+} Header <bgcolor=cPurple>;
+
+FSeek(startof(Header) + Header.TOCOffset);
+struct
+{
+    OffsetT AssetListOffset;
+    OffsetT LayersOffset;
+    int LayerCount <fgcolor=cGreen>;
+    
+    FSeek(startof(UIFileToc) + UIFileToc.AssetListOffset);
+    struct TAssetCollection
+    {
+        OffsetT TextureAssetsOffset;
+        int TextureAssetCount <fgcolor=cGreen>;
+        OffsetT UIAssetsOffset;
+        int UIAssetCount <fgcolor=cGreen>;
+        OffsetT VFXAssetsOffset;
+        int VFXAssetCount <fgcolor=cGreen>;
+        byte _pad[0x1C] <bgcolor=cBlack, fgcolor=cDkGray>;
+        
+        FSeek(startof(this) + TextureAssetsOffset);
+        DataList TextureAssets(TextureAssetCount)<bgcolor=cDkYellow>;
+    
+        FSeek(startof(this) + UIAssetsOffset);
+        DataList UIAssets(UIAssetCount)<bgcolor=cLtGreen>;
+    
+        FSeek(startof(this) + VFXAssetsOffset);
+        DataList VFXAssets(VFXAssetCount)<bgcolor=cLtBlue>;
+        
+        FSeek(startof(this) + 0x34);
+    } Assets;
+} UIFileToc <open=true, bgcolor=cRed, size=0x2C>;
+
+FSeek(startof(UIFileToc) + UIFileToc.LayersOffset);
+local int i = 0;
+struct
+{
+    local int count<hidden=true> = UIFileToc.LayerCount;
+    for (i = 0; i < count; i++)
+    {
+        FSeek(startof(UIFileToc) + UIFileToc.LayersOffset + (i * 0x40));
+        GroupEntry Layer <bgcolor=cBlue>;
+    }
+} Layers <open=true, read=Str("Layers: %d", this.count)>;
