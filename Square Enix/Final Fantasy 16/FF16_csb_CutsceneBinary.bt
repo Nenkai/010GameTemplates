@@ -10,48 +10,316 @@
 //  ID Bytes: 46 43 55 54
 //   History: 
 //------------------------------------------------
+BitfieldDisablePadding();
+
+typedef struct
+{
+    int Id : 24;
+    enum <ubyte>
+    {
+        ActorBase = 0,
+        BNpcBase = 1,
+        ENpcBase = 2,
+        WeaponBase = 3,
+        GimmickBase = 4,
+        StageSetBase = 5,
+        NullActorBase = 7,
+        AnimalBase = 8,
+        PropBase = 9,
+    } EntityType : 8;
+} EntityBase <read=Str("%s - Id: %d", EnumToString(EntityType), Id), fgcolor=cPurple>;
+
+typedef int Offset32 <format=hex, fgcolor=cRed>;
+
+typedef struct
+{
+    double X;
+    double Y;
+    double Z;
+} Vec3Double <read=Str("%f, %f, %f", X, Y, Z)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3f <read=Str("%f, %f, %f", X, Y, Z)>;
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    int DataSize <format=hex>;
+    float field_0x08;
+    float field_0x0C;
+    
+    FSeek(startof(DataOffset) + DataOffset);
+    union
+    {
+        byte DataBytes[DataSize];
+        struct
+        {
+            int KeyframeCount;
+            struct
+            {
+                int FloatCountOrType;
+                float FrameOffset;
+                float b[FloatCountOrType > 0 ? FloatCountOrType : 1];
+            } Keyframe[KeyframeCount] <optimize=false>;
+        } Keyframes;
+    } KeyframesUnion;
+    
+    FSeek(startof(DataOffset) + 0x10);
+} Curve;
+
+typedef struct
+{
+    int AssetType;
+    int AssetPathOffset;
+    
+    FSeek(startof(this) + AssetPathOffset);
+    string Path;
+    
+    FSeek(startof(this) + 0x08);   
+} AssetRef <read=Str("[%d] %s", AssetType, Path)>;
 
 // Initial loader at: ffxvi.exe steam 1.0.1 - 14066C098 
 enum TimelineElementType
 {
-    kTimelineElem_5 = 5,
-    kTimelineElem_CameraAnimationRange = 8,
-    kTimelineElem_BattleCondition = 10, // < check.
-    kTimelineElem_BulletTimeRange = 12,
-    kTimelineElem_ControlPermission = 17, 
-    kTimelineElem_23 = 23,  
-    kTimelineElem_27 = 27,
-    kTimelineElem_30 = 30,
-    kTimelineElem_PlaySoundTrigger = 31,
-    kTimelineElem_AttachWeaponTemporaryRange = 33,
-    kTimelineElem_ModelSE = 45,
-    kTimelineElem_BattleMessageRange = 47,
-    kTimelineElem_BonamikOffRange = 48,
-    kTimelineElem_49 = 49,
-    kTimelineElem_EnableDestructorCollision = 51,
-    kTimelineElem_56 = 56,
-    kTimelineElem_PadVibration = 57,
-    kTimelineElem_60 = 60,
-    kTimelineElem_73 = 73,
-    kTimelineElem_WaterDropTransition = 75,
-    kTimelineElem_ControlRejectionRange = 74,
-    kTimelineElem_84 = 84,
-    kTimelineElem_Motion = 3003,
-    kTimelineElem_FadeRange_Type = 3008,
-    kTimelineElem_ActorPositionTrigger = 3009,
-    kTimelineElem_VoiceRange = 3016,
-    kTimelineElem_VisibleTriggerMaybe = 3018,
-    kTimelineElem_SceneCaptionTrigger = 3022,
-    kTimelineElem_ModelVfxKick = 3030,
-    kTimelineElem_ChangeBgmTrigger = 3079,
-    kTimelineElem_ChangeSoundVolume = 3080,
-    kTimelineElem_CaptionTrigger = 3086,
-    kTimelineElem_ChangeMaterialRange = 3103,
-    kTimelineElem_Wind = 3106,
-    kTimelineElem_SlowSpeedRange = 3115,
-    kTimelineElem_VertexAnimationControlRange = 3135,
-    kTimelineElem_LoreWorldViewNaviStartupType = 3151,
+    kTimelineElem_3 = 3,                                 // Trigger
+    kTimelineElem_5 = 5,                                 // Range
+    kTimelineElem_6 = 6,                                 // Trigger
+    kTimelineElem_9 = 9,                                 // Trigger
+    kTimelineElem_BattleCondition = 10,                  // < check. Range
+    kTimelineElem_11 = 11,                               // Range
+    kTimelineElem_13 = 13,                               // Trigger
+    kTimelineElem_14 = 14,                               // Range
+    kTimelineElem_15 = 15,                               // Trigger
+    kTimelineElem_16 = 16,                               // Range
+    kTimelineElem_18 = 18,                               // Range
+    kTimelineElem_19 = 19,                               // Range
+    kTimelineElem_22 = 22,                               // Range
+    kTimelineElem_25 = 25,                               // Range
+    kTimelineElem_26 = 26,                               // Range
+    kTimelineElem_28 = 28,                               // Trigger
+    kTimelineElem_29 = 29,                               // Range
+    kTimelineElem_30 = 30,                               // Range
+    kTimelineElem_PlaySoundTrigger = 31,                 // Trigger
+    kTimelineElem_32 = 32,                               // Trigger
+    kTimelineElem_AttachWeaponTemporaryRange = 33,       // Range
+    kTimelineElem_34 = 34,                               // Trigger
+    kTimelineElem_36 = 36,                               // Range
+    kTimelineElem_37 = 37,                               // Range
+    kTimelineElem_38 = 38,                               // Range
+    kTimelineElem_41 = 41,                               // Trigger
+    kTimelineElem_42 = 42,                               // Range
+    kTimelineElem_43 = 43,                               // Trigger
+    kTimelineElem_44 = 44,                               // Trigger
+    kTimelineElem_ModelSE = 45,                          // Trigger
+    kTimelineElem_46 = 46,                               // Trigger
+    kTimelineElem_BattleMessageRange = 47,               // Range
+    kTimelineElem_BonamikOffRange = 48,                  // Range
+    kTimelineElem_49 = 49,                               // Range
+    kTimelineElem_50 = 50,                               // Range
+    kTimelineElem_52 = 52,                               // Range
+    kTimelineElem_53 = 53,                               // Range
+    kTimelineElem_54 = 54,                               // Trigger
+    kTimelineElem_56 = 56,                               // Trigger
+    kTimelineElem_PadVibration = 57,                     // Trigger
+    kTimelineElem_58 = 58,                               // Range
+    kTimelineElem_59 = 59,                               // Range
+    kTimelineElem_60 = 60,                               // Range
+    kTimelineElem_61 = 61,                               // Range
+    kTimelineElem_62 = 62,                               // Trigger
+    kTimelineElem_63 = 63,                               // Range
+    kTimelineElem_64 = 64,                               // Range
+    kTimelineElem_65 = 65,                               // Trigger
+    kTimelineElem_66 = 66,                               // Range
+    kTimelineElem_68 = 68,                               // Range
+    kTimelineElem_69 = 69,                               // Range
+    kTimelineElem_71 = 71,                               // Range
+    kTimelineElem_72 = 72,                               // Range
+    kTimelineElem_73 = 73,                               // Range
+    kTimelineElem_WaterDropTransition = 75,              // Range
+    kTimelineElem_76 = 76,                               // Range
+    kTimelineElem_77 = 77,                               // Range
+    kTimelineElem_78 = 78,                               // Trigger
+    kTimelineElem_79 = 79,                               // Trigger
+    kTimelineElem_80 = 80,                               // Range
+    kTimelineElem_82 = 82,                               // Range
+    kTimelineElem_83 = 83,                               // Trigger
+    kTimelineElem_84 = 84,                               // Range
+    kTimelineElem_86 = 86,                               // Trigger
+    kTimelineElem_87 = 87,                               // Range
+    kTimelineElem_88 = 88,                               // Trigger
+    
+    kTimelineElem_1002 = 1002,                           // Range
+    kTimelineElem_1014 = 1014,                           // Range
+    kTimelineElem_1038 = 1038,                           // Trigger
+    kTimelineElem_1055 = 1055,                           // Range
+    kTimelineElem_1057 = 1057,                           // Range
+    kTimelineElem_1058 = 1058,                           // Range
+    kTimelineElem_1061 = 1061,                           // Trigger
+    kTimelineElem_1074 = 1074,                           // Trigger
+    kTimelineElem_1075 = 1075,                           // Range
+    kTimelineElem_1076 = 1076,                           // Range
+    kTimelineElem_1079 = 1079,                           // Range
+    kTimelineElem_1082 = 1082,                           // Trigger
+    kTimelineElem_1087 = 1087,                           // Range
+    kTimelineElem_1097 = 1097,                           // Range
+    kTimelineElem_1102 = 1102,                           // Range
+    kTimelineElem_1103 = 1103,                           // Range
+    kTimelineElem_1107 = 1107,                           // Range
+    kTimelineElem_1119 = 1119,                           // Trigger
+    kTimelineElem_1128 = 1128,                           // Trigger
+    
+    kTimelineElem_Animation = 3001,                      // Range
+    kTimelineElem_3002 = 3002,                           // Range
+    kTimelineElem_Motion = 3003,                         // Range
+    kTimelineElem_3004 = 3004,                           // Trigger
+    kTimelineElem_3005 = 3005,                           // Range
+    kTimelineElem_3006 = 3006,                           // Range
+    kTimelineElem_3007 = 3007,                           // Range
+    kTimelineElem_FadeRange_Type = 3008,                 // Range
+    kTimelineElem_ActorPositionTrigger = 3009,           // Trigger
+    kTimelineElem_3010 = 3010,                           // Range
+    kTimelineElem_3013 = 3013,                           // Trigger
+    kTimelineElem_3014 = 3014,                           // Range
+    kTimelineElem_3015 = 3015,                           // Trigger
+    kTimelineElem_VoiceRange = 3016,                     // Range
+    kTimelineElem_3017 = 3017,                           // Trigger
+    kTimelineElem_VisibleTrigger = 3018,                 // Trigger
+    kTimelineElem_3021 = 3021,                           // Trigger
+    kTimelineElem_SceneCaptionTrigger = 3022,            // Range (check)
+    kTimelineElem_3023 = 3023,                           // Trigger
+    kTimelineElem_3024 = 3024,                           // Range
+    kTimelineElem_FacialMotion = 3025,                   // Range
+    kTimelineElem_3026 = 3026,                           // Range
+    kTimelineElem_3027 = 3027,                           // Range
+    kTimelineElem_3028 = 3028,                           // Range
+    kTimelineElem_3029 = 3029,                           // Range
+    kTimelineElem_ModelVfxKick = 3030,                   // Trigger - this is also 'VfxTrigger'
+    kTimelineElem_3031 = 3031,                           // Trigger
+    kTimelineElem_3034 = 3034,                           // Range
+    kTimelineElem_3035 = 3035,                           // Trigger
+    kTimelineElem_3037 = 3037,                           // Trigger
+    kTimelineElem_3039 = 3039,                           // Range
+    kTimelineElem_3042 = 3042,                           // Range
+    kTimelineElem_3043 = 3043,                           // Trigger
+    kTimelineElem_3045 = 3045,                           // Trigger
+    kTimelineElem_3046 = 3046,                           // Range
+    kTimelineElem_3048 = 3048,                           // Range
+    kTimelineElem_3050 = 3050,                           // Range
+    kTimelineElem_3053 = 3053,                           // Range
+    kTimelineElem_3055 = 3055,                           // Trigger
+    kTimelineElem_3056 = 3056,                           // Range
+    kTimelineElem_3057 = 3057,                           // Trigger
+    kTimelineElem_3059 = 3059,                           // Range
+    kTimelineElem_3060 = 3060,                           // Trigger
+    kTimelineElem_3061 = 3061,                           // Range
+    kTimelineElem_3062 = 3062,                           // Range
+    kTimelineElem_3063 = 3063,                           // Trigger
+    kTimelineElem_3064 = 3064,                           // Range
+    kTimelineElem_3065 = 3065,                           // Range
+    kTimelineElem_3066 = 3066,                           // Range
+    kTimelineElem_3067 = 3067,                           // Range
+    kTimelineElem_3068 = 3068,                           // Range
+    kTimelineElem_3069 = 3069,                           // Range
+    kTimelineElem_3070 = 3070,                           // Range
+    kTimelineElem_3071 = 3071,                           // Range
+    kTimelineElem_3072 = 3072,                           // Range
+    kTimelineElem_3073 = 3073,                           // Trigger
+    kTimelineElem_3074 = 3074,                           // Trigger
+    kTimelineElem_3075 = 3075,                           // Trigger
+    kTimelineElem_3076 = 3076,                           // Range
+    kTimelineElem_3077 = 3077,                           // Range
+    kTimelineElem_3078 = 3078,                           // Trigger
+    kTimelineElem_ChangeBgmTrigger = 3079,               // Trigger
+    kTimelineElem_ChangeSoundVolume = 3080,              // Trigger
+    kTimelineElem_3081 = 3081,                           // Range
+    kTimelineElem_3082 = 3082,                           // Range
+    kTimelineElem_3083 = 3083,                           // Trigger
+    kTimelineElem_BrightnessControlRange = 3084,         // Range - NAME IS GUESSED
+    kTimelineElem_3085 = 3085,                           // Trigger
+    kTimelineElem_CaptionTrigger = 3086,                 // Trigger
+    kTimelineElem_3087 = 3087,                           // Trigger
+    kTimelineElem_3088 = 3088,                           // Range
+    kTimelineElem_3089 = 3089,                           // Range
+    kTimelineElem_3090 = 3090,                           // Range
+    kTimelineElem_3091 = 3091,                           // Range
+    kTimelineElem_3092 = 3092,                           // Range
+    kTimelineElem_3093 = 3093,                           // Range
+    kTimelineElem_3094 = 3094,                           // Range
+    kTimelineElem_3095 = 3095,                           // Range
+    kTimelineElem_3097 = 3097,                           // Range
+    kTimelineElem_3098 = 3098,                           // Range
+    kTimelineElem_3099 = 3099,                           // Trigger
+    kTimelineElem_3100 = 3100,                           // Range
+    kTimelineElem_3102 = 3102,                           // Range
+    kTimelineElem_ChangeMaterialRange = 3103,            // Range
+    kTimelineElem_3104 = 3104,                           // Trigger
+    kTimelineElem_3105 = 3105,                           // Range
+    kTimelineElem_Wind = 3106,                           // Range
+    kTimelineElem_3107 = 3107,                           // Range
+    kTimelineElem_3109 = 3109,                           // Trigger
+    kTimelineElem_3110 = 3110,                           // Range
+    kTimelineElem_3111 = 3111,                           // Trigger
+    kTimelineElem_3112 = 3112,                           // Trigger
+    kTimelineElem_3113 = 3113,                           // Range
+    kTimelineElem_3114 = 3114,                           // Trigger
+    kTimelineElem_SlowSpeedRange = 3115,                 // Range
+    kTimelineElem_3117 = 3117,                           // Range
+    kTimelineElem_3118 = 3118,                           // Range
+    kTimelineElem_3119 = 3119,                           // Trigger
+    kTimelineElem_3120 = 3120,                           // Trigger
+    kTimelineElem_3121 = 3121,                           // Range
+    kTimelineElem_3122 = 3122,                           // Range
+    kTimelineElem_3124 = 3124,                           // Trigger
+    kTimelineElem_3127 = 3127,                           // Range
+    kTimelineElem_3128 = 3128,                           // Range
+    kTimelineElem_3129 = 3129,                           // Range
+    kTimelineElem_3132 = 3132,                           // Trigger
+    kTimelineElem_3133 = 3133,                           // Range
+    kTimelineElem_VertexAnimationControlRange = 3135,    // Range
+    kTimelineElem_3136 = 3136,                           // Range
+    kTimelineElem_3137 = 3137,                           // Range
+    kTimelineElem_3138 = 3138,                           // Range
+    kTimelineElem_3139 = 3139,                           // Range
+    kTimelineElem_3140 = 3140,                           // Trigger
+    kTimelineElem_3141 = 3141,                           // Range
+    kTimelineElem_3142 = 3142,                           // Trigger
+    kTimelineElem_3143 = 3143,                           // Trigger
+    kTimelineElem_3144 = 3144,                           // Range
+    kTimelineElem_3145 = 3145,                           // Range
+    kTimelineElem_3146 = 3146,                           // Range
+    kTimelineElem_3147 = 3147,                           // Range
+    kTimelineElem_3148 = 3148,                           // Range
+    kTimelineElem_3149 = 3149,                           // Range
+    kTimelineElem_LoreWorldViewNaviStartupType = 3151,   // Range
+    kTimelineElem_3152 = 3152,                           // Range
+    kTimelineElem_3153 = 3153,                           // Range
+    kTimelineElem_3154 = 3154,                           // Range
+    kTimelineElem_3155 = 3155,                           // Range
+    kTimelineElem_3156 = 3156,                           // Range
+    kTimelineElem_3157 = 3157,                           // Trigger
+    kTimelineElem_3158 = 3158,                           // Range
+    kTimelineElem_3159 = 3159,                           // Range
+    kTimelineElem_3160 = 3160,                           // Trigger
+    kTimelineElem_3161 = 3161,                           // Range
+    kTimelineElem_3162 = 3162,                           // Range
+    kTimelineElem_3163 = 3163,                           // Range
+    
+    kTimelineElem_3901 = 3901,                           // Range
+    kTimelineElem_3904 = 3904,                           // Range
+    kTimelineElem_3905 = 3905,                           // Range
+    kTimelineElem_3907 = 3907,                           // Range
+    kTimelineElem_3908 = 3908,                           // Range
+    kTimelineElem_3909 = 3909,                           // Trigger
+    kTimelineElem_3911 = 3911,                           // Range
+    kTimelineElem_3912 = 3912,                           // Trigger
 };
+
+// Guesses:
+// NarrowList = 3071, 3072, 3084, 3088, 3901, or 3118
 
 // Some names from: https://youtube.com/watch?v=xQpTI_8B_W8
 // Mirror: https://gdcvault.com/play/1034705/Autodesk-Developer-Summit-FINAL-FANTASY
@@ -192,22 +460,274 @@ enum TimelineElementType
 // - WeaponDisappearRange
 // - Wind
 
-// 3912 - VfxTrigger?
-// 3018 - VisibleTrigger?
-
 typedef struct
 {
-    double X;
-    double Y;
-    double Z;
-} Vec3Double <read=Str("%f, %f, %f", X, Y, Z)>;
+    int field_0x00;
+    int NameOffset <fgcolor=cRed, format=hex>;
+    TimelineElementType ElementType;
+    int FrameStart;
+    int FrameDuration;
+    int field_0x14;
+    byte field_0x15;
+    byte field_0x16;
+    byte pad[2];
+    int DataOffset <format=hex>;
+    
+    FSeek(startof(this) + DataOffset);
+    struct
+    {
+        int Type;
+        int field_0x04;
+        int field_0x08;
+        int field_0x0C;
+        
+        switch (Type)
+        {
+            case 31:
+                struct
+                {
+                    int field_0x00;
+                    int SoundFilePathOffset <fgcolor=cRed, format=hex>;
+                    int field_0x08;
+                    int field_0x0C;
+                    
+                    FSeek(startof(this) + SoundFilePathOffset);
+                    string Path;
+                } Type31 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_BonamikOffRange: // 48
+                // 48 8B C4 48 89 58 ? 48 89 68 ? 48 89 70 ? 57 41 56 41 57 48 83 EC ? C5 F8 29 70 ? 48 8B E9
+                struct
+                {
+                    int BonamikLayerId;
+                    int UnkFrameCount;
+                    float Field_0x08;
+                    byte Bool_0x0C;
+                    byte pad[0x0F];
+                } Type48 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_WaterDropTransition: // 75
+                // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B 41 ? 4C 8B C1
+                struct
+                {
+                    Curve LeftWaterDropCurve;
+                    Curve RightWaterDropCurve;
+                } Type75 <bgcolor=cBlack>;
+                break;
+            case 3001:
+                struct
+                {
+                    // E9 ? ? ? ? CC CC CC 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? 48 8B F9 C5 F8 29 78
+                    Curve UnkCurve1;
+                    Curve UnkCurve2;
+                    Curve UnkCurve3;
+                    Curve UnkCurve4;
+                    Curve UnkCurve5;
+                    Curve UnkCurve6;
+                    Curve UnkCurve7;
+                    Curve UnkCurve8;
+                    byte pad[0x10];
+                } Type3001 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_3002:
+                // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 41 56 48 83 EC ? C5 F8 29 70 ? 4C 8D 71
+                struct
+                {
+                    int UnkIdOrType;
+                    int UnkFrameCount;
+                    int UnkFrameCount2;
+                    int UnkOffset <fgcolor=cRed, format=hex>;
+                    int _pad_[3];
+                    
+                    FSeek(startof(parentof(this)) + UnkOffset);
+                    string Path;
+                    
+                    FSeek(startof(this) + 0x1C);
+                } Type3002 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_Motion:
+                struct
+                {
+                    // 48 8B C4 48 89 58 ? 48 89 68 ? 48 89 70 ? 57 48 83 EC ? C5 F8 29 70 ? 48 8B F1 E8 ? ? ? ? 48 8B 46 ? 48 8B CE
+                    AssetRef AnimAsset <fgcolor=cRed, format=hex>;
+                    int field_0x08;
+                    int field_0x0C;
+                    int field_0x10;
+                    uint ActionMoveTypeId;
+                    int Type_0x18;
+                    int field_0x1C;
+                    int field_0x20;
+                    byte field_0x24;
+                    byte field_0x25;
+                    byte field_0x26;
+                    byte field_0x27;
+                    float field_0x28;
+                    Offset32 BonamikFPathOffset;
+                    AssetRef UnkAssetRef;
+                    int pad_[4];
+                    
+                    FSeek(startof(parentof(this)) + BonamikFPathOffset);
+                    string BonamikFPath;
+                } Type3003 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_ModelVfxKick:
+                // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B 41 ? 48 8B F1 8B 50
+                struct
+                {
+                    // TODO
+                    Offset32 BindersOffset;
+                    int BinderCount;
+                    int Field_0x08;
+                    int Field_0x0C;
+                    AssetRef Vfx;
+                    AssetRef Se;
+                    int Field_0x20;
+                    int Field_0x24;
+                    int Field_0x28;
+                    int Field_0x2C;
+                    int Field_0x30;
+                    int Field_0x34;
+                    double Field_0x38;
+                    double Field_0x40;
+                    double Field_0x48;
+                    float Field_0x50;
+                    int Field_0x54;
+                    int Field_0x58;
+                    float Field_0x5C;
+                    int Field_0x60;
+                    int Field_0x64;
+                    int Field_0x68;
+                    float Field_0x6C;
+                    byte pad[0x30];
+                } Type3030 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_ActorPositionTrigger: // 3009
+                // 40 53 48 83 EC ? 48 8B 41 ? 48 63 58 ? 48 03 D8 83 7B
+                struct
+                {
+                    Vec3Double Transition;
+                    Vec3f Rotation;
+                    float Unk;
+                    byte pad[0x18];
+                } Type3009 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_VoiceRange: // 3016
+                struct
+                {
+                    // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? 48 8B D9
+                    int PanzerTextId; // Pzd
+                    float FrameCount;
+                    int HasLipsync;
+                    Offset32 LipsyncFilePathOffset;
+                    int Field_0x10;
+                    int Field_0x14;
+                    byte Bool_0x18;
+                    
+                    FSeek(startof(parentof(this)) + LipsyncFilePathOffset);
+                    string LipsyncFilePath;
+                } Type3018 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_VisibleTrigger: // 3018
+                // 48 8B 51 ? 48 63 42 ? 8A 54 10
+                struct
+                {
+                    byte Visible;
+                    byte pad_[0x03];
+                } Type3018 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_FacialMotion: // 3025
+                // 48 8B 51 ? 48 63 42 ? 8A 54 10
+                struct
+                {
+                    AssetRef AnimAsset;
+                    byte pad[0x28];
 
-typedef struct
-{
-    float X;
-    float Y;
-    float Z;
-} Vec3f <read=Str("%f, %f, %f", X, Y, Z)>;
+                } Type3025 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_ChangeBgmTrigger: // 3079
+                // 48 83 EC ? 4C 8B 41 ? 33 C9
+                struct
+                {
+                    int BgmId; 
+                    int AreaDefineId;
+                    // Whether to use type, otherwise uses bgmmode 10.
+                    byte IsUseType;
+                    byte Padding[0x3];
+                    
+                    // Type 0-3 
+                    // 0 = bgmmode 8
+                    // 1 = bgmmode 10
+                    // 2 = bgmmode 11
+                    // 3 = use area define id?
+                    int Type;
+                    byte pad_[0x08];
+                } Type3079;
+                break;
+                
+            case kTimelineElem_3089:
+                struct
+                {
+                    Curve UnkCurve;
+                    byte pad[8];
+                } Type3089;
+                break;
+            case kTimelineElem_BrightnessControlRange: // 3084, NAME IS GUESSED
+                //  40 53 48 83 EC ? 48 8B 01 48 8B D9 FF 50 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 8A 53
+                struct
+                {
+                    Curve UnkCurve;
+                    byte pad_[0x0C];
+                } Type3084;
+                break;
+                
+            case kTimelineElem_ChangeSoundVolume: // 3080
+                // 48 83 EC ? 48 8B 41 ? 48 63 48 ? 48 03 C8 8B 51
+                struct
+                {
+                    int Field_0x00;
+                    float Field_0x04;
+                    float Field_0x08;
+                    byte Field_0x0C;
+                    byte pad_[0x07];
+                } Type3080;
+                break;
+            case kTimelineElem_ChangeMaterialRange: // 3103
+                struct
+                {
+                    AssetRef MaterialOffset <fgcolor=cRed, format=hex>;
+                    int field_0x08 <fgcolor=cRed, format=hex>;
+                    int field_0x0C;
+                    
+                    FSeek(startof(parentof(this)) + field_0x08);
+                    string Name;
+                } Type3103 <bgcolor=cBlack>;
+                break;
+            case kTimelineElem_Wind: // 3106
+                // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B C1 48 8D 51 ? 48 8B F9
+                struct
+                {
+                    byte Bool_0x00;
+                    byte pad[3];
+                    Curve Curve_0x04;
+                    Curve Curve_0x14;
+                    Curve Curve_0x24;
+                    Curve Curve_0x34;
+                    Curve Curve_0x44;
+                    Curve Curve_0x54;
+                } Type3080;
+                break;
+                
+            default:
+                break;
+        }
+        
+    } TimelineElementData <bgcolor=cDkPurple>;
+    
+    FSeek(startof(this) + NameOffset);
+    string Name <bgcolor=cGray>;
+    
+} TimelineElement <bgcolor=cRed, read=Str("[%d->%d] %s (%d)", FrameStart, FrameStart+FrameDuration, 
+    (EnumToString(ElementType) == "" ? Str("%d", ElementType) : EnumToString(ElementType)), ElementType)>;
 
 typedef struct
 {
@@ -254,11 +774,11 @@ struct
         float ColorTemperature;
         float Tint;
         int field_0x3C;
-        uint UnkOffset_0x40 <fgcolor=cRed, format=hex>;
+        Offset32 UnkOffset_0x40;
         uint UnkCount_0x40;
-        int UnkOffset_0x48 <fgcolor=cRed, format=hex>;
-        int field_0x4C;
-        uint PackReferencesOffset <fgcolor=cRed, format=hex>;
+        Offset32 SetupElementsOffset;
+        int NumSetupElements;
+        Offset32 PackReferencesOffset;
         int PackReferenceCount;
         uint AssetsOffset <fgcolor=cRed, format=hex>;
         uint AssetCount;
@@ -297,163 +817,13 @@ struct
                 int field_0x14 <fgcolor=cRed, format=hex>;
                 int field_0x18;
                 int FrameCount;
-                int unk;
+                int field_0x1C;
                 
                 local int j = 0;
                 for (j = 0; j < TimelineElementCount; j++)
                 {
                     FSeek(startof(this) + TimelineElementsOffset + (j * 0x20));
-                    struct
-                    {
-                        int field_0x00;
-                        int NameOffset <fgcolor=cRed, format=hex>;
-                        TimelineElementType ElementType;
-                        int FrameStart;
-                        int FrameDuration;
-                        int field_0x14;
-                        byte g;
-                        byte h;
-                        byte pad[2];
-                        int field_0x1C <format=hex>;
-                        
-                        FSeek(startof(this) + field_0x1C);
-                        struct
-                        {
-                            int Type;
-                            int field_0x04;
-                            int field_0x08;
-                            int field_0x0C;
-                            
-                            switch (Type)
-                            {
-                                case 31:
-                                    struct
-                                    {
-                                        int field_0x00;
-                                        int SoundFilePathOffset <fgcolor=cRed, format=hex>;
-                                        int field_0x08;
-                                        int field_0x0C;
-                                        
-                                        FSeek(startof(this) + SoundFilePathOffset);
-                                        string Path;
-                                    } Type31 <bgcolor=cBlack>;
-                                    break;
-                                case 75:
-                                    struct
-                                    {
-                                        int todo;
-                                    } Type3009 <bgcolor=cBlack>;
-                                    break;
-                                case 3001:
-                                    struct
-                                    {
-                                        int UnkOffset1 <fgcolor=cRed, format=hex>;
-                                        int UnkOffset2 <fgcolor=cRed, format=hex>;
-                                        
-                                        /*
-                                        FSeek(startof(this) + UnkOffset1);
-                                        struct
-                                        {
-                                            int SubCount;
-                                            struct
-                                            {
-                                                int A;
-                                                int B;
-                                                
-                                                switch (A)
-                                                {
-                                                    case 0:
-                                                        float v4[4];
-                                                        break;
-                                                    case 1:
-                                                        float v4[1];
-                                                        break;
-                                                    case 2:
-                                                        int a;
-                                                        float v[1];
-                                                        break;
-                                                    case 3:
-                                                        Vec3f v3;
-                                                        break;
-                                                }
-                                            } Sub1[SubCount] <optimize=false>;
-                                        } Ent;
-                                        */
-
-                                        FSeek(startof(this) + UnkOffset2);
-                                        int test;
-                                    } Type3001 <bgcolor=cBlack>;
-                                    break;
-                                case 3002:
-                                    struct
-                                    {
-                                        int field_0x00;
-                                        int field_0x04;
-                                        int field_0x08;
-                                        int UnkOffset <fgcolor=cRed, format=hex>;
-                                        int _pad_[3];
-                                        
-                                        FSeek(startof(parentof(this)) + UnkOffset);
-                                        string Path;
-                                        
-                                        FSeek(startof(this) + 0x1C);
-                                    } Type3002 <bgcolor=cBlack>;
-                                    break;
-                                case 3003:
-                                    struct
-                                    {
-                                        int field_0x00;
-                                        int SoundFilePathOffset <fgcolor=cRed, format=hex>;
-                                        int field_0x08;
-                                        int field_0x0C;
-                                        
-                                        FSeek(startof(this) + SoundFilePathOffset);
-                                        string Path;
-                                    } Type3003 <bgcolor=cBlack>;
-                                    break;
-                                case 3030:
-                                    struct
-                                    {
-                                        int field_0x00;
-
-                                    } Type3030 <bgcolor=cBlack>;
-                                    break;
-                                case kTimelineElem_ActorPositionTrigger: // 3009
-                                    struct
-                                    {
-                                        Vec3Double Transition;
-                                        Vec3f Rotation;
-                                        float Unk;
-                                        int pad[6];
-                                    } Type3009 <bgcolor=cBlack>;
-                                    break;
-                                case kTimelineElem_ChangeMaterialRange: // 3103
-                                    struct
-                                    {
-                                        int field_0x00;
-                                        int MaterialOffset <fgcolor=cRed, format=hex>;
-                                        int field_0x08 <fgcolor=cRed, format=hex>;
-                                        int field_0x0C;
-                                        
-                                        FSeek(startof(this) + MaterialOffset);
-                                        string Path;
-                                        
-                                        FSeek(startof(parentof(this)) + field_0x08);
-                                        string Name;
-                                    } Type3103 <bgcolor=cBlack>;
-                                    break;
-                                    
-                                default:
-                                    break;
-                            }
-                            
-                        } TimelineElementData <bgcolor=cDkPurple>;
-                        
-                        FSeek(startof(this) + NameOffset);
-                        string Name <bgcolor=cGray>;
-                        
-                    } TimelineElement <bgcolor=cRed, read=Str("[%d->%d] %s (%d)", FrameStart, FrameStart+FrameDuration, 
-                        (EnumToString(ElementType) == "" ? Str("%d", ElementType) : EnumToString(ElementType)), ElementType)>;
+                    TimelineElement Element;
                 }
                 
                 FSeek(startof(this) + 0x24);
@@ -461,23 +831,29 @@ struct
             
             
             FSeek(startof(this) + 0x50);
-        } Timeline <bgcolor=cBlue>;
+        } Timeline <open=true, bgcolor=cBlue>;
     }
     
-    FSeek(startof(this) + MainHeader.UnkOffset_0x48);
+    FSeek(startof(this) + MainHeader.SetupElementsOffset);
     struct
     {
-        int Offsets[MainHeader.field_0x4C] <bgcolor=cWhite>;
+        int Offsets[MainHeader.NumSetupElements] <bgcolor=cWhite>;
         local int j = 0;
-        for (j = 0; j < MainHeader.field_0x4C; j++)
+        for (j = 0; j < MainHeader.NumSetupElements; j++)
         {
             FSeek(startof(this) + Offsets[j]);
             struct
             {
-                int Type <fgcolor=cYellow>;
+                enum <int>
+                {
+                    kCutsceneTimelineSetupType_Npc = 3005,
+                    kCutsceneTimelineSetupType_StageSet = 3006,
+                    kCutsceneTimelineSetupType_Weapon = 3015,
+                } CutsceneTimelineSetupType <fgcolor=cYellow>;
+                
                 int _reserved_[9];
                 
-                switch (Type)
+                switch (CutsceneTimelineSetupType)
                 {
                     case 3001:
                         struct 
@@ -498,23 +874,52 @@ struct
                         } Type3004 <bgcolor=cBlack>;
                         break;
                     case 3005:
+                        // 48 89 5C 24 ? 57 48 83 EC ? 48 8B 79 ? 48 8B D9 8B 17
                         struct 
                         {
                             int IdKind;
-                            int ID;
-                            int Unk;
-                            int Unk;
-                            int Unk;
+                            switch (IdKind)
+                            {
+                                case 1:
+                                    EntityBase Base;
+                                    break;
+                                    
+                                case 2:
+                                case 1001:
+                                case 1002:
+                                case 1003:
+                                    int Unk;
+                                    break;
+                                    
+                                default:
+                                    int Unk;
+                                    break;
+                            }
+                            byte pad[0x0C];
                         } Type3005 <bgcolor=cBlack>;  
                         break;
                     case 3006:
                         struct 
                         {
-                            int Unk;
-                            int Unk;
-                            int Unk;
-                            int Unk;
-                            int Unk;
+                            int IdKind;
+                            switch (IdKind)
+                            {
+                                case 1:
+                                    EntityBase Base;
+                                    break;
+                                    
+                                case 2:
+                                case 1001:
+                                case 1002:
+                                case 1003:
+                                    int Unk;
+                                    break;
+                                    
+                                default:
+                                    int Unk;
+                                    break;
+                            }
+                            byte pad[0x0C];
                         } Type3006 <bgcolor=cBlack>;  
                         break;
                     case 3007:
@@ -547,11 +952,25 @@ struct
                     case 3015:
                         struct 
                         {
-                            int Unk;
-                            int Unk;
-                            int Unk;
-                            int Unk;
-                            int Unk;
+                            int IdKind;
+                            switch (IdKind)
+                            {
+                                case 1:
+                                    EntityBase Base;
+                                    break;
+                                    
+                                case 2:
+                                case 1001:
+                                case 1002:
+                                case 1003:
+                                    int Unk;
+                                    break;
+                                    
+                                default:
+                                    int Unk;
+                                    break;
+                            }
+                            byte pad[0x0C];
                         } Type3015 <bgcolor=cBlack>;  
                         break;
                     case 3017:
@@ -596,17 +1015,18 @@ struct
                         } Type3029 <bgcolor=cBlack>;  
                         break;
                 }
-            } CutsceneElement <bgcolor=cGreen, read=Type>;
+            } CutsceneElement <bgcolor=cGreen, read=Str("%s", 
+                EnumToString(CutsceneTimelineSetupType) == "" ? Str("%d", CutsceneTimelineSetupType) : EnumToString(CutsceneTimelineSetupType))>;
         }
         
-        FSeek(startof(Offsets) + MainHeader.field_0x4C * sizeof(int));
-    } CutsceneElements;
+        FSeek(startof(Offsets) + MainHeader.NumSetupElements * sizeof(int));
+    } CutsceneSetupElements;
     
     FSeek(MainHeader.PackReferencesOffset);
     PackReference PackReferences[MainHeader.PackReferenceCount];
 
     FSeek(MainHeader.AssetsOffset);
     Asset Assets[MainHeader.AssetCount];
-} Cutscene;
+} Cutscene <open=true>;
 
 Printf("NOTE: this cutscene template is heavily TODO/Not complete");
