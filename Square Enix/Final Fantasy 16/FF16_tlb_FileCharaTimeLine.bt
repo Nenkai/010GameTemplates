@@ -56,18 +56,18 @@ typedef struct
         byte DataBytes[DataSize];
         struct
         {
-            int GroupCount;
+            int KeyframeCount;
             struct
             {
-                int FloatCount;
-                float field_0x04;
-                float b[FloatCount];
-            } Entry[GroupCount] <optimize=false>;
-        } Data;
-    } DataUnion;
+                int FloatCountOrType;
+                float FrameOffset;
+                float b[FloatCountOrType > 0 ? FloatCountOrType : 1];
+            } Keyframe[KeyframeCount] <optimize=false>;
+        } Keyframes;
+    } KeyframesUnion;
     
     FSeek(startof(DataOffset) + 0x10);
-} AnimPathData; // Keyframe?
+} Curve;
                 
 // idlist init & file handles open: 48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 80 B9        
 // CharaTimeline initializer: 48 89 5C 24 ? 4C 89 4C 24 ? 4C 89 44 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ? 4D 8B F9
@@ -322,14 +322,14 @@ typedef struct
                     byte field_0x09;
                     byte field_0x0A;
                     byte field_0x0B;
-                    AnimPathData field_0x0C;
-                    AnimPathData field_0x1C;
-                    AnimPathData field_0x2C;
-                    AnimPathData field_0x3C;
-                    AnimPathData field_0x4C;
-                    AnimPathData field_0x5C;
-                    AnimPathData field_0x6C;
-                    AnimPathData field_0x7C;
+                    Curve field_0x0C;
+                    Curve field_0x1C;
+                    Curve field_0x2C;
+                    Curve field_0x3C;
+                    Curve field_0x4C;
+                    Curve field_0x5C;
+                    Curve field_0x6C;
+                    Curve field_0x7C;
                     int field_0x8C;
                     int field_0x90;
                     float field_0x94;
