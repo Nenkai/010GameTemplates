@@ -264,7 +264,7 @@ enum TimelineElementType
     kTimelineElem_1114 = 1114,                         // OneShot
     kTimelineElem_1115 = 1115,                         // Range
     kTimelineElem_1116 = 1116,                         // Range
-    kTimelineElem_1117 = 1117,                         // OneShot
+    ActionEventTrigger = 1117,                         // OneShot
     kTimelineElem_1118 = 1118,                         // OneShot
     kTimelineElem_1119 = 1119,                         // OneShot
     kTimelineElem_1120 = 1120,                         // Range
@@ -1234,7 +1234,7 @@ typedef struct
                     byte pad_[0x1E];
                 };
                 break;
-            case kTimelineElem_1117:
+            case ActionEventTrigger: // 1117
                 {
                     // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8B 5C 24
                     int UnkId; // has hardcoded check on id 79 and 80
