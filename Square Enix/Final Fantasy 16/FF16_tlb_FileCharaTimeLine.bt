@@ -47,8 +47,8 @@ typedef struct
 {
     int DataOffset <format=hex, fgcolor=cRed>;
     int DataSize <format=hex>;
-    float field_0x08;
-    float field_0x0C;
+    float Min;
+    float Max;
     
     FSeek(startof(DataOffset) + DataOffset);
     union
@@ -68,6 +68,17 @@ typedef struct
     
     FSeek(startof(DataOffset) + 0x10);
 } Curve;
+
+typedef struct
+{
+    int AssetType;
+    int AssetPathOffset;
+    
+    FSeek(startof(this) + AssetPathOffset);
+    string Path;
+    
+    FSeek(startof(this) + 0x08);   
+} AssetRef <read=Str("[%d] %s", AssetType, Path)>;
                 
 // idlist init & file handles open: 48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 80 B9        
 // CharaTimeline initializer: 48 89 5C 24 ? 4C 89 4C 24 ? 4C 89 44 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ? 4D 8B F9
@@ -322,14 +333,14 @@ typedef struct
                     byte field_0x09;
                     byte field_0x0A;
                     byte field_0x0B;
-                    Curve field_0x0C;
-                    Curve field_0x1C;
-                    Curve field_0x2C;
-                    Curve field_0x3C;
-                    Curve field_0x4C;
-                    Curve field_0x5C;
-                    Curve field_0x6C;
-                    Curve field_0x7C;
+                    Curve PerspectiveX;
+                    Curve PerspectiveY;
+                    Curve PerspectiveZ;
+                    Curve EyeGazeX;
+                    Curve EyeGazeY;
+                    Curve EyeGazeZ;
+                    Curve Twist;
+                    Curve FocalLength;
                     int field_0x8C;
                     int field_0x90;
                     float field_0x94;
@@ -472,8 +483,7 @@ typedef struct
                 
             case 30:
                 {
-                    int field_0x00;
-                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    AssetRef Anim <format=hex, fgcolor=cRed>;
                     int field_0x08;
                     byte field_0x0C;
                     byte pad[3];
@@ -492,18 +502,14 @@ typedef struct
                     int field_0x48;
                     int field_0x4C;
                     int empty[4];
-                    
-                    FSeek(startof(field_0x00) + AnimPathOffset);
-                    string SoundPath <bgcolor=cGray>;
-                    
+
                     FSeek(startof(field_0x00) + 0x60);
                 };
                 break;
             case kTimelineElem_PlaySoundTrigger: // 31
                 {
                     // 48 8B C4 48 89 58 ? 55 56 57 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 83 65
-                    int field_0x00;
-                    int SoundPathOffset <format=hex, fgcolor=cRed>;
+                    AssetRef Sound <format=hex, fgcolor=cRed>;
                     int field_0x08;
                     byte field_0x0C;
                     byte pad[3];
@@ -522,10 +528,7 @@ typedef struct
                     int field_0x48;
                     int field_0x4C;
                     int empty[4];
-                    
-                    FSeek(startof(field_0x00) + SoundPathOffset);
-                    string Path <bgcolor=cGray>;
-                    
+
                     FSeek(startof(field_0x00) + 0x60);
                 };
                 break;
@@ -723,8 +726,7 @@ typedef struct
             case kTimelineElem_1001: // Seems shared across timelines - 1033, 1060, 1035
                 {
                     // Verified in code
-                    int field_0x00;
-                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    AssetRef Anim <format=hex, fgcolor=cRed>;
                     byte Bool_0x08;
                     byte Bool_0x09;
                     byte Bool_0x0A;
@@ -735,11 +737,6 @@ typedef struct
                     byte Bool_0x12;
                     byte pad;
                     byte Padding[0x18];
-                    
-                    FSeek(startof(field_0x00) + AnimPathOffset);
-                    string Path <bgcolor=cGray>;
-                    
-                    FSeek(startof(field_0x00) + 0x2C);
                 };
                 break;
             case 1002:
@@ -861,17 +858,12 @@ typedef struct
             case kTimelineElem_1023:
                 {
                     // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 4C 8B F1
-                    int Offset_0x00;
+                    int Offset_0x00 <format=hex, fgcolor=cRed>;
                     int Count_0x00;
-                    int field_0x08;
+                    int field_0x08 <format=hex, fgcolor=cRed>;
                     int field_0x0C;
-                    
-                    int field_0x10;
-                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
-                    
-                    int field_0x18; 
-                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
-                    
+                    AssetRef VFX <format=hex, fgcolor=cRed>;
+                    AssetRef Se <format=hex, fgcolor=cRed>;
                     int field_0x20;
                     int field_0x24;
                     int field_0x28;
@@ -902,11 +894,8 @@ typedef struct
                         int pad[8];
                     } Sub[Count_0x00];
                     
-                    FSeek(startof(field_0x10) + VFXFileNameOffset);
-                    string VFXPath <bgcolor=cGray>;
-                    
-                    FSeek(startof(field_0x18) + UnkNameOffset2);
-                    string UnkName2 <bgcolor=cGray>;
+                    FSeek(startof(this) + 0x54);
+
                 };
                 break;
             case 1030:
@@ -916,13 +905,8 @@ typedef struct
                     int Count_0x00 <fgcolor=cGreen>;
                     int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
                     int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
-                    
-                    int field_0x10;
-                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
-                    
-                    int field_0x18; 
-                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
-                    
+                    AssetRef VFX <format=hex, fgcolor=cRed>;
+                    AssetRef Se <format=hex, fgcolor=cRed>;
                     byte Flags_0x20;
                     byte pad[3];
                     byte field_0x24;
@@ -956,13 +940,7 @@ typedef struct
                         float field_0x34;
                         int pad[8];
                     } Sub[Count_0x00];
-                    
-                    FSeek(startof(field_0x10) + VFXFileNameOffset);
-                    string VFXPath <bgcolor=cGray>;
-                    
-                    FSeek(startof(field_0x18) + UnkNameOffset2);
-                    string UnkName2 <bgcolor=cGray>;
-                    
+
                     FSeek(startof(UnionType) + UnkNameOffset3);
                     string UnkName3 <bgcolor=cGray>;
                     
@@ -972,8 +950,7 @@ typedef struct
             case 1035: // Inherits from 1001?
                 {
                     // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 8B 83 ? ? ? ? 8A 50 ? F6 DA 1B C0 83 C0 ? 89 83 ? ? ? ? 48 83 C4 ? 5B C3 CC 83 A1 ? ? ? ? ? E9 ? ? ? ? 48 8B 91
-                    int field_0x00;
-                    int AnimPathOffset <format=hex, fgcolor=cRed>;
+                    AssetRef Anim <format=hex, fgcolor=cRed>;
                     byte Bool_0x08;
                     byte Bool_0x09;
                     byte Bool_0x0A;
@@ -984,11 +961,8 @@ typedef struct
                     byte Bool_0x12;
                     byte pad;
                     byte Padding[0x18];
-                    
-                    FSeek(startof(field_0x00) + AnimPathOffset);
-                    string Path <bgcolor=cGray>;
-                    
-                    FSeek(startof(field_0x00) + 0x20);
+
+                    FSeek(startof(Anim) + 0x20);
                 };
                 break;
             case kTimelineElem_SummonPartsVisibleRange: // 1047
@@ -1010,13 +984,8 @@ typedef struct
                     int Count_0x00 <fgcolor=cGreen>;
                     int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
                     int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
-                    
-                    int field_0x10;
-                    int VFXFileNameOffset <format=hex, fgcolor=cRed, comment="Relative to 0x10">;
-                    
-                    int field_0x18; 
-                    int UnkNameOffset2 <format=hex, fgcolor=cRed, comment="Relative to 0x18">;
-                    
+                    AssetRef VFX <format=hex, fgcolor=cRed>;
+                    AssetRef Se <format=hex, fgcolor=cRed>;
                     int field_0x20;
                     byte field_0x24;
                     byte field_0x25;
@@ -1049,13 +1018,7 @@ typedef struct
                         float field_0x34;
                         int pad[8];
                     } Sub[Count_0x00];
-                    
-                    FSeek(startof(field_0x10) + VFXFileNameOffset);
-                    string VFXPath <bgcolor=cGray>;
-                    
-                    FSeek(startof(field_0x18) + UnkNameOffset2);
-                    string UnkName2 <bgcolor=cGray>;
-                    
+
                     FSeek(startof(Offset_0x00) + 0x70);
                 };
                 break;
@@ -1276,7 +1239,7 @@ typedef struct
     
     // Fix
     FSeek(startof(field_0x00) + 0x20);
-} TimelineElement <bgcolor=cRed, read=Str("[%d->%d] Type %s (%d)", FrameStart, FrameStart+NumFrames, 
+} TimelineElement <bgcolor=cRed, read=Str("%d, [%d->%d] Type %s (%d)", field_0x00, FrameStart, FrameStart+NumFrames, 
     EnumToString(DataUnion.UnionType) == "" ? Str("%d", DataUnion.UnionType) : EnumToString(DataUnion.UnionType), DataUnion.UnionType)>;
 
 typedef struct
@@ -1349,7 +1312,7 @@ struct
     
     struct
     {
-        int field_0x00 <fgcolor=cGreen>;
+        int EditorId <fgcolor=cGreen>;
         int TimelineElementsOffset <format=hex, fgcolor=cRed>;
         int TimelineElementCount <fgcolor=cGreen>;
         int AssetGroupsOffset <format=hex, fgcolor=cRed>;
@@ -1357,7 +1320,8 @@ struct
         int MemoryTypeArrayOffset <format=hex, fgcolor=cRed>;
         int MemoryTypeArrayCount <fgcolor=cGreen>;
         int TotalFrames;
-        int Empty;
+        char Bool_0x20;
+        byte pad[0x03];
         
         local int i = 0;
         struct
