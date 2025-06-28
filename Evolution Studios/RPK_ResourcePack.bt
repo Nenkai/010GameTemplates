@@ -19,7 +19,7 @@
  * Anything else is likely not going to work
  * But feel free to adjust stuff.
  *
- * A fair amount of components are supported (mainly vehicle wise, but not all)
+ * Not that many components are supported (mainly for vehicle related rpks)
  *
  * In general the resource pack is pretty straight forward
  * You have a resource type, which may use other resources to function (known as dependencies)
