@@ -2,93 +2,126 @@
 //--- 010 Editor v12.0.1 Binary Template
 //
 //      File: Evolutions Studios Resource PacK
-//   Authors: Nenkai#9075
+//   Authors: Nenkai
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
+// File Mask: *.rpk
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------1
-BitfieldDisablePadding();
 
-typedef enum
+/* This template was mostly only tested with:
+ * Driveclub Proto (Alpha)
+ * Driveclub Retail (1.28)
+ * Motorstorm Apocalypse Prototype from Jan 2010 (Resource Viewer) with debug symbols
+ *
+ * Anything else is likely not going to work
+ * But feel free to adjust stuff.
+ *
+ * A fair amount of components are supported (mainly vehicle wise, but not all)
+ *
+ * In general the resource pack is pretty straight forward
+ * You have a resource type, which may use other resources to function (known as dependencies)
+ * - a VERTEX_BUFFER won't work without a VERTEX_BUFFER,
+ * - a MATERIAL won't work without a PIXEL_BUFFER or SHADER
+ * - a VEHICLE won't work without a SCENEOBJECT (and more, etc).
+ *
+ * These elements are mainly identified with a 64bit id (16 bit type, 48 bit actual id).
+ *
+ * "EVOSLITL"/"EVOSBIG " are stream headers that identifies the endianness to use.
+ *
+ * Most of the reversing work has been done on the Motorstorm Apocalypse Prototype (Resource Viewer) binary.
+ * Refer to debugging.games for more info.
+ *
+ * Additionally refer to MS3SocketTest to get the resource viewer working.
+ * https://github.com/Nenkai/MS3SocketTest
+ *
+ * Lastly, driveclub changed stuff quite a bit that may require adjusting.
+ * The games aren't backwards compatible resource version wise, only debug builds like the resource viewer (and only barely)
+*/
+ 
+// Template start
+
+BitfieldDisablePadding();
+// evo::resourcesystem::ResourceTypeId
+typedef enum <ushort>
 {
-    UNKNOWN = 0,
-    RESOURCE_INFO_BLOCK = 1,
-    STREAM_FORMAT = 2,
-    VERTEX_BUFFER = 3,
-    INDEX_BUFFER = 4,
-    PIXEL_BUFFER = 5,
-    Shader = 6,
-    MATERIAL = 7,
-    MESH = 8,
-    RESOURCE_COLLECTION = 9,
-    HAVOK = 10,
-    HIERARCHY = 11,
-    RIGID_BODY_BINDINGS = 12,
-    MOTORSTORM_WORLD = 13,
-    MESHES = 14,
-    SCENE = 15,
-    MOTORSTORM_VEHICLE = 16,
-    Font = 17,
-    CAMERAS = 18,
-    CAMERA = 19,
-    MOTORSTORM_SCENEOBJECT = 20,
-    MOTORSTORM_ENVIRONMENT = 21,
-    MOTORSTORM_CHARACTER = 22,
-    BASICBITMAP = 23,
-    MOTORSTORM_SOLIDS = 24,
-    MOTORSTORM_GROUND_RUSH = 25,
-    MOTORSTORM_PARTICLEEFFECT = 26,
-    ROADSYSTEM = 27,
-    GPU_PROGRAM = 28, // Not sure
-    GPU_PROGRAMBASE = 29,
-    ATTRIBUTE_SET = 30,
-    ATTRIBUTE_SET_BINDINGS = 31,
-    BASICFONT = 32,
-    OCTREE = 33,
-    GUI_ANIM = 34,
-    PLANT = 35,
-    ANIMATIONS = 36,
-    MOTORSTORM_LIGHTS = 37,
-    BIN = 38,
-    XML = 39,
-    PATCH = 40,
-    NEXUS_CHARACTER = 41,
-    NEXUS_ANIMATION = 42,
-    LEVEL_DATA = 43,
-    LEVEL_TRIGGER_VolumeResource = 44,
-    LEVEL_DO_RESET_VolumeResource = 45,
-    LEVEL_NO_RESET_VolumeResource = 46,
-    LEVEL_SPAWN_POINT = 47,
-    LEVEL_ROAD_REGION_VolumeResource = 48,
-    LEVEL_START_StartFinishVolumeResource = 49,
-    LEVEL_ROAD_DATA = 52,
-    AUDIO_VEHICLEAUDIO = 53,
-    AUDIO_VEHICLESOUNDEFFECT = 54,
-    AUDIO_VEHICLESAMPLE = 55,
-    ROAD_NETWORK = 56, 
-    LEVEL_SPLIT_VolumeResource = 57,
-    DEM = 58,
-    DEM_TILE = 59,
-    VEHICLE_CUSTOM_DATA = 60,
-    LEVEL_SCRIPTED_ROAD_LINE = 61,
-    PROCEDURAL_PLACEMENT = 62,
-    ACTOR_DATA = 63,
-    HABOOB_TEX_ATLAS_INDEX = 64,
-    CROWDS = 65,
-    AUDIO_SOUNDGROUP = 66,
-    SVGMESH = 67,
-    LEVEL_DRIFT_ZONE = 68,
-    AUDIO_FSB = 69,
-    ANIMATIONLIB = 70,
-    TOP_MIPS = 71,
-    LEVEL_AI_MAX_SPEED_VolumeResource = 72,
-    SCRIPTED_ROAD_REGION_VOLUME_VolumeResource = 73,
-    TRIGGER_DATA = 74,
-    DUST_DATA = 75,
-    VEHICLE_PARTICLES_DATA = 76,
+    RTUID_UNKNOWN = 0,
+    RTUID_RESOURCE_INFO_BLOCK = 1,
+    RTUID_STREAM_FORMAT = 2,
+    RTUID_VERTEX_BUFFER = 3,
+    RTUID_INDEX_BUFFER = 4,
+    RTUID_PIXEL_BUFFER = 5,
+    RTUID_SHADER = 6,
+    RTUID_MATERIAL = 7,
+    RTUID_MESH = 8,
+    RTUID_RESOURCE_COLLECTION = 9,
+    RTUID_HAVOK = 10,
+    RTUID_HIERARCHY = 11,
+    RTUID_RIGID_BODY_BINDINGS = 12,
+    RTUID_MOTORSTORM_WORLD = 13,
+    RTUID_MESHES = 14,
+    RTUID_SCENE = 15,
+    RTUID_MOTORSTORM_VEHICLE = 16,
+    RTUID_FONT = 17,
+    RTUID_CAMERAS = 18,
+    RTUID_CAMERA = 19,
+    RTUID_MOTORSTORM_SCENEOBJECT = 20,
+    RTUID_MOTORSTORM_ENVIRONMENT = 21,
+    RTUID_MOTORSTORM_CHARACTER = 22,
+    RTUID_BASICBITMAP = 23,
+    RTUID_MOTORSTORM_SOLIDS = 24,
+    RTUID_MOTORSTORM_GROUND_RUSH = 25,
+    RTUID_MOTORSTORM_PARTICLEEFFECT = 26,
+    RTUID_ROADSYSTEM = 27,
+    RTUID_GPU_PROGRAM = 28,
+    RTUID_GPU_PROGRAMBASE = 29,
+    RTUID_ATTRIBUTE_SET = 30,
+    RTUID_ATTRIBUTE_SET_BINDINGS = 31,
+    RTUID_BASICFONT = 32,
+    RTUID_OCTREE = 33,
+    RTUID_GUI_ANIM = 34,
+    RTUID_PLANT = 35,
+    RTUID_ANIMATIONS = 36,
+    RTUID_MOTORSTORM_LIGHTS = 37,
+    RTUID_BIN = 38,
+    RTUID_XML = 39,
+    RTUID_PATCH = 40,
+    RTUID_NEXUS_CHARACTER = 41,
+    RTUID_NEXUS_ANIMATION = 42,
+    RTUID_LEVEL_DATA = 43,
+    RTUID_LEVEL_TRIGGER_VolumeResource = 44,
+    RTUID_LEVEL_DO_RESET_VolumeResource = 45,
+    RTUID_LEVEL_NO_RESET_VolumeResource = 46,
+    RTUID_LEVEL_SPAWN_POINT = 47,
+    RTUID_LEVEL_ROAD_REGION_VolumeResource = 48,
+    RTUID_LEVEL_START_StartFinishVolumeResource = 49,
+    RTUID_LEVEL_ROAD_DATA = 52,
+    RTUID_AUDIO_VEHICLEAUDIO = 53,
+    RTUID_AUDIO_VEHICLESOUNDEFFECT = 54,
+    RTUID_AUDIO_VEHICLESAMPLE = 55,
+    RTUID_ROAD_NETWORK = 56, 
+    RTUID_LEVEL_SPLIT_VolumeResource = 57,
+    RTUID_DEM = 58,
+    RTUID_DEM_TILE = 59,
+    RTUID_VEHICLE_CUSTOM_DATA = 60,
+    RTUID_LEVEL_SCRIPTED_ROAD_LINE = 61,
+    RTUID_PROCEDURAL_PLACEMENT = 62,
+    RTUID_ACTOR_DATA = 63,
+    RTUID_HABOOB_TEX_ATLAS_INDEX = 64,
+    RTUID_CROWDS = 65,
+    RTUID_AUDIO_SOUNDGROUP = 66,
+    RTUID_SVGMESH = 67,
+    RTUID_LEVEL_DRIFT_ZONE = 68,
+    RTUID_AUDIO_FSB = 69,
+    RTUID_ANIMATIONLIB = 70,
+    RTUID_TOP_MIPS = 71,
+    RTUID_LEVEL_AI_MAX_SPEED_VolumeResource = 72,
+    RTUID_SCRIPTED_ROAD_REGION_VOLUME_VolumeResource = 73,
+    RTUID_TRIGGER_DATA = 74,
+    RTUID_DUST_DATA = 75,
+    RTUID_VEHICLE_PARTICLES_DATA = 76,
 } ResourceTypeId;
 
 //////////////////////////////////////////////////
@@ -98,13 +131,41 @@ typedef struct
 {
     char Magic[4];
     char Endian[4];
-} StreamHeader;
+    if (Endian == "LITL")
+        LittleEndian();
+    else if (Endian == "BIG ")
+        BigEndian();
+        
+} StreamHeader <bgcolor=cBlack>;
 
+// evo::resourcesystem::ResourceIdentifier
 typedef struct
 {
-    int64 Identifier : 48 <format=hex, fgcolor=cGray>;
-    ResourceTypeId Type : 16 <fgcolor=cPurple>;
-} ResourceIdentifier <comment=PrintIdent, bgcolor=cBlack>;
+    union
+    {
+        uint64 m_UID;
+        struct
+        {
+            if (IsBigEndian())
+            {
+                ResourceTypeId Type : 16 <fgcolor=cPurple>;
+                int64 Identifier : 48 <format=hex, fgcolor=cGray>;
+            }
+            else
+            {
+                int64 Identifier : 48 <format=hex, fgcolor=cGray>;
+                ResourceTypeId Type : 16 <fgcolor=cPurple>;
+            }
+        } Packed;
+    } Union;
+} ResourceIdentifier <read=Str("%X%X (%s)", Union.m_UID >> 32, Union.m_UID, EnumToString(Union.Packed.Type)), bgcolor=cPurple>;
+
+// evo::resourcesystem::Resource
+typedef struct
+{
+    ResourceIdentifier m_ResourceIdentifier;
+    int m_VersionNumber <format=hex>;
+} Resource;
 
 string PrintIdent(ResourceIdentifier& identifier)
 {
@@ -117,183 +178,1414 @@ typedef struct
     string str;
 } ResourceName;
 
+typedef struct
+{
+    uint Length;
+    char Str[Length];
+} String <read=Str>;
+
+// evo::math::float3
+typedef struct /* evo::math::float3 : Vectormath::Aos::Vector3 */ 
+{
+    float X;
+    float Y;
+    float Z;
+} float3;
+
+// evo::math::float4
+typedef struct /* evo::math::float4 : Vectormath::Aos::Vector4 */ 
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} float4;
+
+// evo::math::float4x4
+typedef struct /* evo::math::float4x4 : Vectormath::Aos::Matrix4 */ 
+{
+    /* Vectormath::Aos::Vector4 */ float4 mCol0;
+    /* Vectormath::Aos::Vector4 */ float4 mCol1;
+    /* Vectormath::Aos::Vector4 */ float4 mCol2;
+    /* Vectormath::Aos::Vector4 */ float4 mCol3;
+} float4x4;
+
 //////////////////////////////////////////////////
 //////////// RESOURCE STRUCTURES /////////////////
 //////////////////////////////////////////////////
 // Resource Info Block is at the bottom of this section
 
+//////////////////////////////////////////
 // Stream Format (2)
+//////////////////////////////////////////
 
-typedef enum
+// evo::renderer::FieldSemantic
+typedef enum<byte>
 {
-    FieldSemantic_UNKNOWN,
-    FieldSemantic_POSITION,
-    FieldSemantic_NORMAL,
-    FieldSemantic_BINORMAL,
-    FieldSemantic_TANGENT,
-    FieldSemantic_TEXCOORD,
-    FieldSemantic_COLOR,
-    FieldSemantic_BLENDWEIGHTS,
-    FieldSemantic_BLENDINDICES,
-    FieldSemantic_INDEX,
+    FS_UNKNOWN,
+    FS_POSITION,
+    FS_NORMAL,
+    FS_BINORMAL,
+    FS_TANGENT,
+    FS_TEXCOORD,
+    FS_COLOR,
+    FS_BLENDWEIGHTS,
+    FS_BLENDINDICES,
+    FS_INDEX
 } FieldSemantic;
 
+// evo::renderer::FieldType
+typedef enum <byte> 
+{
+    ////////////////////////////// Size:
+    FT_UNKNOWN = 0x0,           // 0
+    FT_INDEX_16 = 0x1,          // 2
+    FT_INDEX_32 = 0x2,          // 4
+    FT_HALF = 0x3,              // 0
+    FT_HALF2 = 0x4,             // 4
+    FT_HALF3 = 0x5,             // 6
+    FT_HALF4 = 0x6,             // 8
+    FT_FLOAT = 0x7,             // 4
+    FT_FLOAT2 = 0x8,            // 8
+    FT_FLOAT3 = 0x9,            // 12
+    FT_FLOAT4 = 0xA,            // 16
+    FT_DOUBLE = 0xB,            // 8
+    FT_DOUBLE2 = 0xC,           // 16
+    FT_DOUBLE3 = 0xD,           // 24
+    FT_DOUBLE4 = 0xE,           // 32
+    FT_NORMAL_10_10_10 = 0xF,   // 4
+    FT_NORMAL_11_11_10 = 0x10,  // 4
+    FT_UBYTE4 = 0x11,           // 4
+    FT_UBYTE4_ARGB = 0x12,      // 4
+    FT_UBYTE4_RGBA = 0x13,      // 4
+    FT_BYTE4_NORMALISED = 0x14, // 4
+    FT_CUSTOM = 0x15,           // 0
+    NUM_FIELD_TYPES = 0x16,
+} FieldType;
+
+/* evo::renderer::FieldFrequencyMode */
+typedef enum <byte>
+{
+    FM_DIVIDE = 0x0,
+    FM_MODULO = 0x1,
+    NUM_FREQUENCY_MODES = 0x2,
+} FieldFrequencyMode;
+
 typedef struct
 {
-    StreamHeader streamHeader;
-    ResourceIdentifier ident;
-    short a;
-    short b;
-    byte EntryCount;
-
-    
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010): 0x20000
+    // Driveclub Proto/Retail/Retail 1.28: 0x20000
+    uint m_VersionNumber <format=hex>;
     struct
     {
-        byte d;
-        byte e;
-        short f;
-        byte g;
-    } StreamFormatEntry[EntryCount];
+        byte EntryCount;
 
-} StreamFormat;
+        struct
+        {
+            FieldSemantic m_Semantic;
+            FieldType m_Type;
+            byte m_UsageOrdinal;
+            
+            // Actual game check
+            if (m_VersionNumber >= 0x20000)
+            {
+                FieldFrequencyMode m_FrequencyMode;
+                byte m_Divider;
+            }
+        } StreamFormatEntry[EntryCount] <optimize=true>;
+    } StreamFormatBase <bgcolor=cDkGreen>;
+    
+} StreamFormat <bgcolor=cGreen>;
+
+//////////////////////////////////////////
+// VERTEX_BUFFER - (3)
+//////////////////////////////////////////
+typedef struct
+{
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010): 0x10000
+    // Driveclub Proto/Retail/Retail 1.28: 0x10000
+    uint Version <format=hex>;
+    
+    // Requires one dependency (stream format)
+    struct
+    {
+        // evo::renderer::Buffer?
+        short unk;
+        short m_ElementSizeInBytes;
+        int m_NumElements;
+        
+        struct
+        {
+            byte Data[m_ElementSizeInBytes];
+        } Elem[m_NumElements] <optimize=true, bgcolor=cDkBlue>;
+    } VertexBufferBase;
+} VertexBuffer <bgcolor=cBlue>;
+
+//////////////////////////////////////////
+// INDEX_BUFFER - (4)
+//////////////////////////////////////////
+typedef struct
+{
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010): 0x10000
+    // Driveclub Proto/Retail/Retail 1.28: 0x10000
+    uint Version <format=hex>;
+    
+    // Requires one dependency (STREAM_FORMAT)
+    struct
+    {
+        // evo::renderer::Buffer?
+        short unk;
+        short m_ElementSizeInBytes;
+        int m_NumElements;
+        
+        struct
+        {
+            byte Data[m_ElementSizeInBytes];
+        } Elem[m_NumElements] <optimize=false, bgcolor=cDkBlue>;
+    } VertexBufferBase;
+} IndexBuffer <bgcolor=cBlue>;
+
+//////////////////////////////////////////
+// PIXEL_BUFFER - (5)
+//////////////////////////////////////////
+/* Motorstorm Apocalypse Debug Symbols */
+typedef enum<int>
+{
+    PF_UNDEFINED_PIXEL_FORMAT = 0x0,
+    PF_RGBA_32_I = 1,
+    PF_RGBA_64_F = 2,
+    PF_RGBA_128_F = 3,
+    PF_Z_16 = 4,
+    PF_Z_24 = 5,
+    PF_Z_24_S_8 = 6,
+    PF_Z_32 = 7,
+    PF_STENCIL = 8,
+    PF_DXT1 = 10,
+    PF_DXT3 = 10,
+    PF_DXT5 = 11,
+    PF_LUM_8 = 12, // 1 byte luminance
+    PF_RG_32_F = 13,
+    PF_RGBA_16_I = 14,
+    PF_L8A8 = 15,
+    PF_A16  = 16,
+    PF_L16A16 = 17,
+    PF_R_32_F = 18,
+} PixelFormatOld;
+
+typedef enum<int> /*evo::renderer::PixelFormat*/
+{
+    // Driveclub Proto
+    UNDEFINED_PIXEL_FORMAT = 0x0,
+    RGBA_32_I_LIN = 1,
+    RGBA_32_I_SRGB = 2,
+    RGBA_64_F = 3,
+    RGBA_128_F = 4,
+    Z_16 = 5,
+    Z_32 = 6,
+    Z32_S8 = 7,
+    STENCIL = 8,
+    DXT1_LIN = 9,
+    DXT1_SRGB = 10,
+    DXT3_LIN = 11,
+    DXT3_SRGB = 12,
+    DXT5_LIN = 13,
+    DXT5_SRGB = 14,
+    A8_UNORM = 15,
+    RG_16_F  = 16,
+    RG_32_F = 17,
+    RGBA_16_I = 18,
+    R8G8 = 19,
+    A16 = 20,
+    L16A16 = 21,
+    R_16_F = 22,
+    R_32_F = 23,
+    R11G11B10_F = 24,
+    R9G9B9E5 = 25,
+    R10G10B10A2_UNORM = 26,
+    R8_UNORM = 27,
+    BGRA_32_I_SRGB = 28,
+    BC4_UNORM = 29,
+    BC4_SNORM = 30,
+    BC5_UNORM = 31,
+    BC5_SNORM = 32,
+    BC6H_UF = 33,
+    BC6H_SF = 34,
+    BC7_UNORM = 35,
+    BC7_SRGB = 36,
+    RGBA_64_UNORM = 37,
+    RGBA_32_SNORM = 38,
+    
+    // Driveclub retail
+    UNK_39 = 39,
+    UNK_40 = 40,
+    UNK_41 = 41,
+    
+    NUM_PIXEL_FORMATS = 39,
+} PixelFormat;
+
+typedef enum <int> /* evo::renderer::PixelBufferBase::Type */
+{
+     TEXTURE_2D = 0x0,
+     TEXTURE_3D = 0x1,
+     TEXTURE_CUBE = 0x2,
+     NUM_TEXTURE_TYPES = 0x3,
+} PixelBufferBase_Type;
+
+typedef enum <int> /* evo::renderer::PixelBufferBase::ServerUsage */
+{
+     READ_WRITE = 0x0,
+     READ_ONLY = 0x1,
+     READLOTS_WRITE = 0x2,
+     READ_WRITELOTS = 0x3,
+     NUM_SERVER_USAGES = 0x4,   
+} PixelBufferBase_ServerUsage;
 
 typedef struct
 {
-    StreamHeader streamHeader;
-    ResourceIdentifier identifier;
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010) - 0x20000
+    // Driveclub Alpha = 0x20003
+    // Driveclub Retail = 0x20005
+    
+    uint m_VersionNumber <format=hex>;
+    struct
+    {
+        if (m_VersionNumber == 0x20000)
+            uint64 unk;
+            
+        ushort m_WriteWidth;
+        ushort m_WriteHeight;
+        ushort m_Depth;
+        
+        if (m_VersionNumber >= 0x20003)
+            PixelFormat m_PixelFormat : 16;
+        else
+            PixelFormatOld m_PixelFormat : 16;
+            
+        byte m_MipLevels;
+        PixelBufferBase_Type m_Type : 8;
+        PixelBufferBase_ServerUsage m_serverUsage : 8;
+
+        // Driveclub (Alpha or later)
+        if (m_VersionNumber >= 0x20003)
+        {
+            byte Unk;
+            byte Unk2;
+        
+            // Driveclub Retail 
+            if (m_VersionNumber >= 0x20005)
+                byte Unk3;
+        
+            ResourceIdentifier TopMipsResrcIdentifier;
+        }
+        
+        uint DataSize <format=hex>;
+        byte ImageData[DataSize];
+    } PixelBufferBase;
+} PixelBuffer;
+      
+//////////////////////////////////////////
+// MATERIAL - (7)
+//////////////////////////////////////////
+/* evo::renderer::ParamType */
+typedef enum <byte>
+{
+    PT_UNDEFINED = 0x0,
+    PT_INT = 1,
+    PT_INT2 = 2,
+    PT_INT3 = 3,
+    PT_INT4 = 4,
+    PT_FLOAT = 5,
+    PT_FLOAT2 = 6,
+    PT_FLOAT3 = 7,
+    PT_FLOAT4 = 8,
+    PT_FLOAT3x3 = 9,
+    PT_FLOAT4x4 = 10,
+    PT_TEXTURE = 11,
+    PT_ARRAY = 12,
+    PT_FLOAT3x4 = 13,
+} ParamType;
+
+// evo::renderer::AlphaBlendMode::AlphaBlendFunc
+typedef enum <int>
+{
+    BLENDZERO = 0x0,
+    BLENDONE = 0x1,
+    BLENDSRCCOLOUR = 0x300,
+    BLENDONEMINUSSRCCOLOUR = 0x301,
+    BLENDSRCALPHA = 0x302,
+    BLENDONEMINUSSRCALPHA = 0x303,
+    BLENDDSTALPHA = 0x304,
+    BLENDONEMINUSDSTALPHA = 0x305,
+    BLENDDSTCOLOUR = 0x306,
+    BLENDONEMINUSDSTCOLOUR = 0x307,
+    BLENDSRCALPHASATURATE = 0x308,
+    BLENDCONSTCOLOUR = 0x8001,
+    BLENDONEMINUSCONSTCOLOUR = 0x8002,
+    BLENDCONSTALPHA = 0x8003,
+    BLENDONEMINUSCONSTALPHA = 0x8004,
+} AlphaBlendFunc;
+
+// evo::renderer::RenderStateBase::DepthCompareMode
+typedef enum <int>
+{ 
+    NOTEST_NOWRITE = 0x0,
+    NOTEST_WRITE = 0x1,
+    TEST_NOWRITE = 0x2,
+    TEST_WRITE = 0x3,
+} DepthCompareMode;
+
+// evo::renderer::FilterMode::Mode
+typedef enum <byte>
+{
+    FilterMode_POINT_NONE = 0,
+    FilterMode_LINEAR_NONE = 1,
+    FilterMode_POINT_POINT = 2,
+    FilterMode_LINEAR_POINT = 3,
+    FilterMode_LINEAR_LINEAR = 4,
+    FilterMode_QUINCUNX = 5,
+    FilterMode_GAUSSIAN = 6,
+    FilterMode_QUINCUNXALT = 7,
+    FilterMode_DEFAULT = 3,
+} FilterMode_Mode;
+
+// evo::renderer::AddressingMode::Mode
+typedef enum <byte>
+{
+    AddressingMode_WRAP = 0x0,
+    AddressingMode_CLAMP = 0x1,
+    AddressingMode_WRAPRCLAMPST = 0x2,
+    AddressingMode_MIRROR = 0x3,
+    AddressingMode_NUM_ADDRESSING_MODES = 0x4,
+    AddressingMode_DEFAULT = 0x0,
+} AddressingMode_Mode;
+
+// evo::renderer::SamplerStateAssignmentBase::Type
+typedef enum <byte>
+{
+    FILTER_MODE = 0,
+    ADDRESSING_MODE = 1,
+    DEPTH_COMPARE_MODE = 2,
+    MIP_BIAS = 3,
+    ANISOTROPY_LEVEL = 4,
+    GAMMACORRECTION_MODE = 5,
+} SamplerStateAssignmentBase_Type;
+
+typedef struct
+{
+    // Required dependencies: SHADER, PIXEL_BUFFER
+    
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010): 0x20004
+    // DriveClub Alpha/Proto: 0x20006
+    // DriveClub: 0x20007
+    uint m_VersionNumber <format=hex>;
+    
+    if (m_VersionNumber >= 0x20006)
+    {
+        byte unk;
+        byte paramCount;
+        
+        struct
+        {
+            struct
+            {
+                byte field_0x00;
+                byte field_0x01;
+                byte field_0x02;
+                byte field_0x03;
+                uint field_0x04;
+                uint field_0x08;
+                float field_0x0C;
+                byte field_0x10;
+            } UnkSub;
+            
+            if (m_VersionNumber >= 0x20007)
+                uint Hash <format=hex>;
+            else
+                byte Index;
+        } Param[paramCount] <optimize=false, read=(exists(Hash) ? Str("%X", Hash) : Str("%d", Index))>;
+        
+        byte UnkRefCount;
+        if (UnkRefCount)
+        {
+            if (m_VersionNumber >= 0x20007)
+                uint UnkHashes[UnkRefCount] <format=hex>;
+            else
+                byte UnkIndices[UnkRefCount];
+        }
+        
+        // TODO: Figure out how this is read, sometimes it's not present at all
+        // It's not obvious why
+        /*
+        struct
+        {
+            uint unkBufferSize <format=hex>;
+            byte buffer[unkBufferSize];
+        } Param2;
+        */
+    }
+    else
+    {
+        ushort paramCount;
+        struct StaticParam
+        {
+            ParamType type;
+            byte pad[3];
+            byte nameLength;
+            char name[nameLength];
+            
+            switch (type)
+            {
+                case PT_INT: int value; break;
+                case PT_INT2: int value[2]; break;
+                case PT_INT3: int value[3]; break;
+                case PT_INT4: int value[4]; break;
+                case PT_FLOAT: float value; break;
+                case PT_FLOAT2: float value[2]; break;
+                case PT_FLOAT3: float value[3]; break;
+                case PT_FLOAT4: float value[4]; break;
+                case PT_FLOAT3x3: float value[3*3]; break;
+                case PT_FLOAT4x4: float value[4*4]; break;
+                case PT_TEXTURE: 
+                    struct
+                    {
+                        byte unk;
+                        int m_AllocatedSize <comment="Number of instructions allocated, array/list wise">;
+                         
+                        // evo::renderer::ShaderBase::ReadSamplerStateAssignments
+                        short numInstructions <comment="Number of instructions actually present here">;
+                        
+                        // 0 = FilterMode
+                        // 1 = AddressingMode
+                        // 2 = DepthCompareMode
+                        // 3 = MipBias
+                        // 4 = AnisotropyLevel
+                        // 5 = GammaCorrectionMode
+                        local int i = 0;
+                        for (i = 0; i < numInstructions; i++)
+                        {
+                            struct
+                            {
+                                SamplerStateAssignmentBase_Type m_Type;
+                                switch (m_Type)
+                                {
+                                    case FILTER_MODE:
+                                        // evo::renderer::FilterMode : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            FilterMode_Mode FilterMode;
+                                        } FilterMode;
+                                        break;
+                                        
+                                    case ADDRESSING_MODE:
+                                        // evo::renderer::AddressingMode : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            AddressingMode_Mode m_Mode;
+                                        } AddressingMode;
+                                        break;
+                                        
+                                    case DEPTH_COMPARE_MODE:
+                                        // evo::renderer::DepthCompareMode : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            int m_Enabled;
+                                        } AddressingMode;
+                                        break;
+                                        
+                                    case MIP_BIAS:
+                                        // evo::renderer::MipBias : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            float m_Bias;
+                                        } MipBias;
+                                        break;
+                                        
+                                    case ANISOTROPY_LEVEL:
+                                        // evo::renderer::AnisotropyLevel : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            uint m_Level;
+                                        } AnisotropyLevel;
+                                        break;
+                                        
+                                    case GAMMACORRECTION_MODE:
+                                        // evo::renderer::GammaCorrectionMode : evo::renderer::SamplerStateAssignment
+                                        struct
+                                        {
+                                            int Enabled;
+                                        } GammaCorrectionMode;
+                                        break;
+                    
+                                     default: Printf("WARN: SamplerStateAssignment type %s not implemented\n", EnumToString(opcode)); break;
+                                }
+                            } SamplerStateAssignment;
+                        }
+                    } texture; break;
+                default: Printf("WARN: Material shader param type %s not implemented\n", EnumToString(type));
+            }
+        } Param[paramCount] <optimize=false>;
+    }
+} MaterialResource <bgcolor=cLtBlue>;
+          
+//////////////////////////////////////////
+// MESH - (8)
+//////////////////////////////////////////
+typedef enum <byte> /* evo::renderer::RenderCommandBase::Command */
+{
+    // evo::renderer::RenderCommandBase::commandSizes - ,, , , , 0x10, 0x50, 0x30, 0x20, 0x10, 0x10
+    // ^ these command sizes are from Motorstorm Apocalypse Proto Resource Viewer (Jan 2010)
+    //   their sizes are a little different in DriveClub
+    
+    END = 0,                                  // 0x10
+    DRAW = 1,                                 // 0x10
+    DRAW_INDEXED = 2,                         // 0x10
+    MATERIAL_SET = 3,                         // 0x10
+    VERTEX_STREAM_SET = 4,                    // 0x10
+    INDEX_STREAM_SET = 5,                     // 0x10    
+    WORLD_MATRIX_SET = 6,                     // 0x10
+    OWNED_WORLD_MATRIX_SET = 7,               // 0x50
+    PREV_WORLD_MATRIX_SET = 8,                // 0x10        
+    OWNED_PREVIOUS_WORLD_MATRIX_SET = 9,      // 0x50
+    MATERIAL_SET_PARAM = 10,                   // 0x30
+    STATE_SET = 11,                            // 0x20
+    TIMESTAMP_SET = 12,                        // 0x10
+    DISPLAYLIST_EXECUTE = 13,                  // 0x10
+    
+    // DriveClub
+    UNK_CMD_14 = 14,
+} Command;
+
+// evo::renderer::PrimType
+typedef enum<byte>
+{
+    PT_POINT_LIST = 0x0,
+    PT_LINE_LIST = 0x1,
+    PT_LINE_STRIP = 0x2,
+    PT_TRI_LIST = 0x3,
+    PT_TRI_FAN = 0x4,
+    PT_TRI_STRIP = 0x5,
+    PT_QUAD_LIST = 0x6,
+    NUM_PRIM_TYPES = 0x7,
+} PrimType;
+
+// evo::renderer::RenderCommandStateSet::StateType
+typedef enum <byte>
+{
+    WIREFRAME_MODE = 0x0,
+    STENCIL_MODE = 0x1,
+    ALPHA_TEST_MODE = 0x2,
+    ALPHA_BLEND_MODE = 0x3,
+    SET_SCISSOR = 0x4,
+    AUTO_SAMPLER_ARRAY_BASE = 0x5,
+    AUTO_SAMPLER_ARRAY_INDEX = 0x6,
+    AUTO_SAMPLER_TEXTURE_PTR = 0x7,
+    WRITE_MASK = 0x8,
+    NUM_STATE_TYPES = 0x9,
+} RenderCommandStateSet_StateType;
+
+// evo::renderer::StateArg
+typedef union
+{
+    int m_int;
+    float m_float;
+} StateArg;
+
+typedef enum<ushort> /* evo::renderer::ShaderPermutation */
+{
+    kShaderPermForward = 0x0,
+    kShaderPermForwardTexLM = 0x1,
+    kShaderPermForwardVertLM = 0x2,
+    kShaderPermShadMapGen = 0x3,
+    kShaderPermDepthOnly = 0x4,
+    kShaderPermPixelVelocity = 0x5,
+    kShaderPermGhost = 0x6,
+    kShaderPermOverdraw = 0x7,
+    kShaderPermMeshRes = 0x8,
+    kShaderPermGBuffer = 0x9,
+    kShaderPermNormalOnly = 0xA,
+    kShaderPermMaterialLPP = 0xB,
+    kShaderPermMaterialLPPTexLM = 0xC,
+    kNumShaderPermutations = 0xD,
+    kShaderPermRoot = 0xD,
+} ShaderPermutation;
+
+
+typedef struct
+{
+    // Use command sizes above to calculate this
+    // This is used to allocate the command object list (cpp object)
+    ushort RuntimeRenderCommandListSize <format=hex>;
+    if (RuntimeRenderCommandListSize == 0)
+        break;
+        
+    local int stop = false;
+    while (true)
+    {
+        struct
+        {
+            Command Command_;
+            switch (Command_)
+            {
+                case END:
+                    stop = true;
+                    break;
+                    
+                case DRAW:
+                    struct
+                    {
+                        PrimType m_PrimType;
+                        int m_StartVertex;
+                        int m_NumVertices;
+                    } RenderCommandDraw;
+                case DRAW_INDEXED:
+                    struct
+                    {
+                        byte VertexInfoCount;
+                        int VertexOffset; // most probably vertex count * stride + 28 bytes header
+                        int VertexCount;
+                        int IndexOffset; // *2 + 28 bytes header
+                        int IndexCount; // *2
+                        int Empty;
+                    } RenderCommandDrawIndexed;
+                    break;
+                case MATERIAL_SET:
+                    struct
+                    {
+                        // evo::renderer::Material
+                        ResourceIdentifier m_UID;
+                        
+                        // Before DriveClub
+                        if (m_VersionNumber < 0xB0000)
+                            ushort m_permutationIdx;
+                    } RenderCommandMaterialSet;
+                    break;
+                case VERTEX_STREAM_SET:
+                    struct
+                    {
+                        byte m_StreamId;
+                        ResourceIdentifier m_pVertexBufferIdentifier;
+                    } RenderCommandVertexStreamSet;
+                    break;
+                    
+                case INDEX_STREAM_SET:
+                    struct
+                    {
+                        ResourceIdentifier m_pIndexBufferIdentifier;
+                    } RenderCommandIndexStreamSet;
+                    break;
+                    
+                case STATE_SET:
+                    struct
+                    {
+                        RenderCommandStateSet_StateType StateType;
+                        StateArg m_arg1;
+                        StateArg m_arg2;
+                        StateArg m_arg3;
+                    } RenderCommandIndexStreamSet;
+                    break;
+                    
+                case UNK_CMD_14:
+                    struct
+                    {
+                        uint unk1;
+                        uint unk2;
+                        uint unk3;
+                        uint unk4;
+                    } RenderCommand14;              
+                default:
+                    break;
+            }
+        } RenderCommand <read=EnumToString(Command_)>;
+
+        if (stop)
+            break;
+    }
+} RenderCommandList;
+
+typedef struct
+{
+    // Dependencies: INDEX_BUFFER, VERTEX_BUFFER, MATERIAL
+    
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010) - 0x90000
+    uint m_VersionNumber <format=hex>;
+    ushort NumReservedVertexBuffers; // sets the size of std::vector<evo::renderer::VertexBuffer>
+    ushort NumVertexBuffers;
+    ushort NumMeshMaterials;
+    
+    if (m_VersionNumber >= 0xB0000)
+    {
+        RenderCommandList UnkCommandList1;
+        RenderCommandList UnkCommandList2;
+        RenderCommandList UnkCommandList3;
+        RenderCommandList UnkCommandList4;
+        
+        int NumCommandLists;
+        RenderCommandList CommandLists[NumCommandLists] <optimize=false>;   
+    }
+    else
+    {
+        if (!NumMeshMaterials)
+        {
+            RenderCommandList DefaultCommandList;
+        }
+        else
+        {
+            int NumCommandLists;
+            RenderCommandList CommandLists[NumCommandLists];   
+        }
+    }
+    
+    byte m_MeshBlendingState;
+    byte m_bHasAlphaToCoverageInZPass;
+    int count3;
+    
+    // Actual game check
+    if (m_VersionNumber >= 0x90000)
+    {
+        // evo::boundingvolume::BVAABB
+        struct
+        {
+            float3 m_v3Centre;
+            float3 m_v3Extent;
+        } BoundingVolume_BVAABB;
+        
+        // evo::boundingvolume::BVOBB
+        struct
+        {
+            float3 m_v3Centre;
+            float3 m_v4AxisAndExtentsInW[3];
+            float test[3];
+            uint what;
+        } BoundingVolume_BVOBB;
+        
+        // evo::boundingvolume::BVSphere
+        struct
+        {
+            float4 m_v4Centre;
+        } BoundingVolume_BVSphere;
+    }
+    
+    float m_AverageTriangleArea;
+    uint m_TriangleCount;
+    
+    if (m_VersionNumber >= 0xB0000)
+    {
+        byte HasUnk;
+        struct
+        {
+            byte Data[0x40];   
+        } Unks[NumMeshMaterials];
+    }
+} Mesh <bgcolor=cYellow>;
+
+//////////////////////////////////////////
+// RESOURCE_COLLECTION - (9)
+//////////////////////////////////////////
+typedef struct
+{
+    // Always 0x10000
+    uint m_VersionNumber <format=hex>;
 } ResourceCollection;
 
-// BIN - (38)
+//////////////////////////////////////////
+// HAVOK - (10)
+//////////////////////////////////////////
+
 typedef struct
 {
-    StreamHeader streamHeader;
-    ResourceIdentifier identifier;
-    int BufferSize <format=hex>;
-    int BinarySize <format=hex>;
-    byte bin[BinarySize];
+    // Always 0x10000 so far (driveclub or before)
+    uint m_VersionNumber <format=hex>;
+    uint DataSize <format=hex>;
+    byte Data[DataSize];
+} Havok <bgcolor=cBlack>;
+
+//////////////////////////////////////////
+// HIERARCHY - (11)
+//////////////////////////////////////////
+
+// evo::sceneresources::HierarchyResource
+typedef struct
+{
+    // DriveClub or Motorstorm Apocalypse = 0x20000
+    uint m_VersionNumber <format=hex>;
+    uint numNodes;
+    float4x4 defaultLocalToParent[numNodes];
+    uint defaultParents[numNodes];
+    uint crcs[numNodes];
+    uint namePoolSize;
+    char namePool[namePoolSize];
+    uint shortNamePoolSize;
+    char shortNamePool[shortNamePoolSize];
+} Hierarchy <bgcolor=cRed>;
+
+//////////////////////////////////////////
+// RIGID_BODY_BINDINGS - (12)
+//////////////////////////////////////////
+
+// evo::physicsresources::RigidBodyBindingsResource
+// Requires a HIERARCHY depdency
+
+typedef struct
+{
+    // DriveClub or Motorstorm Apocalypse = 0x10000
+    uint m_VersionNumber <format=hex>;
+    uint numBindings;
+    
+    // evo::physicsresources::RigidBodyBindingsResource::RigidBodyBinding
+    struct
+    {
+        uint nodeIdx;
+        String rigidBodyName;
+    } RigidBodyBinding[numBindings] <read=Str("%d (%s)", nodeIdx, rigidBodyName.Str), optimize=false>;
+} RigidBodyBindingsResource <bgcolor=cDkRed>;
+
+//////////////////////////////////////////
+// MOTORSTORM_VEHICLE - (16)
+//////////////////////////////////////////
+
+// Dependencies: MOTORSTORM_SCENEOBJECT, HAVOK, BIN, VEHICLE_CUSTOM_DATA, RESOURCE_COLLECTION, PIXEL_BUFFER
+
+typedef struct
+{
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010) - 0x50000
+    // Driveclub Proto/Retail: 0x80000
+    uint m_VersionNumber <format=hex>;
+    
+    // Driveclub
+    if (m_VersionNumber >= 0x80000)
+    {
+        // relevant function (driveclub alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 F7 49 89 FE 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 64 48 8B 04 25
+        struct
+        {
+            int count;
+            struct
+            {
+                int a;
+                int b;
+                int c;
+                int d;
+            } Unk[count];
+        
+            int count2;
+            struct
+            {
+                int a;
+                int b;
+                int c;
+            } Unk2[count2];
+        } Struct1;
+        
+        // relevant function (dc alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 48 89 FB 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 4C 8D 7B
+        struct
+        {
+            uint count;
+            struct
+            {
+                uint subcount;
+                struct
+                {
+                    float4 a;
+                    uint b;
+                    uint c;
+                } SubStruct[subcount];
+                
+                uint unk;
+                uint unk2;
+                float4 unk3;
+                float4 unk4;
+                float4 unk5;
+                uint unk6;
+            } Unk[count];
+        } Struct2;
+        
+        // relevant function (dc alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 F4 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 48 8B 47 ? 48 8B 58
+        struct
+        {
+            float unk1;
+            float unk2;
+            float unk3;
+            float unk4;
+            float unk5;
+            float unk6;
+            float unk7;
+            float unk8;
+        } Struct3;
+        
+        // relevant function (dc alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 F5 49 89 FE 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 48 8D 05
+        struct
+        {
+            struct
+            {
+                struct
+                {
+                    float unk1;
+                    int unk2;
+                } UnkSubStruct[9];                
+            } UnkStruct[4];
+            
+            // Requires scene object context
+            // byte data[sceneObject.numComponents];
+        } Struct4;
+        
+    }
+    else
+    {
+        // Geometry
+        // evo::motorstorm::VehicleResource::InitGeometry
+        struct
+        {
+            int havokGeometrySize; // hkArrayUtil::_reserve
+            float4 array[havokGeometrySize];
+            int TriangleCount;
+            int m_triangles[TriangleCount * 3];
+        } Geometry;
+    
+        struct
+        {
+            // evo::motorstorm::VehicleResource::InitMorphableFlags
+            struct
+            {
+                int Num;
+                byte Flags[Num];
+            } MorphableFlags;
+            
+            // evo::ComponentBounds
+            // Count (VehicleResource->m_numComponents internally) depends on scene object -> numSceneObjectComponents
+            // We can use MorphableFlags.Num aswell, count matches
+            // read by evo::motorstorm::VehicleResource::InitComponentBounds
+            struct
+            {
+                float4 origin;
+                float4 extents;
+            } ComponentBounds[MorphableFlags.Num];
+            
+            // Follow debug symbols for this (Motorstorm Apocalypse Proto Resource Viewer (Jan 2010)).
+            // NOTE THAT IT MAY BE SLIGHTLY DIFFERENT FOR LATER GAMES LIKE DRIVECLUB
+            // The following data needs context from dependencies
+        
+            // 1. VertToComponentIdMapping (evo::motorstorm::VehicleResource::InitVertToComponentIdMapping)
+            //     (as per evo::motorstorm::VehicleResource::InitMorphBufferInfo)
+            //     for each mesh component in scene object
+            //     get mesh
+            //     go through each vertex buffer for the mesh
+            //       get stream format for vertex buffer
+            //        check if semantic -> TEXCOORD and UsageOrdinal = 2
+            //        if so, this is a morphable component, push vertex buffer to morphable component list
+            //     
+            //     m_numMorphBuffers = morphable component list count
+            //     relevant: evo::motorstorm::VehicleResource::AddVertexBufferToMapIfMorphing
+            //
+            // ->  for int i = 0; i < m_numMorphBuffers; i++
+            //         read array (4 * vertex count)
+            
+            // 2. evo::motorstorm::VehicleResource::InitNumDeformableVerts
+            //    (as per evo::motorstorm::VehicleResource::InitNumDeformableVerts)
+            //    
+            // -> for int i = 0; i < m_numMorphBuffers; i++
+            //        read array (2 * numSceneObjectComponents)
+            
+            // 3. evo::motorstorm::VehicleResource::InitVertsMaxDisplacement
+            //    (as per evo::motorstorm::VehicleResource::InitVertsMaxDisplacement)
+            //
+            // -> for int i = 0; i < m_numMorphBuffers; i++
+            //        read array (vertex count?)
+        } Morphs;
+        
+    
+        // evo::motorstorm::VehicleResource::InitConstraints
+        // int numConstraints
+        // for (int i = 0; i < numContraints; i++)
+        // {
+        //      evo::motorstorm::AimConstraint::AimConstraint ->
+        //          int numTargetNodes; // max 3?
+        //          for (int j = 0; j < numTargetNodes; j++)
+        //          {
+        //              // evo::motorstorm::AimConstraint::AimTarget ->
+        //                  float4 targetRotatePivot;
+        //                  uint targetNodeId;
+        //                  float targetWeight;
+        //          }
+        //          uint sourceNodeId;
+        //          evo::motorstorm::AimConstraint::UpVectorType upVectorType;
+        //          float4 aimVector;
+        //          float4 upVector;
+        //          float4 worldUpvector;
+        //          int scaled; // really a bool
+        // }
+    }
+} VehicleResource <bgcolor=cWhite>;
+
+
+//////////////////////////////////////////
+// MOTORSTORM_SCENEOBJECT - (20)
+//////////////////////////////////////////
+
+// evo::motorstorm::SceneObjectComponentResource::Type
+typedef enum <byte>
+{
+    kUnspecifiedComponent = 0,
+    kMeshComponent = 1,
+    kAmbOccVolComponent = 2,
+    kLightComponent = 3,
+} SceneObjectComponentResource_Type;
+
+typedef struct
+{
+    // Motorstorm Apocalypse Proto Resource Viewer (Jan 2010) - 0xD0001
+    // Driveclub Retail/Alpha: 0xD0004
+    uint m_VersionNumber <format=hex>;
+    int unk;
+    int unk;
+    byte unk;
+    
+    // Actual game version checks unless specified
+    if (m_VersionNumber >= 0xC0000)
+        byte unk;      
+    
+    if (m_VersionNumber >= 0x90005)
+    {
+        int m_numLightBindings;
+        
+        // evo::motorstorm::LightBinding
+        struct
+        {
+            ushort m_lightIdx;
+            ushort m_nodeIdx;
+        } LightBinding[m_numLightBindings];
+    }
+    
+    if (m_VersionNumber >= 0xD0000)
+    {
+        uint m_numSolidBindings;
+        // evo::motorstorm::SolidBinding
+        struct
+        {
+            ushort m_solidIdx;
+            ushort m_nodeIdx;
+        } SolidBinding[m_numSolidBindings];
+    }
+    
+    int numSceneObjectComponents;
+    struct
+    {
+        int unk;
+        if (m_VersionNumber >= 0xA0000)
+        {
+            SceneObjectComponentResource_Type ObjectType;
+            if (ObjectType == kMeshComponent)
+            {
+                byte meshComponentUnk;
+            }
+            else if (ObjectType == kAmbOccVolComponent) // AmbOccVol?
+            {
+                if (m_VersionNumber >= 0xA0001)
+                {
+                    byte AmbOccVolUnk;
+                    int AmbOccVolUnk2;
+                }
+            }
+            else if (ObjectType == kLightComponent)
+            {
+                short LightComponentUnk;
+            }
+        }
+        else
+        {
+            int unk1;
+            int unk2;
+        }
+        
+        byte unk;
+        float m_lodModifier;
+        float m_viewportSizeThresholdModifier;
+        float m_zpassSizeThresholdModifier;
+        
+        if (m_VersionNumber >= 0xA0000)
+            short m_hierarchyNodeIdx;
+        else
+            int m_hierarchyNodeIdx;
+        
+        // DriveClub, added checked, may be inaccurate
+        if (m_VersionNumber >= 0xD0004)
+        {
+            short unk;
+            short unk;
+            short unk;
+            short unk; 
+        }
+        
+        uint m_hashedName <format=hex>;
+        
+
+    } SceneObjectComponent[numSceneObjectComponents] <optimize=false>;
+    
+    int m_numListShapeBindings;
+    // evo::physicsresources::ListShapeBindings
+    struct
+    {
+        int m_numBindings;
+        // evo::physicsresources::ChildShapeBinding
+        struct
+        {
+            uint childShapeIdx;
+            uint hierarchyNodeIdx;
+        } ChildShapeBinding;
+    } ListShapeBindings[m_numListShapeBindings];
+    
+    // evo::motorstorm::BoneBindings
+    struct
+    {
+        uint id <format=hex>; // evo::motorstorm::g_boneBindings_ID - EVBB
+        uint count;
+        if (count != 0)
+            Print("Unimplemented SceneObject BoneBindings\n");
+    } BoneBindings;
+    
+    if (m_VersionNumber >= 0xB0000 && m_VersionNumber < 0xD0004) // Exclude driveclub, check added
+    {
+        short m_NumLightFlickers;
+        if (m_NumLightFlickers != 0)
+            Print("Unimplemented SceneObject LightFlickers\n");
+    }
+    
+    // Stray name is not read iirc
+    if (m_VersionNumber >= 0xD0004)
+    {
+        String sceneObjectName;
+    }
+    else
+    {
+        
+        byte unk;
+        char nameLen;
+        char scenObjectName[nameLen];
+    }
+    
+    short unk;
+    
+    
+} SceneObjectResource;
+
+//////////////////////////////////////////
+// ATTRIBUTE_SET - (30)
+//////////////////////////////////////////
+
+// evo::sceneresources::AttributeSet
+typedef struct
+{
+    // Always 0x10000
+    uint m_VersionMember <format=hex>;
+    String ClassName;
+    String InstanceName;
+    
+    ushort numAttributes;
+    
+    // evo::sceneresources::AttributeSet::AttributeValuePair
+    if (numAttributes)
+    {
+        struct
+        {
+            String Name;
+            String Value;
+        } Attributes[numAttributes] <read=Str("%s = %s", Name.Str, Value.Str), optimize=false>;
+    }
+} AttributeSet <read=Str("Class: %s, Instance: %s (%d attributes)", ClassName.Str, InstanceName.Str, numAttributes)>;
+
+//////////////////////////////////////////
+// BIN - (38)
+//////////////////////////////////////////
+typedef struct
+{
+    // Always 0x10000
+    uint m_VersionMember <format=hex>;
+    uint BinarySize <format=hex>;
+    if (BinarySize)
+        byte bin[BinarySize];
 } BinaryResource;
 
+//////////////////////////////////////////
 // XML - (39)
+//////////////////////////////////////////
 typedef struct
 {
-    StreamHeader streamHeader;
-    ResourceIdentifier identifier;
-    int BufferSize <format=hex>;
-    int XMLSize <format=hex>;
-    char xml[XMLSize];
+    // Always 0x10000
+    uint m_VersionMember <format=hex>;
+    uint XMLSize <format=hex>;
+    if (XMLSize)
+        char xml[XMLSize];
 } XMLResource;
 
+//////////////////////////////////////////
 // "ToC" - Main Resource Info Block (1)
+//////////////////////////////////////////
 typedef struct
 {
-    ResourceIdentifier identifier;
-    int DataSize <format=hex, fgcolor=cGreen>;
-    int DataOffset <format=hex, fgcolor=cRed>;
-    short UnkResourceIdentifierCount <format=hex, fgcolor=cYellow>;
+    // Read by evo::resourcesystem::ResourceInfo::Read
+    ResourceIdentifier m_ResourceId;
+    uint m_Size <format=hex, fgcolor=cGreen>;
+    uint m_Offset <format=hex, fgcolor=cRed>;
+    ushort m_NumDependancies <comment="Num other resources required for this resource to function", format=hex, fgcolor=cYellow>;
 
-    if (UnkResourceIdentifierCount != 0)
-        ResourceIdentifier unkIdentifiers[UnkResourceIdentifierCount] <optimize=false>;
+    if (m_NumDependancies != 0)
+        ResourceIdentifier m_pDependancies[m_NumDependancies] <comment="Other resources required for this resource to function", optimize=false>;
 
-    short ResourceNameCount;
+    ushort m_NumNames;
+    int m_pNames[m_NumNames] <format=hex>;
+    ushort SourceAssetPathCount;
+    int SourceAssetPathOffsets[SourceAssetPathCount] <format=hex>;
     
     local int cPos = FTell();
-    if (ResourceNameCount > 0)
+    if (m_NumNames > 0)
     {
-        int ResourceNameOffsets[ResourceNameCount] <format=hex>;
-
-        cPos = FTell();
-        FSeek(0x62 + ResourceNameOffsets[0]);
-        ResourceName ResourceNames[ResourceNameCount] <optimize=false>;
-        FSeek(cPos);
+        FSeek(startof(ResourceInfoBlock.nameStringPool) + m_pNames[0]);
+        ResourceName ResourceNames[m_NumNames] <optimize=false>;
     }
-
-    short SourceAssetPathCount;
     
     if (SourceAssetPathCount > 0)
     {
-        int SourceAssetPathOffsets[SourceAssetPathCount] <format=hex>;
-
-        cPos = FTell();
-        FSeek(0x62 + Resource_PacK.ResourceInfoBlock.ResourcesNamesLength + SourceAssetPathOffsets[0]);
+        FSeek(startof(ResourceInfoBlock.nameStringPool) + Resource_PacK.ResourceInfoBlock.Header_.nameStringPoolSize + SourceAssetPathOffsets[0]);
         ResourceName SourceAssets[SourceAssetPathCount] <optimize=false>;
-        FSeek(cPos);
     }
 
-    cPos = FTell();
-    FSeek(DataOffset);
-
-    switch (identifier.Type)
+    FSeek(m_Offset);
+    struct
     {
-        case STREAM_FORMAT:
-            StreamFormat streamFormat; break;
+        StreamHeader StreamHeader_;
+        ResourceIdentifier Identifier;
+        // version should go here. but we put it in each block instead
+        // so that the comments are coherent.
+        
+        switch (Identifier.Union.Packed.Type)
+        {
+            case RTUID_STREAM_FORMAT: // 2
+                // evo::renderer::StreamFormat
+                StreamFormat StreamFormat_; break;
+                
+            case RTUID_VERTEX_BUFFER: // 3
+                // evo::renderer::PixelBuffer
+                VertexBuffer VertexBuffer_; break;
+                
+            case RTUID_INDEX_BUFFER: // 4
+                // evo::renderer::IndexBuffer
+                IndexBuffer IndexBuffer_;break;
+                
+            case RTUID_PIXEL_BUFFER: // 5
+                // evo::renderer::PixelBuffer
+                PixelBuffer PixelBuffer_; break;
 
-        case RESOURCE_COLLECTION:
-            ResourceCollection resourceCollection; break;
-
-        case BIN:
-            BinaryResource binary; break;
-
-        case XML:
-            XMLResource xml; break;
-
-        // Implement more if needed
-    }
-
+            case RTUID_MATERIAL: // 7
+                // evo::renderer::MaterialResourceType
+                MaterialResource Material; break;
+                
+            case RTUID_MESH: // 8
+                // evo::renderer::Mesh
+                Mesh Mesh_;
+                break;
+                
+            case RTUID_RESOURCE_COLLECTION: // 9
+                // evo::resourcesystem::ResourceCollection
+                ResourceCollection ResourceCollection_; break;
+                
+            case RTUID_HAVOK: // 10
+                Havok Havok_;
+                break;
+                
+            case RTUID_HIERARCHY: // 11
+                Hierarchy Hierarchy_;
+                break;
+                
+            case RTUID_RIGID_BODY_BINDINGS: // 12
+                RigidBodyBindingsResource RigidBodyBindings; break;
+                
+            case RTUID_MOTORSTORM_VEHICLE: // 16
+                VehicleResource VehicleResource_; break;
+                
+            case RTUID_MOTORSTORM_SCENEOBJECT: // 20
+                SceneObjectResource SceneObjectResource_; break;
+                
+            case RTUID_ATTRIBUTE_SET: // 30
+                // evo::sceneresources::AttributeSet
+                AttributeSet AttributeSet_; break;
+                
+            case RTUID_BIN:
+                BinaryResource Binary_; break;
+    
+            case RTUID_XML:
+                XMLResource Xml_; break;
+    
+            // Implement more if needed
+            default:
+                Printf("Not supported yet: %s\n", EnumToString(Identifier.Union.Packed.Type));
+                break;
+        }
+    } ResourceData;
+    
     FSeek(cPos);
-} ResourceInfo <comment=PrintResourceInfo>;
+} ResourceInfo <read=PrintResourceInfo>;
 
 string PrintResourceInfo(ResourceInfo& resourceInfo)
 {
     local string str = "";
-    return resourceInfo.ResourceNames[0].str + " (" + EnumToString(resourceInfo.identifier.Type) + ")";
+    return resourceInfo.ResourceNames[0].str + " (" + EnumToString(resourceInfo.m_ResourceId.Union.Packed.Type) + ")";
 }
 
 struct
 {
     struct
     {
-        StreamHeader streamHdr;
+        StreamHeader StreamHeader_;
         int NameLength;
         char Name[NameLength];
-        int SizeOfToC;
-        int OffsetToToC;
-    } Header <bgcolor=cPurple>;
+        int SizeOfToC <format=hex>;
+        int OffsetToToC <fgcolor=cRed, format=hex>;
+    } Header <bgcolor=cYellow>;
 
-    StreamHeader hdr;
-    ResourceIdentifier identifier;
-
+    StreamHeader DataStreamHeader;
     struct
     {
-        int Version <format=hex>;
-        int MarkerMagicStart <format=hex>;
-        int ResourceCount;
-        int Unk1;
-        int Unk2 <format=hex>;
-        int ResourcesNamesLength <format=hex>;
-        int SourceFileNameLength <format=hex>;
-        int Unk3Count;
-        int Unk4Count;
-        ResourceIdentifier MainIdentifier;
+        // Versions:
+        // Motorstorm Apocalypse Proto (Jan 2010) Resource Viewer - Version 0x40000
+        // Driveclub Alpha or retail 1.28 - 0x40002
+        Resource Resource_;
+        
+        // evo::resourcesystem::ResourceInfoBlockHeader
+        struct ResourceInfoBlockHeader
+        {
+            int marker_start <format=hex>; // Confirmed name
+            int count; // Confirmed name
+            int aliasCount; // Confirmed name
+            int dependancyCount <format=hex>; // Confirmed name
+            int nameStringPoolSize <format=hex>; // Confirmed name
+            int sourceAssetStringPoolSize <format=hex>; // Confirmed name
+            
+            if (Resource_.m_VersionNumber >= 0x40002)
+            {
+                int Unk3Count;
+                int Unk4Count;
+            }
+        } Header_;
+        
+        ResourceIdentifier Identifier;
     
-        char ResourceNames[ResourcesNamesLength] <optimize=false>;
-        char SourceFileNames[SourceFileNameLength] <optimize=false>;
+        char nameStringPool[Header_.nameStringPoolSize] <optimize=false, bgcolor=cLtGray>;
+        char sourceAssetStringPool[Header_.sourceAssetStringPoolSize] <optimize=false, bgcolor=cLtGray>;
 
         struct
         {
-            ResourceInfo resInfos[ResourceCount] <optimize=false>;
+            ResourceInfo ResInfos[Header_.count] <optimize=false>;
         } ResourceInfos;
 
-        if (Unk3Count > 0)
+        if (exists(Header_.Unk3Count) && Header_.Unk3Count > 0)
         {
             struct
             {
                 ResourceIdentifier Unk3_Ident;
                 int Unk3Offset <format=hex, fgcolor=cRed>;
-            } Unk3_Stru[Unk3Count];
+            } Unk3_Stru[Header_.Unk3Count];
         }
 
-        if (Unk4Count > 0)
-            int unk4_offsets[Unk4Count] <format=hex, fgcolor=cRed>;
+        if (exists(Header_.Unk4Count) && Header_.Unk4Count > 0)
+            int unk4_offsets[Header_.Unk4Count] <format=hex, fgcolor=cRed>;
 
         int MarkerMagicEnd <format=hex>;
         if (MarkerMagicEnd != 0x99999999)
