@@ -1,0 +1,356 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Lua State Machine Def
+//   Authors: Evolution Studios? Maybe not. Could be private third party library - code has asserts and looks to be compiled aside from the engine. Relevant path: ./../libwws_stm/stm_profile_impl.h
+//   Version: 
+//   Purpose:
+//  Category: 
+// File Mask: *.smd
+//  ID Bytes: 20 4D 54 53
+//   History: 
+//------------------------------------------------
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+// StateMachineDefGetFromPayload
+struct
+{
+    uint Magic <format=hex, comment="Should be 'STM_', is checked">;
+    uint PayloadVersion <format=hex, comment="Is checked">;
+    uint ResourceType <format=hex, comment="Should be ('SMDF' aka kStateMachineDef), is checked">;
+    uint PayloadSize <format=hex>;
+} StateMachine;
+
+struct
+{
+    byte Sha1HashMaybe[0x14];
+    OffsetT StatesOffset;
+    OffsetT MachinesOffset;
+    OffsetT TransitionScriptSetsOffset;
+    OffsetT PropertiesOffset;
+    OffsetT EventsOffset;
+    ushort UnkPropRangeStartIndex; // property entrypoints?
+    ushort UnkPropRangeCount;
+    uint Flags <format=hex>; // & 4 = initialized
+    ushort StateCount <fgcolor=cGreen>;
+    ushort MachineCount <fgcolor=cGreen>;
+    ushort TransitionScriptSetCount <fgcolor=cGreen>;
+    ushort PropertyCount <fgcolor=cGreen>;
+    ushort EventCount <fgcolor=cGreen>;
+    ushort MaxActiveStates; // should be right
+    ushort MaxTransitions;
+    
+    struct
+    {
+        local int i = 0;
+        FSeek(startof(MachinesOffset) + MachinesOffset + (i * 0x18));
+        for (i = 0; i < MachineCount; i++)
+        {
+            struct
+            {
+                OffsetT StateIndicesOffset <format=hex>;
+                short StateIndexCount;
+                short field_0x06;
+                short field_0x08;
+                short field_0x0A;
+                short PropertyRangeStartIndex;
+                short PropertyRangeCount;
+                short UnkPropertyStartIndex;
+                short UnkPropertyCount;
+                int field_0x14;
+                
+                FSeek(startof(StateIndicesOffset) + StateIndicesOffset);
+                short StateIndices[StateIndexCount];
+                
+                FSeek(startof(this) + 0x18);
+            } Machine <bgcolor=cDkBlue>;
+        }
+    } Machines <read=Str("%d machine(s)", parentof(this).MachineCount)>;
+    
+    struct
+    {
+        local int i = 0;
+        FSeek(startof(StatesOffset) + StatesOffset + (i * 0x18));
+        for (i = 0; i < StateCount; i++)
+        {
+            struct
+            {
+                OffsetT DataOffset <format=hex>;
+                short Count_0x04;
+                short TransitionStartIndex;
+                short TransitionCount;
+                short PropertyStartIndex;
+                short PropertyCount;
+                short UnkPropertyStartIndex;
+                short UnkPropertyCount;
+                short field_0x12;
+                int field_0x14;
+
+                FSeek(startof(this) + 0x18);
+            } State <bgcolor=cYellow>;
+        }
+    } States <read=Str("%d state(s)", parentof(this).StateCount)>;
+    
+    struct
+    {
+        local int i = 0;
+        FSeek(startof(TransitionScriptSetsOffset) + TransitionScriptSetsOffset + (i * 0x12));
+        for (i = 0; i < TransitionScriptSetCount; i++)
+        {
+            struct
+            {
+                short ActiveStateIndex;
+                short UnkStateIndex;
+                short field_0x04;
+                short EventIndex;
+                short field_0x08;
+                short field_0x0A;
+                short PropertyRangeStartIndex;
+                short PropertyRangeCount;
+                short field_0x10;
+
+                FSeek(startof(this) + 0x12);
+            } TransitionScriptSet <bgcolor=cRed>;
+        }
+    } TransitionScriptSets <read=Str("%d transition(s)", parentof(this).TransitionScriptSetCount)>;
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < EventCount; i++)
+        {
+            FSeek(startof(EventsOffset) + EventsOffset + (i * 0x08));
+            struct
+            {
+                OffsetT RelativeNameOffset;
+                uint NameHash <format=hex>;
+                
+                FSeek(startof(RelativeNameOffset) + RelativeNameOffset);
+                string Name;
+            } Event <read=Name>;
+        }
+    } Events <bgcolor=cGreen, read=Str("%d event(s)", parentof(this).EventCount)>;
+    
+    typedef enum <byte>
+    {
+        // For type 0-3, handling in driveclub 1.28 is at: 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 4C 89 8D ? ? ? ? 41 89 D4
+        PropertyType_Int = 0,
+        PropertyType_Int64 = 1,
+        PropertyType_String = 2,
+        PropertyType_Bool = 3,
+        PropertyType_EnumDefTable = 4,
+        PropertyType_Type5 = 5,
+        PropertyType_Script = 6,
+        PropertyType_ScriptIndexProperty = 7,
+        PropertyType_Machine = 8,  
+    } PropertyType;
+    
+    struct
+    {
+        local int i = 0;
+        FSeek(startof(PropertiesOffset) + PropertiesOffset + (i * 0x18));
+        for (i = 0; i < PropertyCount; i++)
+        {
+            struct
+            {
+                OffsetT ValueOrDataOffset <format=hex>;
+                short ScriptIndex;
+                short TransitionScriptSetIndex;
+                OffsetT VariableNameMaybe;
+                int field_0x0C;
+                PropertyType Type; // if (type > 7) & 1, use enum? where member index = type & 0x7F
+                byte pad[3];
+                int field_0x14;
+                
+                if (VariableNameMaybe)
+                {
+                    FSeek(startof(VariableNameMaybe) + VariableNameMaybe);
+                    string Name;
+                }
+                
+                if (ValueOrDataOffset && 
+                    Type != PropertyType_Bool && Type != PropertyType_Int)
+                {
+                    FSeek(startof(ValueOrDataOffset) + ValueOrDataOffset);
+                    struct
+                    {
+                        switch (Type)
+                        {
+                            case PropertyType_String:
+                                string UnkType2Str;
+                                break;
+                                
+                            case PropertyType_EnumDefTable:
+                                struct
+                                {
+                                    OffsetT EnumsOffset;
+                                    ushort EnumCount;
+                                    
+                                    struct
+                                    {
+                                        local int k = 0;
+                                        for (k = 0; k < EnumCount; k++)
+                                        {
+                                            FSeek(startof(EnumsOffset) + EnumsOffset + (k * 0x0C));
+                                            struct
+                                            {
+                                                OffsetT NameOffset;
+                                                int MemberCount;
+                                                OffsetT MembersOffset;
+                                                
+                                                FSeek(startof(NameOffset) + NameOffset);
+                                                string Name;
+                                                
+                                                local int l = 0;
+                                                for (l = 0; l < MemberCount; l++)
+                                                {
+                                                    FSeek(startof(MembersOffset) + MembersOffset + (l * 0x04));
+                                                    struct
+                                                    {
+                                                        int MemberNameOffset;
+                                                        FSeek(startof(MemberNameOffset) + MemberNameOffset);
+                                                        string MemberName;
+                                                    } EnumMember <read=MemberName>;
+                                                }
+                                            } Enum <read=Name>;
+                                        }
+                                    } Enums;
+                                } EnumDefTable;
+                                break;
+                                
+                            case PropertyType_Script:
+                                struct
+                                {
+                                    OffsetT TransitionGuardsNameOffset;
+                                    OffsetT TransitionGuardsOffset;
+                                    uint TransitionGuardSize <format=hex>;
+                                    OffsetT TransitionOnTakesNameOffset;
+                                    OffsetT TransitionOnTakesOffset;
+                                    uint TransitionOnTakesSize <format=hex>;
+                                    OffsetT LuaPayloadsOffset;
+                                    ushort LuaPayloadCount;
+                                    
+                                    struct
+                                    {
+                                        local int k = 0;
+                                        for (k = 0; k < LuaPayloadCount; k++)
+                                        {
+                                            FSeek(startof(LuaPayloadsOffset) + LuaPayloadsOffset + (k * 0x0C));
+                                            struct
+                                            {
+                                                OffsetT NameOffset;
+                                                OffsetT PayloadOffset;
+                                                int PayloadSize <format=hex>;
+                                                
+                                                FSeek(startof(NameOffset) + NameOffset);
+                                                string Name;
+                                                
+                                                FSeek(startof(PayloadOffset) + PayloadOffset);
+                                                byte Lua[PayloadSize] <bgcolor=cBlack>;
+                                            } LuaPayload <read=Name>;
+                                        }
+                                    } LuaPayloads;
+                                    
+                                    FSeek(startof(TransitionGuardsNameOffset) + TransitionGuardsNameOffset);
+                                    string TransitionGuardsName;
+                                    
+                                    FSeek(startof(TransitionGuardsOffset) + TransitionGuardsOffset);
+                                    byte TransitionGuard[TransitionGuardSize];
+                                    
+                                    FSeek(startof(TransitionOnTakesNameOffset) + TransitionOnTakesNameOffset);
+                                    string TransitionOnTakesName;
+                                    
+                                    FSeek(startof(TransitionOnTakesOffset) + TransitionOnTakesOffset);
+                                    byte TransitionOnTakes[TransitionOnTakesSize];
+                                    
+                                } ScriptDefTable;
+                                break;
+                                
+                            case PropertyType_Machine:
+                                string MachineName;
+                                break;
+                                
+                            default:
+                                Printf("Unsupported PropertyDef %s \n", EnumToString(Type));
+                                break;
+                        }
+                    } PropertyData <bgcolor=cDkRed>;
+                }
+                
+                FSeek(startof(this) + 0x18);
+            } PropertyDef <bgcolor=cBlue, read=Str("Type: %s", EnumToString(Type))>;
+        }
+    } Properties <read=Str("%d properties", parentof(this).PropertyCount)>;
+} Payload;
+
+// Bool = 1
+// Float = 2
+// String = 3/4
+// LightUserData = 5
+
+/*
+__int64 __fastcall HashName(char *str, int strlen)
+{
+  __int64 result; // rax
+  int v3; // r9d
+  __int64 v4; // r8
+  char *ptr_1; // r11
+  unsigned int v1; // eax
+  unsigned int v7; // edx
+  int v8; // esi
+  unsigned int v9; // ecx
+  unsigned int v10; // edx
+  unsigned int v11; // ecx
+  unsigned int v12; // eax
+  unsigned int v13; // eax
+
+  result = 0;
+  if ( strlen > 0 && str )
+  {
+    v3 = strlen >> 2;
+    if ( strlen >> 2 <= 0 )
+    {
+      v1 = strlen;
+    }
+    else
+    {
+      v4 = 4LL * (unsigned int)(v3 - 1) + 4;
+      ptr_1 = str;
+      v1 = strlen;
+      do
+      {
+        v7 = v1 + (((unsigned __int8)*ptr_1 << 8) | (unsigned __int16)ptr_1[1]);
+        v1 = (((((unsigned __int8)ptr_1[2] << 8) | (unsigned __int16)ptr_1[3]) << 11) ^ v7 ^ (v7 << 16))
+           + ((((((unsigned __int8)ptr_1[2] << 8) | (unsigned __int16)ptr_1[3]) << 11) ^ v7 ^ (v7 << 16)) >> 11);
+        --v3;
+        ptr_1 += 4;
+      }
+      while ( v3 > 0 );
+      str += v4;
+    }
+    v8 = strlen & 3;
+    switch ( v8 )
+    {
+      case 1:
+        v10 = (v1 + *str) ^ ((v1 + *str) << 10);
+        v1 = v10 + (v10 >> 1);
+        break;
+      case 2:
+        v9 = (v1 + (((unsigned __int8)*str << 8) | (unsigned __int16)str[1]))
+           ^ ((v1 + (((unsigned __int8)*str << 8) | (unsigned __int16)str[1])) << 11);
+        v1 = v9 + (v9 >> 17);
+        break;
+      case 3:
+        v11 = ((v1 + (((unsigned __int8)*str << 8) | (unsigned __int16)str[1])) << 16)
+            ^ (v1 + (((unsigned __int8)*str << 8) | (unsigned __int16)str[1]))
+            ^ (str[2] << 18);
+        v1 = v11 + (v11 >> 11);
+        break;
+    }
+    v12 = (v1 ^ (8 * v1)) + ((v1 ^ (8 * v1)) >> 5);
+    v13 = (v12 ^ (16 * v12)) + ((v12 ^ (16 * v12)) >> 17);
+    return (v13 ^ (v13 << 25)) + ((v13 ^ (v13 << 25)) >> 6);
+  }
+  return result;
+}
+*/
