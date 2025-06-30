@@ -584,25 +584,28 @@ typedef struct
         byte unk;
         byte paramCount;
         
-        struct
+        if (paramCount)
         {
             struct
             {
-                byte field_0x00;
-                byte field_0x01;
-                byte field_0x02;
-                byte field_0x03;
-                uint field_0x04;
-                uint field_0x08;
-                float field_0x0C;
-                byte field_0x10;
-            } UnkSub;
-            
-            if (m_VersionNumber >= 0x20007)
-                uint Hash <format=hex>;
-            else
-                byte Index;
-        } Param[paramCount] <optimize=false, read=(exists(Hash) ? Str("%X", Hash) : Str("%d", Index))>;
+                struct
+                {
+                    byte field_0x00;
+                    byte field_0x01;
+                    byte field_0x02;
+                    byte field_0x03;
+                    uint field_0x04;
+                    uint field_0x08;
+                    float field_0x0C;
+                    byte field_0x10;
+                } UnkSub;
+                
+                if (m_VersionNumber >= 0x20007)
+                    uint Hash <format=hex>;
+                else
+                    byte Index;
+            } Param[paramCount] <optimize=false, read=(exists(Hash) ? Str("%X", Hash) : Str("%d", Index))>;
+        }
         
         byte UnkRefCount;
         if (UnkRefCount)
@@ -1367,6 +1370,20 @@ typedef struct
 } SceneObjectResource;
 
 //////////////////////////////////////////
+// GPU_PROGRAMBASE - (28)
+//////////////////////////////////////////
+
+// evo::sceneresources::AttributeSet
+typedef struct
+{
+    // Always 0x10000
+    uint m_VersionMember <format=hex>;
+    byte unk;
+    uint Size;
+    byte Data[Size];
+} GpuProgram;
+
+//////////////////////////////////////////
 // ATTRIBUTE_SET - (30)
 //////////////////////////////////////////
 
@@ -1502,6 +1519,9 @@ typedef struct
                 
             case RTUID_MOTORSTORM_SCENEOBJECT: // 20
                 SceneObjectResource SceneObjectResource_; break;
+                
+            case RTUID_GPU_PROGRAMBASE: // 28
+                GpuProgram GpuProgram_; break;
                 
             case RTUID_ATTRIBUTE_SET: // 30
                 // evo::sceneresources::AttributeSet
