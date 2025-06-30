@@ -1,0 +1,65 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: DriveClub Stat Event Type Ids
+//   Authors: Nenkai
+//   Version: DriveClub 1.28
+//   Purpose: Used by accolade file (?) - maps names (hardcoded in executable) to IDs
+//  Category: 
+// File Mask: dc.stat_event_types
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+typedef struct
+{
+    char Magic[4];
+    char Endian[4];
+    if (Endian == "LITL")
+        LittleEndian();
+    else if (Endian == "BIG ")
+        BigEndian();
+        
+} StreamHeader <bgcolor=cBlack>;
+
+/*
+do
+{
+  IStream::ReadByte(a1, (__int64)&v7);
+  n0x200 |= (v7 & 0x7F) << v3;
+  v3 += 7;
+}
+while ( v7 < 0 );
+*/
+typedef struct
+{
+    local int32 StrLength = 0; // 7BitEncodedInt
+    local ubyte StrLengthNext = 1;
+    local int StrLengthShift;
+    for (StrLengthShift = 0; StrLengthNext; StrLengthShift += 7)
+    {
+        int StrLengthByte : 7;
+        ubyte StrLengthNext : 1;
+        StrLength |= (StrLengthByte << StrLengthShift);
+    }
+    if (StrLength > 0) 
+    {
+        char Str[StrLength];
+    }
+} _7BitString <read=(exists(Str) ? Str : "<empty>")>;
+
+StreamHeader StreamHeader_;
+struct
+{
+    byte Magic[8] <comment="Unchecked">;
+    int Version;
+    int Count;
+    
+    struct
+    {
+        _7BitString TypeName;
+        uint64 Unk;
+    } StatEventTypeId[Count] <optimize=false, read=Str("%s - %d", (exists(TypeName.Str) ? TypeName.Str : "<empty>"), Unk)>;
+} StatEventTypeIds;
