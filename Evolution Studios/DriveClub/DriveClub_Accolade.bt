@@ -1,0 +1,200 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: DriveClub Accolades (dc.accolades)
+//   Authors: Nenkai
+//   Version: DriveClub 1.28
+//   Purpose: 
+//  Category: 
+// File Mask: dc.accolades, dc_bikes.accolades
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+typedef struct
+{
+    char Magic[4];
+    char Endian[4];
+    if (Endian == "LITL")
+        LittleEndian();
+    else if (Endian == "BIG ")
+        BigEndian();
+        
+} StreamHeader <bgcolor=cBlack>;
+
+typedef struct
+{
+    uint Length;
+    char Str[Length];
+} String <read=Str>;
+
+typedef struct
+{
+    local int32 StrLength = 0; // 7BitEncodedInt
+    local ubyte StrLengthNext = 1;
+    local int StrLengthShift;
+    for (StrLengthShift = 0; StrLengthNext; StrLengthShift += 7)
+    {
+        int StrLengthByte : 7;
+        ubyte StrLengthNext : 1;
+        StrLength |= (StrLengthByte << StrLengthShift);
+    }
+    if (StrLength > 0) 
+    {
+        char Str[StrLength];
+    }
+} _7BitString <read=(exists(Str) ? Str : "<empty>")>;
+
+StreamHeader StreamHeader_;
+struct
+{
+    byte Magic[8] <comment="Unchecked">;
+    int Version;
+    if (Version >= 7)
+    {
+        int NumAccolades;
+        struct
+        {
+            uint64 IdHash <format=hex>;
+            _7BitString unk2;
+            byte unk3;
+            _7BitString unk4;
+            _7BitString unk5;
+            uint64 unk6 <format=hex>;
+            _7BitString unk7;
+            
+            /*
+            "_Invalid"
+            "Attempts"
+            "AverageSpeed"
+            "AverageSpeedAttempts"
+            "AverageSpeedTotalFame"
+            "AverageSpeedWins"
+            "ChallengeCreatedTotal"
+            "ChallengeForwardedTotal"
+            "CleanLap"
+            "CleanLapAttempts"
+            "CleanLapTotalFame"
+            "CleanRace"
+            "CleanRaceAttempts"
+            "CleanRaceTotalFame"
+            "CleanRegion"
+            "CleanSector"
+            "CleanSectorAttempts"
+            "CleanSectorTotalFame"
+            "Cornering"
+            "CorneringAttempts"
+            "CorneringTotalFame"
+            "CorneringWins"
+            "Crash"
+            "CrazySpeed"
+            "CrazySpeedAttempts"
+            "CrazySpeedTotalFame"
+            "DistanceDriven"
+            "Draft"
+            "DraftAttempts"
+            "DraftTotalFame"
+            "Drift"
+            "DriftAttempts"
+            "DriftOverdriveAttempts"
+            "DriftOverdriveTotalFame"
+            "DriftScore"
+            "DriftTotalFame"
+            "DriftWins"
+            "EnvironmentCollision"
+            "EnvironmentCollisionAttempts"
+            "EnvironmentCollisionTotalFame"
+            "FinishPosition"
+            "FinishPositionAttempts"
+            "FinishPositionTotalFame"
+            "Finished"
+            "GameSeriesPoints"
+            "GameSeriesTotalScore"
+            "GlobalFame"
+            "LapTime"
+            "MaxSpeed"
+            "MinSpeed"
+            "OffTrack"
+            "OffTrackAttempts"
+            "OffTrackTotalFame"
+            "Overtake"
+            "PositionGained"
+            "PositionGainedAttempts"
+            "PositionGainedTotalFame"
+            "RacePositionDelta"
+            "RaceTime"
+            "ReplayFile"
+            "Score"
+            "Sector1Time"
+            "Sector2Time"
+            "Sector3Time"
+            "Sector4Time"
+            "Sector5Time"
+            "Sector6Time"
+            "SectorAccuracy"
+            "SectorAccuracyAttempts"
+            "SectorAccuracyTotalFame"
+            "SeriesFinishPosition"
+            "SeriesPosition"
+            "Slipstream"
+            "SplitCornering"
+            "TimeInRegion"
+            "TotalDistanceDraftingDelta"
+            "TotalDistanceDriftingDelta"
+            "TotalDistanceDriven"
+            "TotalDraftScoreDelta"
+            "TotalDriftScore"
+            "TotalDriftScoreDelta"
+            "TotalFame"
+            "TotalRaceFame"
+            "TotalRacingLineScoreDelta"
+            "TotalTimeDrifting"
+            "TotalTimeSlipstreaming"
+            "UniquePositionsGainedDelta"
+            "VehicleCollision"
+            "VehicleCollisionAttempts"
+            "VehicleCollisionTotalFame"
+            "Wins"
+            "WetnessResult"
+            "WetnessLap"
+            */
+            _7BitString unk8;
+            _7BitString unk9;
+            _7BitString unk10;
+            _7BitString unk11;
+            
+            /*
+            "HigherThanTarget"
+            "HigherOrEqualToTarget"
+            "LessThanTarget"
+            "LessOrEqualToTarget"
+            "LowerOrEqualToTarget"
+            "BooleanEqualToTarget"
+            "BooleanNotEqualToTarget"
+            "AlwaysTrue"
+            "LessThanOrEqualToUnlockParameter"
+            "CountSuccess"
+            "CountStatVal"
+            "CountOnce"
+            "CountMaxThreshold"
+            "CountMinThreshold"
+            */
+            _7BitString unk12;
+            _7BitString unk13;
+            _7BitString unk14;
+            _7BitString unk15;
+            byte unkBool16;
+            byte unkBool17;
+            byte unk18;
+            byte unk19;
+            int unk20;
+            struct
+            {
+                uint64 unk1 <format=hex>;
+                uint unk2;
+                uint unk3;
+            } UnkStruct[unk20] <optimize=false>;
+        } Accolade[NumAccolades] <optimize=false, read=Str("%X%X - %s", IdHash >> 32, IdHash, unk2.Str)>;
+    }
+} Accolades;
