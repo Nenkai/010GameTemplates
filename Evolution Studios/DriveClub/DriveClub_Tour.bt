@@ -1,0 +1,308 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Driveclub Tour Data
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: dc.tour
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int StrLen;
+    if (StrLen)
+        char Str[StrLen];
+} String <read=(exists(Str) ? Str : "<empty>")>;
+
+typedef struct
+{
+    char Magic[4];
+    char Endian[4];
+    if (Endian == "LITL")
+        LittleEndian();
+    else if (Endian == "BIG ")
+        BigEndian();
+        
+} StreamHeader <bgcolor=cBlack>;
+
+typedef struct
+{
+    int a;
+    String b;
+} UnkCommon;
+
+StreamHeader StreamHeader_;
+struct
+{
+    String TOURDATA;
+    int VersionMaybe;
+    
+    String Tours;
+    int TourCount;
+    struct
+    {
+        int Id;
+        String unk2;
+        String unk3;
+        String unk4;
+        String unk5;
+        int unk6;
+        int unkBool7;
+        int unk8;
+        String dlcRequirement <comment="Checked against \"DLC1\", \"DLC2\", \"DLC3\"">;
+        String unk9;
+        int unk10;
+        int unk11;
+    } Tour[TourCount] <optimize=false, read=Str("ID %d - %s", Id, unk2.Str)>;
+    
+    String Objectives;
+    int ObjectiveCount;
+    struct
+    {
+        int Id;
+        
+        /*
+        "Finish Position"
+        "Series Finish Position"
+        "Series Finish Points"
+        "Race Time"
+        "Lap Time"
+        "Lap Time With OSD"
+        "Fame"
+        "Drift Score"
+        "Drift Score With OSD"
+        "Clean Lap"
+        "Reach Speed"
+        "Sector Accuracy Fame"
+        "Number Of Times Off Track"
+        "Never RTT"
+        "Beat Driver"
+        "Speed Face Off"
+        "Drift Face Off"
+        "Cornering Face Off"
+        "Lead Race For X"
+        "In Top X For Race"
+        "Draft Score"
+        "Draft Score With OSD"
+        "Beat X Face Offs"
+        "Dev Lap Time"
+        "Dev Lap Time With OSD"
+        "Dev Race Time"
+        "Dev Drift Score"
+        "Dev Drift Score With OSD"
+        "Longest Wheelie Distance"
+        "Longest Wheelie Time"
+        "Longest Wheelie Score"
+        "Total Wheelie Distance"
+        "Total Wheelie Time"
+        "Total Wheelie Score"
+        "Longest Stoppie Distance"
+        "Longest Stoppie Time"
+        "Longest Stoppie Score"
+        "Total Stoppie Distance"
+        "Total Stoppie Time"
+        "Total Stoppie Score"
+        "Longest Drift Score"
+        "Clean Sectors"
+        "Sector Time"
+        "Beat Driver In Championship"
+        "Specific Vehicle"
+        "Max Speed Face Off"
+        "Clean Lap Time"
+        "Clean Lap Time With OSD"
+        */
+        String ObjectiveStr;
+        
+        /*
+        "Less Than"
+        "Equal Or Less Than"
+        "More Than"
+        "Equal Or More Than"
+        "Equal"
+        */
+        String OperatorType;
+        String unk2;
+        String unk3;
+    } Objective[ObjectiveCount] <optimize=false, read=Str("ID %d - %s,%s,%s", Id, ObjectiveStr.Str, OperatorType.Str, unk2.Str)>;
+    
+    String FaceOffs;
+    int FaceOffCount;
+    struct
+    {
+        int Id;
+        String unk2;
+        String Name;
+    } FaceOff[FaceOffCount] <optimize=false, read=Str("ID %d - %s (%s)", Id, unk2.Str, Name.Str)>;
+    
+    String Groups;
+    int GroupCount;
+    struct
+    {
+        int Id;
+        int unk2;
+        int unk3;
+        int unk4;
+        int unkBool5;
+        String unk6;
+        
+        /*
+        "Rookie"
+        "Amateur"
+        "Semi-Pro"
+        "Professional"
+        "Legend"
+        */
+        String unk7;
+        String unk8;
+    } Group[GroupCount] <optimize=false, read=Str("ID %d", Id)>;
+    
+    String Drivers;
+    int DriverCount;
+    struct
+    {
+        int Id;
+        int unkBool2;
+        String Name;
+        String Country;
+        String Pronoun; // Checks against 'M' or 'm'
+        String Race;
+        int unk3;
+        int unk4;
+        String unk5;
+        String unk6;
+        int Color <format=hex>;
+        String unk8;
+        String unk9;
+    } Driver[DriverCount] <optimize=false, read=Str("ID %d - %s", Id, Name.Str)>;
+    
+    String Ghosts;
+    int GhostCount;
+    struct
+    {
+        int Id;
+        String Name;
+        String unk3;
+        String unk4;
+    } Ghost[GhostCount] <optimize=false, read=Str("ID %d - %s", Id, Name.Str)>;
+    
+    String Vehicles;
+    int VehiclesCount;
+    struct
+    {
+        String GroupId;
+        String GroupName;
+        int unk3[50];
+    } Vehicle[VehiclesCount]  <optimize=false, read=Str("%s - %s", GroupId.Str, GroupName.Str)>;
+    
+    String Events;
+    int EventCount;
+    struct
+    {
+        int unk0;
+        int unk1;
+        int unk2;
+        int unkBool3;
+        int unk4;
+        String unk5;
+        String unk6;
+        int unk7;
+        int unk8;
+        String unk9;
+        String unk10;
+        int unk11;
+        String unk12;
+        String unk13; // number parsed? checked against 'g' too?
+        int unk14;
+        int unk15;
+        String Track;
+        float TimeOfDay;
+        float SpeedOfTime;
+        
+        /*
+        "Clear"
+        "Cloudy"
+        "Overcast"
+        "Stormy"
+        "Random"
+        */
+        String Weather;
+        
+        /* 
+        "Dry"
+        "Light Precipitation"
+        "Heavy Precipitation"
+        "Dry To Wet"
+        "Dry To Wet To Dry"
+        "Wet To Dry"
+        "Wet To Dry To Wet"
+        "Light To Dry"
+        "Dry To Light"
+        "Dry To Light To Heavy"
+        "Dry To Dry To Light"
+        "Heavy To Light"
+        "Dry To Dry To Light To Heavy"
+        "Wet Track"
+        "Damp Track"
+        "Very Light Precipitation"
+        "Damp To Light"
+        "Mid Precipitation"
+        "Light Constant"
+        "Very Light Constant"
+        */
+        String Precipitation;
+        float unk21;
+        String unk22;
+        int unk23;
+        int unk24;
+        String Mode; // race, drift, timetrial, topspeed
+        struct
+        {
+            int unk1;
+            UnkCommon unk2;
+            int unk3;
+            UnkCommon unk4;
+        } unkArray1[5] <optimize=false>;
+        
+        struct
+        {
+            int unk;
+            UnkCommon unk2;
+            int unk3;
+            UnkCommon unk4;
+        } unkArray2[3] <optimize=false>;
+        String unk;
+        struct
+        {
+            int unk1;
+            int unk2;
+            float unk3;
+            float unk4;
+        } unkArray3[12]  <optimize=false>;
+        int unk25;
+        int unk26;
+        int unk27;
+        int unk28;
+        int unk29;
+        int unk30;
+        int unk31;
+        int unk32;
+        int unk33;
+        int unk34;
+        int unk35;
+        int unk36;
+    } Event[EventCount] <optimize=false, read=Str("ID %d %d - %s", unk0, unk1, exists(unk5.Str) ? unk5.Str : "<empty>")>;
+    
+    String Collections;
+    int CollectionCount;
+    struct
+    {
+        int Id;
+        String unk;
+        String unk2;
+        int unk3;
+    } Collection[CollectionCount] <optimize=false, read=Str("ID %d - %s", Id, unk.Str)>;
+} DcTour <open=true>;
