@@ -283,11 +283,6 @@ struct
     } Properties <read=Str("%d properties", parentof(this).PropertyCount)>;
 } Payload;
 
-// Bool = 1
-// Float = 2
-// String = 3/4
-// LightUserData = 5
-
 /*
 __int64 __fastcall HashName(char *str, int strlen)
 {
