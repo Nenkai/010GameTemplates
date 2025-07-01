@@ -314,10 +314,12 @@ typedef struct
         short m_ElementSizeInBytes;
         int m_NumElements;
         
+        /*
         struct
         {
             byte Data[m_ElementSizeInBytes];
         } Elem[m_NumElements] <optimize=true, bgcolor=cDkBlue>;
+        */
     } VertexBufferBase;
 } VertexBuffer <bgcolor=cBlue>;
 
@@ -338,10 +340,11 @@ typedef struct
         short m_ElementSizeInBytes;
         int m_NumElements;
         
+        
         struct
         {
             byte Data[m_ElementSizeInBytes];
-        } Elem[m_NumElements] <optimize=false, bgcolor=cDkBlue>;
+        } Elem[m_NumElements] <optimize=true, bgcolor=cDkBlue>;
     } VertexBufferBase;
 } IndexBuffer <bgcolor=cBlue>;
 
@@ -1035,11 +1038,14 @@ typedef struct
     uint numBindings;
     
     // evo::physicsresources::RigidBodyBindingsResource::RigidBodyBinding
-    struct
+    if (numBindings)
     {
-        uint nodeIdx;
-        String rigidBodyName;
-    } RigidBodyBinding[numBindings] <read=Str("%d (%s)", nodeIdx, rigidBodyName.Str), optimize=false>;
+        struct
+        {
+            uint nodeIdx;
+            String rigidBodyName;
+        } RigidBodyBinding[numBindings] <read=Str("%d (%s)", nodeIdx, rigidBodyName.Str), optimize=false>;
+    }
 } RigidBodyBindingsResource <bgcolor=cDkRed>;
 
 //////////////////////////////////////////
@@ -1061,44 +1067,53 @@ typedef struct
         struct
         {
             int count;
-            struct
+            if (count)
             {
-                int a;
-                int b;
-                int c;
-                int d;
-            } Unk[count];
-        
+                struct
+                {
+                    int a;
+                    int b;
+                    int c;
+                    int d;
+                } Unk[count];
+            }
+            
             int count2;
-            struct
+            if (count2)
             {
-                int a;
-                int b;
-                int c;
-            } Unk2[count2];
+                struct
+                {
+                    int a;
+                    int b;
+                    int c;
+                } Unk2[count2];
+            }
         } Struct1;
         
         // relevant function (dc alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 48 89 FB 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 4C 8D 7B
         struct
         {
             uint count;
-            struct
+            if (count)
             {
-                uint subcount;
                 struct
                 {
-                    float4 a;
-                    uint b;
-                    uint c;
-                } SubStruct[subcount];
-                
-                uint unk;
-                uint unk2;
-                float4 unk3;
-                float4 unk4;
-                float4 unk5;
-                uint unk6;
-            } Unk[count];
+                    uint subcount;
+                    struct
+                    {
+                        float4 a;
+                        uint b;
+                        uint c;
+                    } SubStruct[subcount];
+                    
+                    uint unk;
+                    uint unk2;
+                    float4 unk3;
+                    float4 unk4;
+                    float4 unk5;
+                    uint unk6;
+                } Unk[count];
+            }        
         } Struct2;
         
         // relevant function (dc alpha/proto): 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 F4 48 8B 05 ? ? ? ? 48 8B 00 48 89 45 ? 48 8B 47 ? 48 8B 58
@@ -1250,22 +1265,28 @@ typedef struct
         int m_numLightBindings;
         
         // evo::motorstorm::LightBinding
-        struct
+        if (m_numLightBindings)
         {
-            ushort m_lightIdx;
-            ushort m_nodeIdx;
-        } LightBinding[m_numLightBindings];
+            struct
+            {
+                ushort m_lightIdx;
+                ushort m_nodeIdx;
+            } LightBinding[m_numLightBindings];
+        }
     }
     
     if (m_VersionNumber >= 0xD0000)
     {
         uint m_numSolidBindings;
         // evo::motorstorm::SolidBinding
-        struct
+        if (m_numSolidBindings)
         {
-            ushort m_solidIdx;
-            ushort m_nodeIdx;
-        } SolidBinding[m_numSolidBindings];
+            struct
+            {
+                ushort m_solidIdx;
+                ushort m_nodeIdx;
+            } SolidBinding[m_numSolidBindings];
+        }
     }
     
     int numSceneObjectComponents;
@@ -1324,16 +1345,22 @@ typedef struct
     
     int m_numListShapeBindings;
     // evo::physicsresources::ListShapeBindings
-    struct
+    if (m_numListShapeBindings)
     {
-        int m_numBindings;
-        // evo::physicsresources::ChildShapeBinding
         struct
         {
-            uint childShapeIdx;
-            uint hierarchyNodeIdx;
-        } ChildShapeBinding;
-    } ListShapeBindings[m_numListShapeBindings];
+            int m_numBindings;
+            // evo::physicsresources::ChildShapeBinding
+            if (m_numBindings)
+            {
+                struct
+                {
+                    uint childShapeIdx;
+                    uint hierarchyNodeIdx;
+                } ChildShapeBinding;
+            }
+        } ListShapeBindings[m_numListShapeBindings];
+    }
     
     // evo::motorstorm::BoneBindings
     struct
@@ -1341,14 +1368,21 @@ typedef struct
         uint id <format=hex>; // evo::motorstorm::g_boneBindings_ID - EVBB
         uint count;
         if (count != 0)
-            Print("Unimplemented SceneObject BoneBindings\n");
+        {
+            struct
+            {
+                uint unkHash;
+                int numIndices;
+                int indices[numIndices];
+            } BoneBinding[count] <optimize=false>;
+        }
     } BoneBindings;
     
     if (m_VersionNumber >= 0xB0000 && m_VersionNumber < 0xD0004) // Exclude driveclub, check added
     {
         short m_NumLightFlickers;
         if (m_NumLightFlickers != 0)
-            Print("Unimplemented SceneObject LightFlickers\n");
+            Printf("Unimplemented SceneObject LightFlickers\n");
     }
     
     // Stray name is not read iirc
@@ -1433,6 +1467,17 @@ typedef struct
 } XMLResource;
 
 //////////////////////////////////////////
+// TOP_MIPS - (71)
+//////////////////////////////////////////
+typedef struct
+{
+    // Always 0x10000
+    uint m_VersionMember <format=hex>;
+    ResourceIdentifier PixelBufferIdentifier;
+    uint TopMipsSize <format=hex>;
+} TopMips;
+
+//////////////////////////////////////////
 // "ToC" - Main Resource Info Block (1)
 //////////////////////////////////////////
 typedef struct
@@ -1471,7 +1516,7 @@ typedef struct
         ResourceIdentifier Identifier;
         // version should go here. but we put it in each block instead
         // so that the comments are coherent.
-        
+
         switch (Identifier.Union.Packed.Type)
         {
             case RTUID_STREAM_FORMAT: // 2
@@ -1533,6 +1578,9 @@ typedef struct
             case RTUID_XML:
                 XMLResource Xml_; break;
     
+            case RTUID_TOP_MIPS: // 71
+                TopMips TopMips_; break;
+                
             // Implement more if needed
             default:
                 Printf("Not supported yet: %s\n", EnumToString(Identifier.Union.Packed.Type));
@@ -1574,7 +1622,7 @@ struct
             int marker_start <format=hex>; // Confirmed name
             int count; // Confirmed name
             int aliasCount; // Confirmed name
-            int dependancyCount <format=hex>; // Confirmed name
+            int dependancyCount; // Confirmed name
             int nameStringPoolSize <format=hex>; // Confirmed name
             int sourceAssetStringPoolSize <format=hex>; // Confirmed name
             
@@ -1585,7 +1633,7 @@ struct
             }
         } Header_;
         
-        ResourceIdentifier Identifier;
+        ResourceIdentifier MainIdentifier;
     
         char nameStringPool[Header_.nameStringPoolSize] <optimize=false, bgcolor=cLtGray>;
         char sourceAssetStringPool[Header_.sourceAssetStringPoolSize] <optimize=false, bgcolor=cLtGray>;
@@ -1601,7 +1649,7 @@ struct
             {
                 ResourceIdentifier Unk3_Ident;
                 int Unk3Offset <format=hex, fgcolor=cRed>;
-            } Unk3_Stru[Header_.Unk3Count];
+            } Unk3_Stru[Header_.Unk3Count] <optimize=false>;
         }
 
         if (exists(Header_.Unk4Count) && Header_.Unk4Count > 0)
