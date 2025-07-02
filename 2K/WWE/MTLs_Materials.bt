@@ -1,0 +1,233 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: WWE 2K MTLs (Materials) File
+//   Authors: Nenkai
+//   Version: 5 and 6 (MTL! 6.3)
+//   Purpose: 
+//  Category: 
+// File Mask: .mtls
+//  ID Bytes: 4D 54 4C 73
+//   History: 
+//------------------------------------------------
+
+// Supports MTLs V5 and MTLs V6 (where MTL! Version is 3)
+int Align(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
+
+    return pos + amount;
+}
+
+typedef enum <ushort>
+{
+    PropV5_S32 = 0,
+    PropV5_F32 = 1,
+    PropV5_VEC4 = 2,
+    PropV5_BOOL = 3,
+    PropV5_STRING = 4,
+    PropV5_U64 = 5,
+    PropV5_S64 = 6,
+} PropertyType;
+        
+typedef struct
+{
+    short unk;
+    short UnkNameOffset <format=hex>;
+    short unk;
+    short UnkBRDFNameOffset <format=hex>;
+    byte unk;
+    byte unk;
+    byte unk;
+    byte unk;
+    byte unk;
+    FSeek(Align(FTell(), 4));
+    
+    ushort NumProperties;
+    struct
+    {
+        short PropertyName;
+        PropertyType Type;
+        
+        switch (Type)
+        {
+            case PropV5_S32:
+                int Value; break;
+            case PropV5_F32:
+                float Value; break;
+            case PropV5_VEC4:
+                float Values[4]; break;
+            case PropV5_BOOL:
+                int BoolValue; break;
+            case PropV5_U64:
+                struct
+                {
+                    int StringOffset <fgcolor=cRed>;
+                } String <optimize=false, read=ReadString(startof(Materials.StringTable) + StringOffset)>;
+                break;
+            case PropV5_S64:
+                uint64 Value; break;
+        }
+        
+    } Properties[NumProperties] <optimize=false, read=ReadString(startof(Materials.StringTable) + PropertyName)>;
+} MaterialV5;
+
+typedef enum <byte>
+{
+    PropV6_BoolInt = 0,
+    PropV6_Int = 1,
+    PropV6_Float = 2,
+    PropV6_Vec2 = 3,
+    PropV6_Vec3 = 4,
+    PropV6_Vec4 = 5,
+    PropV6_String = 6,
+    PropV6_Hash = 7,
+} PropertyTypeV6;
+        
+/////////////////////////////////////////////////////////////////////////
+// Reverse engineering notes
+// -----------------------------------
+// ReadMaterial(MaterialProperties *this_, SpanReader *spanReader)
+// Read at: 48 8B C4 48 89 50 ? 55 48 83 EC ? 48 89 58 (2K25 Windows)
+// struct SpanReader // sizeof=0x10
+// {
+//    _QWORD CurrentPtr;
+//    int field_8;
+//    int CurrentOffset;
+// };
+//////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+    // Header
+    byte Magic[4]; // MTL!
+    uint Version;
+    uint StringTableLength <format=hex>;
+    byte StringTable[StringTableLength] <bgcolor=cGray>;
+    FSeek(Align(FTell(), 4));
+    
+    // TOC
+    ushort Flag1;
+    ushort Flag2;
+    byte unkBool;
+    byte unkBool;
+    byte unkBool;
+    byte unkBool;
+    byte unkBool;
+    byte unkBool;
+    FSeek(Align(FTell(), 4));
+    
+    // Properties
+    uint PropertiesCount <fgcolor=cGreen>;
+    uint MaterialPropertiesSize <format=hex>;
+    struct
+    {
+        uint NameOffsets[PropertiesCount] <format=hex, fgcolor=cRed>;
+        uint Hashes[PropertiesCount] <fgcolor=cYellow>;
+        PropertyTypeV6 PropertyTypes[PropertiesCount] <fgcolor=cPurple>;
+        FSeek(startof(this) + Align((PropertiesCount * 0x08) + PropertiesCount, 0x10));
+        
+        // The data for these types ALWAYS appears before.
+        // They're pointed to by an offset in the actual property data.
+        local int j = 0;
+        for (j = 0; j < PropertiesCount; j++)
+        {
+            switch (PropertyTypes[j])
+            {
+                case PropV6_Vec2:
+                    FSkip(8); break;
+                case PropV6_Vec3:
+                    FSkip(12); break;
+                case PropV6_Vec4:
+                    FSkip(16); break;
+                case PropV6_Hash:
+                    FSkip(8); break;
+            }
+        }
+        
+        for (j = 0; j < PropertiesCount; j++)
+        {
+            struct
+            {
+                local PropertyTypeV6 prop = PropertyTypes[j];
+                local string name = ReadString(startof(parentof(parentof(this)).StringTable) + NameOffsets[j]);
+                
+                switch (PropertyTypes[j])
+                {
+                    case PropV6_BoolInt:
+                        int BoolValue; break;
+                    case PropV6_Int:
+                        int Value; break;
+                    case PropV6_Float:
+                        float Value <fgcolor=cLtBlue>;  break;
+                    case PropV6_Vec2:
+                        int VecDataOffset <fgcolor=cRed, format=hex, comment="From start of MaterialProperties">;
+                        local int TempPos = FTell();
+                        FSeek(startof(parentof(this)) + VecDataOffset);
+                        float Data[2] <fgcolor=cLtBlue, bgcolor=cRed>;
+                        FSeek(TempPos);
+                        break;
+                    case PropV6_Vec3:
+                        int VecDataOffset <fgcolor=cRed, format=hex, comment="From start of MaterialProperties">;
+                        local int TempPos = FTell();
+                        FSeek(startof(parentof(this)) + VecDataOffset);
+                        float Data[3] <fgcolor=cLtBlue, bgcolor=cRed>;
+                        FSeek(TempPos);
+                        break;
+                    case PropV6_Vec4:
+                        int VecDataOffset <fgcolor=cRed, format=hex, comment="From start of MaterialProperties">;
+                        local int TempPos = FTell();
+                        FSeek(startof(parentof(this)) + VecDataOffset);
+                        float Data[4] <fgcolor=cLtBlue, bgcolor=cRed>;
+                        FSeek(TempPos);
+                        break;
+                    case PropV6_String:
+                        int StringOffset <format=hex, fgcolor=cRed>; break;
+                        break;
+                    case PropV6_Hash:
+                        int HashOffset <fgcolor=cRed, format=hex, comment="From start of MaterialProperties">;
+                        local int TempPos = FTell();
+                        FSeek(startof(parentof(this)) + HashOffset);
+                        uint64 Hash <bgcolor=cRed>;
+                        FSeek(TempPos);
+                        break;
+                    default:
+                        Printf("Fuck %d\n", PropertyTypes[j]);
+                        break; 
+                }
+            } Prop <bgcolor=cBlack, optimize=false, read=Str("%s (%s)", name, EnumToString(this.prop))>;
+        }
+    } MaterialProperties <optimize=false>;
+} MaterialV6;
+
+// WEngine::CMaterials::Load_
+struct
+{
+    // Main Header
+    byte Magic[4];
+    uint nVersion;
+    int StringTableLength <format=hex>;
+    byte StringTable[StringTableLength] <bgcolor=cGray>;
+    FSeek(Align(FTell(), 4));
+    
+    // TOC
+    int NumMaterials;
+    if (nVersion == 5)
+    {
+        MaterialV5 Material;
+    }
+    else if (nVersion >= 6)
+    {
+        struct
+        {
+            int field_0x00;
+            int field_0x04;
+        } UnkEntryPad[NumMaterials];
+        ushort MaterialNameOffsets[NumMaterials] <format=hex, fgcolor=cRed>;
+        FSeek(Align(FTell(), 4));
+        
+        local int basePos = FTell();
+        
+        local int i = 0;
+        for (i = 0; i < NumMaterials; i++)
+            MaterialV6 MaterialV6_;
+    }
+} Materials;
