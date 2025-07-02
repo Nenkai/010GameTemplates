@@ -190,7 +190,7 @@ typedef struct
                         FSeek(TempPos);
                         break;
                     default:
-                        Printf("Fuck %d\n", PropertyTypes[j]);
+                        Printf("Unknown property %d\n", PropertyTypes[j]);
                         break; 
                 }
             } Prop <bgcolor=cBlack, optimize=false, read=Str("%s (%s)", name, EnumToString(this.prop))>;
