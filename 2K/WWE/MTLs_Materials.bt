@@ -80,7 +80,7 @@ typedef enum <byte>
     PropV6_Vec3 = 4,
     PropV6_Vec4 = 5,
     PropV6_String = 6,
-    PropV6_Hash = 7,
+    PropV6_Hash = 7, // FNV Hash of path (for ref entries)
 } PropertyTypeV6;
         
 /////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ typedef struct
     struct
     {
         uint NameOffsets[PropertiesCount] <format=hex, fgcolor=cRed>;
-        uint Hashes[PropertiesCount] <fgcolor=cYellow>;
+        uint Hashes[PropertiesCount] <fgcolor=cYellow>; // CRC32 of name, to lowercase
         PropertyTypeV6 PropertyTypes[PropertiesCount] <fgcolor=cPurple>;
         FSeek(startof(this) + Align((PropertiesCount * 0x08) + PropertiesCount, 0x10));
         
@@ -142,7 +142,9 @@ typedef struct
                     FSkip(8); break;
             }
         }
-        
+
+        // Since all properties are now 4 bytes, this position is stored and used as a way to index into properties more easily. 
+        // PropertyData = PropertiesBlock[<this position> + (PropertyIndex * sizeof(int))])
         for (j = 0; j < PropertiesCount; j++)
         {
             struct
@@ -196,6 +198,7 @@ typedef struct
             } Prop <bgcolor=cBlack, optimize=false, read=Str("%s (%s)", name, EnumToString(this.prop))>;
         }
     } MaterialProperties <optimize=false>;
+    FSeek(Align(FTell(), 4));
 } MaterialV6;
 
 // WEngine::CMaterials::Load_
