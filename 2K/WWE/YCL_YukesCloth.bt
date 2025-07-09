@@ -1,0 +1,391 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: WWE Yukes Cloth (.ycl) File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Clothing Physics
+//  Category: 
+// File Mask: .ycl
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+
+// Hierarchy is simple:
+// - Essentially, everything is a ycl::StTag
+// - Folders are a ycl::StFolTag
+// - Header is a ycl::Head which extends from ycl::StFolTag
+// etc. tags are either elements that inherit from StTag or StFolTag. That's it.
+
+// ycl::EnTagType
+// names found at ycl::StTag::Typename
+typedef enum <int>
+{
+    // 2K22 has all these
+    Unknown = -1,
+    Head = 0, // ycl::StHead
+    Cols = 1,
+    ColPack = 2,
+    Capsule_Standard = 3,
+    Capsule_tapered = 4,
+    SimMesh = 5,
+    SimMesh_AssignSubObj = 6,
+    SimMesh_AssignSubObjVtx = 7,
+    SimMesh_AssignSimVtx = 8,
+    SimMesh_Stacks = 9,
+    SimMesh_SkinCalc = 10,
+    SimMesh_SkinPaste = 11,
+    SimMesh_Force = 12,
+    SimMesh_CtStdLink = 13,
+    SimMesh_CtBendLink = 14,
+    SimMesh_CtLocalRange = 15,
+    SimMesh_CtFixation = 16,
+    SimMesh_SimLinkTar = 17,
+    SimMesh_ColVtx = 18,
+    SimMesh_RCN = 19,
+    SimMesh_RCNSubObj = 20,
+    SimMesh_Skin = 21,
+    SimMesh_SimLinkSrc = 22,
+    StrTbl = 23,
+    String = 24,
+    NodeTbl = 25,
+    SimMesh_OldVtxSave = 26,
+    SimLine = 27,
+    SimLine_LineDef = 28,
+    SimLine_AssignNode = 29,
+    // gap
+    SimMesh_Pattern = 31,
+    ColIDTbl = 32,
+    SimMesh_CtStretchLink = 33,
+    Box_S = 34,
+    Box_D = 35,
+    ColIDInfo = 36,
+    SimMesh_ColVtxFast = 37,
+    ColMeshLink_Model = 38,
+    ColMeshLink_Object = 39,
+    ColMeshLink_SubObj = 40,
+    ColMeshLink_Col = 41,
+    ColMeshLink_Capsule = 42,
+    SimMesh_CtNodeFixation = 43,
+    SimMesh_AnimNodeFixation = 44,
+    SimMesh_Wind = 45,
+    SimMesh_TarNodeLink = 46,
+    SimMesh_SrcNodeLink = 47,
+    SimMesh_CtLinkFixation = 48,
+    SimMesh_CtCancelFixation = 49,
+    SimMesh_SelfLinkCapsule = 50,
+    ColNameTbl = 51,
+    Box_R = 52,
+    SimMesh_Friction = 53,
+    SimMesh_CtLinkFixationST = 54,
+    SimMesh_CtEdgeLength = 55,
+    SimMesh_BendingStiffness = 56,
+    
+    // 2K25 has these extra, >= 2K23 might too
+    Unk_57 = 57,
+    Unk_58 = 58,
+    Unk_59 = 59,
+    Unk_60 = 60,
+    Unk_61 = 61,
+    Unk_62 = 62,
+} EnTagType;
+
+struct StTag;
+
+int IsFolderTag(StTag& tag)
+{
+    switch (tag.TagType)
+    {
+        // These are 'StFolTag', aka Folder tags
+        case Head:
+        case Cols:
+        case ColPack:
+        case SimMesh:
+        case SimMesh_AssignSubObj:
+        case SimMesh_Stacks:
+        case SimMesh_RCN:
+        case StrTbl:
+        case NodeTbl:
+        case SimLine:
+        case SimMesh_Pattern:
+        case ColIDTbl:
+        case ColIDInfo:
+        case ColMeshLink_Model:
+        case ColMeshLink_Object:
+        case ColMeshLink_Col:
+        case Unk_62:
+            return true;
+            break;
+    }
+    
+    return false;
+}
+
+local int strTblIndex;
+local int nodeTblIndex;
+
+string GetNodeName(int index)
+{
+    if (index == -1)
+        return "no name available";
+        
+    return Str("%s (StrIndex: %d)", MainTag.Child[nodeTblIndex].Child[index].String, index);
+}
+
+string GetStrName(int index)
+{
+    if (index == -1)
+        return "no name available";
+
+    return Str("%s (StrIndex: %d)", MainTag.Child[strTblIndex].Child[index].String, index);
+}
+
+string GetTagRead(StTag& tag)
+{
+    if (tag.TagType == String)
+        return Str("%s (%d) [%s]", EnumToString(tag.TagType), tag.TagType, tag.String);
+        
+    return Str("%s (%d) [%s]",EnumToString(tag.TagType), tag.TagType, GetStrName(tag.strIndex));
+}
+
+BitfieldDisablePadding();
+typedef struct 
+{
+    EnTagType TagType : 31;
+    byte Disabled : 1;
+    uint Size <format=hex>;
+    uint TotalSize <format=hex>;
+
+    if (IsFolderTag(this))
+        uint ChildCount;
+        
+    switch (TagType)
+    {
+        case Head: // 0
+            struct
+            {
+                short Unk;
+                short StStrTblIndex;
+                int a;
+            } StHead_Data <bgcolor=cDkPurple>;
+            break;
+        case Capsule_Standard: // 3
+            struct
+            {
+                uint Name <read=GetStrName>;
+                int Parent <bgcolor=cYellow, read=GetNodeName>;
+            } StCapsuleStandard_Data;
+            break;
+        case Capsule_tapered: // 4
+            struct
+            {
+                int Name <read=GetStrName>;
+                int Parent <bgcolor=cDkYellow, read=GetNodeName>;
+            } StCapsuleTapered_Data;
+            break;
+        case SimMesh: // 5
+            struct
+            {
+                int Unk;
+                uint SimVtx;
+                uint Iteration;
+                uint Unk;
+                uint Unk;
+            } StSimMesh_Data <bgcolor=cBlue>;
+            break;
+            
+        case SimMesh_AssignSubObj: // 6
+            struct
+            {
+                int ModelStrIndex <read=GetStrName>;
+                int TargetStrIndex <read=GetStrName>;
+            } SimMesh_AssignSubObj_Data <bgcolor=cLtBlue>;
+            break;
+            
+        case SimMesh_AssignSubObjVtx: // 7
+            struct
+            {
+                uint SubNo;
+                int NumVtx;
+                
+                FSeek(startof(parentof(this)) + Size);
+                int Vertices[NumVtx];
+            } SimMesh_AssignSubObjVtx_Data <bgcolor=cDkBlue>;
+            break;
+            
+        case SimMesh_Force: // 12
+            struct
+            {
+                uint Unk;
+                float Gravity;
+                float AirDrag;
+                float Weight;
+                float Friction;
+            } SimMesh_Force_Data <bgcolor=cRed>;
+            break;
+            
+        case SimMesh_CtStdLink: // 13
+            struct
+            {
+                uint Unk;
+                uint MaxStretchLimit; // Bool
+            } SimMesh_CtStdLink_Data <bgcolor=cNone>;
+            break;
+            
+        case SimMesh_CtBendLink: // 14
+            struct
+            {
+                uint Unk;
+                uint MinStretchLimit; // Bool
+            } SimMesh_CtBendLink_Data <bgcolor=cNone>;
+            break;
+            
+        case SimMesh_CtLocalRange: // 15
+            struct
+            {
+                // Box
+                // Sphere
+                // Length
+                // LenBox
+                // LenSphere
+                uint CollisionType;
+            } SimMesh_CtLocalRange_Data <bgcolor=cNone>;
+            break;
+
+        case SimMesh_CtFixation: // 16
+            struct
+            {
+                uint NumVtx;
+            } SimMesh_CtFixation_Data <bgcolor=cNone>;
+            break;
+            
+        case SimMesh_ColVtx: // 18
+            struct
+            {
+                int unk[0x0C];
+                
+                // Standard
+                // Link
+                // LinkHQ
+                int CollisionType;
+                
+                int unks[2];
+                
+                int MaxHits;
+                
+                // None
+                // Both Dir
+                // One Dir
+                // Adaptive Dir
+                int LinkType;
+            } SimMesh_ColVtx_Data <bgcolor=cNone>;
+            break;
+            
+        case StrTbl: // 23
+           strTblIndex = i;
+           struct
+           {
+               int NumStrings;
+           } StStrTbl_Data;
+           break;
+           
+        case String: // 24
+            FSeek(startof(this) + Size);
+            string String <bgcolor=cLtGray>;
+            break;
+            
+        case NodeTbl: // 25
+           nodeTblIndex = i;
+           struct
+           {
+               int NumStrings;
+           } StNodeTbl_Data;
+           break;  
+           
+        case SimLine: // 27
+           nodeTblIndex = i;
+           struct
+           {
+               int Unk;
+               int Name <read=GetStrName>;
+           } StSimLine_Data;
+           break;
+           
+        case Box_S: // 34
+            struct
+            {
+                int Name <read=GetStrName>;
+            } StBoxS_Data;
+            break;
+            
+        case Box_D: // 35
+            struct
+            {
+                int Name <read=GetStrName>;
+            } StBoxD_Data;
+            break;
+            
+        case ColMeshLink_Object: // 27
+           nodeTblIndex = i;
+           struct
+           {
+               int Unk;
+               int Name <read=GetStrName>;
+           } StColMeshLink_Object_Data;
+           break;
+           
+        case Box_R: // 52
+            struct
+            {
+                int Name <read=GetStrName>;
+            } StBoxR_Data;
+            break;
+            
+        case SimMesh_BendingStiffness: // 56
+           struct
+           {
+               int Iterations;
+               float Stiffness;
+               float Curvature;
+           } SimMesh_BendingStiffness_Data;
+           break;  
+    }
+
+    if (IsFolderTag(this))
+    {
+        FSeek(startof(this) + Size);
+        if (ChildCount)
+        {
+            local int i = 0;
+            for (i = 0; i < ChildCount; i++)
+            {
+                StTag Child;
+            }
+        }
+    }    
+ 
+    // This is how the game does it
+    local int strIndex = -1;
+    switch (TagType)
+    {
+        case Capsule_Standard:
+        case Capsule_tapered:
+        case Box_S:
+        case Box_D:
+        case Box_R:
+            strIndex = ReadUInt(startof(this) + 0x0C);
+            break;
+            
+        case SimMesh:
+        case SimLine:
+        case ColMeshLink_Object:
+            strIndex = ReadUInt(startof(this) + 0x10);
+            break;
+    }
+    FSeek(startof(this) + TotalSize);
+    
+} StTag <read=GetTagRead, optimize=false, bgcolor=cPurple>;
+
+StTag MainTag;
