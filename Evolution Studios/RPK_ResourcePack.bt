@@ -1413,8 +1413,71 @@ typedef struct
     // Always 0x10000
     uint m_VersionMember <format=hex>;
     byte unk;
-    uint Size;
-    byte Data[Size];
+    uint Size <format=hex>;
+    union
+    {
+        byte DataBytes[Size];
+        struct
+        {
+            // DriveClub 1.28: 55 48 89 E5 41 56 53 49 89 F6 48 89 FB E8 ? ? ? ? 48 8D 05 ? ? ? ? 48 83 C0 ? 48 89 03 C7 43
+            struct
+            {
+                uint Magic;
+                uint Version <format=hex>;
+                byte Type;
+                byte unk[3];
+                uint unk;
+            } MainHeader;
+            
+            local uint subHeaderSize = ReadUInt(startof(this) + 0x18);
+            struct
+            {
+                uint DataBlockSize : 23 <format=hex>;
+                uint pad : 1;
+                uint UnkIntCount : 8;
+                ushort UnkVecCount0x4;
+                ushort field_0x6;
+                uint OffsetToData <format=hex, comment="Relative to this block">;
+                int unk;
+                short unk;
+                short unk;
+                
+                // 1 bit
+                // 5 bits
+                // 1 bit
+                // 1 bit
+                // 1 bit
+                // ...
+                int Flags <format=hex>;
+                
+                byte field_0x18;
+                byte field_0x19_1 : 4;
+                byte field_0x19_2 : 4;
+                short unk;
+                int field_0x1c;
+                int field_0x20;
+                byte Count_0x24;
+                byte field_0x25;
+                byte field_0x26;
+                byte field_0x27;
+                int values[UnkIntCount];
+                // Count_0x24 entries?
+                
+                /* not sure
+                if (Count_0x24 > 0)
+                {
+                    local uint unkSize = (4 * Count_0x24 + 0x3FFFFFFFCLL) & 0x3FFFFFFFCLL;
+                    int values2[unkSize];
+                }
+                */
+            } SubHeader <size=subHeaderSize, bgcolor=0x005500>;
+            byte DataBlock[SubHeader.DataBlockSize] <bgcolor=0x005555>;
+            
+            if (SubHeader.UnkVecCount0x4 > 0)
+                float4 unkVecs[SubHeader.UnkVecCount0x4] <bgcolor=cDkBlue>;
+                
+        } ShdrHeader <bgcolor=cDkGreen>;
+    } ShdrUnion;
 } GpuProgram;
 
 //////////////////////////////////////////
