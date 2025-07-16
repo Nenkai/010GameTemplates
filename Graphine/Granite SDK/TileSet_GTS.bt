@@ -12,8 +12,10 @@
 //------------------------------------------------
 
 // Everything taken mostly straight from unity RE'ing
+// NOTE: CURRENTLY, ONLY VERSION 5 AND 6 ARE COVERED.
 
 BitfieldDisablePadding();
+LittleEndian();
 
 uint AlignValue(uint x, uint alignment)
 {
@@ -255,6 +257,4 @@ struct
             uint tileListOffset <comment="Offset in the tilelist where numTiles PackedTileListItems are found that point back to the tiles referencing this tile.">;
         } FlatTileInfo[HeaderV5orV6.Header.numFlatTiles] <bgcolor=cYellow>;
     }
-
-    
 } GranitePageFile;
