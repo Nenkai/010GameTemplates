@@ -141,6 +141,11 @@ typedef struct
 // evo::resourcesystem::ResourceIdentifier
 typedef struct
 {
+    // Identifiers seem to be calculated by concatenating a MD5 hash (low 48 bits) and the type.
+    // The hash is created by creating a byte buffer consisting of:
+    // - 'shortName'
+    // - 'sourceAsset'
+    // - EACH dependants's full identifier (8 bytes)
     union
     {
         uint64 m_UID;
