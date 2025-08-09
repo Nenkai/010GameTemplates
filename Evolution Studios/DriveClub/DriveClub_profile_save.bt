@@ -1,0 +1,661 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: DriveClub profile.sav header
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: profile.sav
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int StrLen;
+    if (StrLen)
+        char Str[StrLen];
+} String4 <read=(StrLen ? Str : "")>;
+
+typedef struct
+{
+    float UnkFloat <comment="Defaults to 1.0">;
+    float UnkFloat <comment="Defaults to 0.0">;
+    
+    if (Version >= 11)
+    {
+        float UnkFloat_V11 <comment="Defaults to 0.7">;
+        float UnkFloat_V11 <comment="Defaults to 1.0">;
+        float UnkFloat_V11 <comment="Defaults to 0.6">;
+        float UnkFloat_V11 <comment="Defaults to 0.6">;
+        float UnkFloat_V11 <comment="Defaults to 0.6">;
+        float UnkFloat_V11 <comment="Defaults to 0.6">;
+        float UnkFloat_V11 <comment="Defaults to 0.6">;
+        
+        if (Version >= 13)
+            float UnkFloat_V13 <comment="Defaults to 0">;
+    }
+    else
+    {
+        float UnkFloat <comment="Defaults to 1.0">; // Same as Unk_v11[1]
+        float UnkFloat <comment="Defaults to 0.7 if version >= 5">;
+    }
+} GameSettingsComponent_Struct1;
+    
+typedef struct
+{
+    float UnkFloat;
+    float UnkFloat;
+    int UnkBool;
+    int UnkBool;
+    int Unk;
+    int UnkBool;
+    int UnkBool;
+    
+    if (Version >= 9)
+        int UnkBool_V9;
+        
+    int UnkBool;
+    int Unk;
+    int UnkBool;
+    int UnkBool;
+    int UnkBool;
+    
+    if (Version >= 6)
+        int UnkBool_V6;
+        
+    if (Version >= 12)
+        int UnkBool_V12;
+} GameSettingsComponent_Struct2;
+    
+typedef struct
+{
+    int Unk;
+    if (Version >= 20)
+        float UnkFloat_V20;
+    
+    if (Version >= 15)
+        int UnkBool_V15;
+        
+    int UnkBool;
+    int UnkBool;
+    int UnkBool;
+    int UnkBool;
+    
+    if (Version >= 4)
+        int UnkBool_V4;
+        
+    if (Version >= 17)
+        float UnkFloat_V17;
+        
+    if (Version >= 21)
+        int UnkBool_V21;
+} GameSettingsComponent_Struct3;
+    
+typedef enum <int>
+{
+    Circle,
+    Square,
+    L1,
+    L2,
+    L3,
+    R1,
+    R2,
+    R3,
+    Triangle,
+    Cross
+} PadButton;
+    
+typedef enum <int>
+{
+    WheelButton_Circle,
+    WheelButton_Square,
+    WheelButton_WheelShiftBackward,
+    WheelButton_L2,
+    WheelButton_L3,
+    WheelButton_WheelShiftForward,
+    WheelButton_R2,
+    WheelButton_R3,
+    WheelButton_Triangle,
+    WheelButton_Cross
+} WheelButton;
+
+typedef enum <int>
+{
+    RemoteVitaButton_Circle,
+    RemoteVitaButton_Square,
+    RemoteVitaButton_DPadUp,
+    RemoteVitaButton_DPadDown,
+    RemoteVitaButton_DPadLeft,
+    RemoteVitaButton_DPadRight,
+    RemoteVitaButton_L1,
+    RemoteVitaButton_L2,
+    RemoteVitaButton_L3,
+    RemoteVitaButton_R1,
+    RemoteVitaButton_R2,
+    RemoteVitaButton_R3,
+    RemoteVitaButton_Triangle,
+    RemoteVitaButton_Cross,
+} RemoteVitaButton;
+
+typedef struct
+{
+    enum <int>
+    {
+        LeftStickX,
+        DPadX,
+        OrientationQuatXNeg,
+    } PadSteer;
+    enum <int>
+    {
+        LeftStickY,
+        DPadY,
+        
+    } Pitch;
+    
+    PadButton Handbrake;
+    PadButton GearUp;
+    PadButton GearDown;
+    PadButton LookBack;
+    PadButton CameraChange;
+    PadButton KERS;
+    PadButton DRS;
+    PadButton Accelerate;
+    PadButton Brake;
+} PadSettings;
+
+typedef struct
+{
+    if (Version >= 14)
+        int UnkV14;
+        
+    float Unk;
+    int UnkBool;
+    int Unk;
+    WheelButton Handbrake;
+    WheelButton GearUp;
+    WheelButton GearDown;
+    WheelButton LookBack;
+    WheelButton CameraChange;
+    WheelButton KERS;
+    WheelButton DRS;
+} WheelSettings;
+    
+typedef struct
+{
+    RemoteVitaButton Handbrake;
+    RemoteVitaButton GearUp;
+    RemoteVitaButton GearDown;
+    RemoteVitaButton LookBack;
+    RemoteVitaButton CameraChange;
+    RemoteVitaButton KERS;
+    RemoteVitaButton DRS;
+    RemoteVitaButton Accelerate;
+    RemoteVitaButton Brake;
+} RemoteVitaSettings;
+
+typedef struct
+{
+    int UnkBool;
+    int Unk;
+    int Unk;
+    
+    if (Version >= 18)
+    {
+        int Unk;
+        int Unk;
+        int UnkBool;
+        int Unk;
+        int Unk;
+        int Unk;
+        int Unk;
+    }
+} GameSettingsComponent_Struct7;
+    
+typedef struct
+{
+    GameSettingsComponent_Struct1 Struct1_;
+    GameSettingsComponent_Struct2 Struct2_;
+    float Unk <comment="Defaults to 0.0">;
+    float UnkFloat <comment="Defaults to 0.5">;
+    GameSettingsComponent_Struct3 Struct3_;
+    PadSettings PadSettings_;
+    WheelSettings WheelSettings_;
+    RemoteVitaSettings RemoteVitaSettings_;
+    GameSettingsComponent_Struct7 Struct7_;
+    
+    if (Version >= 18)
+    {
+        PadSettings PadSettings_V18;
+        RemoteVitaSettings RemoteVitaSettings_V18;
+        WheelSettings WheelSettings_V18;
+    }
+} GameSettingsComponent;
+
+typedef struct
+{
+    uint64 Count;
+    
+    local int i = 0;
+    for (i = 0; i < Count; i++)
+    {
+        struct
+        {
+            String4 Name;
+            int Unk;
+            uint64 Flags;
+            if (Flags & 1)
+                uint64 UnkVal1;
+                
+            if (Flags & 2)
+                uint UnkVal2;
+                
+            if (Flags & 4)
+                uint UnkVal3;
+                
+            if (Flags & 8)
+                uint UnkVal4;
+                
+            if (Flags & 0x10)
+                uint UnkVal5;
+        } Unk <read=Name.Str>;
+    }
+} StatsStore;
+
+typedef struct
+{
+    uint Unk;
+    uint Unk;
+    uint Unk;
+    uint Unk;
+    uint Unk;
+} RankComponent;
+
+typedef struct
+{
+    uint64 Count;
+    struct
+    {
+        uint Unk;
+        uint Unk;
+        float Unk;
+        uint Unk;
+        uint64 Unk;
+        uint UnkBool;
+        uint Unk;
+        if (Version >= 19)
+        {
+            uint Unk_V19;
+            float Unk_V19;   
+        }
+        
+        if (Version >= 31)
+        {
+            uint Unk_V31;   
+        }
+        
+        uint Unk;
+        uint UnkCount;
+        uint Unk;
+        
+        if (Version >= 20)
+            uint Unk_V20 <comment="Defaults to 300">;
+            
+        if (Version >= 26)
+            uint Unk_V26 <comment="Defaults to 300">;
+            
+        uint Unk;
+        uint Unk;
+        int64 Unk64;
+        
+        local int count1 = Version >= 29 ? 12 : Unk_Count;
+        struct
+        {
+            int Unk;
+            int Unk;
+            float UnkFloat;
+        } GameSessionComponent_Entry_Entry1[count1];   
+    
+        int Unk;
+        int UnkBool;
+        int64 Unk64;
+        int64 Unk64;
+        int64 Unk64;
+        int64 Unk64;
+        int64 Unk64;
+        
+        if (Version >= 25)
+            int UnkBool_V25;
+            
+        uint64 UnkCount2;
+        if (UnkCount2)
+        {
+            struct
+            {
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int64 Unk64;
+                int Unk;
+                if (Version >= 23)
+                    int UnkBool_V23;
+            } GameSessionComponent_Entry_Entry2[UnkCount2] <optimize=false>;
+        }
+        
+        uint64 UnkCount3;
+        if (UnkCount3)
+        {
+            struct
+            {
+                int Unk;
+                int Unk;
+                int64 Unk64;
+                if (Version >= 23)
+                    int UnkBool_V23; 
+            } GameSessionComponent_Entry_Entry3[UnkCount3] <optimize=false>;
+        }
+        
+        uint64 UnkCount4;
+        if (UnkCount4)
+        {
+            struct
+            {
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                
+                if (Version >= 24)
+                    int UnkBool_V24;
+                    
+                if (Version >= 25)
+                    int Unk_V25;
+                    
+            } GameSessionComponent_Entry_Entry4[UnkCount4] <optimize=false>;
+        }
+        
+        uint64 UnkCount5;
+        if (UnkCount5)
+        {
+            struct
+            {
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                int Unk;
+                
+                /* v22 = 0x3FFFFFFFFFFFFFE8uLL;
+                  do
+                  {
+                    IStream::Read4(a2, &v61);
+                    *&v71[v22] = v61;
+                    IStream::Read4(a2, &v71[v22 + 1]);
+                    v22 += 2;
+                  }
+                  while ( v22 * 4 );
+                */
+                struct
+                {
+                    int Unk;
+                    int Unk;
+                } Unks[12] <comment="This is fixed size - unknown, TODO: figure it out - check template">;
+            } GameSessionComponent_Entry_Entry5[UnkCount5] <optimize=false>;
+        }
+        
+        uint64 UnkCount6;
+        if (UnkCount6)
+            int64 Unks64_6[UnkCount6];
+            
+        int64 Unk64;
+        
+        if (Version >= 18)
+        {
+            int64 Unk64_V18;
+        }
+        
+        if (Version >= 21)
+        {
+            uint Unk64_V21;
+            String4 UnkString_V21;
+            String4 UnkString_V21;
+        }
+        
+        if (Version >= 22)
+        {
+            int Unk_V22;
+        }
+        
+        if (Version >= 27)
+        {
+            int UnkBool_V27;
+            int64 Unk64_V27;
+            int64 Unk64_V27;
+            String4 UnkString_V27;
+            int Unk_V27;
+        }
+        
+        if (Version >= 28)
+        {
+            int Unk_V28;
+            int Unk_V28;
+            int Unk_V28;
+            int Unk_V28;
+            int Unk_V28;
+            int64 Unk64_V28;
+            int Unk_V28;
+            int UnkBool_V28;
+        }
+        
+        if (Version >= 30)
+            int Unk_V30;
+            
+        if (Version >= 32)
+            int UnkBool_V32;
+
+        
+    } GameSessionComponent_Entry[Count] <optimize=false>;
+    
+} GameSessionComponent;
+
+typedef struct
+{
+    int64 Unk64;
+    int UnkCount;
+    
+    struct
+    {
+        if (Version >= 23)
+        {
+            int UnkPackedID <format=hex, comment="v43 = (UnkPackedID << 12) & 0xF000000 | (UnkPackedID << 8) & 0xF0000 | UnkPackedID;">;
+        }
+        else
+            int UnkID;
+            
+        int UnkBool;
+    } UnkEntry[UnkCount] <optimize=false>;
+    
+    if (Version >= 24)
+    {
+        int UnkCount2;
+        struct
+        {
+            int Unk;
+            int UnkBool;
+        } UnkEntry2[UnkCount2] <optimize=false>;   
+    }
+    
+    int UnkCount3;
+    if (UnkCount3)
+    {
+        struct
+        {
+            String4 Name;
+            float Value;
+        } UnkEntry3[UnkCount3] <read=Name.Str, optimize=false>;
+    }
+    
+    int KeyValueCount;
+    if (KeyValueCount)
+    {
+        struct
+        {
+            String4 Key;
+            String4 Value;
+        } KeyValueStr[KeyValueCount] <read=Key.Str, optimize=false>;
+    }
+    
+    int UnkCount5;
+    if (UnkCount5)
+    {
+        struct
+        {
+            int64 Unk <format=hex>;
+            int64 Unk;
+            int64 Unk;
+        } UnkEntry5[UnkCount5] <comment="Likely needs to be ordered", optimize=false>;
+    }
+    
+    int Unk;
+    
+    if (Version >= 21)
+    {
+        int UnkCount_V21;
+        if (UnkCount_V21)
+            int64 Unk64s_V21[UnkCount_V21];
+    }
+    
+    if (Version >= 22)
+        int64 Unk64_V22;
+} PlayerProfileComponent;
+
+typedef struct
+{
+    int NumUsed;
+    struct
+    {
+        char UnkBase64[64];
+    } Unks[100];   
+} Entity0xAE1D;
+
+typedef struct
+{
+    if (Version >= 1)
+    {
+        int UnkCount;
+        if (UnkCount)
+        {
+            struct
+            {
+                String4 UnkString;
+                String4 UnkString;
+                String4 UnkString;
+                String4 UnkString;
+                if (Version >= 2)
+                    int Unk;
+            } Unks[UnkCount] <optimize=false>;
+        }
+        
+        if (Version == 3) // ONLY version 3
+        {
+            struct
+            {
+                int Unk;
+                int Count;
+                if (Count)
+                {
+                    struct
+                    {
+                        int Unk;
+                        int Unk;
+                        int64 Unk64;
+                        int64 Unk64;
+                    } UnkV3_Entry[Count] <optimize=false>;
+                }
+            } UnkV3; 
+        }
+    }
+} otgLeaderboardComponent;
+
+typedef struct
+{
+    int64 Unk64;
+    int64 Unk64;
+    int64 Unk64;
+    int UnkBool;
+    int64 Unk64;
+    int UnkBool;
+} FameComponent;
+
+typedef struct
+{
+    int Count;
+    if (Count)
+        int Unks[Count] <optimize=false>;
+} StoreCatalogComponent;
+
+////////////////////////////////////////////
+// __Header Starts__________________________
+////////////////////////////////////////////
+struct
+{
+    int Version <comment="DriveClub 1.28 = must match 65519">;
+    int64 Checksum <format=hex, comment="First 8 bytes of MD5 of ALL the following data">;
+} SavHeader <bgcolor=cPurple, open=true>;
+
+struct
+{
+    int Version;
+    struct
+    {
+        
+        enum <uint>
+        {
+            Entity_GameSettingsComponent = 0x1E32,
+            Entity_StatsStore = 0x1E33,
+            Entity_RankComponent = 0x1E34,
+            Entity_GameSessionComponent = 0x6AEE,
+            Entity_PlayerProfileComponent = 0xAE0E,
+            Entity_otgLeaderboardComponent = 0xCDDE,
+            Entity_FameComponent = 0xFAEC,
+            Entity_StoreCatalogComponent = 0xA1A4510E,
+        } Type <format=hex, bgcolor=cDkPurple>;
+        int Version <bgcolor=cDkPurple>;
+        int Size <bgcolor=cDkPurple>;
+    
+        switch (Type)
+        {
+            case Entity_GameSettingsComponent:
+                GameSettingsComponent GameSettingsComponent_ <bgcolor=cBlue>; break;   
+            case Entity_StatsStore:
+                StatsStore StatsStore_ <bgcolor=cGreen>; break;   
+            case Entity_RankComponent:
+                RankComponent RankComponent_ <bgcolor=cRed>; break;  
+            case Entity_GameSessionComponent:
+                GameSessionComponent GameSessionComponent_ <bgcolor=cYellow>; break;
+            case Entity_PlayerProfileComponent:
+                PlayerProfileComponent PlayerProfileComponent_ <bgcolor=cBlack>; break;
+            case 0xAE1D:
+                Entity0xAE1D Entity0xAE1D_ <bgcolor=cWhite>; break;
+            case Entity_otgLeaderboardComponent:
+                otgLeaderboardComponent otgLeaderboardComponent_ <bgcolor=cDkGreen>; break;
+            case Entity_FameComponent:
+                FameComponent FameComponent_ <bgcolor=cDkBlue>; break;
+            case Entity_StoreCatalogComponent:
+                StoreCatalogComponent StoreCatalogComponent_ <bgcolor=cDkRed>; break;
+        }
+    
+    } SaveEntity[9] <read=Str("Type %s", (EnumToString(Type) != "" ? EnumToString(Type) : Str("%X", Type))), optimize=false>;
+    
+    int End <format=hex, comment="Must be 0xFFFF">;
+    if (End != 0xFFFF)
+        Printf("Save problem!");
+} Profile <open=true>;
+
