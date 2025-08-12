@@ -1,7 +1,7 @@
 //------------------------------------------------
 //--- 010 Editor v14.0 Binary Template
 //
-//      File: PlatinumGames Eff/Est 
+//      File: PlatinumGames EFF/Est file 
 //   Authors: Nenkai, some information taken from https://github.com/ArthurHeitmann/F-SERVO
 //   Version: 
 //   Purpose: 
@@ -488,3 +488,4 @@ struct
          }
     } Functions;
 } espEmtEst;
+
