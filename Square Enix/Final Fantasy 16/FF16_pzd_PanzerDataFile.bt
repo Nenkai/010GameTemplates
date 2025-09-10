@@ -83,35 +83,38 @@ struct
     // There is bottom serialization data from their side
     // Not parsed by the game.
     
-    FSeek(FileSize() - 0x10);
-    struct
+    if (ReadUInt(FileSize() - 0x10) == 0x444C5642)
     {
-        uint Magic <format=hex>;
-        int Version;
-        OffsetT DataOffset; 
-        int _padding_;
-        
-        FSeek(startof(this) + DataOffset);
+        FSeek(FileSize() - 0x10);
         struct
         {
-            OffsetT ListOffset;
-            CountT EntryCount;
+            uint Magic <format=hex>;
+            int Version;
+            OffsetT DataOffset; 
+            int _padding_;
             
-            local int i = 0;
-            for (i = 0; i < EntryCount; i++)
+            FSeek(startof(this) + DataOffset);
+            struct
             {
-                FSeek(startof(this) + 0x20 + (i * 0x08));
-                struct
+                OffsetT ListOffset;
+                CountT EntryCount;
+                
+                local int i = 0;
+                for (i = 0; i < EntryCount; i++)
                 {
-                    OffsetT NameOffset;
-                    uint Size;
-                    
-                    FSeek(startof(this) + NameOffset);
-                    string Name;
-                } StructInfo <read=Str("%s (Size: 0x%x bytes)", Name, Size)>;   
-            }
-        } StructInfos;
-        
-        FSeek(startof(this) + 0x10);
-    } BVLDHeader <comment="Debug/tool building data. Not read by the game.">;
+                    FSeek(startof(this) + 0x20 + (i * 0x08));
+                    struct
+                    {
+                        OffsetT NameOffset;
+                        uint Size;
+                        
+                        FSeek(startof(this) + NameOffset);
+                        string Name;
+                    } StructInfo <read=Str("%s (Size: 0x%x bytes)", Name, Size)>;   
+                }
+            } StructInfos;
+    
+            FSeek(startof(this) + 0x10);
+        } BVLDHeader <comment="Debug/tool building data. Not read by the game.">;
+    }
 } PzdFile <open=true, comment="DevEnv.Panzer.Models.Binary.PzdFile">;
