@@ -1,0 +1,117 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: Final Fantasy 16 Panzer (Localization) Text/Line Content
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.pzd
+//  ID Bytes: 50 5A 44 46
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    enum <ushort>
+    {
+        bnpcbase = 23,
+        enpcbase = 50,
+        speaker = 224,
+    } NpcTypeUnion;
+    short _pad_ <hidden=true>;
+    uint Id;
+} NxdUnionKey32 <read=GetUnionStr, comment="DevEnv.Nex.NexSerialization.Nxd.NxdUnionKey32">;
+
+char[] GetUnionStr(NxdUnionKey32& union_)
+{
+    return Str("%s: %d", EnumToString(union_.NpcTypeUnion), union_.Id);
+}
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+typedef uint CountT <fgcolor=cGreen>;
+struct
+{
+    struct
+    {
+        char Magic[4] <comment="Checked">;
+        ushort Version <comment="Checked. FF16 PC: 2">;
+        ushort Pad;
+        byte _reserved_[0x18];
+        OffsetT EntriesOffset;
+        CountT EntryCount;
+        byte _pad2_[0x08];
+    } Header <bgcolor=cPurple, open=true, comment="DevEnv.Panzer.Models.Binary.Pzd.PzdFileHeader">;
+    
+    local int i = 0;
+    for (i = 0; i < Header.EntryCount; i++)
+    {
+        FSeek(startof(Header) + Header.EntriesOffset + (i * 0x20));
+        struct
+        { 
+            uint Id <comment="Referenced by: Timeline Element 3016, maybe nex questsimpleeventsequence, lorecutmreference">;
+            OffsetT LineStringOffset;
+            NxdUnionKey32 Speaker_;
+            OffsetT VoiceSoundPathOffset;
+            enum <int>
+            {
+                // Subtitle will only show if the person opted in to subtitles
+                Normal = 0,
+                
+                // Subtitle will always show regardless. used for mog and other entities that don't speak in english or have very altered voice lines (so like, ifrit/phoenix fusion)
+                AlwaysShow = 1,
+                
+                // Only shows if opted in to these subtitles in accessibility
+                HearingImpairedSubtitle = 2,
+            } ShowType <comment="Used by timeline elem 3016">;
+            
+            OffsetT ShortVoiceSoundPathOffset;
+            byte IsShortened;
+            byte pad[3];
+            
+            FSeek(startof(this) + LineStringOffset);
+            string Line <bgcolor=cLtGray>;
+            
+            FSeek(startof(this) + VoiceSoundPathOffset);
+            string VoiceSoundPath <bgcolor=cLtGray>;
+            
+            FSeek(startof(this) + ShortVoiceSoundPathOffset);
+            string ShortVoiceSoundPath;
+        } PzdTextContent <bgcolor=cGreen, read=Str("[%d] (%s): %s", Id, GetUnionStr(Speaker_), Line), comment="DevEnv.Panzer.Models.Binary.Pzd.PzdTextContent">;
+    }
+    
+    // There is bottom serialization data from their side
+    // Not parsed by the game.
+    
+    FSeek(FileSize() - 0x10);
+    struct
+    {
+        uint Magic <format=hex>;
+        int Version;
+        OffsetT DataOffset; 
+        int _padding_;
+        
+        FSeek(startof(this) + DataOffset);
+        struct
+        {
+            OffsetT ListOffset;
+            CountT EntryCount;
+            
+            local int i = 0;
+            for (i = 0; i < EntryCount; i++)
+            {
+                FSeek(startof(this) + 0x20 + (i * 0x08));
+                struct
+                {
+                    OffsetT NameOffset;
+                    uint Size;
+                    
+                    FSeek(startof(this) + NameOffset);
+                    string Name;
+                } StructInfo <read=Str("%s (Size: 0x%x bytes)", Name, Size)>;   
+            }
+        } StructInfos;
+        
+        FSeek(startof(this) + 0x10);
+    } BVLDHeader <comment="Debug/tool building data. Not read by the game.">;
+} PzdFile <open=true, comment="DevEnv.Panzer.Models.Binary.PzdFile">;
