@@ -1,0 +1,181 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: FF16 Merge Grid Binary (.mgb)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.mgb
+//  ID Bytes: 14 09 22 20
+//   History: 
+//------------------------------------------------
+// NOT FINISHED
+// May not be loaded, depends on nex table layoutsettings->UseMergeGridMgbFile
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+typedef uint CountT <fgcolor=cGreen>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="Checked. 2022 09 14">;
+        float Unk;
+        
+        FSeek(0x1C);
+        CountT Field_0x1C;
+        OffsetT Field_0x20;
+        CountT Field_0x24 <comment="Some code calculate Field_0x1C plus this.">;
+        OffsetT Field_0x28;
+        CountT UnkCount_0x2C;
+        OffsetT UnkOffset_0x30;
+        CountT UnkCount_0x34;
+        OffsetT UnkOffset_0x38;
+        CountT OnInitAssetsToLoadCount;
+        OffsetT OnInitAssetsToLoadOffset;
+        float UnkFloat_0x44;
+        CountT Count_0x48;
+        OffsetT UnkOffset_0x4C;
+        CountT Count_0x50;
+        OffsetT UnkOffset_0x54;
+        CountT Count_0x58;
+        OffsetT UnkOffset_0x5C;
+        CountT Count_0x60;
+        OffsetT UnkOffset_0x64;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(startof(this) + Header.Field_0x20);
+    struct
+    {
+        FSeek(startof(MergeGridBinary) + Header.Field_0x20);
+        struct
+        {
+            OffsetT DataOffsets[Header.Field_0x1C];
+            local int i = 0;
+            for (i = 0; i < Header.Field_0x1C; i++)
+            {
+                FSeek(startof(DataOffsets) + DataOffsets[i]);
+                struct
+                {
+                    int Field_0x00;
+                    int Field_0x04;
+                    int Field_0x08;
+                    int Field_0x0C;
+                    int Field_0x10;
+                    Vec3 UnkMin;
+                    Vec3 UnkMax;
+                    CountT Count_0x2C <comment="Stride: 0x88">;
+                    OffsetT Offset_0x30;
+                    float Field_0x34;
+                    int Field_0x38;
+                    OffsetT Offset_0x3C;
+                    CountT Count_0x40;
+                    int Field_0x44;
+                    
+                    if (Count_0x2C > 0)
+                    {
+                        FSeek(startof(this) + Offset_0x30);
+                        struct
+                        {
+                            OffsetT DataOffsets[Count_0x2C];
+                            local int j = 0;
+                            for (j = 0; j < Count_0x2C; j++)
+                            {
+                                FSeek(startof(DataOffsets) + DataOffsets[j]);
+                                struct
+                                {
+                                    Vec3 Field_0x00;
+                                    Vec3 Field_0x0C;
+                                    OffsetT Field_0x18;
+                                    CountT Field_0x1C;
+                                    int Field_0x20;
+                                    int Field_0x24;
+                                    OffsetT Field_0x28;
+                                    CountT Field_0x2C;
+                                    OffsetT Field_0x30;
+                                    CountT Field_0x34;
+                                    Vec3 Field_0x38;
+                                    Vec3 Field_0x44;
+                                    int Field_0x50[8];
+                                    int Field_0x70;
+                                    int Field_0x74;
+                                    float Field_0x78;
+                                    int Field_0x7C;
+                                    int Field_0x80;
+                                    int Field_0x84;
+                                } Unk_0x20_0x30_Data <bgcolor=cGray>;
+                            }
+                        } Unk_0x20_0x30s;   
+                    }
+                    
+                } Unk0x20Data <bgcolor=cLtGray>;
+            }
+        } Unk0x20;
+    } Unks0x20;
+    
+    FSeek(startof(this) + Header.UnkOffset_0x30);
+    struct
+    {
+        int UnkId;
+        int LayoutInstanceId;   
+    } Unk_0x30[Header.UnkCount_0x2C] <bgcolor=cBlue, read=Str("LayoutInstanceId: %d", LayoutInstanceId), comment="This whole thing has to be ordered for binary search.">;
+    
+    FSeek(startof(this) + Header.UnkOffset_0x38);
+    struct
+    {
+        int UnkId;
+        int LayoutInstanceId;   
+    } Unk_0x38[Header.UnkCount_0x34] <bgcolor=cDkBlue, read=Str("LayoutInstanceId: %d", LayoutInstanceId), comment="This whole thing has to be ordered for binary search.">;
+    
+    
+    FSeek(startof(this) + Header.OnInitAssetsToLoadOffset);
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < Header.OnInitAssetsToLoadCount; i++)
+        {
+            FSeek(startof(MergeGridBinary) + Header.OnInitAssetsToLoadOffset + (i * 0x04));
+            struct
+            {
+                OffsetT NameOffset;
+                
+                FSeek(startof(MergeGridBinary) + Header.OnInitAssetsToLoadOffset + NameOffset);
+                struct
+                {
+                    byte Unk;
+                    byte StrOffset;
+                    short TypeMaybe;
+                    
+                    FSeek(startof(this) + StrOffset);
+                    string Str;
+                } Asset <bgcolor=cLtGray>;
+                
+                FSeek(startof(this) + 0x04);
+            } InitAsset <read=Str("[%d] %s", Asset.TypeMaybe, Asset.Str)>;
+        }
+    } OnInitAssetsToLoad;
+    
+    FSeek(startof(this) + Header.UnkOffset_0x5C);
+    struct
+    {
+        Vec3 Min;
+        Vec3 Max;
+    } Unk_0x5C[Header.Count_0x58] <bgcolor=cLtBlue>;
+    
+    FSeek(startof(this) + Header.UnkOffset_0x64);
+    struct
+    {
+        int LayoutInstanceId;
+        int Field_0x04;
+        int Field_0x08;
+        int Field_0x0C;
+    } Unk_0x64[Header.Count_0x60] <read=Str("Id: %d, (%d %d %d)", LayoutInstanceId, Field_0x04, Field_0x08, Field_0x0C), bgcolor=cLtBlue, comment="This whole thing has to be ordered for binary search.">; 
+} MergeGridBinary <open=true>;
