@@ -1,0 +1,105 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: The Crew Motorfest Big File ToC (.toc)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.toc
+//  ID Bytes:
+//   History: 
+//------------------------------------------------
+
+struct Section;
+
+struct Section
+{
+    uint Magic <format=hex>;
+    uint Version <format=hex>;
+    uint SectionDataLength <format=hex>;
+
+    union
+    {
+        /* Some valid magics:
+         * VRSN - Version
+         * ETOC - Encrypted TOC
+         * CTOC - Compressed TOC - Note: 3 encrypted ints with 0x55555555 Xor
+         * RDC!
+         * BNK! - Bank
+         * TOC! - Main TOC
+         */
+         
+        switch (Magic)
+        {
+            case 0x434F5445:
+                struct
+                {
+                    int MethodEncrypted <format=hex, comment="Xor 0x55555555 - XTEA Magic">;
+                    int SizeEncrypted <format=hex, comment="Xor 0x55555555">;
+                    byte EncryptedData[SizeEncrypted ^ 0x55555555];
+                } EncryptedTOC;
+                break;
+            
+            case 0x434F5443:
+                struct
+                {
+                    int MethodEncrypted <format=hex, comment="Xor 0x55555555 - KRKN Magic">;
+                    int CompressedSizeEncrypted <format=hex, comment="Xor 0x55555555">;
+                    int DecompressedSizeEncrypted <format=hex, comment="Xor 0x55555555">;
+                    byte CompressedData[CompressedSizeEncrypted ^ 0x55555555];
+                } CompressedTOC;
+                
+            case 0x4E535256:
+                struct
+                {
+                    int Unk;
+                    int NumBanksMaybe;
+                    int NumRDCMaybe;
+                    int Unk4 <format=hex>;
+                    int CompressionMethod <format=hex>;
+                    int EncryptionMethod <format=hex>;
+                    time64_t Date;
+                } Version;
+                break;
+                
+            case 0x214B4E42:
+                struct
+                {
+                    int BigFileNumber;
+                    int UsesSideBigFileMaybe;
+                    int FileCount;
+                    
+                    struct
+                    {
+                        uint64 Hash <format=hex>;
+                        uint64 DataOffset  <format=hex>;
+                        uint CompressedSize <format=hex>;
+                        uint Size  <format=hex>;
+                        enum <uint> { Compressed = 1, Encrypted = 2 } Flags;
+                    } FileInfo[FileCount];
+                } Bank;
+                break;
+                
+            case 0x21434452:
+                struct
+                {
+                    string Unk;
+                    FSkip(1);
+                    int cnt;
+                    struct
+                    {
+                        int64 A <format=hex>;
+                        int64 B <format=hex>;
+                    } Entry[cnt];
+                } RDC;
+        }
+        
+        byte Data[SectionDataLength];
+    } Data;
+    
+    uint SectionCount <comment="Extra streams? 0x38 stride?">;
+    
+    if (SectionCount > 0)
+        Section child[SectionCount] <optimize=false>;
+} BigFile;
