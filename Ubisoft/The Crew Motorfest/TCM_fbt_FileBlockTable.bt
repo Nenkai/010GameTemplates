@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: The Crew Motorfest File Block Table (.fbt), PZFB
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.fbt
+//  ID Bytes: 50 5A 46 42
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="PZFB (Packed(?) Zlib File Blocks?)">; 
+        uint Empty;
+        uint NumFiles;
+        uint NumChunks;
+    } Header;
+    
+    struct
+    {
+        uint64 FileOffset;
+        uint NumChunks;
+        uint StartChunkIndex;
+    } FileBlockInfo[Header.NumFiles] <bgcolor=cGreen,
+        read=Str("Offset: %X, Chunks %d->%d", FileOffset, StartChunkIndex, StartChunkIndex+NumChunks)>;
+    
+    struct
+    {
+        uint CompressedSize <format=hex>;
+        uint DecompressedSize <format=hex>;
+        uint InputOffset <format=hex>;
+        uint OutputOffset <format=hex>;
+    } Blocks[Header.NumChunks] <bgcolor=cBlue,
+        read=Str("ZSize: 0x%x, DecSize: 0x%x, InputOffset: 0x%x, OutputOffset: 0x%x", CompressedSize, DecompressedSize, InputOffset, OutputOffset)>;
+} FileBlockTable <open=true>;
