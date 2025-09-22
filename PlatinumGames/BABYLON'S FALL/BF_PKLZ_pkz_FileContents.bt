@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: Platinum Games BABYLON'S FALL pkzl container
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.pkzl
+//  ID Bytes: 70 6B 7A 6C
+//   History: 
+//------------------------------------------------
+// Incase you wonder, reversed this only to datamine and find relevant information for
+// Granblue Fantasy: Relink :p, I got no clue about this game
+
+typedef struct
+{
+    uint64 NameOffset <format=hex>;
+    uint64 DecompressedSize <format=hex>;
+    uint64 DataOffset <format=hex>;
+    uint64 CompressedSize <format=hex>;
+} FileInfo <bgcolor=cDkBlue, read=PrintFileInfo>;
+    
+string PrintFileInfo(FileInfo& info)
+{
+    local string str = ReadString(startof(Pklz.StringTable) + info.NameOffset);
+    return Str("%s (DataOffset: 0x%X, CompSize: 0x%X, Size: 0x%X)", str, info.DataOffset, info.CompressedSize, info.DecompressedSize);
+}
+
+struct
+{
+    struct
+    {
+        char Magic[4] <comment="Must be 'pklz'. Checked.">;
+        uint Version <format=hex, comment="Must be at least 0x10000">;
+        uint64 FileSize <format=hex>;
+    } Header <bgcolor=cPurple>;
+    
+    struct
+    {
+        uint NumEntries;
+        uint SizeOfFileInfo <format=hex, comment="Must be 0x20, checked.">;
+        uint SizeOfStringTable <format=hex>;
+        uint Pad;
+    } SubHeader <bgcolor=cDkPurple>;
+    
+    FileInfo FileInfos[SubHeader.NumEntries] <bgcolor=cDkBlue>;
+    
+    union
+    {
+        string CompressionType <comment="Either 'ZStandard' or 'None'. Nothing else.">;
+        byte TableBytes[SubHeader.SizeOfStringTable];
+    } StringTable <bgcolor=cLtGray>;        
+
+} Pklz <open=true>;
