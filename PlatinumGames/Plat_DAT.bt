@@ -1,0 +1,86 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: PlatinumGames .DAT folder container
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.dat
+//  ID Bytes: 44 41 54 00
+//   History: 
+//------------------------------------------------
+
+typedef uint CountT <fgcolor=cGreen>;
+typedef uint SizeT <fgcolor=cYellow, format=hex>;
+typedef uint OffsetT <format=hex, fgcolor=cRed>;
+
+struct
+{
+    struct
+    {
+        uint Magic;
+        CountT FileCount;
+        OffsetT FileDataOffsetTableOffset <format=hex>;
+        OffsetT ExtensionsTableOffset <format=hex>;
+        OffsetT FileNamesTableOffset <format=hex>;
+        OffsetT FileSizesTableOffset <format=hex>;
+        OffsetT HashTableOffset <format=hex>;
+        uint Pad;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(Header.FileDataOffsetTableOffset);
+    OffsetT FileDataOffsets[Header.FileCount] <bgcolor=cRed>;
+    
+    FSeek(Header.ExtensionsTableOffset);
+    struct
+    {
+        string Str;
+    } Extensions[Header.FileCount] <optimize=false, bgcolor=cGray>;
+    
+    FSeek(Header.FileNamesTableOffset);
+    struct
+    {
+        SizeT FileNameStructSize;
+        struct
+        {
+            
+            string FileName;
+            FSeek(startof(this) + FileNameStructSize);
+        } FileNames[Header.FileCount] <bgcolor=cWhite, optimize=false>;
+    } FileNameTable;
+    
+    FSeek(Header.FileSizesTableOffset);
+    SizeT FileSizes[Header.FileCount] <bgcolor=cBlue>;
+    
+    FSeek(Header.HashTableOffset);
+    struct
+    {
+        // Credits to https://github.com/xxk-i/DATrepacker/blob/master/dat.py
+        // def calculate_shift(self):
+        // count = len(self.in_files)
+        // if count <= 1:
+        //     count += 1
+        // return max(24, 32 - count.bit_length())  
+        uint PreHashShift;
+        OffsetT BucketTableOffset;
+        OffsetT HashesTableOffset;
+        OffsetT FileIndicesTableOffset;
+        
+        FSeek(startof(this) + BucketTableOffset);
+        short Buckets[(HashesTableOffset - BucketTableOffset) / sizeof(ushort)];
+        
+        // for i in range(len(self.filenames)):
+        //     names_indices_hashes.append((self.filenames[i], i, (zlib.crc32(self.filenames[i].lower().encode('ascii')) & ~0x80000000)))
+        // names_indices_hashes.sort(key=lambda x: x[2] >> self.pre_hash_shift)
+        FSeek(startof(this) + HashesTableOffset);
+        uint Hashes[Header.FileCount] <comment="Must be sorted for bsearch", format=hex>;
+        
+        // for i in range(len(names_indices_hashes)):
+        //   if self.bucket_offsets[names_indices_hashes[i][2] >> self.pre_hash_shift] == -1:
+        //       self.bucket_offsets[names_indices_hashes[i][2] >> self.pre_hash_shift] = i
+        //   self.indices.append(names_indices_hashes[i][1])
+        FSeek(startof(this) + FileIndicesTableOffset);
+        short FileIndices[Header.FileCount];
+    } HashTable <bgcolor=cGreen>;
+} DAT <open=true>;
