@@ -1,7 +1,7 @@
 //------------------------------------------------
-//--- 010 Editor v15.0 Binary Template
+//--- 010 Editor v14.0 Binary Template
 //
-//      File: GBFR CfCt CameraFade Binary
+//      File: Granblue Fantasy: Relink Data Index (data.i)
 //   Authors: Nenkai
 //   Version: 
 //   Purpose: 
@@ -11,18 +11,11 @@
 //   History: 
 //------------------------------------------------
 
-// NOTE! This file is a flatbuffer file
-// It is not supposed to be mapped out, but only did to more easily reverse up the original schema
-// You should be using the schema defined here if you intend to alter the file:
-
-BitfieldDisablePadding();
-
-typedef struct
-{
-    float X;
-    float Y;
-    float Z;
-} Vec3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+// Base steam release - useful offsets:
+// .i reader = 0x1401ABD50
+// hash finder = 0x1406F8380
+// xxhash = 0x14069AC40
+// decompression: 0x143666F40
 
 typedef struct
 {
@@ -43,38 +36,25 @@ typedef struct
     FSeek(FileSize());
 } FlatArkHeader <bgcolor=cPurple>;
 
-typedef struct
-{
-    FlatArkFields Fields2;
-    
-    if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
-    {
-        FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
-        uint F1_1 : 4 <bgcolor=cBlue>;
-        uint F1_2 : 4 <bgcolor=cBlue>;
-        uint F1_3 : 4 <bgcolor=cBlue>;
-    }
-    
-    if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
-    {
-        FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
-        float F2 <bgcolor=cBlue, format=hex>;
-    }
-    
-    if (exists(Fields2.OffsetTable[3]) && Fields2.OffsetTable[3])
-    {
-        FSeek(startof(Fields2) + Fields2.OffsetTable[3]);
-        Vec3 F3 <bgcolor=cBlue, format=hex>;
-    }
-} SubTable;
-
 FlatArkHeader Hdr;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
-int Date <fgcolor=cRed>;
+struct
+{
+    int StrOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(StrOffset) + StrOffset);
+    int StrLength <bgcolor=cYellow, format=hex>;
+    char Str[StrLength] <bgcolor=cYellow, format=hex>;
+} CodeName;
 
 FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
-struct
+ushort NumArchives;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
+ushort XXHashSeed;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
+struct 
 {
     int DataOffset <format=hex, fgcolor=cRed>;
     FSeek(startof(DataOffset) + DataOffset);
@@ -82,125 +62,86 @@ struct
     struct
     {
         int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
-        int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
-        local int j = 0;
-        for (j = 0; j < NumEntries; j++)
-        {
-            FSeek(startof(Offsets[j]) + Offsets[j]);
-            struct
-            {
-                FlatArkFields Fields;
-                
-                if (exists(Fields.OffsetTable[1]) && Fields.OffsetTable[1])
-                {
-                    FSeek(startof(Fields) + Fields.OffsetTable[1]);
-                    uint ObjId <bgcolor=cBlue, format=hex>;
-                }
-                
-                if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2])
-                {
-                    FSeek(startof(Fields) + Fields.OffsetTable[2]);
-                    struct 
-                    {
-                        int DataOffset <format=hex, fgcolor=cRed>;
-                        FSeek(startof(DataOffset) + DataOffset);
-                        
-                        struct
-                        {
-                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
-                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
-                            local int j = 0;
-                            for (j = 0; j < NumEntries; j++)
-                            {
-                                FSeek(startof(Offsets[j]) + Offsets[j]);
-                                SubTable Sub;
-                            }
-                        } Table;
-                    } F2;
-
-                }
-                
-                if (exists(Fields.OffsetTable[3]) && Fields.OffsetTable[3])
-                {
-                    FSeek(startof(Fields) + Fields.OffsetTable[3]);
-                    struct 
-                    {
-                        int DataOffset <format=hex, fgcolor=cRed>;
-                        FSeek(startof(DataOffset) + DataOffset);
-                        
-                        struct
-                        {
-                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
-                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
-                            local int j = 0;
-                            for (j = 0; j < NumEntries; j++)
-                            {
-                                FSeek(startof(Offsets[j]) + Offsets[j]);
-                                struct
-                                {
-                                    FlatArkFields Fields2;
-                                    
-                                    if (exists(Fields2.OffsetTable[1]) && Fields2.OffsetTable[1])
-                                    {
-                                        FSeek(startof(Fields2) + Fields2.OffsetTable[1]);
-                                        struct
-                                        {
-                                            int StrOffset <format=hex, fgcolor=cRed>;
-                                            FSeek(startof(StrOffset) + StrOffset);
-                                            int StrLength <bgcolor=cYellow, format=hex>;
-                                            char Str[StrLength] <bgcolor=cYellow, format=hex>;
-                                        } F1 <read=Str>;
-                                    }
-                                    
-                                    if (exists(Fields2.OffsetTable[2]) && Fields2.OffsetTable[2])
-                                    {
-                                        FSeek(startof(Fields2) + Fields2.OffsetTable[2]);
-                                        struct
-                                        {
-                                            int DataOffset <format=hex, fgcolor=cRed>;
-                                            FSeek(startof(DataOffset) + DataOffset);
-                                            
-                                            struct
-                                            {
-                                                int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
-                                                int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
-                                                local int j = 0;
-                                                for (j = 0; j < NumEntries; j++)
-                                                {
-                                                    FSeek(startof(Offsets[j]) + Offsets[j]);
-                                                    SubTable Sub;
-                                                }
-                                            } Table;
-                                        } F2;
-                                    }
-                                } Entry;
-                            }
-                        } Table;
-                    } F3;
-                }
-                
-                if (exists(Fields.OffsetTable[4]) && Fields.OffsetTable[4])
-                {
-                    FSeek(startof(Fields) + Fields.OffsetTable[4]);
-                    struct
-                    {
-                        int DataOffset <format=hex, fgcolor=cRed>;
-                        FSeek(startof(DataOffset) + DataOffset);
-                        
-                        struct
-                        {
-                            int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
-                            int Offsets[NumEntries] <format=hex, fgcolor=cRed>;
-                            local int j = 0;
-                            for (j = 0; j < NumEntries; j++)
-                            {
-                                FSeek(startof(Offsets[j]) + Offsets[j]);
-                                SubTable Sub;
-                            }
-                        } Table;
-                    } F4;
-                }
-            } Entity <read=Str("ObjId: %x", ObjId)>;
-        }
+        uint64 Hashes[NumEntries] <format=hex>;
     } Table;
-} Entities;
+} ArchiveFileHashes <bgcolor=cBlack>;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[5]);
+struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        struct
+        {
+            uint ChunkEntryIndex;
+            uint FileSize;
+            uint OffsetIntoDecompressedChunk;
+        } FileToChunkIndexer[NumEntries] <bgcolor=cRed>;
+    } Table;
+} FileToChunkIndexers;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[6]);
+struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        struct
+        {
+            uint64 FileOffset <format=hex>;
+            uint Size <format=hex>;
+            uint CompressedSize <format=hex>;
+            uint AllocAlignment <format=hex>;
+            byte UnkBool;
+            byte Pad;
+            byte DataFileNumber;
+            byte Pad;
+        } DataChunk[NumEntries] <bgcolor=cRed>;
+    } Table;
+} Chunks <bgcolor=cDkBlue>;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[7]);
+struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        uint64 Hashes[NumEntries] <format=hex>;
+    } Table;
+} ExternalFileHashes <bgcolor=cGreen>;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[8]);
+struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        uint64 Sizes[NumEntries] <format=hex>;
+    } Table;
+} ExternalFileSizes <bgcolor=cDkGreen>;
+
+FSeek(Hdr.FieldsOffset + Hdr.Fields.OffsetTable[9]);
+struct 
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    struct
+    {
+        int NumEntries <fgcolor=cGreen, bgcolor=cBlue>;
+        uint Indices[NumEntries] <format=hex>;
+    } Table;
+} CachedChunkIndices;
