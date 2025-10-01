@@ -108,19 +108,19 @@ enum LayerEffect{
 
 enum MemberType
 {
-    kGroup = 1,
-    kImage = 2,
-    kText = 3,
-    kUnknown4 = 4,
-    kUnknown5 = 5,
-    kRectangle = 6,
-    kEllipse = 7,
+    kLayerNode = 1,
+    kImageNode = 2,
+    kTextNode = 3,
+    kNinegridNode = 4,
+    kCounterNode = 5,
+    kRectNode = 6,
+    kEllipseNode = 7,
     kBezier = 8,
-    kUnknown9 = 9,
-    kGroupRef = 10,
-    kEffect = 11,
-    kUnknown12 = 12,
-    kMask = 13
+    kCollisionNode = 9,
+    kReferenceNode = 10,
+    kEffectNode = 11,
+    kModelNode = 12,
+    kMaskNode = 13
 };
 
 typedef struct TMemberStruct_0
@@ -301,13 +301,13 @@ typedef struct TMemberDataBase{
     int pad[4];
 } MemberDataBase;
 
-typedef struct TGroup // 1
+typedef struct TLayerNode // 1
 {
     MemberDataBase Base;
     byte pad[0x20] <fgcolor=cDkGray>;
-} Group;
+} LayerNode;
 
-typedef struct TImage // 2
+typedef struct TImageNode // 2
 {
     MemberDataBase Base;
     OffsetT TextureInfosOffset;
@@ -329,9 +329,9 @@ typedef struct TImage // 2
         FSeek(startof(this) + ResourceInfoOffset);
         AssetEntry ResourceInfo;
     } TextureInfos;  
-} Image;
+} ImageNode;
 
-typedef struct TText // 3
+typedef struct TTextNode // 3
 {
     MemberDataBase Base;
     int UiKeyId <comment="from 'ui' nex table - may be set manually externally?">;
@@ -374,9 +374,9 @@ typedef struct TText // 3
     string unk_str;
     
     FSeek(startof(Base) + 0x80);
-} Text;
+} TextNode;
 
-typedef struct TUnknown4 // 4
+typedef struct TNinegridNode // 4
 {
     MemberDataBase Base;
     OffsetT TextureInfosOffset;
@@ -402,9 +402,9 @@ typedef struct TUnknown4 // 4
         FSeek(startof(this) + ResourceInfoOffset);
         AssetEntry ResourceInfo;
     } TextureInfos;  
-} TextureUnk4;
+} NinegridNode;
 
-typedef struct TUnknown5
+typedef struct TCounterNode
 {
     MemberDataBase Base;
     OffsetT TextureInfosOffset;
@@ -436,9 +436,9 @@ typedef struct TUnknown5
     
     FSeek(startof(this) + UnkStrOffset0x6C);
     string Str0x6C;
-} Unknown5;
+} CounterNode;
 
-typedef struct TRectangle // 6
+typedef struct TRectNode // 6
 {
     MemberDataBase Base;
     int Field_0x40;
@@ -446,9 +446,9 @@ typedef struct TRectangle // 6
     int Field_0x48;
     int Field_0x4C;
     byte pad[0x10];
-} Rectangle;
+} RectNode;
 
-typedef struct TEllipse // 7
+typedef struct TEllipseNode // 7
 {
     MemberDataBase Base;
     int Field_0x40;
@@ -470,7 +470,7 @@ typedef struct TEllipse // 7
         FSeek(startof(this) + ResourceInfoOffset);
         AssetEntry ResourceInfo;
     } TextureInfos;
-} Ellipse;
+} EllipseNode;
 
 typedef struct TBezierNode
 {
@@ -479,7 +479,7 @@ typedef struct TBezierNode
     Point handle_b;
     float Field_0x18;
     byte padding[0x1C];
-} BezierNode<bgcolor=cDkBlue, read=BezierNodeRead>;
+} BezierNode <bgcolor=cDkBlue, read=BezierNodeRead>;
 
 string BezierNodeRead(BezierNode& input)
 {
@@ -513,13 +513,13 @@ typedef struct TBezier{
     BezierNode Nodes[NodesCount];
 } Bezier;
 
-typedef struct TUnknown9
+typedef struct TCollisionNode
 {
     MemberDataBase Base;
     byte pad[0x20];
-} Unknown9;
+} CollisionNode;
 
-typedef struct TGroupRef{
+typedef struct TReferenceNode {
     MemberDataBase Base;
     int Unused0x40;
     int Field_0x44;
@@ -542,15 +542,15 @@ typedef struct TGroupRef{
     int Type_0x88; // Type0-3
     int Type_0x8C; // Type0-4
     byte pad[0x18];
-} GroupRef;
+} ReferenceNode;
 
-typedef struct TEffect
+typedef struct TEffectNode
 {
     MemberDataBase Base;
     byte _pad[0x20];
-} Effect;
+} EffectNode;
 
-typedef struct TMask // 13
+typedef struct TMaskNode // 13
 {
     MemberDataBase Base;
     OffsetT TextureInfosOffset;
@@ -568,7 +568,7 @@ typedef struct TMask // 13
         FSeek(startof(this) + ResourceInfoOffset);
         AssetEntry ResourceInfo;
     } TextureInfos;  
-} Mask;
+} MaskNode;
 
 typedef struct TMember
 {
@@ -589,79 +589,81 @@ typedef struct TMember
     
     // Yes i know. lots of weird padding.
     // Trust me it's correct though.
-    if (Type == kGroupRef)
+    if (Type == kReferenceNode)
     {
-        OffsetT GroupRefNameOffset;
-        OffsetT GroupRefAssetOffset <bgcolor=cGreen>;
+        OffsetT ReferenceNameOffset;
+        OffsetT ReferenceAssetOffset <bgcolor=cGreen>;
         byte pad2[0x08];
     }
-    else if (Type == kText)
+    else if (Type == kTextNode)
     {
         int TextField_0x70;
         byte pad2[0x1C];   
     }
-    else if (Type == kGroup)
+    else if (Type == kLayerNode)
     {
        byte pad2[0x20];
-       OffsetT GroupChildrenOffset;
-       uint GroupChildCount <bgcolor=cGreen>;
+       OffsetT LayerChildrenOffset;
+       uint LayerChildCount <bgcolor=cGreen>;
     }
-    else if (Type == kEffect)
+    else if (Type == kEffectNode)
     {
          byte pad2[0x04];
          OffsetT EffectAssetOffset;
          byte pad2_2[0x1C];
     }
-    else if (Type == kImage)
+    else if (Type == kImageNode)
     {
         byte pad2[0x2C];   
     }
-    else if (Type == kRectangle)
+    else if (Type == kRectNode)
     {
         byte pad2[0x20];   
     }
-    else if (Type == kEllipse)
+    else if (Type == kEllipseNode)
     {
         byte pad2[0x20];   
     }
-    else if (Type == kMask)
+    else if (Type == kMaskNode)
     {
         byte pad2[0x2C];
         OffsetT MaskUiAssetOffset;
         OffsetT MaskNameUnkOffset;
         byte pad3[0x18];
     }
-    
-    if (Type != kGroup && Type != kMask)
+    else
+        Printf("GUINode type %s (%d) not supported\n", EnumToString(Type), Type);
+        
+    if (Type != kLayerNode && Type != kMaskNode)
         byte pad3[0x20];
     
     FSeek(startof(this) + DataOffset);
     switch(Type)
     {
-        case kGroup:
-            Group GroupData <bgcolor=cPurple, comment="Group of elements">; break;
-        case kImage:
-            Image ImageData <bgcolor=cPurple>; break;
-        case kText:
-            Text TextData <bgcolor=cPurple>; break;  
-        case kUnknown4:
-            TextureUnk4 TextureUnk4Data <bgcolor=cPurple>; break;   
-        case kUnknown5: // frytext.uib
-            Unknown5 Unknown5Data <bgcolor=cPurple>; break;  
-        case kRectangle:
-            Rectangle RectangleData <bgcolor=cPurple>; break;
-        case kEllipse:
-            Ellipse EllipseData <bgcolor=cPurple>; break;
+        case kLayerNode:
+            LayerNode LayerNodeData <bgcolor=cPurple, comment="Group of elements">; break;
+        case kImageNode:
+            ImageNode ImageNodeData <bgcolor=cPurple>; break;
+        case kTextNode:
+            TextNode TextNodeData <bgcolor=cPurple>; break;  
+        case kNinegridNode:
+            NinegridNode NinegridNodeData <bgcolor=cPurple>; break;   
+        case kCounterNode: // frytext.uib
+            CounterNode CounterNodeData <bgcolor=cPurple>; break;  
+        case kRectNode:
+            RectNode RectNodeData <bgcolor=cPurple>; break;
+        case kEllipseNode:
+            EllipseNode EllipseNodeData <bgcolor=cPurple>; break;
         case kBezier:
             Bezier BezierData <bgcolor=cPurple>; break;
-        case kUnknown9:
-            Unknown9 Unknown9Data <bgcolor=cPurple>; break;  
-        case kGroupRef:
-            GroupRef GroupRefData <bgcolor=cPurple, comment="Reference to layer">; break;
-        case kEffect:
-            Effect EffectData <bgcolor=cPurple>; break;  
-        case kMask:
-            Mask MaskData <bgcolor=cPurple>; break;
+        case kCollisionNode:
+            CollisionNode CollisionNodeData <bgcolor=cPurple>; break;  
+        case kReferenceNode:
+            ReferenceNode ReferenceNodeData <bgcolor=cPurple, comment="Reference to layer">; break;
+        case kEffectNode:
+            EffectNode EffectNodeData <bgcolor=cPurple>; break;  
+        case kMaskNode:
+            MaskNode MaskNodeData <bgcolor=cPurple>; break;
         default:
             break;
     }
@@ -669,25 +671,25 @@ typedef struct TMember
     FSeek(startof(this) + NameOffset);
     string Name <bgcolor=cWhite>;
     
-    if (Type == kGroup)
+    if (Type == kLayerNode)
     {
-        FSeek(startof(this) + GroupChildrenOffset);
-        MemberList GroupChildren(GroupChildCount);
+        FSeek(startof(this) + LayerChildrenOffset);
+        MemberList LayerChildren(LayerChildCount);
     }
-    else if (Type == kGroupRef)
+    else if (Type == kReferenceNode)
     {
-        FSeek(startof(this) + GroupRefNameOffset);
-        string GroupRefName;
+        FSeek(startof(this) + ReferenceNameOffset);
+        string ReferenceName;
         
-        FSeek(startof(this) + GroupRefAssetOffset);
-        AssetEntry GroupRefAssetEntry;
+        FSeek(startof(this) + ReferenceAssetOffset);
+        AssetEntry ReferenceAssetEntry;
     }
-    else if (Type == kEffect)
+    else if (Type == kEffectNode)
     {
         FSeek(startof(this) + EffectAssetOffset);
         AssetEntry EffectAssetEntry;
     }
-    else if (Type == kMask)
+    else if (Type == kMaskNode)
     {
         FSeek(startof(this) + MaskUiAssetOffset);
         AssetEntry MaskAssetEntry;
@@ -719,7 +721,27 @@ typedef struct TLayerProperties
 {
     // Mainly read from 48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 4C 63 72
     
-    int type;
+    // Determines type of layer component
+    // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 4C 89 70 ? 55 48 8D 68 ? 48 81 EC ? ? ? ? 48 63 42
+    enum 
+    {
+        kComponentRoot = 1,
+        kComponentCustom = 2,
+        kComponentButton = 3,
+        kComponentCheckBox = 4,
+        kComponentRadioButton = 5,
+        kComponentTab = 6,
+        kComponentSlider = 7,
+        kComponentScrollBar = 8,
+        kComponentList = 9,
+        kComponentListItem = 10,
+        kComponentDropdownList = 11,
+        kComponentGauge = 12,
+        kComponentTextBoard = 13,
+        kComponentWindow = 14,
+        kComponentBahamutEffect = 15,
+    } ComponentType;
+    
     int name_offset_offset<format=hex, fgcolor=cRed>;
     int name_count<fgcolor=cGreen>;
     // 74 ? 41 2B C1 74 ? 41 3B C1 75
@@ -803,18 +825,18 @@ typedef struct TLayerProperties
     int field_0x100;
     int field_0x104;
     
-    switch (type)
+    switch (ComponentType)
     {
-        case 1:
+        case kComponentRoot:
             int field_0x108; // Type 1-5
             int field_0x10C; // Type 1-5
             break;
             
-        case 8:
+        case kComponentScrollBar:
             int field_0x08; // Same as 15->0x134?
             break;
             
-        case 15:
+        case kComponentBahamutEffect:
             float Type15_field_0x108;
             float Type15_field_0x10C;
             float Type15_field_0x110;
@@ -843,7 +865,7 @@ typedef struct TLayerProperties
     local int endPos = FTell();
     struct
     {
-        FSeek(startof(type) + name_offset_offset);
+        FSeek(startof(ComponentType) + name_offset_offset);
         int str_offset[name_count] <format=hex, fgcolor=cRed>;
     
         local int i = 0;
@@ -859,14 +881,14 @@ typedef struct TLayerProperties
         FSeek(startof(str_offset) + (name_count * 4));
     } names <bgcolor=cGray>;
     
-    FSeek(startof(type) + offset_0x98);
+    FSeek(startof(ComponentType) + offset_0x98);
     AssetEntry struct_0x98 <bgcolor=cDkRed>;
     
     if(count_0xAC > 0)
     {
         struct
         {
-            FSeek(startof(type) + offset_0xA8);
+            FSeek(startof(ComponentType) + offset_0xA8);
             int offset_0<fgcolor=cRed, format=hex>;
             int field_1;
             uint field_2 <format=hex>;
@@ -916,8 +938,9 @@ typedef struct TGroupEntry{
 string GroupRead(GroupEntry& input)
 {
     local int count = input.MemberCount;
+    local string type = EnumToString(input.LayerProperties_.ComponentType);
     local string blend_mode = EnumToString(input.LayerProperties_.BlendMode_);
-    return Str("Members: %d, Blend Mode: %s", count, blend_mode);
+    return Str("[%s] Members: %d, Blend Mode: %s", type, count, blend_mode);
 }
 
 typedef struct TAssetEntry{
