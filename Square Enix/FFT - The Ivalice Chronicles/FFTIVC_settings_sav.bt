@@ -1,0 +1,85 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFT - The Ivalice Chronicles -> settings.sav
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        int Version;
+        int Checksum <format=hex>; //CRC32 Hash of following data to end of file
+        uint64 Empty;
+    } Header <bgcolor=cPurple>;
+    
+    struct
+    {
+        struct
+        {
+            struct
+            {
+                byte resolution; // default 2
+                byte screenMode; // default 0
+                byte enableDof;
+                byte screenBrightness;
+                byte visibleSpeaker;
+                byte textLang;
+                byte voiceLang;
+                byte visibleSituationSubtitles;
+                
+                struct
+                {
+                    int volumeAll;
+                    int volumeBGM;
+                    int volumeSE;
+                    int volumeVoice;
+                    int volumeMovie;
+                    byte enableVisualEffect;
+                    byte pad_[3];
+                } sound;
+                
+                byte reverseCameraHorizontal;
+                byte reverseCameraVertical;
+                byte enableDeactivePlay;
+                byte cursorMoveType;
+                byte enableCursorClip;
+                byte enableAutoBestEquip;
+                byte enableRemoveMonsterForce;
+                byte forwardEnabledType;
+                byte keyCustomize;
+                byte enableVSync;
+                byte platform;
+                byte pad[5];
+                int buttonAssign[16];
+                int buttonType;
+                int keyAssign[16];
+            
+            } config;
+            
+            struct
+            {
+                short guide_flag[10];
+            } guide;
+            
+            uint64 outputId;
+            int windowPosX;
+            int windowPosY;
+            int resolutionW;
+            int resolutionH;
+            int refreshRateNumerator;
+            int refreshRateDenominator;
+            byte isGameCleared;
+            byte isClassicStarted;
+            byte isEnhancedStarted;
+        
+        } m_system <open=true>;
+    } Body <open=true>;
+} Root;
