@@ -489,7 +489,7 @@ struct
                                 {
                                     byte is_new;
                                 } job_new[0x15];
-                                byte disable_flag[0x7D]•;
+                                byte disable_flag[0x7D];
                             } unit_job;
                             
                             struct
