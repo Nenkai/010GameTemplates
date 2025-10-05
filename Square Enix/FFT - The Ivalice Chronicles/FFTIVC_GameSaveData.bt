@@ -1,7 +1,7 @@
 //------------------------------------------------
 //--- 010 Editor v16.0.2 Binary Template
 //
-//      File: FFT - The Ivalice Chronicles -> resume
+//      File: FFT - The Ivalice Chronicles -> settings.sav
 //   Authors: Nenkai
 //   Version: 
 //   Purpose: 
@@ -11,6 +11,130 @@
 //   History: 
 //------------------------------------------------
 
+typedef struct
+{
+    byte name[0x42];
+    byte item[10];
+    short ability[5];
+    byte job;
+    byte is_double_hand;
+} EquipSet;
+
+typedef struct
+{
+    byte character;
+    byte resist;
+    byte job;
+    byte union_;
+    byte sex;
+    byte birth_1;
+    byte birth_2;
+    byte sub_command;
+    byte reaction_ability_1;
+    byte reaction_ability_2;
+    byte support_ability_1;
+    byte support_ability_2;
+    byte move_ability_1;
+    byte move_ability_2;
+    short equip_item[7];
+    byte exp;
+    byte level;
+    byte start_bcp;
+    byte start_faith;
+    byte hp_max_base[3];
+    byte mp_max_base[3];
+    byte wt_base[3];
+    byte at_base[3];
+    byte mat_base[3];
+    byte job_change_flag[3];
+    byte ability_flag_00[3];
+    byte ability_flag_01[3];
+    byte ability_flag_02[3];
+    byte ability_flag_03[3];
+    byte ability_flag_04[3];
+    byte ability_flag_05[3];
+    byte ability_flag_06[3];
+    byte ability_flag_07[3];
+    byte ability_flag_08[3];
+    byte ability_flag_09[3];
+    byte ability_flag_10[3];
+    byte ability_flag_11[3];
+    byte ability_flag_12[3];
+    byte ability_flag_13[3];
+    byte ability_flag_14[3];
+    byte ability_flag_15[3];
+    byte ability_flag_16[3];
+    byte ability_flag_17[3];
+    byte ability_flag_18[3];
+    byte ability_flag_19[3];
+    byte ability_flag_20[3];
+    byte ability_flag_21[3];
+    byte job_level[12];
+    short job_point_00;
+    short job_point_01;
+    short job_point_02;
+    short job_point_03;
+    short job_point_04;
+    short job_point_05;
+    short job_point_06;
+    short job_point_07;
+    short job_point_08;
+    short job_point_09;
+    short job_point_10;
+    short job_point_11;
+    short job_point_12;
+    short job_point_13;
+    short job_point_14;
+    short job_point_15;
+    short job_point_16;
+    short job_point_17;
+    short job_point_18;
+    short job_point_19;
+    short job_point_20;
+    short job_point_21;
+    short job_point_22;
+    short total_job_point_00;
+    short total_job_point_01;
+    short total_job_point_02;
+    short total_job_point_03;
+    short total_job_point_04;
+    short total_job_point_05;
+    short total_job_point_06;
+    short total_job_point_07;
+    short total_job_point_08;
+    short total_job_point_09;
+    short total_job_point_10;
+    short total_job_point_11;
+    short total_job_point_12;
+    short total_job_point_13;
+    short total_job_point_14;
+    short total_job_point_15;
+    short total_job_point_16;
+    short total_job_point_17;
+    short total_job_point_18;
+    short total_job_point_19;
+    short total_job_point_20;
+    short total_job_point_21;
+    short total_job_point_22;
+    char chr_name[64];
+    short name_no;
+    byte in_trip;
+    byte parasite;
+    byte egg_color;
+    byte pspKilledNum;
+    byte unit_order_id;
+    byte unit_starting_team;
+    byte unit_join_id;
+    byte current_equip_set_number;
+    
+    EquipSet ffto_equip_set0;
+    EquipSet ffto_equip_set1;
+    EquipSet ffto_equip_set2;
+    short pad;
+    short charaNameKey;
+    byte pad2 [0x26];
+} UnitSaveData <read=Str("Character: %d (Job %d)", character, job)>;
+                        
 struct
 {
     struct
@@ -127,7 +251,225 @@ struct
                         
                         byte pad[3];
                     } world <bgcolor=cYellow>;
-                } info;
+                    
+                    struct
+                    {
+                        UnitSaveData UnitSaveData_00;
+                        UnitSaveData UnitSaveData_01;
+                        UnitSaveData UnitSaveData_02;
+                        UnitSaveData UnitSaveData_03;
+                        UnitSaveData UnitSaveData_04;
+                        UnitSaveData UnitSaveData_05;
+                        UnitSaveData UnitSaveData_06;
+                        UnitSaveData UnitSaveData_07;
+                        UnitSaveData UnitSaveData_08;
+                        UnitSaveData UnitSaveData_09;
+                        UnitSaveData UnitSaveData_10;
+                        UnitSaveData UnitSaveData_11;
+                        UnitSaveData UnitSaveData_12;
+                        UnitSaveData UnitSaveData_13;
+                        UnitSaveData UnitSaveData_14;
+                        UnitSaveData UnitSaveData_15;
+                        UnitSaveData UnitSaveData_16;
+                        UnitSaveData UnitSaveData_17;
+                        UnitSaveData UnitSaveData_18;
+                        UnitSaveData UnitSaveData_19;
+                        UnitSaveData UnitSaveData_20;
+                        UnitSaveData UnitSaveData_21;
+                        UnitSaveData UnitSaveData_22;
+                        UnitSaveData UnitSaveData_23;
+                        UnitSaveData UnitSaveData_24;
+                        UnitSaveData UnitSaveData_25;
+                        UnitSaveData UnitSaveData_26;
+                        UnitSaveData UnitSaveData_27;
+                        UnitSaveData UnitSaveData_28;
+                        UnitSaveData UnitSaveData_29;
+                        UnitSaveData UnitSaveData_30;
+                        UnitSaveData UnitSaveData_31;
+                        UnitSaveData UnitSaveData_32;
+                        UnitSaveData UnitSaveData_33;
+                        UnitSaveData UnitSaveData_34;
+                        UnitSaveData UnitSaveData_35;
+                        UnitSaveData UnitSaveData_36;
+                        UnitSaveData UnitSaveData_37;
+                        UnitSaveData UnitSaveData_38;
+                        UnitSaveData UnitSaveData_39;
+                        UnitSaveData UnitSaveData_40;
+                        UnitSaveData UnitSaveData_41;
+                        UnitSaveData UnitSaveData_42;
+                        UnitSaveData UnitSaveData_43;
+                        UnitSaveData UnitSaveData_44;
+                        UnitSaveData UnitSaveData_45;
+                        UnitSaveData UnitSaveData_46;
+                        UnitSaveData UnitSaveData_47;
+                        UnitSaveData UnitSaveData_48;
+                        UnitSaveData UnitSaveData_49;
+                        UnitSaveData UnitSaveData_50;
+                        UnitSaveData UnitSaveData_51;
+                        UnitSaveData UnitSaveData_52;
+                        UnitSaveData UnitSaveData_53;
+                        byte PartyItem[0x105];
+                        byte ShopItem[0x105];    
+                        byte FindItem[0x80];
+                        short unk;
+                        int eventwork[0x100];
+                        int optrec;
+                        byte WeaveInCommand;
+                        byte battle_chr_sort[12];
+                        byte battle_unitlist_sort;
+                        byte world_chr_sort[8];
+                        byte dummy2;
+                        byte item_sort[7];
+                        byte item_sort2[5];
+                        byte item_sort3[5];
+                        byte item_sort4[7];
+                        byte item_sort5[5];
+                        short item_user_sort[0x8D];
+                        short item_user_sort2[0x1E];
+                        short item_user_sort3[0x26];
+                        short item_user_sort4[0x22];
+                        short item_user_sort5[0x15];
+                        struct
+                        {
+                            short equip_user_sort_hand[0x8D];
+                            short equip_user_sort_head[0x1E];
+                            short equip_user_sort_armor[0x26];
+                            short equip_user_sort_accessory[0x22];
+                            short item_get_order_sort[0x106];
+                        } ffto_item_sort;
+                        struct
+                        {
+                            struct
+                            {
+                                byte is_new;
+                                byte is_newarrival;
+                            } shop_new[0x105];
+                            byte poach_item_num[0x61];
+                            byte poach_item_get_order[0x61];
+                            byte poach_item_sort[0x61];
+                            struct
+                            {
+                                byte is_new;
+                                byte is_newarrival;
+                            } poach_item_new[0x61];
+                        } ffto_item;
+                        byte pad[0x03];
+                    } battle;
+                    
+                    struct
+                    {
+                        struct
+                        {
+                            int game_progress[12];
+                            byte game_flag[32];
+                        } game_flow;
+                        int bonus_item[5];
+                    } user;
+                    
+                    struct
+                    {
+                        struct
+                        {
+                            struct
+                            {
+                                byte is_new;
+                            } menu_new[4];
+                        } map_menu;
+                        
+                        struct
+                        {
+                            struct
+                            {
+                                byte is_new;
+                                byte is_newarrival;
+                            } menu_new[10];
+                            byte last_menu_index;
+                        } deep_dungeon;
+                        
+                        struct
+                        {
+                            struct
+                            {
+                                struct
+                                {
+                                    byte is_new;
+                                    byte is_newarrival;
+                                } menu_new[0x40];
+                            } uwasa;
+                            
+                            struct
+                            {
+                                struct
+                                {
+                                    byte is_new;
+                                    byte is_newarrival;
+                                } menu_new[0x60];
+                            } mouke;
+                            
+                            byte pad[3];
+                        } bar;
+                        
+                        struct
+                        {
+                            int SortieAvoidTown;
+                            int SortieLastRute;
+                            int RestartGoalTown;
+                            int reserveLastTown;
+                            int reserveLastRute;
+                            byte bSortieAvoid;
+                            byte pad[3];
+                        } sortie;
+                        
+                        struct
+                        {
+                            byte marker_town[3];
+                            byte pad;
+                        } map;
+                        
+                        
+                        struct
+                        {
+                            int flg;
+                            int r_no;
+                            int t_cnt;
+                            int t_max;
+                            int w_cnt;
+                            int w_max;
+                            int rute[16];
+                            int wr_cnt;
+                            int wr_max;
+                            int wr_cost;
+                            int town_cost;
+                            int town_st;
+                            int town_en;
+                            int r_rot;
+                            int stk_buf;
+                            
+                            struct
+                            {
+                                int id;
+                                int id2;
+                            } pt;
+                            
+                            struct
+                            {
+                                int id;
+                                int id2;
+                            } pt0;
+                            
+                            struct
+                            {
+                                int id;
+                                int id2;
+                            } pt1;
+                        } walk_info;
+                    } ffto_world;
+                    
+                    // TODO: ffto_battle
+                    // TODO: ffto_achievement
+                    // TODO: ffto_config
+                    // TODO: ffto_brave_story
+                } info <open=true>;
             } saveWork;
         } m_fftpsp;
         
