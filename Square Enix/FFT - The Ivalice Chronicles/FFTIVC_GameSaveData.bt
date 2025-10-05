@@ -1,0 +1,135 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFT - The Ivalice Chronicles -> resume
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        int Version;
+        int Checksum <format=hex>; //CRC32 Hash of following data to end of file
+        uint64 Empty;
+    } Header <bgcolor=cPurple>;
+    
+    struct
+    {
+        int magic;
+        int ThisHeaderSize; // Must match 0x7A
+        int Size;
+        int SaveType; // 0 = 0x9CDC, otherwise 0xA31C8
+        byte Bytes[0x144]; // TODO.
+    } FFTI;
+    
+    struct
+    {
+        struct
+        {
+            struct
+            {
+                struct
+                {
+                    struct
+                    {
+                        short magic;
+                        byte type;
+                        byte blockEntry;
+                        byte title[0x40];
+                        time_t timestamp;
+                        byte reserve[0x18];
+                        byte mission_clut[0x20]; // mission.clut
+                        byte icon[0x80];
+                    } card;
+                    
+                    struct
+                    {
+                        struct
+                        {
+                            byte complete_flag;
+                            byte hero_name[0x11];
+                            byte job;
+                            byte level;
+                            byte month;
+                            byte day;
+                            byte pos;
+                            byte version;
+                            byte language;
+                            byte gameCleared;
+                            byte situation;
+                            byte difficultyLevel;
+                            int nextEventId;
+                            int mainProgress;
+                            struct
+                            {
+                                int iAnimWorkID_;
+                                int iUnitID_;
+                                short iColor_;
+                                short iColorOfs_;
+                                int iFlags_[3];
+                                int iAnimSeq[2];
+                            } unitChrParam[4];
+                        } header;
+                        byte chk_sum[0x10];
+                        int time;
+                    } info;
+
+                    struct
+                    {
+                        byte treasure_findday[0x35];
+                        byte unreg_findday[0x12];
+                        byte mouke_finishday[0x6C];
+                        byte mouke_delay[0x60];
+                        byte unk;
+                        struct
+                        {
+                            int dt_tbl;
+                            int dt_adr;
+                            int dt;
+                            short flg;
+                            short page;
+                            short step;
+                            short work[4];
+                            short bkno;
+                            short widx;
+                            short pic;
+                            short bkpage[4];
+                            short musicno;
+                            short effmode;
+                            short pic_x;
+                            short pic_y;
+                            short envsnd;
+                            short para;
+                            short _pad_[2];
+                        } snpl_inf[5] <bgcolor=cDkYellow>;
+                        
+                        byte snpl_pageflg[0xA0];
+                        uint64 snpl_staticflg;
+                        short person_year[32];
+                        byte mouke_event_cnt;
+                        struct
+                        {
+                            byte flag;
+                            byte mou_no;
+                            byte now_day;
+                            byte max_day;
+                            byte town;
+                            byte unit_cnt;
+                            byte unit_no[3];
+                        } mouke_event[8];
+                        
+                        byte pad[3];
+                    } world <bgcolor=cYellow>;
+                } info;
+            } saveWork;
+        } m_fftpsp;
+        
+    } Body <open=true>;
+} Root;
