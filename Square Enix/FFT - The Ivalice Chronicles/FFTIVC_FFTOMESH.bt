@@ -1,0 +1,151 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Final Fantasy TACTICS - The Ivalice Chronicles bg mesh
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 46 46 54 4F 4D 45 53 48
+//   History: 
+//------------------------------------------------
+
+typedef struct 
+{
+    float X;
+    float Y;
+    float Z;
+    int Unk;
+} Vertex <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+typedef struct
+{
+    string Str;
+} FileName <read=Str>;
+struct
+{
+    struct
+    {
+        uint64 Magic <format=hex, comment="Checked">;
+        int MapIndex <comment="Must match file name's">;
+        int NumMeshes;
+        int Field_0x10;
+        int Field_0x14;
+        int Field_0x18;
+        int Field_0x1C;
+        int Field_0x20;
+        byte Pad[0x0C];
+    } Header <bgcolor=cPurple>;
+        
+    struct
+    {
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < 32; i++)
+            {
+                FSeek(startof(this) + (i * 0x20));
+                FileName Name;
+            }   
+            
+        } ObjectNames <size=0x400, bgcolor=cLtGray>;
+    
+        struct
+        {
+            int NumElements;
+            int Table1Count;
+            int Table2Count;
+            int Table3Count;
+            int Table4Count;
+            int Field_0x444;
+            byte Pad[12];
+        } MeshHeader <bgcolor=cDkPurple>;
+        
+        if (MeshHeader.Table1Count)
+            byte Table1[MeshHeader.Table1Count];
+        if (MeshHeader.Table2Count)
+            byte Table2[MeshHeader.Table2Count];
+        if (MeshHeader.Table3Count)
+            byte Table3[MeshHeader.Table3Count];
+        if (MeshHeader.Table4Count)
+            byte Table4[MeshHeader.Table4Count];
+        
+        if (MeshHeader.Table1Count)
+            Vertex Table5[MeshHeader.Table1Count];
+        if (MeshHeader.Table2Count)
+            Vertex Table6[MeshHeader.Table2Count];
+        if (MeshHeader.Table3Count)
+            Vertex Table7[MeshHeader.Table3Count];
+        if (MeshHeader.Table4Count)
+            Vertex Table8[MeshHeader.Table4Count];
+        
+        if (MeshHeader.Table1Count)
+        {
+            struct
+            {
+                int Field_0x00;
+                int Field_0x04;
+            } Table9[MeshHeader.Table1Count];
+        }
+        if (MeshHeader.Table2Count)
+        {
+            struct
+            {
+                int Field_0x00;
+                int Field_0x04;
+            } Table10[MeshHeader.Table2Count];
+        }
+        
+        if (MeshHeader.Table1Count)
+        {
+            struct
+            {
+                int Field_0x00;
+                int Field_0x04;
+                int Field_0x08;
+                int Field_0x0C;
+                int Field_0x10;
+                int Field_0x14;
+                int Field_0x18;
+                int Field_0x1C;
+            } Table11[MeshHeader.Table1Count];
+        }
+        if (MeshHeader.Table2Count)
+        {
+            struct
+            {
+                int Field_0x00;
+                int Field_0x04;
+                int Field_0x08;
+                int Field_0x0C;
+                int Field_0x10;
+                int Field_0x14;
+                int Field_0x18;
+                int Field_0x1C;
+            } Table12[MeshHeader.Table2Count];
+        }
+        
+        if (MeshHeader.Field_0x444)
+        {
+            struct
+            {
+                int Field_0x00;
+                float Field_0x04;
+                float Field_0x08;
+                int Field_0x0C;
+                int Field_0x10;
+                int Field_0x14;
+                int Field_0x18;
+            } UnkTable[MeshHeader.Field_0x444];
+        }
+        
+        struct
+        {
+            int Unk;
+            int Unk2;
+            int Unk3;
+            int Unk4;
+        } FinalTable[32];
+    } FileEntry[Header.NumMeshes] <optimize=false>;
+} FFTOMESH;
