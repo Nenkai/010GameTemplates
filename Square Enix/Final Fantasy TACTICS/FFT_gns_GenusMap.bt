@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FINAL FANTASY TACTICS - gns map (genus)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Refer to WoTL mobile symbols.
+
+struct
+{
+    
+    ubyte EventFlag; // ASHURA_GNS_Analyzer
+    ubyte field_0x01;
+    ubyte field_0x02; // passed to ASHURA_MapProjectFlag as Arg2
+    ubyte field_0x03;
+    ubyte field_0x04; // passed to ASHURA_MapProjectFlag as Arg1
+    ubyte Type; // ASHURA_MapProjectMem2Mem - ASHURA_GNS_Analyzer
+    short Field_0x00;
+    int FEEDBACC <format=hex>;
+    byte Index; // ASHURA_GNS_Analyzer
+    byte pad;
+    
+    // The following bytes depends on the type
+    short Unk;
+    int Unk;
+    
+    // ASHURA_MapProjectMem2Mem reads type from arg1
+    // 15 = ASHURA_LMDL_Read
+    // 18 = system_warning?
+    // 19-20-21-22 - image?
+    // 23 is all of the above combined?
+    // 25 = ?
+    // 26 = set_md?
+    // 27 = SetDrawMove?
+    // 28 = ?
+    // 31 = loadClutData
+    // 35 = ASURA_PKT_Analyze
+    // 36->43 = ASHURA_LMDL_Read
+    // 44 = ?
+    // 46/47/48 = ?
+    // 50 = ?
+    // 51 - loadClutData?
+    // 131 = setMapVector?
+    // 132 - setMapVector?
+    // 133 = SetDrawMode?
+    // 134 = SetDrawMode?
+    // 136 = ?
+    // 137 = ?
+    // 139 = ?
+} GenusEntry[FileSize() / 0x14] <read=Str("Type %d", this.Type), open=true>;
