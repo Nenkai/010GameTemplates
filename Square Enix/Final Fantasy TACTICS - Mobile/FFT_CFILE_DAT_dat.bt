@@ -1,0 +1,79 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFT Mobile/TIC CFILE_DAT File (.dat) - for g2d (Graphics 2D), sound.dat & music.dat 
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.dat
+//  ID Bytes: 59 4F 58 00
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    uint32 Magic <format=hex>; // 'YOX '
+    uint32 Flag;
+    uint32 Offset <format=hex>; // Normally points to a ToC (table of contents) at the bottom of the physical file.
+    uint32 NumEntries <format=hex>;
+    
+    // Starting from here, unused fields. Possibly not even part of the header.
+    short Year;
+    short Month;
+    short Day;
+    short Unknown;
+    short Hour;
+    short Minute;
+    short Second;
+    short Millisecond;
+} YOXHeader;
+
+typedef struct
+{
+    uint32 Magic <format=hex>; // 'YOX '
+    enum <uint>
+    {
+       NONE = 0x00,
+       ZLIB = 0x02, 
+    } Flag <edit=flags>; // Checked for in CFILE_DAT::Decode
+    uint32 Size <format=hex>;
+    uint Empty;
+    
+    // Technically files can support encryption too, through CFILE_DAT::Decrypt
+    // Sprite files in G2D that aren't raw pixel formats can support:
+    // - BMP (CG2D_LOADER_BMP)
+    // - TIM (CG2D_LOADER_TIM)
+    // - TGA (CG2D_LOADER_TGA)
+    // ...in that order, depending on final headers content.
+} YOXFileHeader;
+
+typedef struct
+{
+    uint32 FileOffset <format=hex, comment="Always aligned to sector size (0x800)">; // CFILE_DAT::GetOffset
+    uint32 FileSize <format=hex>; // CFILE_DAT::GetSize
+    int32 Compress; // CFILE_DAT::GetCompress - unused in G2D
+    uint32 Format;   // CFILE_DAT::GetFormat - always 0 across g2d.dat, music.dat and sound.dat.
+} FileInfo;
+
+//////////////////////////////////
+// Main header begins.
+//////////////////////////////////
+YOXHeader MainHeader;
+FSeek(MainHeader.Offset);
+
+// Bottom footer.
+FileInfo FileInfos[MainHeader.NumEntries] <optimize=false>;
+
+local int i = 0;
+for (i = 0; i < MainHeader.NumEntries; i++)
+{
+    FSeek(FileInfos[i].FileOffset);
+    
+    // G2D files point to a container with a YOX header as they're compressed (though slightly different)
+    // music.dat points to Ogg & other header
+    if (FileInfos[i].Compress != -1)
+        YOXFileHeader FileHeader;
+}
+
+// NOTE: File data starts at the first sector (0x800) for g2d, second sector (0x1000) for sound/music.
