@@ -43,7 +43,7 @@ const uint64 Red_700<hidden=true> = 0x1C1CB9;
 const uint64 Red_800<hidden=true> = 0x1B1B99;
 const uint64 Red_900<hidden=true> = 0x1D1D7F;
 
-struct MemberList;
+struct NodeList;
 struct BezierNode;
 struct AssetEntry;
 
@@ -106,7 +106,7 @@ enum LayerEffect{
     kAntiAliasing,
 };
 
-enum MemberType
+enum NodeType
 {
     kLayerNode = 1,
     kImageNode = 2,
@@ -123,14 +123,27 @@ enum MemberType
     kMaskNode = 13
 };
 
-typedef struct TMemberStruct_0
+typedef struct
+{
+    OffsetT ResourceInfoOffset;
+    int Unused;
+    int field_0x08;
+    byte pad[0x20];
+    
+    FSeek(startof(this) + ResourceInfoOffset);
+    AssetEntry ResourceInfo;
+    
+    FSeek(startof(this) + 0x2C);
+} TextureAsset <optimize=false>;  
+    
+typedef struct TNodeStruct_0
 {
     int field_0x0; // Maybe timeline item index
     OffsetT NameOffset;
     int TimelineElementType; // Maybe timeline item type + flags
     int FrameStart <bgcolor=cLtRed>;
     int NumFrames <fgcolor=0x8affff>;
-    int ItemIndex <fgcolor=cGreen>; // Index of group member this item affects
+    int TargetIndex <fgcolor=cGreen, comment="Index of group member this item affects">;
     ubyte bool_0;
     ubyte bool_1;
     byte pad_[2];
@@ -141,6 +154,8 @@ typedef struct TMemberStruct_0
     struct 
     {
         int TimelineElementType;
+        byte pad[0x2C]<bgcolor=cGray>;
+
         switch(TimelineElementType)
         {
             // 5009: Likely for keyframes
@@ -152,39 +167,114 @@ typedef struct TMemberStruct_0
             // Anything >= 5031 is handled at
             // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 8B 42
             
-            case 5027: { 
-                int stuff[20]<bgcolor=cGray>;
-                int offset;
-                int count;
-                
-                FSeek(startof(this) + offset);
-                BezierNode nodes[count];
+            case 5002: {
+                int Field_0x30;
+                byte pad2[0x40];
+                int Field_0x74;
+                int Field_0x78;
                 break;
             }
-            case 5028:{
-                byte data[0x2C]<bgcolor=cGray>;
-                int offset<fgcolor=cRed>;
-                FSeek(startof(this) + offset);
-                string string_data;
+            case 5003: {
+                int Field_0x30;
+                byte pad2[0x40];
+                int Field_0x74;
+                int Field_0x78;
                 break;
+            }
+            case 5004: {
+                int Field_0x30;
+                byte pad2[0x40];
+                float Field_0x74;
+                float Field_0x78;
+                break;
+            }
+            case 5005: {
+                int Field_0x30;
+                byte pad2[0x40];
+                float Field_0x74;
+                break;
+            }
+            case 5007: {
+                int Field_0x30;
+                byte pad2[0x40];
+                byte Field_0x74;
+                byte Field_0x75;
+                byte Field_0x76;
+                byte pad3;
+                break;
+            }
+            case 5009: {
+                int Field_0x30;
+                byte pad2[0x40];
+                float Field_0x74;
+                break;   
+            }
+            case 5017: {
+                int Field_0x30;
+                byte pad2[0x40];
+                byte Field_0x74;
+                byte Field_0x75;
+                byte Field_0x76;
+                byte pad3;
+                break;   
+            }
+            case 5028: {
+                OffsetT StrOffset;
+                byte pad2[0x40];
+                
+                FSeek(startof(this) + StrOffset);
+                string Str;
+                break;   
+            }
+            case 5031: {
+               byte pad2[0x40];
+               break;
+            }
+            case 5034: {
+               byte pad2[0x20];
+               int Field_0x50;
+               float Field_0x54;
+               byte pad3[0x20];
+               break;
+            }
+            case 5035: {
+               byte pad2[0x20];
+               int Field_0x50;
+               float Field_0x54;
+               byte pad3[0x20];
+               break;
+            }
+            case 5050: {
+               int Field_0x30;
+               byte pad2[0x1C];
+               int Field_0x50;
+               float Field_0x54;
+               byte pad3[0x20];
+               break;
+            }
+            case 5051: {
+               int Field_0x30;
+               byte pad2[0x1C];
+               int Field_0x50;
+               float Field_0x54;
+               byte pad3[0x20];
+               break;
             }
             default:
             {
                 Printf("Unimplemented timeline element type %d\n", TimelineElementType);
-                byte pad[0x2C];
-                int field_0x1;
                 break;
             }
         }
-    } member_data<bgcolor=cDkGreen>;
+    } TimelineElement <bgcolor=cDkGreen>;
     
     FSeek(startof(this) + NameOffset);
     string Name;
     
     FSeek(startof(this) + 0x20);
-} MemberStruct_0<bgcolor=cRed, name = Str("%d: Item %d ", this.TimelineElementType, this.ItemIndex)>;
+} MemberStruct_0<bgcolor=cRed, name = Str("%d: Item %d ", this.TimelineElementType, this.TargetIndex)>;
 
-typedef struct TMemberStruct_1(int count)
+typedef struct TNodeStruct_1(int count)
 {
     local int cnt <hidden=true> = count;
     OffsetT Offsets[count]<bgcolor=Teal_400>;
@@ -220,7 +310,7 @@ typedef struct TMemberStruct_1(int count)
 
         } Member<name = (exists(this.name) ? this.name : ""), read=Str("Type: %d", this.Type)>;
     }
-} MemberStruct_1<bgcolor=cPurple, read=Str("Members: %d", this.cnt)>;
+} TimelineTarget <bgcolor=cPurple, read=Str("Members: %d", this.cnt)>;
 
 typedef struct TTimelineMember
 {
@@ -234,38 +324,41 @@ typedef struct TTimelineMember
         int Type;
         OffsetT ElementsOffset;
         int ElementCount <fgcolor=cGreen>;
-        OffsetT UnkOffset;
-        int UnkCount <fgcolor=cGreen>;
-        OffsetT MembersOffset;
-        int MemberCount <fgcolor=cGreen>;
+        OffsetT UnusedOffset_0x0C;
+        int UnusedCount_0x10 <fgcolor=cGreen>;
+        OffsetT TargetsOffset;
+        int TargetCount <fgcolor=cGreen>;
+        int FrameCount;
+        int Field_0x28;
         
         if (ElementCount)
         {
             FSeek(startof(this) + ElementsOffset);
-            MemberStruct_0 timeline_elements[ElementCount]<optimize=false>;
+            MemberStruct_0 TimelineElements[ElementCount]<optimize=false>;
         }
         
-        FSeek(startof(this) + UnkOffset);
+        FSeek(startof(this) + UnusedOffset_0x0C);
         struct
         {
             int Index;
             OffsetT UnkOffset;
             int UnkCount <fgcolor=cGreen>;
-        } what_even[UnkCount]<bgcolor=cGreen>;
+        } UnusedUnk_0x0C[UnusedCount_0x10]<bgcolor=cGreen>;
         
-        FSeek(startof(this) + MembersOffset);
-        MemberStruct_1 TimelineMembers(MemberCount);
+        FSeek(startof(this) + TargetsOffset);
+        TimelineTarget TimelineTargets(TargetCount);
+        
+
     } TimelineInfo;
-    FSeek(startof(this) + 0x24);
+    FSeek(startof(this) + 0x2C);
     
-    int FrameCount;
-    int Field_0x28;
     int Field_0x2C;
     OffsetT StrOffset_0x30 <fgcolor=cRed>;
     OffsetT AssetsOffset <fgcolor=cRed>;
     int Field_0x38;
     OffsetT StrOffset_0x3C <fgcolor=cRed>;
-    byte _pad[0x20];
+    int Field_0x40;
+    byte _pad[0x1C];
     
     FSeek(startof(this) + NameOffset);
     string Name <bgcolor=Sky_500>;
@@ -280,9 +373,9 @@ typedef struct TTimelineMember
     string Name0x3C;
 
     FSeek(startof(this) + 0x60);
-} TimelineMember<name = this.Name>;
+} UIComponentTimeline <name = this.Name>;
 
-typedef struct TMemberDataBase{
+typedef struct TNodeDataBase{
     int field_0x00;
     int field_0x04;
     Color color;
@@ -299,41 +392,33 @@ typedef struct TMemberDataBase{
     int field_0x28;
     int field_0x2C;
     int pad[4];
-} MemberDataBase;
+} NodeDataBase;
 
 typedef struct TLayerNode // 1
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     byte pad[0x20] <fgcolor=cDkGray>;
 } LayerNode;
 
 typedef struct TImageNode // 2
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     OffsetT TextureInfosOffset;
     int TextureInfoCount <fgcolor=cGreen>;
     byte _pad[0x20];
     int Type_0x68; // Type0-3
+    int Field_0x6C;
     int Field_0x70;
     int Field_0x74;
-    byte _pad2[0x20];
+    byte _pad2[0x1C];
     
     FSeek(startof(this) + TextureInfosOffset);
-    struct
-    {
-        OffsetT ResourceInfoOffset;
-        int Unused;
-        int field_0x08;
-        byte pad[0x20];
-        
-        FSeek(startof(this) + ResourceInfoOffset);
-        AssetEntry ResourceInfo;
-    } TextureInfos;  
+    TextureAsset TextureAssets[TextureInfoCount];  
 } ImageNode;
 
 typedef struct TTextNode // 3
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     int UiKeyId <comment="from 'ui' nex table - may be set manually externally?">;
     int UnkStrOffset0x44 <format=hex, fgcolor=cRed>;
     int FontSize;
@@ -378,7 +463,7 @@ typedef struct TTextNode // 3
 
 typedef struct TNinegridNode // 4
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     OffsetT TextureInfosOffset;
     int TextureInfoCount <fgcolor=cGreen>;
     byte _pad[0x20];
@@ -388,7 +473,7 @@ typedef struct TNinegridNode // 4
     int Field_0x74;
     int Field_0x78; // Type0-3
     int Field_0x7C;
-    byte _pad2[0x0C];
+    byte _pad2[0x08];
     
     FSeek(startof(this) + TextureInfosOffset);
     
@@ -406,7 +491,7 @@ typedef struct TNinegridNode // 4
 
 typedef struct TCounterNode
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     OffsetT TextureInfosOffset;
     int TextureInfoCount <fgcolor=cGreen>;
     byte _pad[0x20];
@@ -420,16 +505,7 @@ typedef struct TCounterNode
     byte _pad2[0x08];
     
     FSeek(startof(this) + TextureInfosOffset);
-    struct
-    {
-        OffsetT ResourceInfoOffset;
-        int Unused;
-        int field_0x08;
-        byte pad[0x20];
-        
-        FSeek(startof(this) + ResourceInfoOffset);
-        AssetEntry ResourceInfo;
-    } TextureInfos;
+    TextureAsset TextureAsset_;
     
     FSeek(startof(this) + UnkStrOffset0x68);
     string Str0x68;
@@ -440,7 +516,7 @@ typedef struct TCounterNode
 
 typedef struct TRectNode // 6
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     int Field_0x40;
     int Field_0x44;
     int Field_0x48;
@@ -450,7 +526,7 @@ typedef struct TRectNode // 6
 
 typedef struct TEllipseNode // 7
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     int Field_0x40;
     float Field_0x44;
     int Field_0x48;
@@ -478,7 +554,8 @@ typedef struct TBezierNode
     Point handle_a;
     Point handle_b;
     float Field_0x18;
-    byte padding[0x1C];
+    int Field_0x1C;
+    byte padding[0x18];
 } BezierNode <bgcolor=cDkBlue, read=BezierNodeRead>;
 
 string BezierNodeRead(BezierNode& input)
@@ -487,14 +564,14 @@ string BezierNodeRead(BezierNode& input)
 }
 
 typedef struct TBezier{
-    MemberDataBase Base;
+    NodeDataBase Base;
     int Field_0x40;
     int Field_0x44;
     int Type_0x48; // 0-2
     int Type_0x4C; // 0-2
     int Type_0x50; // 0-2
     int Field_0x54;
-    int Field_0x58;
+    float Field_0x58;
     float Field_0x5C;
     float Field_0x60;
     byte Field_0x64;
@@ -515,12 +592,13 @@ typedef struct TBezier{
 
 typedef struct TCollisionNode
 {
-    MemberDataBase Base;
-    byte pad[0x20];
+    NodeDataBase Base;
+    int Unk_0x40;
+    byte pad[0x1C];
 } CollisionNode;
 
 typedef struct TReferenceNode {
-    MemberDataBase Base;
+    NodeDataBase Base;
     int Unused0x40;
     int Field_0x44;
     int Field_0x48;
@@ -546,41 +624,32 @@ typedef struct TReferenceNode {
 
 typedef struct TEffectNode
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     byte _pad[0x20];
 } EffectNode;
 
 typedef struct TMaskNode // 13
 {
-    MemberDataBase Base;
+    NodeDataBase Base;
     OffsetT TextureInfosOffset;
     int TextureInfoCount <fgcolor=cGreen>;
     byte Pad[0x40];
     
     FSeek(startof(this) + TextureInfosOffset);
-    struct
-    {
-        OffsetT ResourceInfoOffset;
-        int Unused;
-        int field_0x08;
-        byte pad[0x20];
-        
-        FSeek(startof(this) + ResourceInfoOffset);
-        AssetEntry ResourceInfo;
-    } TextureInfos;  
+    TextureAsset TextureAssets[TextureInfoCount];  
 } MaskNode;
 
-typedef struct TMember
+typedef struct TNode
 {
     // 48 8B C4 48 89 58 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? C5 F8 29 78 ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B DA
     
-    MemberType Type;
+    NodeType Type;
     OffsetT NameOffset <bgcolor=cWhite>;
     Point Origin;
     float Rotation;
     Vector2 Scale;
     Point AnchorPoint;
-    int UnkBool;
+    int IsAnchored;
     byte pad0[0x1C];
     Point Size;
     int DataOffset <format=hex, fgcolor=cRed>;
@@ -612,7 +681,7 @@ typedef struct TMember
          OffsetT EffectAssetOffset;
          byte pad2_2[0x1C];
     }
-    else if (Type == kImageNode)
+    else if (Type == kImageNode || Type == kCounterNode || Type == kNinegridNode)
     {
         byte pad2[0x2C];   
     }
@@ -623,6 +692,10 @@ typedef struct TMember
     else if (Type == kEllipseNode)
     {
         byte pad2[0x20];   
+    }
+    else if (Type == kCollisionNode)
+    {
+        // Nothing
     }
     else if (Type == kMaskNode)
     {
@@ -674,7 +747,7 @@ typedef struct TMember
     if (Type == kLayerNode)
     {
         FSeek(startof(this) + LayerChildrenOffset);
-        MemberList LayerChildren(LayerChildCount);
+        NodeList LayerChildren(LayerChildCount);
     }
     else if (Type == kReferenceNode)
     {
@@ -698,11 +771,11 @@ typedef struct TMember
         string MaskNameUnk;
     }
     
-} Member  <name = Str("%s @ %d,%d (%dx%d) ", this.Name, this.Origin.x, this.Origin.y, this.Size.x, this.Size.y), 
+} Node  <name = Str("%s @ %d,%d (%dx%d) ", this.Name, this.Origin.x, this.Origin.y, this.Size.x, this.Size.y), 
             read=EnumToString(this.Type), 
             bgcolor=cDkRed>;
 
-typedef struct TMemberList(uint count){
+typedef struct TNodeList(uint count){
     local uint cnt<hidden=true> = count;
     OffsetT offsets[count];
     
@@ -711,11 +784,11 @@ typedef struct TMemberList(uint count){
     for(i = 0 ; i < count; i++)
     {
         FSeek(startof(this) + offsets[i]);
-        Member member<bgcolor=cLtPurple>;
+        Node node<bgcolor=cLtPurple>;
     }
     
     FSeek(cpos);
-} MemberList <read=Str("Members: %d", this.cnt)>;
+} NodeList <read=Str("Nodes: %d", this.cnt)>;
 
 typedef struct TLayerProperties
 {
@@ -809,7 +882,7 @@ typedef struct TLayerProperties
     float field_0xC0;
     float field_0xC4;
     float field_0xC8;
-    float field_0xCC;
+    uint field_0xCC;
     float field_0xD0;
     float field_0xD4;
     float field_0xD8;
@@ -827,13 +900,20 @@ typedef struct TLayerProperties
     
     switch (ComponentType)
     {
+
         case kComponentRoot:
             int field_0x108; // Type 1-5
             int field_0x10C; // Type 1-5
+            byte padding[0x18] <fgcolor=cDkGray>;
+            break;
+            
+        case kComponentTextBoard:
+            byte padding[0x20] <fgcolor=cDkGray>;
             break;
             
         case kComponentScrollBar:
-            int field_0x08; // Same as 15->0x134?
+            int field_0x108; // Same as 15->0x134?
+             byte padding[0x1C] <fgcolor=cDkGray>;
             break;
             
         case kComponentBahamutEffect:
@@ -858,10 +938,14 @@ typedef struct TLayerProperties
             float Type15_field_0x150;
             int Type15_field_0x154;
             int Type15_field_0x158;
+            byte padding[0x20];
+            break;
+            
+        default:
+            byte padding[0x20] <fgcolor=cDkGray>;
             break;
     }
-    
-    byte padding[0x20] <fgcolor=cDkGray>;
+
     local int endPos = FTell();
     struct
     {
@@ -901,14 +985,14 @@ typedef struct TLayerProperties
     
     
     FSeek(endPos);
-} LayerProperties <bgcolor=cRed>;
+} ComponentProperties <bgcolor=cRed>;
 
 typedef struct TGroupEntry{
     uint NameOffset <format=hex, fgcolor=cRed>;
     Point Size;
-    uint LayerPropertiesOffset <format=hex, fgcolor=cRed>;
-    OffsetT MembersOffset;
-    uint MemberCount <bgcolor=cGreen>;
+    uint ComponentPropertiesOffset <format=hex, fgcolor=cRed>;
+    OffsetT NodesOffset;
+    uint NodeCount <bgcolor=cGreen>;
     OffsetT TimelineMembersOffset;
     uint TimelineMemberCount <bgcolor=cGreen>;
     byte _pad[0x20] <fgcolor=cDkGray>;
@@ -916,19 +1000,19 @@ typedef struct TGroupEntry{
     FSeek(startof(this) + NameOffset);
     string Name <bgcolor=cPurple>;
     
-    FSeek(startof(this) + LayerPropertiesOffset);
-    LayerProperties LayerProperties_;
+    FSeek(startof(this) + ComponentPropertiesOffset);
+    ComponentProperties ComponentProperties_;
     
-    if (MemberCount)
+    if (NodeCount)
     {
-        FSeek(startof(this) + MembersOffset);
-        MemberList Members(MemberCount);
+        FSeek(startof(this) + NodesOffset);
+        NodeList Nodes(NodeCount);
     }
     
     if (TimelineMemberCount)
     {
         FSeek(startof(this) + TimelineMembersOffset);
-        TimelineMember Timeline[TimelineMemberCount] <optimize=false>;
+        UIComponentTimeline Timeline[TimelineMemberCount] <optimize=false>;
     }
     
     FSeek(startof(NameOffset) + 0x40);
@@ -937,10 +1021,10 @@ typedef struct TGroupEntry{
                 
 string GroupRead(GroupEntry& input)
 {
-    local int count = input.MemberCount;
-    local string type = EnumToString(input.LayerProperties_.ComponentType);
-    local string blend_mode = EnumToString(input.LayerProperties_.BlendMode_);
-    return Str("[%s] Members: %d, Blend Mode: %s", type, count, blend_mode);
+    local int count = input.NodeCount;
+    local string type = EnumToString(input.ComponentProperties_.ComponentType);
+    local string blend_mode = EnumToString(input.ComponentProperties_.BlendMode_);
+    return Str("[%s] Nodes: %d, Blend Mode: %s", type, count, blend_mode);
 }
 
 typedef struct TAssetEntry{
@@ -1006,8 +1090,8 @@ FSeek(startof(Header) + Header.TOCOffset);
 struct
 {
     OffsetT AssetListOffset;
-    OffsetT LayersOffset;
-    int LayerCount <fgcolor=cGreen>;
+    OffsetT ComponentsOffset;
+    int ComponentCount <fgcolor=cGreen>;
     
     FSeek(startof(UIFileToc) + UIFileToc.AssetListOffset);
     struct TAssetCollection
@@ -1033,14 +1117,14 @@ struct
     } Assets;
 } UIFileToc <open=true, bgcolor=cRed, size=0x2C>;
 
-FSeek(startof(UIFileToc) + UIFileToc.LayersOffset);
+FSeek(startof(UIFileToc) + UIFileToc.ComponentsOffset);
 local int i = 0;
 struct
 {
-    local int count<hidden=true> = UIFileToc.LayerCount;
+    local int count<hidden=true> = UIFileToc.ComponentCount;
     for (i = 0; i < count; i++)
     {
-        FSeek(startof(UIFileToc) + UIFileToc.LayersOffset + (i * 0x40));
+        FSeek(startof(UIFileToc) + UIFileToc.ComponentsOffset + (i * 0x40));
         GroupEntry Layer <bgcolor=cBlue>;
     }
-} Layers <open=true, read=Str("Layers: %d", this.count)>;
+} Components <open=true, read=Str("Components: %d", this.count)>;
