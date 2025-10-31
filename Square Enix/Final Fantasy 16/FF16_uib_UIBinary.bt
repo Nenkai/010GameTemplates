@@ -154,7 +154,8 @@ typedef struct TNodeStruct_0
     struct 
     {
         int TimelineElementType;
-        byte pad[0x2C]<bgcolor=cGray>;
+        byte pad1_[0x0C];
+        byte pad2_[0x20]<bgcolor=cGray>;
 
         switch(TimelineElementType)
         {
@@ -272,7 +273,7 @@ typedef struct TNodeStruct_0
     string Name;
     
     FSeek(startof(this) + 0x20);
-} MemberStruct_0<bgcolor=cRed, name = Str("%d: Item %d ", this.TimelineElementType, this.TargetIndex)>;
+} TimelineElement<bgcolor=cRed, name = Str("%d: Item %d ", this.TimelineElementType, this.TargetIndex)>;
 
 typedef struct TNodeStruct_1(int count)
 {
@@ -324,8 +325,8 @@ typedef struct TTimelineMember
         int Type;
         OffsetT ElementsOffset;
         int ElementCount <fgcolor=cGreen>;
-        OffsetT UnusedOffset_0x0C;
-        int UnusedCount_0x10 <fgcolor=cGreen>;
+        OffsetT AssetGroupsOffset;
+        int AssetGroupCount <fgcolor=cGreen>;
         OffsetT TargetsOffset;
         int TargetCount <fgcolor=cGreen>;
         int FrameCount;
@@ -334,16 +335,16 @@ typedef struct TTimelineMember
         if (ElementCount)
         {
             FSeek(startof(this) + ElementsOffset);
-            MemberStruct_0 TimelineElements[ElementCount]<optimize=false>;
+            TimelineElement TimelineElements[ElementCount]<optimize=false>;
         }
         
-        FSeek(startof(this) + UnusedOffset_0x0C);
+        FSeek(startof(this) + AssetGroupsOffset);
         struct
         {
             int Index;
-            OffsetT UnkOffset;
-            int UnkCount <fgcolor=cGreen>;
-        } UnusedUnk_0x0C[UnusedCount_0x10]<bgcolor=cGreen>;
+            OffsetT AssetListOffset;
+            int AssetCount <fgcolor=cGreen>;
+        } AssetGroup[AssetGroupCount]<bgcolor=cGreen>;
         
         FSeek(startof(this) + TargetsOffset);
         TimelineTarget TimelineTargets(TargetCount);
@@ -517,10 +518,10 @@ typedef struct TCounterNode
 typedef struct TRectNode // 6
 {
     NodeDataBase Base;
-    int Field_0x40;
-    int Field_0x44;
-    int Field_0x48;
-    int Field_0x4C;
+    Color Field_0x40 <format=hex>;
+    Color Field_0x44 <format=hex>;
+    Color Field_0x48 <format=hex>;
+    Color Field_0x4C <format=hex>;
     byte pad[0x10];
 } RectNode;
 
@@ -970,17 +971,8 @@ typedef struct TLayerProperties
     
     if(count_0xAC > 0)
     {
-        struct
-        {
-            FSeek(startof(ComponentType) + offset_0xA8);
-            int offset_0<fgcolor=cRed, format=hex>;
-            int field_1;
-            uint field_2 <format=hex>;
-            
-            byte padding[0x20] <fgcolor=cDkGray>;
-            FSeek(startof(offset_0) + offset_0);
-            AssetEntry test;
-        } struct_0xA8 <bgcolor=cDkPurple>;
+        FSeek(startof(ComponentType) + offset_0xA8);
+        TextureAsset struct_0xA8 <bgcolor=cDkPurple>;
     }
     
     
