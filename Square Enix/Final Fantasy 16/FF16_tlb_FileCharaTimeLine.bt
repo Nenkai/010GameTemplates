@@ -1229,12 +1229,12 @@ typedef struct
     byte field_0x19;
     byte field_0x1A;
     byte field_0x1B;
-    int Offset_0x1C <format=hex, fgcolor=cRed>;
+    int DataOffset <format=hex, fgcolor=cRed>;
     
     FSeek(startof(field_0x00) + UnkNameOffset);
     string Name <bgcolor=cGray>;
     
-    FSeek(startof(field_0x00) + Offset_0x1C);
+    FSeek(startof(field_0x00) + DataOffset);
     TimelineElementDataUnion DataUnion <bgcolor=cDkGreen>;
     
     // Fix
@@ -1246,7 +1246,7 @@ typedef struct
 {
     int Type;
     byte pad[0x24];
-} SetupData <read=Type, bgcolor=cRed>;
+} TargetData <read=Type, bgcolor=cRed>;
 
 typedef struct
 {
@@ -1311,8 +1311,8 @@ struct
         int TimelineElementCount <fgcolor=cGreen>;
         int AssetGroupsOffset <format=hex, fgcolor=cRed>;
         int AssetGroupCount <fgcolor=cGreen>;
-        int SetupDataArrayOffset <format=hex, fgcolor=cRed>;
-        int SetupDataCount <fgcolor=cGreen>;
+        int TargetsArrayOffset <format=hex, fgcolor=cRed>;
+        int TargetCount <fgcolor=cGreen>;
         int TotalFrames;
         char Bool_0x20;
         byte pad[0x03];
@@ -1336,15 +1336,15 @@ struct
             }
         } AssetGroups;
         
-        FSeek(startof(Timeline) + SetupDataArrayOffset);
+        FSeek(startof(Timeline) + TargetsArrayOffset);
         struct
         {
-            int Offsets[SetupDataCount];
-            for (i = 0; i < SetupDataCount; i++)
+            int Offsets[TargetCount];
+            for (i = 0; i < TargetCount; i++)
             {
                 FSeek(startof(Offsets) + Offsets[i]);
-                SetupData SetupData_ <bgcolor=cPurple>;
+                TargetData TargetData_ <bgcolor=cPurple>;
             }
-        } SetupDataArray;
+        } TargetDataArray;
     } Timeline <bgcolor=cYellow>;
 } CharaTimelineFile <open=true>;
