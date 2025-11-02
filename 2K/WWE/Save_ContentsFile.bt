@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+uint VersionMaybe;
+uint BodyCRC <format=hex, comment="CRC, starting from 0x08">;
+uint64 SaveCountMaybe;
+int FileCount;
+int Unk;
+
+struct
+{
+    struct
+    {
+        // %08x_%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x_%08x
+        char Name[0x3F];
+        char TypeLetter <format=hex>;
+        uint64 CompressedFileSize <format=hex>;
+        uint64 DecryptedFile_FNV1A64Hash <format=hex, comment="When decrypted. Input bytes is signed, refer to below func">;
+        int FileNumber <format=hex, comment="Sometimes start of the name too. 24334339 appears to be important/very hardcoded">;
+    } Entries[FileCount] <read=Str("%s (%c)", Name, TypeLetter)>;
+} Body <open=true>;
+
+/*
+public static ulong FNV1A64_Signed(byte[] data)
+{
+    const ulong FNV_OFFSET_BASIS = 0xcbf29ce484222325;
+    const ulong FNV_PRIME = 0x100000001b3;
+
+    ulong hash = FNV_OFFSET_BASIS;
+
+    foreach (byte b in data)
+    {
+        long signedValue = (long)(sbyte)b; // Used for some reason by saves.
+        hash ^= (ulong)signedValue;
+        hash *= FNV_PRIME;
+    }
+
+    return hash;
+}
+*/
