@@ -1,0 +1,340 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Tales of Series Animation Binary (MotionBinFormat)
+//   Authors: Nenkai, Zombie (initial research)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+int Align(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
+
+    return pos + amount;
+}
+
+int Is64Bit()
+{
+    return MotionBinFormat.SHeader.mMagicNumber != 0x4D414E4D;
+}
+
+typedef uint64 Offset64 <format=hex, fgcolor=cRed>;
+typedef uint64 Count64 <fgcolor=cGreen>;
+typedef uint32 Offset32 <format=hex, fgcolor=cRed>;
+typedef uint32 Count32 <fgcolor=cGreen>;
+
+typedef enum <byte>
+{
+    // ACTIVE = LERP_DOWN_ONLY | 0x00001
+    ANIMATION_TARGET_DYNAMIC = 1,
+    
+    // ROTATE    = QUATERNION | 0x00004
+    // TRANSLATE = 0x10003
+    ANIMATION_TARGET_IK = 2,
+    
+    // TARGET_ID = 0x00001
+    ANIMATION_TARGET_CONSTRAINT = 3,
+    
+    // MATERIAL_COLOR = 0x00003
+    // MATERIAL_ALPHA = 0x10001
+    // LAYER_SCALE = 0x100002
+    // LAYER_ROTATE = 0x110001
+    // LAYER_TRANSLATE = 0x120001
+    // LAYER_FRAME = 0x130001
+    ANIMATION_TARGET_MATERIAL_LAYER = 8,
+    
+    // WEIGHT = 0x00001
+    ANIMATION_TARGET_MORPH = 9,
+    
+    // COLOR      = 0x00003
+    // INTENSITY  = 0x10001
+    ANIMATION_TARGET_POINT_LIGHT = 10,
+    
+    // COUNT     = 0x00001
+    // INTERVAL  = 0x10001
+    ANIMATION_TARGET_EMITTER = 11,
+    
+    // FIELD_OF_VIEW = 0x00001
+    // NEAR_CLIP     = 0x10001
+    // FAR_CLIP      = 0x20001
+    ANIMATION_TARGET_CAMERA = 12,
+} ANIMATION_TARGET_GROUP;
+
+typedef struct
+{
+    union
+    {
+        struct
+        {
+            // First 24 bits
+            // based on Assets::Scripts::GameMain::DebugVisibility::InitAnimTargetFlag
+            // 0x00003 = Scaling
+            // 0x10014 = Rotation
+            // 0x20003 = Translation
+            // 0x30003 = Skip
+            // 0x80001 = Visibility
+            
+            if (Is64Bit())
+            {
+                byte ANIMATION_TARGET_DIM            : 4;
+                byte ANIMATION_TARGET_QUATERNION     : 1;
+                byte ANIMATION_TARGET_LERP_DOWN_ONLY : 1;
+                short               : 10;
+                byte sub_group      : 8;
+                byte sub_id         : 8;
+                int target_id       : 24; // matched to hierarchyBinFormat->mTransformID
+                ANIMATION_TARGET_GROUP group             : 4;
+                byte                : 4;
+            }
+            else
+            {
+                byte                : 4;
+                ANIMATION_TARGET_GROUP group             : 4;
+                int target_id       : 24; // matched to hierarchyBinFormat->mTransformID
+                byte sub_id         : 8;
+                byte sub_group      : 8;
+                short               : 10;
+                byte ANIMATION_TARGET_LERP_DOWN_ONLY : 1;
+                byte ANIMATION_TARGET_QUATERNION     : 1;
+                byte ANIMATION_TARGET_DIM            : 4;
+            }
+            
+            if (Is64Bit())
+                uint64 whatever;
+        } Components;
+        uint64 HashValue;
+    } Hash;
+} SHashAnimTargetFlag <optimize=false, read=Str("%s", EnumToString(Hash.Components.group))>;
+
+typedef struct
+{
+    uint64 aHashTable[SHeader.mNumHashTable + 1] <format=hex>;
+    Offset64 mOfsCurve;
+    uint Unk <format=hex>;
+    SHashAnimTargetFlag aHashAnimTargetFlagArray[SHeader.mNumHashTable];
+} SAnimHashTable <bgcolor=cYellow>;
+
+typedef struct
+{
+    switch (mCurveFormatFlag.value)
+    {
+        case CURVE_FORMAT_VALUE_S16:
+            hfloat axis[mCurveFormatFlag.dim]; break; // Should it actually be shorts? Normalized?
+        case CURVE_FORMAT_VALUE_F32:
+            float axis[mCurveFormatFlag.dim]; break;
+        default:
+            Printf("data type not supported: %s\n", EnumToString(mCurveFormatFlag.value));
+            break;
+    }
+} BRVec <bgcolor=cDkBlue, optimize=false, read=Str("<%f, %f, %f>", axis[0], axis[1], axis[2])>;
+
+typedef enum <byte> 
+{
+    CURVE_FORMAT_LINEAR = 0,
+    CURVE_FORMAT_FLAT = 2,
+    CURVE_FORMAT_CONSTANT = 3,
+    CURVE_FORMAT_DCT4_SHORT = 8,
+    CURVE_FORMAT_DCT4_LONG = 9,
+} CURVE_FORMAT;
+          
+typedef enum <byte> 
+{
+    CURVE_FORMAT_VALUE_F32 = 0,
+    CURVE_FORMAT_VALUE_S16 = 1,
+} CURVE_FORMAT_VALUE; 
+
+typedef enum <byte> 
+{
+    CURVE_FORMAT_KEY_NO = 0,
+    CURVE_FORMAT_KEY_F32 = 1,
+    CURVE_FORMAT_KEY_U16 = 2,
+    CURVE_FORMAT_KEY_U8 = 3,
+    CURVE_FORMAT_KEY_INDEX = 4,
+} CURVE_FORMAT_KEY; 
+
+typedef struct
+{
+    if (Is64Bit())
+    {
+        struct
+        {
+            
+            CURVE_FORMAT format     : 4;
+            CURVE_FORMAT_VALUE value      : 2;
+            byte         : 2; // Padding
+            CURVE_FORMAT_KEY key : 4;
+            int dim : 4;
+            short pad : 16;
+        } mCurveFormatFlag <open=true>;
+    }
+    else
+    {
+        struct
+        {
+            short pad : 16;
+            int dim : 4;
+            CURVE_FORMAT_KEY key : 4;
+            byte         : 2; // Padding
+            CURVE_FORMAT_VALUE value      : 2;
+            CURVE_FORMAT format     : 4;
+        } mCurveFormatFlag <open=true>;
+    }
+    
+    if (mCurveFormatFlag.key != CURVE_FORMAT_KEY_NO)
+    {
+        int numKeys;
+        float maxValue;
+        switch (mCurveFormatFlag.key)
+        {
+            case CURVE_FORMAT_KEY_F32:
+                float keys[numKeys] <bgcolor=cBlack>; break;
+            case CURVE_FORMAT_KEY_U16:
+                uint16 keys[numKeys] <bgcolor=cBlack>; break;
+            case CURVE_FORMAT_KEY_U8:
+                ubyte keys[numKeys] <bgcolor=cBlack>; break;
+            case CURVE_FORMAT_KEY_INDEX:
+                break; // No data
+            default:
+                Printf("key type not supported: %s\n", EnumToString(mCurveFormatFlag.key));
+                break;
+        }
+    }
+    
+    local int vecSize = (mCurveFormatFlag.value == CURVE_FORMAT_VALUE_S16 ? 2 : 4) * mCurveFormatFlag.dim;
+    FSeek(Align(FTell(), 0x04));
+    
+    switch (mCurveFormatFlag.format)
+    {
+        case CURVE_FORMAT_DCT4_SHORT:            
+        case CURVE_FORMAT_DCT4_LONG:
+            struct
+            {
+                float unk;
+                
+                local int count = 1;
+                if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
+                {
+                    short countUnk;
+                    count = countUnk;
+                }
+                
+                short partCounts[count -1];
+                BRVec vector_[count + 1];
+                
+                if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
+                    int unks[partCounts[count - 2]];
+                // TODO: Short
+                
+                // start of CAnimationAlgorithmBaseVirtual::ExtractDCT
+                struct
+	            {
+		            ushort mBase1; // (float)this / 65535.0
+		            ushort mBase2; // (float)this / 65535.0
+		            byte mBase3; // (float)this / 255.0
+                    
+                    // count = (mNum16_8 >> 4) + (mNum16_8 & 0xF) + (mNum4_0 >> 4) + (mNum4_0 & 0xF)
+                    // DCTTable index is count - 1?
+                    // Maybe it's reversed naming wise?
+		            byte mNum8 : 4; // mNum16_8
+                    byte mNum16 : 4; // mNum16_8
+		            byte mNum0 : 4; // mNum4_0
+                    byte mNum4 : 4; // mNum4_0
+                    
+		            byte mNumBase1 : 4; // mNumBase1_2
+                    byte mNumBase2 : 4; // mNumBase1_2
+	            } SCompDCTHeader;
+                // TODO: continued
+                // S8 x mNum8?
+                // S4x2 * mNum4?
+                // S16 * mNum16?
+            } unkDct;
+            break;
+    }
+    
+    local int dataStart = FTell();
+    //local int dataEnd = startof(this) + parentof(this).mSize;
+    //BRVec vector_[(dataEnd - dataStart)/ vecSize] <bgcolor=cDkBlue, optimize=false>;
+} SCurve <bgcolor=cLtBlue, read=Str("%s (%s)", EnumToString(mCurveFormatFlag.format), EnumToString(mCurveFormatFlag.key))>;
+
+typedef struct
+{
+    if (Is64Bit())
+    {
+        Offset64 mOffset;
+        uint64 mSize <format=hex>;
+    }
+    else
+    {
+        Offset32 mOffset;
+        uint mSize;   
+    }
+    
+    FSeek(startof(this) + mOffset);
+    SCurve sCurve;
+    
+    FSeek(startof(this) + 0x10);
+} SCurveHeader <optimize=false, read=Str("%s (%s)", EnumToString(sCurve.mCurveFormatFlag.format), EnumToString(sCurve.mCurveFormatFlag.key))>;
+
+struct
+{
+if (ReadByte(0) == 0x4D && ReadByte(1) == 0x41 && ReadByte(2) == 0x4E && ReadByte(3) == 0x4D)
+{
+    BigEndian();
+
+    struct
+    {
+        uint mMagicNumber <format=hex>;
+	    uint mSize <format=hex>;
+	    uint mVersion;
+	    ushort mNumCurve;
+	    ushort mGroupFlag <format=hex>;
+	    float mTotalTime;
+	    uint mNumHashTable;
+    } SHeader;
+
+    FSeek(0x18);
+    short aHashTable[SHeader.mNumHashTable + 1];
+    
+    FSeek(Align(FTell(), 0x08));
+    SHashAnimTargetFlag aHashAnimTargetFlagArray[SHeader.mNumCurve] <bgcolor=cBlue>;
+    Offset32 mCurveOfs[SHeader.mNumCurve] <bgcolor=cRed, format=hex>;
+    
+    local int i = 0;
+    for (i = 0; i < SHeader.mNumCurve; i++)
+    {
+        FSeek(startof(mCurveOfs[i]) + mCurveOfs[i]);
+        SCurve curve;
+    }
+}
+else
+{
+    LittleEndian();
+    
+    struct
+    {
+        int mMagicNumber;
+        float NumFrames; // Num frames
+        float Field_0x08;
+        uint Field_0x0C;
+        Offset64 mOffset;
+        Count64 mNumCurve1;
+        Count64 mNumHashTable;
+        Offset64 mOfsCurve;
+        Count64 mNumCurve2;
+        uint64 Field_0x28;
+        uint64 Field_0x2C;
+        
+        FSeek(startof(SHeader) + mOffset);
+        SAnimHashTable mArray;
+        
+        FSeek(startof(mOfsCurve) + mOfsCurve);
+        SCurveHeader aCurve[mNumCurve2];
+    } SHeader <open=true>;
+}
+} MotionBinFormat <open=true>;
