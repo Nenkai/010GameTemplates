@@ -112,7 +112,7 @@ struct
         
         Matrix4x4 mTransformBaseposeInverse[mTransformHeader.mNumTransform];
         Matrix4x4 mTransformBaseposeTranspose[mTransformHeader.mNumTransform];
-        uint64 mTransformAnimationTargetFlag[mTransformHeader.mNumAnimationTarget];
+        uint64 mTransformAnimationTargetFlag[mTransformHeader.mNumAnimationTarget] <comment="Matched to TOANMB Flags/Hash list">;
         uint mTransformID[mTransformHeader.mNumTransform];
         
         struct CTransformSetImplData_STransform
@@ -180,7 +180,7 @@ struct
             uint mReserve;
         } mDynamicHeader;
         
-        uint64 mDynamicAnimationTargetFlag[mDynamicHeader.mNumAnimationTarget];
+        uint64 mDynamicAnimationTargetFlag[mDynamicHeader.mNumAnimationTarget] <comment="Matched to TOANMB Flags/Hash list">;
         
         struct CDynamicSetImplData_SDynamic
         {
@@ -251,7 +251,7 @@ struct
             ushort mReserve[3];
         } mIKCharacterHeader;
         
-        uint64 mAnimationTargetFlag[mIKCharacterHeader.mNumAnimationTarget];
+        uint64 mAnimationTargetFlag[mIKCharacterHeader.mNumAnimationTarget] <comment="Matched to TOANMB Flags/Hash list">;
         struct CDynamicSetImplData_SRig
         {
             uint mFlag;
@@ -302,10 +302,17 @@ struct
             ushort mReserve;
         } mConstraintHeader;
         
-        uint64 mAnimationTargetFlag[mConstraintHeader.mNumAnimationTarget];
+        uint64 mAnimationTargetFlag[mConstraintHeader.mNumAnimationTarget] <comment="Matched to TOANMB Flags/Hash list">;
         
         struct SConstraintSetImplData_SConstraint
         {
+            // 4 bits:
+            // 0 = Parent
+            // 1 = Half
+            // 2 = Roll
+            // 3 = Orient
+            // 4 = HalfRoll
+            
             uint mFlag;
             ushort mTransformBodyIndex;
             ushort mAnimIndex;
