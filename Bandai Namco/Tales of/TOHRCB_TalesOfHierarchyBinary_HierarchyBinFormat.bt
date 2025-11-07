@@ -152,7 +152,7 @@ struct
             FSeek(startof(mNameOfs) + mNameOfs);
             string mName <bgcolor=cGray>;
             
-            FSeek(startof(mNameOfs) + mExtraStringOfs);
+            FSeek(startof(mExtraStringOfs) + mExtraStringOfs);
             string mExtraString <bgcolor=cGray>;
             
             Printf("Transform #%d | ID: %d - %s (%s)\n", thisIndex, HierarchyBinFormat.mTransformSet.mTransformID[thisIndex], mName, mExtraString);
