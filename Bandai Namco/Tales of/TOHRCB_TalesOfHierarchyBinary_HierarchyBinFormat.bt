@@ -124,7 +124,9 @@ struct
         struct CTransformSetImplData_STransformBody
         {
             short mParentIndex;
-            ushort mFlag;
+            // // ETransformFlag?
+            // TRANSFORM_FLAG_JOINT = 1
+            ushort mFlag; 
             tlVECTOR3 mTranslate;
         } mTransformBody[mTransformHeader.mNumBody];
         
@@ -164,6 +166,26 @@ struct
         {
             struct CTransformSetImplData_SBillboard
             {
+                // EBillboardType?
+                /*
+		        BILLBOARD_FOLLOW_PARENT,
+		        BILLBOARD_2D_X = 16,
+		        BILLBOARD_2D_Y,
+		        BILLBOARD_2D_Z,
+		        BILLBOARD_2D_XYZ,
+		        BILLBOARD_3D_X = 32,
+		        BILLBOARD_3D_Y,
+		        BILLBOARD_3D_Z,
+		        BILLBOARD_3D_XYZ,
+		        BILLBOARD_ORIGIN = 1,
+		        BILLBOARD_AXIS_MASK = 3, // axis is 2 bits
+		        BILLBOARD_2D_MASK = 16,
+		        BILLBOARD_3D_MASK = 32,
+		        BILLBOARD_AXIS_X = 0,
+		        BILLBOARD_AXIS_Y,
+		        BILLBOARD_AXIS_Z,
+		        BILLBOARD_AXIS_XYZ
+                */
                 ushort mType;
                 short mBodyIndex;
             } mBillboard[mTransformHeader.mNumBillboard];
@@ -184,6 +206,8 @@ struct
         
         struct CDynamicSetImplData_SDynamic
         {
+            // EDynamicFlag?
+            // DYNAMIC_FLAG_FIX_ROTATE = 1
             ushort mFlag;
             ushort mTransformBodyIndex;
             ushort mCollisionGroupID;
@@ -254,6 +278,20 @@ struct
         uint64 mAnimationTargetFlag[mIKCharacterHeader.mNumAnimationTarget] <comment="Matched to TOANMB Flags/Hash list">;
         struct CDynamicSetImplData_SRig
         {
+            // EIKRigFlag?
+            /*
+		    RIG_FLAG_IK_TYPE_TRANSFORM,
+		    RIG_FLAG_IK_TYPE_0_BONE_IK,
+		    RIG_FLAG_IK_TYPE_1_BONE_IK,
+		    RIG_FLAG_IK_TYPE_2_BONE_IK,
+		    RIG_FLAG_IK_TYPE_2_BONE_IK_MIDDLE,
+		    RIG_FLAG_IK_TYPE_ROTATE_IK,
+		    RIG_FLAG_IK_TYPE_NORMAL,
+		    RIG_FLAG_IK_TYPE_MASK = 15, // type is 4 bits
+		    RIG_FLAG_RELATIVE_COORDINATE_FULL = 0,
+		    RIG_FLAG_RELATIVE_COORDINATE_ROTATE_Y = 16,
+		    RIG_FLAG_RELATIVE_COORDINATE_MASK = 48
+            */
             uint mFlag;
             ushort mTransformIndex;
             ushort mRelativeCoordinateRigIndex;
@@ -306,13 +344,15 @@ struct
         
         struct SConstraintSetImplData_SConstraint
         {
-            // 4 bits:
-            // 0 = Parent
-            // 1 = Half
-            // 2 = Roll
-            // 3 = Orient
-            // 4 = HalfRoll
-            
+            // EConstraintFlag?
+            /*
+		    CONSTRAINT_FLAG_TYPE_PARENT,
+		    CONSTRAINT_FLAG_TYPE_HALF,
+		    CONSTRAINT_FLAG_TYPE_ROLL,
+		    CONSTRAINT_FLAG_TYPE_ORIENT,
+		    CONSTRAINT_FLAG_TYPE_HALF_ROLL,
+		    CONSTRAINT_FLAG_TYPE_MASK = 15 - type is 4 bits
+            */
             uint mFlag;
             ushort mTransformBodyIndex;
             ushort mAnimIndex;
