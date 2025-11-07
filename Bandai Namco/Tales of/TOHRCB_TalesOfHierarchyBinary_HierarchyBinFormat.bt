@@ -158,7 +158,7 @@ struct
             Printf("Transform #%d | ID: %d - %s (%s)\n", thisIndex, HierarchyBinFormat.mTransformSet.mTransformID[thisIndex], mName, mExtraString);
             FSeek(startof(this) + 0x0C);
         } mTransformInfo[mTransformHeader.mNumTransform] <optimize=false, read=Str("[%d] %s (%s)", 
-            HierarchyBinFormat.CTransformSetImplData.mTransformID[thisIndex], mName, mExtraString)>;
+            HierarchyBinFormat.mTransformSet.mTransformID[thisIndex], mName, mExtraString)>;
         
         if (mTransformHeader.mNumBillboard)
         {
