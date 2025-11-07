@@ -2,7 +2,7 @@
 //--- 010 Editor v16.0.2 Binary Template
 //
 //      File: Tales of Series Animation Binary (MotionBinFormat)
-//   Authors: Nenkai, Zombie (initial research)
+//   Authors: Nenkai, DaZombieKiller (initial research)
 //   Version: 
 //   Purpose: 
 //  Category: 
@@ -31,15 +31,17 @@ typedef uint32 Count32 <fgcolor=cGreen>;
 
 typedef enum <byte>
 {
+    ANIMATION_TARGET_GROUP_TRANSFORM = 0,
+    
     // ACTIVE = LERP_DOWN_ONLY | 0x00001
-    ANIMATION_TARGET_DYNAMIC = 1,
+    ANIMATION_TARGET_GROUP_DYNAMIC = 1,
     
     // ROTATE    = QUATERNION | 0x00004
     // TRANSLATE = 0x10003
-    ANIMATION_TARGET_IK = 2,
+    ANIMATION_TARGET_GROUP_IK_RIG = 2,
     
     // TARGET_ID = 0x00001
-    ANIMATION_TARGET_CONSTRAINT = 3,
+    ANIMATION_TARGET_GROUP_CONSTRAINT = 3,
     
     // MATERIAL_COLOR = 0x00003
     // MATERIAL_ALPHA = 0x10001
@@ -47,24 +49,24 @@ typedef enum <byte>
     // LAYER_ROTATE = 0x110001
     // LAYER_TRANSLATE = 0x120001
     // LAYER_FRAME = 0x130001
-    ANIMATION_TARGET_MATERIAL_LAYER = 8,
+    ANIMATION_TARGET_GROUP_MATERIAL = 8,
     
     // WEIGHT = 0x00001
-    ANIMATION_TARGET_MORPH = 9,
+    ANIMATION_TARGET_GROUP_MORPH = 9,
     
     // COLOR      = 0x00003
     // INTENSITY  = 0x10001
-    ANIMATION_TARGET_POINT_LIGHT = 10,
+    ANIMATION_TARGET_GROUP_POINT_LIGHT = 10,
     
     // COUNT     = 0x00001
     // INTERVAL  = 0x10001
-    ANIMATION_TARGET_EMITTER = 11,
+    ANIMATION_TARGET_GROUP_EMITTER = 11,
     
     // FIELD_OF_VIEW = 0x00001
     // NEAR_CLIP     = 0x10001
     // FAR_CLIP      = 0x20001
-    ANIMATION_TARGET_CAMERA = 12,
-} ANIMATION_TARGET_GROUP;
+    ANIMATION_TARGET_GROUP_CAMERA = 12,
+} EAnimationTargetGroupType;
 
 typedef struct
 {
