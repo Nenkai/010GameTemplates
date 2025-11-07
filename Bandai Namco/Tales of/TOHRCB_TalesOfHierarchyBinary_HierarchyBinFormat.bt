@@ -1,0 +1,337 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Tales of Series TOHRCB (Tales Of Hierarchy Binary / Hierarchy Bin Format)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.TOHRCB
+//  ID Bytes: 4D 48 52 43
+//   History: 
+//------------------------------------------------
+
+// Research from Xillia Remastered.
+// Matched with Xillia files.
+// No clue if it works with other games.
+
+BigEndian();
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+
+typedef struct
+{
+    float X;
+    float Y;
+} tlVECTOR2 <read=Str("<%f, %f>", X, Y)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} tlVECTOR3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} tlVECTOR4 <read=Str("<%f, %f, %f, %f>", X, Y, Z, W)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float R;
+} tlQUATERNION;
+
+typedef struct
+{
+    float m00;
+    float m10;
+    float m20;
+    float m30;
+    float m01;
+    float m11;
+    float m21;
+    float m31;
+    float m02;
+    float m12;
+    float m22;
+    float m32;
+    float m03;
+    float m13;
+    float m23;
+    float m33;
+} Matrix4x4;
+
+struct
+{
+    struct SHeader
+    {
+        uint mMagicNumber <format=hex>;
+        uint mSize <format=hex>;
+        uint mVersion;
+        OffsetT mTransformSet;
+        OffsetT mDynamicSet;
+        OffsetT mCollisionSet;
+        OffsetT mTLIKCharacter;
+        OffsetT mConstraintSet;
+        OffsetT mLookAtSet;
+        
+        if (mVersion != 20)
+        {
+            Printf("WARNING: Version not 20 (Xillia)! May not be supported!\n");   
+        }
+    } mHeader;
+    
+    FSeek(startof(mHeader.mTransformSet) + mHeader.mTransformSet);
+    struct
+    {
+        struct CTransformSetImplData_SHeader
+        {
+            ushort mNumTransform;
+            ushort mNumBody;
+            ushort mNumVisibility;
+            ushort mNumAnimationTarget;
+            ushort mNumBillboard;
+            ushort mBodyProcessOrderBegin[5];
+            uint mReserve[3];
+        } mTransformHeader;
+        
+        struct CTransformSetImplData_SBoundingSphere
+        {
+            float mSize;
+            uint mRelativeBodyIndex;
+            tlVECTOR3 mCenter;
+            tlVECTOR3 mRelativeCenter;
+        } mBoundingSphere;
+        
+        Matrix4x4 mTransformBaseposeInverse[mTransformHeader.mNumTransform];
+        Matrix4x4 mTransformBaseposeTranspose[mTransformHeader.mNumTransform];
+        uint64 mTransformAnimationTargetFlag[mTransformHeader.mNumAnimationTarget];
+        uint mTransformID[mTransformHeader.mNumTransform];
+        
+        struct CTransformSetImplData_STransform
+        {
+            short mBodyIndex;
+            short mVisibilityIndex;
+        } mTransform[mTransformHeader.mNumTransform];
+        
+        struct CTransformSetImplData_STransformBody
+        {
+            short mParentIndex;
+            ushort mFlag;
+            tlVECTOR3 mTranslate;
+        } mTransformBody[mTransformHeader.mNumBody];
+        
+        struct CTransformSetImplData_STransformBodyAnimation
+        {
+            tlVECTOR3 mScale;
+            tlQUATERNION mRotate;
+            tlVECTOR3 mTranslate;
+            tlVECTOR3 mCompensateScale;
+        } mTransformBodyAnimationInitialize[mTransformHeader.mNumBody];
+        
+        struct CTransformSetImplData_SVisibilityAnimation
+        {
+            float mVisibility;
+        } mVisibilityAnimationInitialize[mTransformHeader.mNumVisibility];
+        
+        local int cnt = 0;
+        struct CTransformSetImplData_STransformInfo
+        {
+            local int thisIndex = cnt++;
+            uint mUserData;
+            OffsetT mNameOfs;
+            OffsetT mExtraStringOfs;
+            
+            FSeek(startof(mNameOfs) + mNameOfs);
+            string mName <bgcolor=cGray>;
+            
+            FSeek(startof(mNameOfs) + mExtraStringOfs);
+            string mExtraString <bgcolor=cGray>;
+            
+            Printf("Transform #%d | ID: %d - %s (%s)\n", thisIndex, HierarchyBinFormat.mTransformSet.mTransformID[thisIndex], mName, mExtraString);
+            FSeek(startof(this) + 0x0C);
+        } mTransformInfo[mTransformHeader.mNumTransform] <optimize=false, read=Str("[%d] %s (%s)", 
+            HierarchyBinFormat.CTransformSetImplData.mTransformID[thisIndex], mName, mExtraString)>;
+        
+        if (mTransformHeader.mNumBillboard)
+        {
+            struct CTransformSetImplData_SBillboard
+            {
+                ushort mType;
+                short mBodyIndex;
+            } mBillboard[mTransformHeader.mNumBillboard];
+        }
+    } mTransformSet <bgcolor=cBlue>;
+    
+    FSeek(startof(mHeader.mDynamicSet) + mHeader.mDynamicSet);
+    struct CDynamicSetImplData
+    {
+        struct CDynamicSetImplData_SHeader
+        {
+            ushort mNumDynamic;
+            ushort mNumAnimationTarget;
+            uint mReserve;
+        } mDynamicHeader;
+        
+        uint64 mDynamicAnimationTargetFlag[mDynamicHeader.mNumAnimationTarget];
+        
+        struct CDynamicSetImplData_SDynamic
+        {
+            ushort mFlag;
+            ushort mTransformBodyIndex;
+            ushort mCollisionGroupID;
+            short mFixRotateBaseTransformBodyIndex;
+            tlVECTOR2 mEslasticity;
+            float mAirresistance;
+            float mGravity;
+            float mWeight;
+            float mFriction;
+            float mCollisionSize;
+            tlVECTOR4 mLimit;
+            float mTwist_Unused;
+            float mWind;
+            float mWindFlutter;
+            tlVECTOR3 mChildPosition;
+            float mChildPositionLength;
+            tlVECTOR3 mDynamicMatrix[3];
+        } mDynamic[mDynamicHeader.mNumDynamic];
+        
+        struct CDynamicSetImplData_SDynamicAnimation
+        {
+            float mActive;
+        } mDynamicAnimationInitialize[mDynamicHeader.mNumDynamic];
+    } mDynamicSet <bgcolor=cYellow>;
+    
+    FSeek(startof(mHeader.mCollisionSet) + mHeader.mCollisionSet);
+    struct CCollisionSetImplData
+    {
+        struct CCollisionSetImplData_SHeader
+        {
+            ushort mNumCollision;
+            ushort mPad;
+        } mCollisionHeader;
+        
+        struct CDynamicSetImplData_SCollision
+        {
+            short mTransformBodyIndex;
+            ushort mNumPolygon;
+            ushort mGroupID;
+            ushort mPad;
+            tlVECTOR3 mBoundingBoxMin;
+            tlVECTOR3 mBoundingBoxMax;
+            uint mPolygonOfs;
+            
+            FSeek(startof(mPolygonOfs) + mPolygonOfs);
+            struct CCollisionSetImplData_SPolygon
+            {
+                tlVECTOR3 mVertex[3];
+            } mPolygon[mNumPolygon] <optimize=false, bgcolor=cDkRed>;
+            
+            FSeek(startof(this) + 0x24);
+        } mCollision[mCollisionHeader.mNumCollision] <optimize=false>;
+    } mCollisionSet <bgcolor=cRed>;
+    
+    FSeek(startof(mHeader.mTLIKCharacter) + mHeader.mTLIKCharacter);
+    struct STLIKCharacterImplData
+    {
+        struct STLIKCharacterImplData_SHeader
+        {
+            ushort mNumRig;
+            ushort mNumAnimationTarget;
+            ushort mNum2BoneIK;
+            ushort mNum1BoneIK;
+            ushort mNumUpdateIK;
+            ushort mReserve[3];
+        } mIKCharacterHeader;
+        
+        uint64 mAnimationTargetFlag[mIKCharacterHeader.mNumAnimationTarget];
+        struct CDynamicSetImplData_SRig
+        {
+            uint mFlag;
+            ushort mTransformIndex;
+            ushort mRelativeCoordinateRigIndex;
+            ushort mParentRigIndex;
+            ushort mPad;
+            tlVECTOR3 mTranslate;
+            float mTranslateBaseValue;
+        } mRig[mIKCharacterHeader.mNumRig] <optimize=false>;
+        
+        struct CDynamicSetImplData_SRigAnimation
+        {
+            tlQUATERNION mRotate;
+            tlVECTOR3 mTranslateRelative;
+        } mAnimationInitializeValue[mIKCharacterHeader.mNumRig] <optimize=false>;
+        
+        struct CDynamicSetImplData_S2BoneIK
+        {
+            ushort mRootRigIndex;
+            ushort mMiddleRigIndex;
+            ushort mEndRigIndex;
+        } m2BoneIK[mIKCharacterHeader.mNum2BoneIK] <optimize=false>;
+        
+        struct CDynamicSetImplData_S1BoneIK
+        {
+            ushort mRootRigIndex;
+            ushort mEndRigIndex;
+        } m1BoneIK[mIKCharacterHeader.mNum1BoneIK] <optimize=false>;
+        
+        struct CDynamicSetImplData_SUpdateIK
+        {
+            ushort mType;
+            ushort mIndex;
+        } mUpdateIK[mIKCharacterHeader.mNumUpdateIK] <optimize=false>;
+        
+        uint mRigID[mIKCharacterHeader.mNumRig];
+    } mIKCharacterSet <bgcolor=cGreen>;
+    
+    FSeek(startof(mHeader.mConstraintSet) + mHeader.mConstraintSet);
+    struct SConstraintSetImplData
+    {
+        struct SConstraintSetImplData_SHeader
+        {
+            ushort mNumConstraint;
+            ushort mNumConstraintAnimation;
+            ushort mNumAnimationTarget;
+            ushort mReserve;
+        } mConstraintHeader;
+        
+        uint64 mAnimationTargetFlag[mConstraintHeader.mNumAnimationTarget];
+        
+        struct SConstraintSetImplData_SConstraint
+        {
+            uint mFlag;
+            ushort mTransformBodyIndex;
+            ushort mAnimIndex;
+            ushort mTargetTransformBodyIndex[2];
+        } mConstraint[mConstraintHeader.mNumConstraint] <optimize=false>;
+        
+        struct SConstraintSetImplData_SConstraintAnimation
+        {
+            float mTargetID;
+        } mConstraintAnimation[mConstraintHeader.mNumConstraintAnimation] <optimize=false>;
+    } mConstraintSet <bgcolor=cPurple>;
+    
+    FSeek(startof(mHeader.mLookAtSet) + mHeader.mLookAtSet);
+    struct STLIKLookAtImplData
+    {
+        struct STLIKLookAtImplData_SLookAtSetHeader
+        {
+            ushort mNumLookAt;
+            ushort mPad;
+        } mLookAtHeader;
+        
+        struct STLIKLookAtImplData_SCollision
+        {
+            ushort mTransformIndex;
+            ushort mNumParent;
+            tlVECTOR3 mDefaultPosition;
+        } mLookAt[mLookAtHeader.mNumLookAt] <optimize=false>;
+    } mLookAtSet <bgcolor=cPurple>;
+} HierarchyBinFormat <open=true>;
