@@ -11,6 +11,7 @@
 //   History: 
 //------------------------------------------------
 BitfieldDisablePadding();
+LittleEndian();
 
 typedef struct
 {
@@ -52,22 +53,27 @@ typedef struct
     float field_0x08;
     float field_0x0C;
     
-    FSeek(startof(DataOffset) + DataOffset);
-    union
+    if (DataOffset && DataSize)
     {
-        byte DataBytes[DataSize];
-        struct
+        FSeek(startof(DataOffset) + DataOffset);
+        union
         {
-            int KeyframeCount;
+            byte DataBytes[DataSize];
             struct
             {
-                int FloatCountOrType;
-                float FrameOffset;
-                float b[FloatCountOrType > 0 ? FloatCountOrType : 1];
-            } Keyframe[KeyframeCount] <optimize=false>;
-        } Keyframes;
-    } KeyframesUnion;
-    
+                int KeyframeCount;
+                if (KeyframeCount)
+                {
+                    struct
+                    {
+                        int FloatCountOrType;
+                        float FrameOffset;
+                        float b[FloatCountOrType > 0 ? FloatCountOrType : 1];
+                    } Keyframe[KeyframeCount] <optimize=false>;
+                }
+            } Keyframes;
+        } KeyframesUnion;
+    }
     FSeek(startof(DataOffset) + 0x10);
 } Curve;
 
@@ -467,10 +473,11 @@ typedef struct
     TimelineElementType ElementType;
     int FrameStart;
     int FrameDuration;
-    int field_0x14;
-    byte field_0x15;
-    byte field_0x16;
-    byte pad[2];
+    int TargetIndex;
+    byte field_0x18;
+    byte field_0x19;
+    byte field_0x1A;
+    byte field_0x1B;
     int DataOffset <format=hex>;
     
     FSeek(startof(this) + DataOffset);
@@ -644,6 +651,34 @@ typedef struct
 
                 } Type3025 <bgcolor=cBlack>;
                 break;
+            case kTimelineElem_3071: // 3071
+                // Related to brightness, like 3084
+                // 48 8B C4 48 89 58 ? 48 89 70 ? 48 89 78 ? 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? 48 8D 51
+                struct
+                {
+                    int UseCurve0x68;
+                    Curve UnkCurve_0x14;
+                    int UnkType_0x24; // Used at: 48 89 5C 24 ? 57 48 83 EC ? 48 8B C1 48 8D 79 ? 48 8B D9 48 F7 D8 48 1B C9 48 23 CF E8 ? ? ? ? 48 85 C0 74 ? 48 8B C8 E8 ? ? ? ? 48 89 43 ? 48 85 C0 74 ? B2
+                    Curve UnkCurve_0x28;
+                    Curve UnkCurve_0x38;
+                    Curve UnkCurve_0x48;
+                    Curve UnkCurve_0x58;
+                    Curve UnkCurve_0x68;
+                    Curve UnkCurve_0x78;
+                    Curve UnkCurve_0x88;
+                    Curve UnkCurve_0x98;
+                    Curve UnkCurve_0xA8;
+                    Curve UnkCurve_0xB8;
+                    Curve UnkCurve_0xC8;
+                    Curve UnkCurve_0xD8;
+                    Curve UnkCurve_0xE8;
+                    Curve UnkCurve_0xF8;
+                    Curve UnkCurve_0x108;
+                    Curve UnkCurve_0x118;
+                    Curve UnkCurve_0x128;
+                    int pad[5];
+                } Type3071 <bgcolor=cBlack>;
+                break;
             case kTimelineElem_ChangeBgmTrigger: // 3079
                 // 48 83 EC ? 4C 8B 41 ? 33 C9
                 struct
@@ -663,23 +698,6 @@ typedef struct
                     byte pad_[0x08];
                 } Type3079;
                 break;
-                
-            case kTimelineElem_3089:
-                struct
-                {
-                    Curve UnkCurve;
-                    byte pad[8];
-                } Type3089;
-                break;
-            case kTimelineElem_BrightnessControlRange: // 3084, NAME IS GUESSED
-                //  40 53 48 83 EC ? 48 8B 01 48 8B D9 FF 50 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 8A 53
-                struct
-                {
-                    Curve UnkCurve;
-                    byte pad_[0x0C];
-                } Type3084;
-                break;
-                
             case kTimelineElem_ChangeSoundVolume: // 3080
                 // 48 83 EC ? 48 8B 41 ? 48 63 48 ? 48 03 C8 8B 51
                 struct
@@ -690,6 +708,21 @@ typedef struct
                     byte Field_0x0C;
                     byte pad_[0x07];
                 } Type3080;
+                break;
+            case kTimelineElem_BrightnessControlRange: // 3084, NAME IS GUESSED
+                //  40 53 48 83 EC ? 48 8B 01 48 8B D9 FF 50 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 8A 53
+                struct
+                {
+                    Curve UnkCurve;
+                    byte pad_[0x0C];
+                } Type3084;
+                break;
+            case kTimelineElem_3089:
+                struct
+                {
+                    Curve UnkCurve;
+                    byte pad[8];
+                } Type3089;
                 break;
             case kTimelineElem_ChangeMaterialRange: // 3103
                 struct
@@ -776,8 +809,8 @@ struct
         int field_0x3C;
         Offset32 UnkOffset_0x40;
         uint UnkCount_0x40;
-        Offset32 SetupElementsOffset;
-        int NumSetupElements;
+        Offset32 TargetElementsOffset;
+        int NumTargetElements;
         Offset32 PackReferencesOffset;
         int PackReferenceCount;
         uint AssetsOffset <fgcolor=cRed, format=hex>;
@@ -834,26 +867,26 @@ struct
         } Timeline <open=true, bgcolor=cBlue>;
     }
     
-    FSeek(startof(this) + MainHeader.SetupElementsOffset);
+    FSeek(startof(this) + MainHeader.TargetElementsOffset);
     struct
     {
-        int Offsets[MainHeader.NumSetupElements] <bgcolor=cWhite>;
+        int Offsets[MainHeader.NumTargetElements] <bgcolor=cWhite>;
         local int j = 0;
-        for (j = 0; j < MainHeader.NumSetupElements; j++)
+        for (j = 0; j < MainHeader.NumTargetElements; j++)
         {
             FSeek(startof(this) + Offsets[j]);
             struct
             {
                 enum <int>
                 {
-                    kCutsceneTimelineSetupType_Npc = 3005,
-                    kCutsceneTimelineSetupType_StageSet = 3006,
-                    kCutsceneTimelineSetupType_Weapon = 3015,
-                } CutsceneTimelineSetupType <fgcolor=cYellow>;
+                    kCutsceneTimelineTargetType_Npc = 3005,
+                    kCutsceneTimelineTargetType_StageSet = 3006,
+                    kCutsceneTimelineTargetType_Weapon = 3015,
+                } CutsceneTimelineTargetType <fgcolor=cYellow>;
                 
                 int _reserved_[9];
                 
-                switch (CutsceneTimelineSetupType)
+                switch (CutsceneTimelineTargetType)
                 {
                     case 3001:
                         struct 
@@ -1015,12 +1048,12 @@ struct
                         } Type3029 <bgcolor=cBlack>;  
                         break;
                 }
-            } CutsceneElement <bgcolor=cGreen, read=Str("%s", 
-                EnumToString(CutsceneTimelineSetupType) == "" ? Str("%d", CutsceneTimelineSetupType) : EnumToString(CutsceneTimelineSetupType))>;
+            } CutsceneTargetElement <bgcolor=cGreen, read=Str("%s", 
+                EnumToString(CutsceneTimelineTargetType) == "" ? Str("%d", CutsceneTimelineTargetType) : EnumToString(CutsceneTimelineTargetType))>;
         }
         
-        FSeek(startof(Offsets) + MainHeader.NumSetupElements * sizeof(int));
-    } CutsceneSetupElements;
+        FSeek(startof(Offsets) + MainHeader.NumTargetElements * sizeof(int));
+    } CutsceneTargetsElements;
     
     FSeek(MainHeader.PackReferencesOffset);
     PackReference PackReferences[MainHeader.PackReferenceCount];
