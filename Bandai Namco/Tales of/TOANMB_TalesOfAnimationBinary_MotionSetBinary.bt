@@ -91,13 +91,13 @@ typedef struct
                 byte sub_group      : 8;
                 byte sub_id         : 8;
                 int target_id       : 24; // matched to hierarchyBinFormat->mTransformID
-                ANIMATION_TARGET_GROUP group             : 4;
+                EAnimationTargetGroupType group             : 4;
                 byte                : 4;
             }
             else
             {
                 byte                : 4;
-                ANIMATION_TARGET_GROUP group             : 4;
+                EAnimationTargetGroupType group             : 4;
                 int target_id       : 24; // matched to hierarchyBinFormat->mTransformID
                 byte sub_id         : 8;
                 byte sub_group      : 8;
