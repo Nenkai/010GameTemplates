@@ -213,6 +213,14 @@ typedef struct
     
     switch (mCurveFormatFlag.format)
     {
+        case CURVE_FORMAT_CONSTANT:
+            BRVec Constant;
+            break;
+            
+        case CURVE_FORMAT_LINEAR:
+            BRVec Vecs[numKeys];
+            break;
+            
         case CURVE_FORMAT_DCT4_SHORT:            
         case CURVE_FORMAT_DCT4_LONG:
             struct
