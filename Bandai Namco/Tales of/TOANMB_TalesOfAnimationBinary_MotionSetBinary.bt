@@ -219,43 +219,60 @@ typedef struct
             {
                 float unk;
                 
-                local int count = 1;
+                local int actualChunkCount = 1;
                 if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
                 {
-                    short countUnk;
-                    count = countUnk;
+                    short ChunkCount;
+                    actualChunkCount = ChunkCount;
                 }
                 
-                short partCounts[count -1];
-                BRVec vector_[count + 1];
-                
-                if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
-                    int unks[partCounts[count - 2]];
-                // TODO: Short
+                short ChunkOffsetTable[actualChunkCount - 1] <warn=false, comment="Per chunk. Multiply by 4">;
+                BRVec VectorBases_[actualChunkCount + 1];
                 
                 // start of CAnimationAlgorithmBaseVirtual::ExtractDCT
                 struct
-	            {
-		            ushort mBase1; // (float)this / 65535.0
-		            ushort mBase2; // (float)this / 65535.0
-		            byte mBase3; // (float)this / 255.0
+                {
+                    struct
+	                {
+		                ushort mBase1; // (float)this / 65535.0
+		                ushort mBase2; // (float)this / 65535.0
+		                byte mBase3; // (float)this / 255.0
+                        
+                        // dctIndex = mNum16) + mNum8 + mNum4 + mNum0
+		                byte mNum16 : 4; // mNum16_8
+                        byte mNum8 : 4; // mNum16_8
+		                byte mNum4 : 4; // mNum4_0
+                        byte mNum0 : 4; // mNum4_0
+                        
+		                byte mNumBase1 : 4; // mNumBase1_2
+                        byte mNumBase2 : 4; // mNumBase1_2
+	                } SCompDCTHeader <bgcolor=cGreen>;
                     
-                    // count = (mNum16_8 >> 4) + (mNum16_8 & 0xF) + (mNum4_0 >> 4) + (mNum4_0 & 0xF)
-                    // DCTTable index is count - 1?
-                    // Maybe it's reversed naming wise?
-		            byte mNum8 : 4; // mNum16_8
-                    byte mNum16 : 4; // mNum16_8
-		            byte mNum0 : 4; // mNum4_0
-                    byte mNum4 : 4; // mNum4_0
+                    struct
+                    {
+                        short X;
+                        short Y;
+                        short Z;
+                        short W;
+                    } S16Vecs[SCompDCTHeader.mNum16] <warn=false>;
                     
-		            byte mNumBase1 : 4; // mNumBase1_2
-                    byte mNumBase2 : 4; // mNumBase1_2
-	            } SCompDCTHeader;
-                // TODO: continued
-                // S8 x mNum8?
-                // S4x2 * mNum4?
-                // S16 * mNum16?
-            } unkDct;
+                    struct
+                    {
+                        byte X;
+                        byte Y;
+                        byte Z;
+                        byte W;
+                    } S8Vecs[SCompDCTHeader.mNum8] <warn=false>;
+                    
+                    struct
+                    {
+                        byte X : 4;
+                        byte Y : 4;
+                        byte Z : 4;
+                        byte W : 4;
+                    } S4Vecs[SCompDCTHeader.mNum4] <warn=false, optimize=false>;
+                } DCTPart[mCurveFormatFlag.dim] <bgcolor=cDkGreen, optimize=false>;
+            } DCT;
             break;
     }
     
