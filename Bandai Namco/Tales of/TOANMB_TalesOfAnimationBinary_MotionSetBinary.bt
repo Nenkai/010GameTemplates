@@ -228,13 +228,10 @@ typedef struct
                 float unk;
                 
                 local int actualChunkCount = 1;
-                local int preSize = 0;
-                local int tableStart = FTell();
                 if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
                 {
                     short ChunkCount;
                     actualChunkCount = ChunkCount;
-                    preSize = 2;
                 }
                 
                 short ChunkOffsetTable[actualChunkCount - 1] <warn=false, comment="Per chunk. Multiply by 4">;
