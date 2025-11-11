@@ -236,10 +236,11 @@ typedef struct
                 
                 short ChunkOffsetTable[actualChunkCount - 1] <warn=false, comment="Per chunk. Multiply by 4">;
                 FSeek(Align(FTell(), 0x04));
-                
+                    
                 BRVec VectorBases_[actualChunkCount + 1];
-                FSeek(Align(FTell(), 0x04));
-                
+                if (mCurveFormatFlag.value == CURVE_FORMAT_VALUE_S16)
+                    FSeek(Align(FTell(), 0x04));
+                    
                 // start of CAnimationAlgorithmBaseVirtual::ExtractDCT
                 struct
                 {
@@ -252,11 +253,8 @@ typedef struct
 		                    byte mBase3; // (float)this / 255.0
                             
                             // dctIndex = mNum16) + mNum8 + mNum4 + mNum0
-		                    byte mNum16 : 4; // mNum16_8
-                            byte mNum8 : 4; // mNum16_8
-		                    byte mNum4 : 4; // mNum4_0
-                            byte mNum0 : 4; // mNum4_0
-                            
+		                    ubyte mNum16_8; // mNum16_8
+		                    ubyte mNum4_0; // mNum4_0
 		                    byte mNumBase1 : 4; // mNumBase1_2
                             byte mNumBase2 : 4; // mNumBase1_2
 	                    } SCompDCTHeader <bgcolor=cGreen>;
@@ -267,7 +265,7 @@ typedef struct
                             short Y;
                             short Z;
                             short W;
-                        } S16Vecs[SCompDCTHeader.mNum16] <warn=false>;
+                        } S16Vecs[SCompDCTHeader.mNum16_8 >> 4] <warn=false>;
                         
                         struct
                         {
@@ -275,7 +273,7 @@ typedef struct
                             byte Y;
                             byte Z;
                             byte W;
-                        } S8Vecs[SCompDCTHeader.mNum8] <warn=false>;
+                        } S8Vecs[SCompDCTHeader.mNum16_8 & 0x0F] <warn=false>;
                         
                         struct
                         {
@@ -283,8 +281,8 @@ typedef struct
                             byte Y : 4;
                             byte Z : 4;
                             byte W : 4;
-                        } S4Vecs[SCompDCTHeader.mNum4] <warn=false, optimize=false>;
-                    } DCTPart[mCurveFormatFlag.dim] <bgcolor=cDkGreen, optimize=false>;
+                        } S4Vecs[SCompDCTHeader.mNum4_0 >> 4] <warn=false, optimize=false>;
+                    } DCTAxisPart[mCurveFormatFlag.dim] <bgcolor=cDkGreen, optimize=false>;
                 } DCTChunk[actualChunkCount] <optimize=false>;
             } DCT;
             break;
