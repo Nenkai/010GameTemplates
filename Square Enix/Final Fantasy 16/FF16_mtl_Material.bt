@@ -10,6 +10,10 @@
 //  ID Bytes: 4D 54 4C 20
 //   History: 
 //------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
 struct NameOffset;
 struct NameOffset16;
 
@@ -36,14 +40,30 @@ struct MatFileHeader
     ushort NumTexturePaths;   
     byte ParamType <comment="Seems important. Possibly the param layout preset - 8 is invalid?">;
     byte unk <comment="Is this unused?">;
-    uint ParamSectionSize <format=hex>;
+    uint ConstantBufferSize <format=hex>;
     ushort NumConstants;
     ushort NumShaders <comment="Usually never more than 1, if not 0, shb shaders are used">;
     byte Unk0x1C <comment="Is this unused? Used by files but no immediate code reference">;
     byte UnkCount0x1D <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
     byte Unk0x1E <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
-    ubyte UnkBitFlags <format=hex>;
+    ubyte UnkBitFlags <format=hex, comment="If 0x20, no header in body 1?">;
 } Header <bgcolor=cYellow>; // Header size is 0x28 if version == 1? otherwise 0x20
+
+void WriteColorHex(uint& outValue, string inString)
+{
+    // RRGGBBAA
+    local uint r, g, b, a;
+    if (SScanf(inString, "#%02x%02x%02x%02x", r, g, b, a))
+    {
+        outValue = r | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24);
+    }
+}
+
+string GetColorHex(uint& color)
+{
+    // RRGGBBAA
+    return Str("#%02x%02x%02x%02x (#%X)", color & 0xFF, (color >> 8) & 0xFF, (color >> 16) & 0xFF, (color >> 24) & 0xFF, color);
+}
 
 union
 {
@@ -59,14 +79,21 @@ union
             uint Padding;
             
             local uint string_table_pos = Align(startof(BodyBytes) + 8 +
-                (Header.NumTexturePaths * 8) + (Header.NumConstants * 8) + (Header.NumShaders * 8) + Header.ParamSectionSize, 0x10);
+                (Header.NumTexturePaths * 8) + (Header.NumConstants * 8) + (Header.NumShaders * 8) + Header.ConstantBufferSize, 0x10);
     
+            // Game opens all handles at:
+            // 48 89 4C 24 ? 55 53 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 8D 55
+            // But first grabs all pointers to various things here at
+            // 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B DA 48 8B F9 33 D2
+            
             if (Header.NumTexturePaths)
             {
                 struct TexturePath
                 {
-                   NameOffset path;
-                   NameOffset name;
+                   NameOffset16 path;
+                   short pad_;
+                   NameOffset16 ShaderVariableName;
+                   short pad2_;
                 } TexturePaths[Header.NumTexturePaths] <optimize=false, bgcolor=cRed, read=Str(this.path.name)>;
             }
             
@@ -74,9 +101,10 @@ union
             {
                 struct TextureConstant
                 {
-                    ushort flag_type; //0 or 1,
-                    NameOffset16 name;
-                    byte flags[4];
+                    ubyte flag_type;
+                    byte _pad_;
+                    NameOffset16 ShaderVariableName;
+                    uint Color <format=hex, edit=color, read=GetColorHex, write=WriteColorHex>;
                 } TextureConstants[Header.NumConstants] <optimize=false, bgcolor=cBlue>;
             }
             
@@ -84,15 +112,15 @@ union
             {
                 struct
                 {
-                    NameOffset Path;
-                    uint unk;
-                } ShaderFiles[Header.NumShaders] <optimize=false, bgcolor=cBlack>;
+                    NameOffset16 Path;
+                    byte pad[0x06];
+                } ShaderFiles[Header.NumShaders] <comment="There should only ever be 1, game doesn't loop", optimize=false, bgcolor=cBlack>;
             }
         }
         
         union 
         {
-            byte Bytes[Header.ParamSectionSize];
+            byte Bytes[Header.ConstantBufferSize];
             
             if (Header.UnkBitFlags & 0x20)
             {
@@ -105,18 +133,19 @@ union
                     {
                         struct TextureBindInfo
                         {
-                           byte slot;
-                           byte type;
+                           short TextureSlotId : 14 <comment="TexturePaths[this]">;
+                           byte UnkFlag : 1;
+                           byte UnusedBit : 1;
                         } TextureBinds[NumTotalTextures] <comment="This gets replaced at runtime, 2 each", optimize=false, bgcolor=cGreen>;
                     }
                     
                     
-                } Param;
+                } ConstantBuffer;
             }
-        } ParamUnion;
+        } ConstantBufferUnion;
             
     } Body1;
-} Body1Union;
+} Body1Union <open=true>;
 
 // Used by system/graphics/default_decal
 if (Header.Body2Size)
