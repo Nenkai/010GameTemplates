@@ -318,6 +318,7 @@ struct
 {
 if (ReadByte(0) == 0x4D && ReadByte(1) == 0x41 && ReadByte(2) == 0x4E && ReadByte(3) == 0x4D)
 {
+    Printf("File is likely Big Endian (found MANM magic)");
     BigEndian();
 
     struct
@@ -347,6 +348,7 @@ if (ReadByte(0) == 0x4D && ReadByte(1) == 0x41 && ReadByte(2) == 0x4E && ReadByt
 }
 else
 {
+    Printf("File is likely Little Endian (x64)");
     LittleEndian();
     
     struct
