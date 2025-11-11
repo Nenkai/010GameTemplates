@@ -228,17 +228,28 @@ typedef struct
                 float unk;
                 
                 local int actualChunkCount = 1;
+                local int preSize = 0;
+                local int tableStart = FTell();
                 if (mCurveFormatFlag.format == CURVE_FORMAT_DCT4_LONG)
                 {
                     short ChunkCount;
                     actualChunkCount = ChunkCount;
+                    preSize = 2;
                 }
                 
                 short ChunkOffsetTable[actualChunkCount - 1] <warn=false, comment="Per chunk. Multiply by 4">;
-                FSeek(Align(FTell(), 0x04));
+                
+                // Only aligned in Berseria if F32
+                // Otherwise always
+                // See: curve[109] in MTN_CHR_ALV_000_BTL_000.TOANMB (ToX1)
+                //      aCurve[10] in MTN_CHR_VEL000_BTL_000.TOANMB (ToB)
+                if (!Is64Bit() || (Is64Bit() && mCurveFormatFlag.value == CURVE_FORMAT_VALUE_F32))
+                    FSeek(Align(FTell(), 0x04));
                     
                 BRVec VectorBases_[actualChunkCount + 1];
-                if (mCurveFormatFlag.value == CURVE_FORMAT_VALUE_S16)
+                
+                // Same here, possibly
+                if (!Is64Bit() && mCurveFormatFlag.value == CURVE_FORMAT_VALUE_S16)
                     FSeek(Align(FTell(), 0x04));
                     
                 // start of CAnimationAlgorithmBaseVirtual::ExtractDCT
