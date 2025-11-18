@@ -1,0 +1,574 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Tales of Shape Bin Format (TOSHPB)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 4D 53 50 4D
+//  ID Bytes: *.TOSHPB
+//   History: 
+//------------------------------------------------
+
+// Mainly intended for Tales of Xillia, using research from Tales of Xillia Remastered
+
+BigEndian();
+
+typedef struct
+{
+    float X;
+    float Y;
+} tlVECTOR2 <read=Str("<%f, %f>", X, Y)>;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} tlVECTOR3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
+
+typedef struct
+{
+    ubyte r;
+    ubyte g;
+    ubyte b;
+    ubyte a;
+} tlPACKCOLOR <read=Str("R%d G%d B%d A%d", r, g, b, a)>;
+
+typedef struct
+{
+    float r;
+    float g;
+    float b;
+    float a;
+} tlCOLOR <read=Str("R %f G %f B %f A %f", r, g, b, a)>;
+
+typedef uint32 Offset32 <format=hex, fgcolor=cRed>;
+typedef uint32 Count32 <fgcolor=cGreen>;
+
+int Align(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
+
+    return pos + amount;
+}
+
+struct ShapeSetBinFormat
+{
+    struct SHeader
+    {
+        uint mMagicNumber <format=hex>;
+        uint mSize <format=hex>;
+        uint mVersion;
+        Offset32 mMeshSet;
+        Offset32 mMorphSet;
+        Offset32 mMaterialSet;
+        Offset32 mParticleSet;
+        Offset32 mLightSet;
+        Offset32 mCameraSet;
+        Offset32 mLineSet;
+    } mHeader <bgcolor=cPurple>;
+    
+    FSeek(startof(mHeader.mMeshSet) + mHeader.mMeshSet);
+    struct CMeshSetImplData
+    {
+        struct CMeshSetImplData_SHeader
+        {
+            ushort mNumMesh;
+            ushort mNumInfluence;
+        } mMeshHeader;
+        
+        struct CMeshSetImplData_SMeshSort
+        {
+            int mPriority;
+            tlVECTOR3 mBasePosition;
+        } mMeshSort[mMeshHeader.mNumMesh];
+        
+        struct CMeshSetImplData_SMeshInfo
+        {
+            uint mID;
+            ushort mSubID;
+            enum <ushort> EMeshFlag
+	        {
+                // 4 bit = numUvMask
+                // 4 bit for skin/morph/static/bump
+                // 4 bit primitive type (tri strip, tri list)
+                // 1 bit external
+                // 1 bit cut normal
+                // rest padding
+                
+		        //MESH_FLAG_NUM_UV_MASK = 15,
+		        MESH_FLAG_SKIN,
+		        MESH_FLAG_MORPH = 0x20,
+		        MESH_FLAG_STATIC = 0x40,
+		        MESH_FLAG_BUMP = 0x80,
+		        //MESH_FLAG_PRIMITIVE_MASK = 3840,
+		        MESH_FLAG_PRIMITIVE_TRI_STRIP = 0,
+		        MESH_FLAG_PRIMITIVE_TRI_LIST = 0x100,
+		        MESH_FLAG_EXTERNAL = 0x1000,
+		        MESH_FLAG_CUT_NORMAL = 0x2000
+	        } mFlag <comment="Check template for details!">;
+            ushort mMaterialIndex;
+            
+            /* ?
+            public enum EMaterialVariationIDFlag
+	        {
+		        MATERIAL_VARIATION_ID_Z_WRITE = 4096,
+		        MATERIAL_VARIATION_ID_Z_TEST = 8192,
+		        MATERIAL_VARIATION_ID_DOUBLE_SIDED = 16384
+	        }
+            */
+    
+            ushort mMaterialVariationID;
+            Offset32 mName;
+            
+            FSeek(startof(mName) + mName);
+            string Name <bgcolor=cLtGray>;
+            
+            FSeek(startof(this) + 0x10);
+        } mMeshInfo[mMeshHeader.mNumMesh] <read=Str("[%d] %s", mID, Name), optimize=false>;
+        
+        struct CGPUMeshBuffer_SMeshVertexInfo
+        { 
+            ushort mNumVertex;
+            ushort mNumIndex;
+            Offset32 mVertexOffset;
+            Offset32 mIndexOffset;
+            Offset32 mBlendVertexOffset;
+        } mMeshVertexInfo[mMeshHeader.mNumMesh];
+        
+        uint mInfluenceID[mMeshHeader.mNumInfluence] <warn=false>;
+    } mMeshSet <bgcolor=cYellow, read=Str("%d meshes", mMeshHeader.mNumMesh)>;
+    
+    FSeek(startof(mHeader.mMorphSet) + mHeader.mMorphSet);
+    struct CMorphSetImplData
+    {
+        struct CMorphSetImplData_SHeader
+        {
+            ushort mNumMorph;
+            ushort mNumAnimationTarget;
+            uint mReserve;
+        } mMorphHeader;
+        
+        uint64 mAnimationTargetFlag[mMorphHeader.mNumAnimationTarget] <warn=false>;
+        
+        struct CMorphSetImplData_SMorph
+        {
+            Offset32 mName;
+            Offset32 mBufferOffset;
+            uint mID;
+            
+            FSeek(startof(mName) + mName);
+            string Name <bgcolor=cLtGray>;
+            
+            FSeek(startof(this) + 0x0C);
+        } mMorph[mMorphHeader.mNumMorph] <bgcolor=cGreen, read=Str("[%d] %s", mID, Name), optimize=false, warn=false>;
+        
+        float mWorkMorphAnimation[mMorphHeader.mNumMorph] <warn=false>;
+    } mMorphSet <read=Str("%d morphs", mMorphHeader.mNumMorph)>;
+    
+    FSeek(startof(mHeader.mMaterialSet) + mHeader.mMaterialSet);
+    struct CMaterialSetImplData
+    {
+        struct CMaterialSetImplData_SHeader
+        {
+            ushort mNumMaterial;
+            ushort mNumLayer;
+            ushort mNumAnimationMaterial;
+            ushort mNumAnimationLayer;
+            ushort mNumTexture;
+            ushort mNumAnimationTarget;
+            uint mReserve;
+        } mMaterialHeader;
+        
+        uint64 mMorphAnimationTargetFlag[mMaterialHeader.mNumAnimationTarget] <warn=false>;
+        
+        struct CMaterialSetImplData_SMaterial
+        {
+            uint mID;
+            ushort mVariationID;
+            enum <ushort> EMaterialFlag
+	        {
+                // 5 bits blend set
+                // DETAIL::CMaterialIteratorCore::GetBlendSet -> this & 0x1F
+		        MATERIAL_FLAG_BLEND_SET_NONE,
+		        MATERIAL_FLAG_BLEND_SET_ALPHA_TEST,
+		        MATERIAL_FLAG_BLEND_SET_NORMAL,
+		        MATERIAL_FLAG_BLEND_SET_ADD,
+		        MATERIAL_FLAG_BLEND_SET_SUBTRACT,
+		        MATERIAL_FLAG_BLEND_SET_ALPHA_MASK_ADD,
+		        MATERIAL_FLAG_BLEND_SET_MULTIPLY,
+		        MATERIAL_FLAG_BLEND_SET_MULTIPLY_X2,
+		        MATERIAL_FLAG_BLEND_SET_SCREEN,
+		        MATERIAL_FLAG_BLEND_SET_REVERSE_SUBTRACT,
+		        MATERIAL_FLAG_BLEND_SET_OVER_MULTIPLY,
+		        MATERIAL_FLAG_BLEND_SET_INVERSE_MULTIPLY,
+		        MATERIAL_FLAG_BLEND_SET_PRE_MULTIPLIED_NORMAL,
+		        MATERIAL_FLAG_BLEND_SET_PRE_MULTIPLIED_ADD,
+		        MATERIAL_FLAG_BLEND_SET_PRE_MULTIPLIED_SUBTRACT,
+		        MATERIAL_FLAG_BLEND_SET_ALPHA_COVERAGE,
+		        MATERIAL_FLAG_BLEND_SET_MASK = 31,
+                
+                // 3 bits
+                // DETAIL::CMaterialIteratorCore::GetBlendGroup -> this & 0xC0
+		        MATERIAL_FLAG_BLEND_GROUP_ALPHA_NONE = 0,
+		        MATERIAL_FLAG_BLEND_GROUP_ALPHA_TEST = 64,
+		        MATERIAL_FLAG_BLEND_GROUP_BLEND = 128,
+		        MATERIAL_FLAG_BLEND_GROUP_MASK = 192,
+                
+                // 2 bits
+		        MATERIAL_FLAG_VERTEX_COLOR_MULT = 0,
+		        MATERIAL_FLAG_VERTEX_COLOR_MULT_X2 = 256,
+		        MATERIAL_FLAG_VERTEX_COLOR_MASK = 768
+	        } mFlag <comment="Bitpacked! Refer to the template for details!">;
+            ushort mNumLayer;
+            ushort mAnimationMaterialIndex;
+            ushort mFirstLayerIndex;
+            enum <ushort> EModelShaderType // CShaderDefinitionTO11::EModelShaderType (TO11 is Xillia)
+            {
+		        MODEL_SHADER_NORMAL,
+		        MODEL_SHADER_TOON,
+		        MODEL_SHADER_REFRACTION,
+		        MODEL_SHADER_PROJECTION,
+		        MODEL_SHADER_FRESNEL,
+		        MODEL_SHADER_WATER,
+		        MODEL_SHADER_LIGHTING,
+		        MODEL_SHADER_EXTRA
+            } mShaderType <comment="NOTE: May depend per game!! This is for Xillia!">;
+            enum <ushort> EModelRenderPassType // CShaderDefinitionTO11::EModelRenderPassType (TO11 is Xillia)
+            {
+		        MODEL_RENDER_PASS_NORMAL,
+		        MODEL_RENDER_PASS_IN_WATER,
+		        MODEL_RENDER_PASS_POST_WATER,
+		        MODEL_RENDER_PASS_EFFECT,
+		        MODEL_RENDER_PASS_REDUCED_BUFFER,
+		        MODEL_RENDER_PASS_2D
+            } mRenderPass <comment="NOTE: May depend per game!! This is for Xillia!">;
+            ushort mPad;
+            
+            Offset32 mAppendParameterOfs;
+            Offset32 mShaderParameterOfs;
+            
+            FSeek(startof(mAppendParameterOfs) + mAppendParameterOfs);
+            struct
+            {
+                int mFog;
+                int mShadowTarget;
+                int mProjectionTarget;
+                int mLocalZPass;
+                int mWaterReflect;
+                int mGlow;
+                int mStencilOrder;
+                int mOutline;
+                int mHighlightTarget;
+                int mInvisible;
+            } SMaterialParameter;
+            
+            FSeek(startof(mShaderParameterOfs) + mShaderParameterOfs);
+            union
+            {
+                // Depends on shader type?
+                struct ShaderManage_SNormalParameter
+                {
+                    int mMaterialType;
+                    int mUseSpecularTexture;
+                    float mSpecularColorR;
+                    float mSpecularColorG;
+                    float mSpecularColorB;
+                    float mSpecularPower;
+                } mNormalShaderParameter;
+                
+                struct ShaderManager_SToonParameter
+                {
+                    int mToonPreset;
+                    int mToonColorPreset;
+                    int mRimLightPreset;
+                    int mMaterialType;
+                    int mUseSpecularTexture;
+                    float mSpecularColorR;
+                    float mSpecularColorG;
+                    float mSpecularColorB;
+                    float mSpecularPower;
+                } mToonShaderParameter;
+                
+                struct ShaderManager_SProjectionParameter
+                {
+                    int mPreset;
+                } mProjectionParameter;
+            } ShaderParameterUnion;
+            
+            FSeek(startof(this) + 0x1C);
+        } mMaterial[mMaterialHeader.mNumMaterial] <optimize=false>;
+
+        struct CMaterialSetImplData_SLayer
+        {
+            enum <ubyte> ELayerBlendType
+	        {
+		        LAYER_BLEND_OVER,
+		        LAYER_BLEND_ADD,
+		        LAYER_BLEND_SUBTRACT,
+		        LAYER_BLEND_MULTIPLY,
+		        LAYER_BLEND_MULTIPLYX2,
+		        LAYER_BLEND_BUMP,
+		        LAYER_BLEND_SPECULAR
+	        } mBlendType;
+            
+            ubyte mPad;
+            ushort mTextureIndex;
+            ushort mNumLayerFrame;
+            ushort mAnimationLayerIndex;
+        } mLayer[mMaterialHeader.mNumLayer] <optimize=false>;
+        
+        struct CMaterialSetImplData_SMaterialInfo
+        {
+            int mVertexShaderParameterVariation;
+            int mPixelShaderParameterVariation;
+            Offset32 mName;
+            Offset32 mExtraString;
+            
+            FSeek(startof(mName) + mName);
+            string Name;
+            
+            FSeek(startof(mExtraString) + mExtraString);
+            string ExtraString;
+            
+            FSeek(startof(this) + 0x10);
+        } mMaterialInfo[mMaterialHeader.mNumMaterial] <read=Str("%s (%s)", Name, ExtraString), optimize=false>;
+        
+        struct CMaterialSetImplData_SMaterialAnimation
+        {
+            tlCOLOR mBaseColor;
+        } mMaterialAnimationInitialize[mMaterialHeader.mNumAnimationMaterial] <optimize=false, warn=false>;
+        
+        struct CMaterialSetImplData_SLayerAnimation
+        {
+            tlVECTOR2 mLayerScale;
+            float mLayerRotate;
+            tlVECTOR2 mLayerTranslate;
+            float mLayerFrame;
+        } mLayerAnimationInitialize[mMaterialHeader.mNumAnimationLayer] <optimize=false, warn=false>;
+        
+        ushort mIndexFromMaterialAnimation[mMaterialHeader.mNumAnimationMaterial] <warn=false>;
+        ushort mIndexFromLayerAnimation[mMaterialHeader.mNumAnimationLayer] <warn=false>;
+        FSeek(Align(FTell(), 0x04));
+        
+        struct
+        {
+            Offset32 offset;
+            
+            FSeek(startof(offset) + offset);
+            string Name;
+            
+            FSeek(startof(this) + 0x04);
+        } mTextureName[mMaterialHeader.mNumTexture] <read=Name, optimize=false>;
+    } mMaterialSet <bgcolor=cBlue, read=Str("%d materials", mMaterialHeader.mNumMaterial)>;
+    
+    FSeek(startof(mHeader.mParticleSet) + mHeader.mParticleSet);
+    struct CParticleSetImplData
+    {
+        struct CParticleSetImplData_SHeader
+        {
+            ushort mNumParticle;
+            ushort mNumAnimationTarget;
+            ushort mNumParticleField;
+            ushort mReserve[5];
+        } mParticleHeader;
+        
+        uint64 mAnimationTargetFlag[mParticleHeader.mNumAnimationTarget] <warn=false>;
+        
+        struct CParticleSetImplData_SParticle
+        {
+            uint mEmitterID;
+            uint mParticleID;
+            short mMaterialIndex;
+            enum <ushort> EParticleFlag
+            {
+		        PARTICLE_FLAG_SHAPE_BOX,
+		        PARTICLE_FLAG_SHAPE_SPHERE,
+		        PARTICLE_FLAG_SHAPE_CYLINDER,
+		        // PARTICLE_FLAG_SHAPE_MASK,
+
+		        PARTICLE_FLAG_ELEMENT_QUAD = 0,
+		        PARTICLE_FLAG_ELEMENT_VERTEX_NORMAL = 4,
+		        PARTICLE_FLAG_ELEMENT_BLUR = 8,
+		        PARTICLE_FLAG_ELEMENT_OBJECT = 12,
+		        PARTICLE_FLAG_ELEMENT_PLANE = 4096,
+		        PARTICLE_FLAG_ELEMENT_TOWARD = 4100,
+		        PARTICLE_FLAG_ELEMENT_TOWARD_PLANE = 4104,
+		        // PARTICLE_FLAG_ELEMENT_MASK = 4108,
+
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_NONE = 0,
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_ONCE = 16,
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_LOOP = 32,
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_RAND_LOOP = 48,
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_FIX = 64,
+		        PARTICLE_FLAG_TEXCOORD_ANIMATION_MASK = 240,
+                
+		        PARTICLE_FLAG_DIRECTION_LOCAL_SPACE = 256,
+		        PARTICLE_FLAG_ROTATE_RAND_START = 512,
+		        PARTICLE_FLAG_SIZE_WIDTH_HEIGHT_SYNC = 1024
+            } mFlag <comment="Bitpacked! Refer to the template for details!">;
+            int mPriority;
+            tlVECTOR3 mSize;
+            float mCountRand;
+            float mIntervalRand;
+            float mVelocity;
+            float mVelocityRand;
+            tlVECTOR3 mDirection;
+            tlVECTOR3 mDirectionRand;
+            float mRotateStart;
+            float mRotateVelocity;
+            float mRotateVelocityRand;
+            float mLife;
+            float mLifeRand;
+            uint mRandSeed;
+            
+            struct CParticleSetImplData_SParticleColor
+            {
+                float mTime;
+                tlCOLOR mColor;
+                tlCOLOR mColorRand;
+            } mParticleColor[5]; // public const int NUM_PARTICLE_COLOR = 5;
+            
+            struct CParticleSetImplData_SParticleSize
+            {
+                float mTime;
+                tlVECTOR2 mSize;
+                tlVECTOR2 mSizeRand;
+            } mParticleSize[5]; // public const int NUM_PARTICLE_SIZE = 5;
+            
+            float mTexcoordAnimationStepTime;
+            int mTexcoordAnimationSplitHeight;
+            int mTexcoordAnimationSplitWidth;
+            Offset32 mElementDataOffset;
+        } mParticle[mParticleHeader.mNumParticle] <read=Str("ID: %d", mParticleID), warn=false>;
+        
+        struct CParticleSetImplData_SParticleAnimation
+        {
+            float mCount;
+            float mInterval;
+        } mParticleAnimationInitialize[mParticleHeader.mNumParticle] <warn=false>;
+        
+        struct CParticleSetImplData_SParticleField
+        {
+            uint mID;
+            enum <uint>
+            {
+		        PARTICLE_FIELD_FLAG_TYPE_GRAVITY_WORLD,
+		        PARTICLE_FIELD_FLAG_TYPE_GRAVITY_BOX,
+		        PARTICLE_FIELD_FLAG_TYPE_GRAVITY_SPHERE,
+		        PARTICLE_FIELD_FLAG_TYPE_ACCELERATE_WORLD,
+		        PARTICLE_FIELD_FLAG_TYPE_ACCELERATE_BOX,
+		        PARTICLE_FIELD_FLAG_TYPE_ACCELERATE_SPHERE,
+		        PARTICLE_FIELD_FLAG_TYPE_WALL_INFINITE,
+		        PARTICLE_FIELD_FLAG_TYPE_WALL_PLANE,
+		        PARTICLE_FIELD_FLAG_TYPE_KILL_BOX,
+		        PARTICLE_FIELD_FLAG_TYPE_KILL_SPHERE,
+		        // PARTICLE_FIELD_FLAG_TYPE_MASK = 15 - 4 bit
+            } mFlag;
+            tlVECTOR3 mSize;
+            float mPower;
+            uint mNumTarget;
+            Offset32 mTargetIndexOfs; // not official
+            
+            FSeek(startof(mTargetIndexOfs) + mTargetIndexOfs);
+            ushort mTargetIndex[mNumTarget];
+            
+            FSeek(startof(this) + 0x20);
+        } mParticleField[mParticleHeader.mNumParticleField] <read=Str("ID: %d", mID), optimize=false, warn=false>;
+        
+        if (mParticleHeader.mNumParticleField)
+            tlVECTOR2 Unks[1] <comment="Not sure how this is read.">;
+    } mParticleSet <bgcolor=cRed, read=Str("%d particles", mParticleHeader.mNumParticle)>;
+    
+    FSeek(startof(mHeader.mLightSet) + mHeader.mLightSet);
+    struct CLightSetImplData_SHeader
+    {
+        struct
+        {
+            ushort mNumLight;
+            ushort mNumAnimationTarget;
+            uint mReserve;
+        } mLightHeader;
+        
+        uint64 mLightSetAnimationTargetFlag[mLightHeader.mNumAnimationTarget] <warn=false>;
+        
+        struct CLightSetImplData_SLight
+        {
+            uint mID;
+            Offset32 mParameter;
+            
+            FSeek(startof(mParameter) + mParameter);
+            struct ShaderManager_SLightParameter
+            {
+                int mShadowDirection;
+                int mLightDirection;
+                int mObjectHighlight;
+                int mMapHighlight;
+            } mParameter;
+            
+            FSeek(startof(this) + 0x08);
+        } mLight[mLightHeader.mNumLight] <read=Str("ID: %d", mID), optimize=false, warn=false>;
+        
+        struct CLightSetImplData_SLightAnimation
+        {
+            float mIntensity;
+            tlVECTOR3 mColor;
+        } mLightAnimationInitialize[mLightHeader.mNumLight] <warn=false>;
+    } mLightSet <bgcolor=cWhite, read=Str("%d lights", mLightHeader.mNumLight)>;
+    
+    FSeek(startof(mHeader.mCameraSet) + mHeader.mCameraSet);
+    struct CCameraSetImplData_SHeader
+    {
+        struct
+        {
+            ushort mNumCamera;
+            ushort mNumAnimationTarget;
+            uint mReserve;
+        } mCameraHeader;
+        
+        uint64 mCameraAnimationTargetFlag[mCameraHeader.mNumAnimationTarget] <warn=false>;
+        
+        struct CCameraSetImplData_SCamera
+        {
+            uint mID;
+            uint mLookAtID;
+        } mCamera[mCameraHeader.mNumCamera] <read=Str("ID: %d", mID), optimize=false, warn=false>;
+        
+        struct CCameraSetImplData_SCameraAnimation
+        {
+            float mFieldOfView;
+            float mNearClip;
+            float mFarClip;
+        } mLightAnimationInitialize[mCameraHeader.mNumCamera] <warn=false>;
+    } mCameraSet <bgcolor=cDkRed, read=Str("%d cameras", mCameraHeader.mNumCamera)>;
+    
+    FSeek(startof(mHeader.mLineSet) + mHeader.mLineSet);
+    struct CLineSetImplData
+    {
+        struct CLineSetImplData_SHeader
+        {
+            ushort mNumLine;
+            ushort mReserve[3];
+        } mLineHeader;
+
+        struct CLineSetImplData_SLine
+        {
+            uint mID;
+            ushort mMaterialIndex;
+            ushort mNumVertex;
+            Offset32 mVertexOfs;
+            
+            FSeek(startof(mVertexOfs) + mVertexOfs);
+            struct CLineSetImplData_SLineVertex
+            {
+                tlVECTOR3 mPosition;
+                tlVECTOR3 mNormal;
+                tlPACKCOLOR mColor;
+                tlVECTOR2 mTexcoord;
+            } mVertex[mNumVertex];
+            
+            FSeek(startof(this) + 0x0C);
+        } mLine[mLineHeader.mNumLine] <read=Str("ID: %d", mID), optimize=false, warn=false>;
+    } mLineSet <bgcolor=cBlack, read=Str("%d lines", mLineHeader.mNumLine)>;
+} TalesOfShapeSetBinFormat <open=true>;
