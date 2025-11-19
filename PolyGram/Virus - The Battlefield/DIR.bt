@@ -1,0 +1,24 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Virus - The Battlefield DIR file
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+int NumFiles;
+while (!FEof())
+{
+    struct
+    {
+        char Buffer[0x14];
+        int FileSize;
+    } FileInfo <read=(exists(Buffer) ? Buffer : "(end)"), optimize=false>;
+}
