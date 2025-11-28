@@ -1,0 +1,118 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: WWE 2K Save File (refer to ContentsFile for the wrapped/container file instead!)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 53 42 4F 53
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef enum <byte>
+{
+    Bool = 1,
+    Int8 = 2,
+    Uint8 = 3,
+    Short = 4,
+    UShort = 5,
+    Int = 6,
+    UInt = 7,
+    Int64 = 8,
+    UInt64 = 9,
+    CRC32C = 10, // case sensitive hashed string
+    CRC32Ci = 11, // case insensitive hashed string, any input is to lowercase
+    Float = 12,
+    Double = 13,
+    CRC64C = 14,
+    CRC64Ci = 15,
+    Array = 16,
+    Object = 17,
+} SaveObjectValueType;
+     
+struct SaveObject;
+struct SaveArray;
+       
+struct SaveArray // WGE::SaveArray
+{
+    int ArrayLength;
+    SaveObjectValueType ArrayElementType;
+    
+    for (local int j = 0; j < ArrayLength; j++)
+    {
+        switch (ArrayElementType)
+        {
+            case 1: byte Value; break;
+            case 2: int8 Value; break;
+            case 3: uint8 Value; break;
+            case 4: int16 Value; break;
+            case 5: uint16 Value; break;
+            case 6: int32 Value; break;
+            case 7: uint32 Value; break;
+            case 8: int64 Value; break;
+            case 9: uint64 Value; break;
+            case 10: uint Value; break;
+            case 11: uint Value; break;
+            case 12: float Value; break;
+            case 13: double Value; break;
+            case 14: uint64 Value; break;
+            case 15: uint64 Value; break;
+            case 16: SaveArray Array <read=Str("%d elements (%s)", ArrayLength, EnumToString(ArrayElementType))>;  break;
+            case 17: SaveObject Value; break;
+            default:
+                Printf("Unsupported %s\n", EnumToString(ArrayElementType));
+                break;
+        }   
+    }
+};
+                    
+struct SaveObject; // WGE::SaveObject
+struct SaveObject
+{
+    uint ObjCount;
+    for (local int i = 0; i < ObjCount; i++)
+    {
+        struct
+        {
+            uint CRC32CiHash <format=hex>; // Hashed string, case insensitive (input to lowercase)
+            SaveObjectValueType Type;
+            
+            switch (Type)
+            {
+                case 1: byte Value; break;
+                case 2: int8 Value; break;
+                case 3: uint8 Value; break;
+                case 4: int16 Value; break;
+                case 5: uint16 Value; break;
+                case 6: int32 Value; break;
+                case 7: uint32 Value; break;
+                case 8: int64 Value; break;
+                case 9: uint64 Value; break;
+                case 10: uint Value; break;
+                case 11: uint Value; break;
+                case 12: float Value; break;
+                case 13: double Value; break;
+                case 14: uint64 Value; break;
+                case 15: uint64 Value; break;
+                case 16: SaveArray Array <read=Str("%d elements (%s)", ArrayLength, EnumToString(ArrayElementType))>; break;
+                case 17: SaveObject Value; break;
+                default:
+                    Printf("Unsupported %s\n", EnumToString(Type));
+                    break;
+            }
+        } SaveValue <read=Str("%X (%s)", CRC32CHash, EnumToString(Type))>; // WGE::SaveValue
+    }
+};
+    
+// WGE::SaveObjectBinarySerializer::Deserialize
+struct
+{
+    uint Magic <format=hex, comment="Must match 0x534F4253 (SBOS in LE = SOBS (SaveObjectBinarySerializer)">;
+    int Version <comment="Must be 1 (K25)">;
+    
+   SaveObject Root;
+} SaveObjectBinary <open=true>;
