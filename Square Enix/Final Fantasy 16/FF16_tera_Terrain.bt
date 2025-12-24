@@ -1,0 +1,108 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFXVI Terrain (.tera) file - VASTLY UNFINISHED
+//   Authors: Nenkai 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.tera
+//  ID Bytes: 54 45 52 41
+//   History: 
+//------------------------------------------------
+
+// This template is NOT finished
+BitfieldDisablePadding();
+LittleEndian();
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="Not checked, 'TERA'">;
+        char Unk <comment="Must match 0x78. Explicitly checked.">;
+        byte Unk;
+        byte Unk;
+        byte Unk;
+        
+        struct
+        {
+            int64 TextureSRVRuntimePtr; // 8
+            int Unused2; // 10
+            int Flags; // 14
+            int PixelFormat <format=hex>; // 18
+            int Flags2; // 1C
+            int Width : 14;  // 20
+            int Height : 14;
+            int MipCount : 4;
+            int DepthBits : 6;
+            int pad : 26;
+        } TextureBuffer[20];
+        
+        FSeek(0x2EC);
+        uint MainBufferSize <format=hex>; // Allocation made -> Allocate(this->Header.field_2EC - 0x460LL);
+        
+        FSeek(0x338);
+        int UnkWidth_0x338;
+        
+        FSeek(0x344);
+        int UnkWidth_0x344;
+        
+        FSeek(0x350);
+        int Count_0x350;
+        int Field_0x354;
+        ushort Count_0x358 <format=hex>; // Allocate((unsigned int)(Count_0x350 + 0x60 * (Count_0x358 + 1))
+        short Unk;
+        uint Offset_0x35C <format=hex>; // Check not used?
+        uint Offset_0x360 <format=hex>; // Check not used?
+        uint Offset_0x364 <format=hex>; // Check not used?
+        uint Offset_0x368 <format=hex>; // Check not used?
+        uint Offset_0x36C <format=hex>; // Check not used?
+        uint Offset_0x370 <format=hex>; // Check not used?
+        uint Offset_0x374 <format=hex>; // Check not used?
+        uint Offset_0x378 <format=hex>;
+        uint Offset_0x37C <format=hex>;
+        uint Offset_0x380 <format=hex>; // Check not used?
+        uint Offset_0x384 <format=hex>; // Check not used?
+        uint Offset_0x388 <format=hex>; // Check not used?
+        uint Offset_0x38C <format=hex>; // relative to 0x388
+        uint Offset_0x390 <format=hex>; // relative to 0x388
+        
+        FSeek(0x454);
+        short UnkCount_0x454;
+        short Field_0x456;
+        uint64 Flags;
+        
+    } MainHeader <bgcolor=cPurple, size=0x460, open=true>;
+    
+    /* faith::Graphics::TerrainResourceHandle::InitResource
+    48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 83 EC ? 45 33 E4 48 8B F9
+    ----
+    ...
+    for ( _EDX = 0; _EDX < 0x20; ++_EDX )
+    {
+      __asm { pdep    r9d, edx, esi }
+      v12 = 2 * _R9D;
+      for ( _R8D = 0; _R8D < 0x20; ++_R8D )
+      {
+        v14 = _R8D + this->Header._field_454 * (_EDX + 16) + 16 - 4LL;
+        v15 = &this->FullBuffer[0x118 * v14 + (unsigned int)this->Header.field_37C];
+        __asm { pdep    eax, r8d, esi }
+        v17 = (unsigned int)(v12 + _EAX);
+        *(_WORD *)&this->gap9B1[24 * v17 + 19] = *((_WORD *)v15 + 137);
+        if ( (v15[272] & 0x20) != 0 )
+        {
+          v14 = (__int64)&this->FullBuffer[*(unsigned int *)v15 + 0xFFFFFBA0LL];
+          *(_DWORD *)&this->gap9B1[24 * (unsigned int)v17 + 15] |= 0x80000000;
+          *((_QWORD *)&this->char9B0 + 3 * v17) = v14;
+        }
+      }
+    }
+    */
+    FSeek(startof(MainHeader) + MainHeader.Offset_0x37C);
+    struct
+    {
+        byte UnkArray[0x118];   
+    } Unks1[MainHeader.UnkCount_0x454 * 32 * 2]; /*4096*/;
+    byte Unks2[MainHeader.Offset_0x37C];
+} TerrainFile <open=true>;
