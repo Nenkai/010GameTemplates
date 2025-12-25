@@ -21,6 +21,12 @@ typedef struct
 {
     float X;
     float Y;
+} Vec2 <read=Str("<%f, %f>", X, Y)>;
+
+typedef struct
+{
+    float X;
+    float Y;
     float Z;   
 } Vec3 <read=Str("<%f, %f, %f>", X, Y, Z)>;
 
@@ -204,7 +210,16 @@ typedef struct
     // i.e for OperationType = 4448
     // Refer to 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? B8 ? ? ? ? C5 F8 29 74 24 for types
     // (this is a method for object 4448, refer to xref of that function for the relevant vtable)
-    int PropertyType;
+    enum <int>
+    {
+        Property26_OperationGroupId = 26,   
+        Property35_ProjectileDuration = 35,  
+        Property35_ProjectileDurationRandomRange = 36,  
+        Property37_OperationGroupId = 37,   
+        Property41_AttackParamId = 41,   
+        Property95_OperationGroupId = 95,   
+        Property1379_ProjectileDurationDiffScaled = 1379,   
+    } PropertyType;
     int DataSize <format=hex>;
     
     union
@@ -213,18 +228,18 @@ typedef struct
         switch (PropertyType)
         {
             case 2: int Value; break;
-            case 3: int Value; break;
-            case 4: int Value; break;
-            case 5: int Value; break;
-            case 6: int Value; break;
+            case 3: float Value; break;
+            case 4: float Value; break;
+            case 5: float Value; break;
+            case 6: float Value; break;
             case 7: int Value; break;
-            case 8: int Value; break;
-            case 9: int Value; break;
+            case 8: float Value; break;
+            case 9: float Value; break;
             case 10: float Chance; break;
-            case 11: int Value; break;
-            case 12: int Value; break;
+            case 11: float Value; break;
+            case 12: float Value; break;
             case 13: byte BoolValue; break;
-            case 14: int Value; break;
+            case 14: float Value; break;
             case 16: byte BoolValue; break;
             case 17: int Value; break;
             case 18: byte BoolValue; break;
@@ -237,21 +252,23 @@ typedef struct
             case 29: int Value; break;
             case 30: byte BoolValue; break;
             case 31: float VFXAudioSizeFloat; break;
-            case 32: float Value; break;
-            case 35: float Value; break;
-            case 36: float Value; break;
-            case 37: int Value; break;
+            case 32: float Value; break; // May also be a vec3?
+            case 35: float ProjectileDuration; break;
+            case 36: Vec3 ProjectileRandDurationMinMax; break;
+            case 37: int OperationGroupId; break; // ref: 8B 93 ? ? ? ? 85 D2 74 ? 48 8B 4B ? E8 ? ? ? ? 83 A3 ? ? ? ? ? 83 A3 ? ? ? ? ? 83 A3 & more (op 3771)
             case 38: byte BoolValue; break;
-            case 39: int Value; break;
-            case 41: int Value; break;
-            case 42: int Value; break;
-            case 43: int Value; break;
-            case 44: int Value; break;
-            case 45: int Value; break;
-            case 46: int Value; break;
-            case 47: int Value; break;
-            case 48: int Value; break;
-            case 49: int Value; break;
+            case 39: int OperationGroupId; break; // ref: 44 8B 49 ? 33 F6 48 8B D9 45 85 C9 0F 84 ? ? ? ? 48 8B 51 ? 48 8D 05 ? ? ? ? C5 FB 10 05 ? ? ? ? 48 89 44 24 ? 48 8D 4C 24 ? 8B 05 ? ? ? ? 8B BA
+            case 41: int AttackParamId; break;
+            
+            case 42: float Value; break; // These three are as a group
+            case 43: float Rate; break; // Speed
+            case 44: float Target; break;
+            
+            case 45: int Type; break; // 41 8B 88 ? ? ? ? 85 C9 0F 84
+            case 46: float Value; break;
+            case 47: float Value; break;
+            case 48: float Value; break;
+            case 49: float Value; break;
             case 52: Vec3 Value; break;
             case 53: Vec3 Value; break;
             case 54: Vec3 Value; break;
@@ -266,7 +283,7 @@ typedef struct
             case 63: Vec3 Value; break;
             case 64: Vec3 Value; break;
             case 65: int Value; break;
-            case 66: int Value; break;
+            case 66: float Value; break;
             case 68: int Value; break;
             case 69: int Value; break;
             case 70: float Value; break;
@@ -280,50 +297,53 @@ typedef struct
             case 78: int Value; break;
             case 79: int Value; break;
             case 80: int Value; break;
-            case 81: int EidId; break;
-            case 89: byte Value; break;
-            case 93: int Value; break;
-            case 95: int Value; break; // OperationGroupId
-            case 96: int Value; break;
+            case 81: uint EidId; break; // ref: 8B 97 ? ? ? ? 4C 8D 45 ? 48 8B C8
+            case 89: int VfxAudioId; break; // ref: 44 8B 47 ? 44 8A 67
+            case 90: byte BoolValue; break; // Whether to use property 91
+            case 91: int Value; break; // MotionLayerSetId maybe? not sure
+            case 93: float Value; break;
+            case 95: int OperationGroupId; break;
+            case 96: int OperationGroupId; break; // ref: E8 ? ? ? ? 83 A3 ? ? ? ? ? 83 A3 ? ? ? ? ? C6 83 ? ? ? ? ? EB
             case 97: int Value; break;
             case 98: int Value; break;
             case 99: int Value; break;
-            case 102: int Value; break;
-            case 105: int Value; break;
+            case 102: int OperationGroupId; break; // ref: 48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC ? 40 8A FA 48 8B D9 8B 91
+            case 105: int VFXAudioId; break; // ref: 44 8B 81 ? ? ? ? 48 8B F9 45 85 C0 74
             case 109: int Value; break;
-            case 110: int Value; break;
+            case 110: int OperationGroupId; break;
             case 114: byte BoolValue; break;
-            case 117: int Value; break;
+            case 117: float Value; break;
             case 129: float Value; break;
             case 134: int Value; break;
             case 136: int Value; break;
-            case 147: int Value; break;
-            case 148: int Value; break;
-            case 149: int Value; break;
+            case 147: int MagicId; break; // ref: 44 8B 41 ? 8B 89
+            case 148: int MagicId; break; // ref: 44 8B 43 ? 48 8B 53 ? 48 8D 4C 24
+            case 149: int MagicId; break; // ref: 44 8B 43 ? EB ? 3B 4B
             case 150: int Value; break;
             case 187: int Value; break;
-            case 997: int Value; break;
+            case 997: float Value; break;
             case 1025: byte Value; break;
             case 1026: byte Value; break;
             case 1123: byte BoolValue; break;
             case 1231: int Value; break;
             case 1232: int Value; break;
+            case 1379: float ProjectileDuration; break; // Same as 35, but DifficultyLevel->Unk11 * this
             case 1432: int Value; break;
             case 1484: float Value; break;
             case 1490: byte Value; break;
-            case 1503: int Value; break;
+            case 1503: int OperationGroupId; break; // ref: E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? E8 ? ? ? ? 89 73
             case 1686: float Value; break;
             case 1688: float Value; break;
             case 1791: int Value; break;
             case 1793: float Value; break;
             case 1807: Vec3 Value; break;
-            case 1833: int Value; break;
+            case 1833: int OperationGroupId; break; // 8B 97 ? ? ? ? 85 D2 74 ? 48 8B 4F ? E8 ? ? ? ? 83 A7
             case 1957: byte BoolValue; break;
             case 1994: byte Value; break;
             case 1997: Vec3 Value; break;
             case 1999: float Angle; break;
             case 2000: float Angle; break;
-            case 2060: int Value; break;
+            case 2060: float Value; break;
             case 2061: uint Value; break;
             case 2062: uint Value; break;
             case 2063: uint Value; break;
@@ -346,8 +366,8 @@ typedef struct
             case 2430: Vec3 Rotation; break;
             case 2528: int Value; break;
             case 2529: int Value; break;
-            case 2593: int Value; break;
-            case 2575: byte BoolValue; break;
+            case 2593: float Value; break;
+            case 2575: int Value; break;
             case 2604: byte Value; break;
             case 2672: byte Value; break;
             case 2798: int Value; break;
@@ -358,24 +378,29 @@ typedef struct
             case 3079: int Value; break;
             case 3171: float Value; break;
             case 3172: float Value; break;
-            case 3362: int Value; break;
+            case 3362: float Value; break;
             case 3363: int Value; break;
             case 3434: int Value; break;
-            case 3440: int Value; break;
-            case 3441: int Value; break;
+            case 3440: int OperationGroupId; break;
+            case 3441: int OperationGroupId; break;
             case 3497: Vec3 Value; break;
             case 3498: Vec3 Value; break;
             case 3606: byte BoolValue; break;
-            case 3608: int Value; break;
+            case 3608: int OperationGroupId; break;
+            case 3609: int OperationGroupId; break;
             case 3658: byte Value; break;
             case 3659: int Value; break;
+            case 3691: int OperationGroupId; break;
+            case 3692: int OperationGroupId; break;
+            case 3693: int OperationGroupId; break;
             case 3721: byte BoolValue; break;
             case 3722: int Value; break;
             case 3785: int Value; break;
             case 3791: int Value; break;
             case 3802: int Value; break;
-            case 3848: int Value; break;
-            case 3856: int Value; break;
+            case 3848: uint CameraFCurveId; break; // ref: 8B 53 ? 48 8B C8 E8 ? ? ? ? 4C 8B C0 48 85 C0 74 ? 48 83 38 ? 7C ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 49 83 38 ? 7C ? 49 8B C8 E8 ? ? ? ? EB ? 48 8B C7
+            case 3850: uint CameraFCurveId; break; // ref: 8B 53 ? C4 C1 78 28 D9
+            case 3856: uint CameraFCurveId; break; // ref: 8B 53 ? 48 8B C8 E8 ? ? ? ? 4C 8B C0 48 85 C0 74 ? 48 83 38 ? 7C ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 49 83 38 ? 7C ? 49 8B C8 E8 ? ? ? ? 48 8B F8
             case 3938: int LayoutInstanceId; break;
             case 3961: int Value; break;
             case 3962: int Value; break;
@@ -385,13 +410,13 @@ typedef struct
             case 3907: float Value; break;
             case 3970: byte Value; break;
             case 4002: int EidId; break;
-            case 4007: int Value; break;
-            case 4008: int Value; break;
+            case 4007: float Value; break;
+            case 4008: float Time; break; // ref: C5 FA 10 61 ? C5 FA 10 2D
             case 4010: float Value; break;
             case 4011: int Value; break;
             case 4014: Vec3 Value; break;
-            case 4101: float Value; break;
-            case 4102: int Value; break;
+            case 4101: float Value; break; // ref: C5 BA 58 77
+            case 4102: float Value; break; // ref: C5 BA 58 77
             case 4107: int Value; break;
             case 4131: int Value; break;
             case 4132: int Value; break;
@@ -401,22 +426,25 @@ typedef struct
             case 4327: int Value; break;
             case 4343: int Value; break;
             case 4387: byte BoolValue; break;
-            case 4402: int Value; break;
+            case 4402: int OperationGroupId; break;
             case 4427: byte Value; break;
             case 4436: int Value; break;
             case 4447: uint Value; break;
             case 4509: byte Value; break;
-            case 4774: int Value; break;
+            case 4774: int OperationGroupId; break;
             case 4785: byte BoolValue; break;
             case 4829: byte Value; break;
             case 4845: int Value; break;
-            case 4846: int Value; break;
-            case 4847: int Value; break;
+            
+            case 4846: int Value; break; // Group of 3 - ref: 48 83 C1 ? E8 ? ? ? ? F6 43 ? ? 0F 85
+            case 4847: int Rate; break;
+            case 4848: int Target; break;
+            
             case 5101: byte Value; break;
             case 5125: byte Value; break;
             case 5274: int CommandId; break;
             case 5275: int CommandId; break;
-            case 5276: int Value; break;
+            case 5276: int SkillUpgradeLevel; break; // ref: 3B 46 ? B9
             case 5312: byte Value; break;
             case 5644: Vec3 Value; break;
             case 5671: int Value; break;
@@ -424,9 +452,9 @@ typedef struct
             case 5838: float Value; break;
             case 5989: int Value; break;
             case 6056: byte BoolValue; break;
-            case 6107: int Value; break;
+            case 6107: int OperationGroupId; break;
             case 6179: int Value; break;
-            case 6287: int Value; break;
+            case 6287: float Value; break;
             case 6299: int Value; break;
             case 6339: byte Value; break;
             case 6340: byte Value; break;
@@ -435,13 +463,13 @@ typedef struct
             case 6454: byte Value; break;
             case 6459: byte Value; break;
             case 6471: int Value; break;
-            case 6474: int Value; break;
-            case 6475: int Value; break;
+            case 6474: int OperationGroupId; break; // ref: 8B 54 9E ? E8 ? ? ? ? 48 8B 5C 24
+            case 6475: int OperationGroupId; break; // ref: 8B 54 9E ? E8 ? ? ? ? 48 8B 5C 24
             case 6471: int Value; break;
-            case 6515: int Value; break;
-            case 6516: int Value; break;
+            case 6515: int OperationGroupId; break; // ref: 8B 93 ? ? ? ? 85 D2 74 ? 48 8B 4B ? E8 ? ? ? ? 83 A3 ? ? ? ? ? C6 83
+            case 6516: int OperationGroupId; break; // ref: 8B 93 ? ? ? ? 85 D2 74 ? 48 8B 4B ? E8 ? ? ? ? 83 A3 ? ? ? ? ? EB
             case 6596: byte BoolValue; break;
-            case 6600: int Value; break;
+            case 6600: float Value; break;
             case 6775: float Chance; break;
             case 6776: byte BoolValue; break;
             case 6800: int Value; break;
@@ -449,12 +477,12 @@ typedef struct
             case 6822: int Value; break;
             case 6825: byte BoolValue; break;
             case 6826: byte BoolValue; break;
-            case 6831: int Value; break;
+            case 6831: float Value; break;
             case 6913: int Value; break;
             case 6975: int Value; break;
             case 6988: byte BoolValue; break;
             case 7028: byte Value; break;
-            case 7037: int Value; break;
+            case 7037: float Value; break;
             case 7121: byte Value; break;
             case 7428: byte Value; break;
             case 7429: byte Value; break;
