@@ -1,0 +1,268 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Netease Messiah Engine (?) NewBasis Video/Animation/Clip .nbs file
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.nbs
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+struct
+{
+    byte Version <bgcolor=cPurple>; // > 1 = nbs::NBSProber::ParseVersion2 or nbs::NBSProber::ParseLowVersion - nbs::NBSDecoder::GetVersion
+    byte UnkType <bgcolor=cPurple>; // 5 = isPanorama
+    byte NumSections <bgcolor=cPurple>;
+    
+    local int baseInfoIndex;
+    local int keyInfoIndex;
+    for (local int i = 0; i < NumSections; i++)
+    {
+        FSeek(0x03 + (i * 0x05));
+        struct
+        {
+            enum <byte>
+            {
+                BaseInfo = 0,
+                KeyInfo = 1,
+                BaseColorData = 2, // Data read by nbs::BaseColorDecoder (inherits from nbs::VP9Decoder)
+                AudioInfo = 3,
+                AlphaInfo = 4, // Data read by nbs::AlphaDecoder (inherits from nbs::VP9Decoder)
+                KeyInfo6 = 6,
+                AlphaInfo8 = 8,
+            } SectionType <bgcolor=cGreen>;
+            int Offset <format=hex, bgcolor=cGreen>;
+            
+            FSeek(Offset);
+            switch (SectionType)
+            {
+                case BaseInfo:
+                    baseInfoIndex = i;
+                    struct
+                    {
+                        byte ClipCount; // nbs::NBSDecoder::GetClipCount
+                        byte Field_0x01;
+                        int Width; // nbs::NBSDecoder::GetWidth
+                        int Height; // nbs::NBSDecoder::GetHeight
+                        int FrameCount; // nbs::NBSDecoder::GetFrameCount
+                        int FrameRate; // nbs::NBSDecoder::GetFrameRate
+                        int BaseColorDataVP9StartOffset <format=hex>;
+                        int BaseColorDataVP9Size <format=hex>;
+                        int NamesLength;
+                        char Names[NamesLength] <comment="Engine expects names to be separated by a space in one string">;
+                        
+                        for (local int j = 0; j < ClipCount; j++)
+                        {
+                            struct
+                            {
+                                int KeyStart;
+                                int NumKeys;
+                                int BaseColorDataOffset <format=hex>;
+                                int BaseColorDataSize <format=hex>;
+                            } ClipInfo;
+                        }
+                    } BaseInfo <bgcolor=cWhite>;
+                    break;
+                    
+                case KeyInfo:
+                    keyInfoIndex = i;
+                    struct
+                    {
+                        int NumKeys;
+                        
+                        local int basePos = FTell();
+                        for (local int j = 0; j < NumKeys; j++)
+                        {
+                            FSeek(basePos + (j * 0x08));
+                            struct
+                            {
+                                int KeyIndex;
+                                int FrameDataOffset <format=hex>;
+                                
+                                FSeek(FrameDataOffset);
+                                struct
+                                {
+                                    int Size <fgcolor=cYellow>;
+                                    byte Bytes[Size];
+                                } FrameData <bgcolor=cBlack>;
+                            } Key;
+                        }
+                    } KeyInfo <bgcolor=cBlue>;
+                    break;
+                    
+                case AlphaInfo:
+                    struct
+                    {
+                        byte Version;
+                        if (Version == 1)
+                        {
+                            byte Unk;
+                            break;
+                        }
+                        
+                        for (local int j = 0; j < Section[baseInfoIndex].BaseInfo.ClipCount; j++)
+                        {
+                            struct
+                            {
+                                int AlphaDataOffset <format=hex>;
+                                int AlphaDataSize <format=hex>;
+                            } ClipAlphaData;
+                        }
+                        
+                        for (local int j = 0; j < Section[keyInfoIndex].KeyInfo.NumKeys; j++)
+                        {
+                            struct
+                            {
+                                int KeyIndex;
+                                int AlphaVP9DataOffset <format=hex>;
+                            } KeyAlphaData;
+                        }
+                        
+                        int DataStartOffset <format=hex>;
+                        int DataEndOffset <format=hex>;
+                    } AlphaInfo <bgcolor=cRed>;
+            }
+            
+            FSeek(0x03 + (i * 0x05) + 0x05);
+        } Section <read=EnumToString(SectionType)>;
+    }
+} NewBasisFile <open=true>;
+
+/*
+Research notes:
+Game used: https://hlr.163.com/m/ (android, has symbols).
+
+Offset to vp9 data always has size of frame, and then data[size].
+
+Their VPX library is edited.
+They've added vpx_codec_control 270, 271, 272, used by nbs::VP9Decoder::EnableSerial.
+They also added vpx_codec_serial_frame_buffers which is used by nbs::VP9Decoder::SerialFrameBuffers.
+
+I haven't been able to decode frames yet for some reason.. vpx_codec_decode returns 5 (VPX_CODEC_UNSUP_BITSTREAM)
+
+Side note: they seem to use these to parallel batch frame writes or reads for some specific reason?
+you have
+- SerialFrameBuffers
+  - SerialFrameBuffersImpl
+    - vpx::Serialer::Process
+      
+nbs::VP9Decoder::Open(VP9Decoder, width, height, stream, numThreads)
+
+*/
+
+//////////////////// TEST C# CODE
+/*
+static unsafe void Main(string[] args)
+{
+    var iface = vpx_codec_vp9_dx();
+
+    var codec = new vpx_codec_ctx_t();
+    var cfg = new vpx_codec_dec_cfg_t()
+    {
+        w = 1334,
+        h = 750,
+
+        threads = 1
+    };
+
+    if (vpx_codec_dec_init_ver(&codec, iface, &cfg, 0, VPX_DECODER_ABI_VERSION) > 0)
+    {
+        Console.WriteLine("Failed to initialize codec.");
+    }
+
+    if (vpx_codec_control_(&codec, 265, 0) > 0)
+    {
+        Console.WriteLine("Failed to set control.");
+    }
+
+    var inputFrameFile = File.ReadAllBytes(@"<path to nbs>");
+    fixed (byte* p = inputFrameFile)
+    {
+        if (vpx_codec_decode(&codec, p, (uint)inputFrameFile.Length, 0, 0) > 0)
+        {
+            Console.WriteLine($"Failed to decode frame.");
+        }
+    }
+
+    Console.WriteLine("Hello, World!");
+}
+
+// For bindings: https://github.com/ShiftMediaProject/libvpx
+// Used 1.15.1.
+
+public const int VPX_IMAGE_ABI_VERSION = 5;
+public const int VPX_CODEC_ABI_VERSION = 4 + VPX_IMAGE_ABI_VERSION;
+public const int VPX_DECODER_ABI_VERSION = 3 + VPX_CODEC_ABI_VERSION;
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern int vpx_codec_decode(vpx_codec_ctx_t* ctx, byte* data,
+                         uint data_sz, nint user_priv,
+                         long deadline);
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern int vpx_codec_get_frame(vpx_codec_ctx_t* ctx, nint iter);
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern int vpx_codec_control_(vpx_codec_ctx_t* ctx, int ctrl_id, nint data);
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern vpx_codec_iface_t* vpx_codec_vp9_dx();
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern int vpx_codec_dec_init_ver(vpx_codec_ctx_t* ctx,
+                               vpx_codec_iface_t* iface,
+                               vpx_codec_dec_cfg_t* cfg,
+                               uint flags, int ver);
+
+[System.Runtime.InteropServices.DllImport("vpx", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+public static extern int vpx_codec_destroy(vpx_codec_ctx_t* ctx);
+
+public struct vpx_codec_iface_t { }
+
+public unsafe struct vpx_codec_ctx_t
+{
+    byte* name;
+    vpx_codec_iface_t* iface;
+    int err;
+    byte* err_detail;
+    int init_flags;
+    vpx_codec_dec_cfg_t* config; // anonymous, union config { dec enc raw }
+    nint priv;
+};
+
+public unsafe struct vpx_codec_dec_cfg_t
+{
+    public uint threads;
+    public uint w;
+    public uint h;
+};
+*/
+
+///////////////////// FFMpeg test (unused)
+/*
+    // Used FFMpeg.AutoGen lib for bindings (binaries are in the repo: https://github.com/Ruslan-B/FFmpeg.AutoGen)
+    
+    AVCodec* codec = ffmpeg.avcodec_find_decoder(AVCodecID.AV_CODEC_ID_VP9);
+    AVCodecContext* codecContext = ffmpeg.avcodec_alloc_context3(codec);
+    AVFrame* frame = ffmpeg.av_frame_alloc();
+    if (ffmpeg.avcodec_open2(codecContext, codec, null) < 0)
+    {
+        Console.WriteLine("Could not open codec.");
+    }
+
+
+    var packet = ffmpeg.av_packet_alloc();
+
+    packet->size = inputFrameFile.Length;
+    fixed (byte* p = inputFrameFile)
+    {
+        packet->data = p;
+        if (ffmpeg.AVERROR(ffmpeg.avcodec_send_packet(codecContext, packet)) < 0)
+        {
+            Console.WriteLine("Error sending a packet for decoding.");
+        }
+        
+    }
+*/
