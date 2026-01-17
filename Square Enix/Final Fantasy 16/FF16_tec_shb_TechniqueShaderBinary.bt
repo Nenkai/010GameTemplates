@@ -165,7 +165,7 @@ struct
         Uniform Samplers[NumSamplers] <optimize=false>;
         Uniform ReadWriteBuffers[NumReadWriteBuffers] <optimize=false>;
         */
-    } DefineInfos[Header.ShaderDefineCount] <bgcolor=cGreen>;
+    } DefineInfos[Header.ShaderDefineCount] <optimize=false, bgcolor=cGreen>;
     
     FSeek(pos + Header.RuntimeShaderSlotsOffset);
     ulong RuntimeShaderPointers[Header.RuntimeShaderSlotCount] <comment="This is where the pointers to each instantiated shader goes">;
@@ -188,12 +188,15 @@ struct
         byte InitStage <comment="If current stage = this, create">; //2
         ushort pad;
         
-        local uint origin = FTell();
-        
-        FSeek(pos + Header.BytecodeOffset + BytecodeOffset);
-        byte Bytecode[Size];
-
-        FSeek(origin);
+        if (Size)
+        {
+            local uint origin = FTell();
+            
+            FSeek(pos + Header.BytecodeOffset + BytecodeOffset);
+            byte Bytecode[Size];
+    
+            FSeek(origin);
+        }
     } Shaders[Header.ShaderCount] <read=Str("%s", EnumToString(ShaderType)), bgcolor=cGreen, optimize=false>;
 
     FSeek(pos + Header.SamplerNameOffset);
