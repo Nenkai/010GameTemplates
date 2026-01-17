@@ -1,0 +1,235 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Faith Engine (ffxvi, fft) Technique/Shader Binary file (.tec, shb)
+//   Authors: Nenkai, KillzXGaming
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 54 45 43 00
+//  ID Bytes: *.tec,*.shb
+//   History: 
+//------------------------------------------------
+struct NameOffset;
+struct NameOffset16;
+struct ShaderData;
+struct Uniform;
+
+typedef uint OffsetT <format=hex, fgcolor=cRed>;
+
+BitfieldDisablePadding();
+LittleEndian();
+
+struct
+{
+    /* Unk1
+      -> Unk2 (through Unks2Index)
+      -> Programs (through ProgramsIndex)
+        -> Indices (through IndicesIndex)
+          -> Shaders/RuntimeShaderPointers (through Indices value)
+            -> Define (through DefineIndex)
+              -> DefineInfo (through ShaderDefineInfoIndex)
+              -> Uniform (through UniformStringStartIndex)
+            -> Bytecode (through BytecodeOffset)
+              
+    */
+    
+    struct
+    {
+        uint Magic <format=hex, comment="TEC\0, checked.">;
+        byte Version <comment="FFXVI checks if this is lower than 14 and bails otherwise">;
+        byte UnkFlag <comment="FFXVI checks if this is 1">;
+        short pad;
+        
+        uint UnkOffset0x08;
+        uint UnkCount0x0C;
+        
+        uint UnkOffset0x10;
+        uint UnkCount0x14;
+        
+        OffsetT ProgramsOffset;
+        uint ProgramCount;
+        
+        OffsetT RuntimeShaderSlotsOffset;
+        uint RuntimeShaderSlotCount;
+        
+        OffsetT IndicesOffset;
+        uint IndicesCount;
+        
+        OffsetT ShaderOffset;
+        uint ShaderCount;
+        
+        OffsetT ShaderDefineOffset;
+        uint ShaderDefineCount;
+        
+        OffsetT BytecodeOffset;
+        uint BytecodeSize;
+        
+        OffsetT StringTableOffset;
+        uint StringTableSize;
+        
+        OffsetT ShaderDefineInfoOffset;
+        OffsetT UniformBufferOffset;
+        
+        uint SamplerCount;
+        OffsetT SamplerNameOffset;
+        OffsetT SamplerConfigOffset;
+        uint WholeTocSize <format=hex, comment="Starting from 0x70.">;
+        
+        uint padding;
+        uint padding;
+        
+    } Header <bgcolor=cPurple>;
+    
+    local uint pos = FTell();
+
+    FSeek(pos + Header.UnkOffset0x08);
+    struct UnknownSection1
+    {
+        int field_0x00;
+        int field_0x04;
+        int field_0x08;
+        int field_0x0C;
+        int Unks2Index;
+        int Unks2Count;
+        int ProgramsIndex;
+        int ProgramCount;
+    } unks1[(Header.UnkCount0x0C)];
+    
+    FSeek(pos + Header.UnkOffset0x10);
+    struct UnknownSection2
+    {
+        int Flags <format=hex>;
+        int Flags2Maybe;
+        int Field_0x08[8]; // Weird array.
+        int Field_0x28;
+        int Field_0x2C;
+        uint64 Field_0x30;
+        byte ShaderStartIndex;
+        byte ShaderCount;
+        byte Flag_0x3A <format=hex>;
+        byte Pad[5];
+    } unks2[(Header.UnkCount0x14)];
+    
+    FSeek(pos + Header.ProgramsOffset);
+    struct ShaderProgram
+    {
+        uint IndicesIndex; //index to shader data index list
+        uint Count; //count to shader data index list
+    } Programs[Header.ProgramCount] <bgcolor=cGreen>;
+    
+    FSeek(pos + Header.IndicesOffset);
+    uint ShaderIndices[Header.IndicesCount]; //some indices link to shaders
+    
+    FSeek(pos + Header.ShaderDefineOffset);
+    struct ShaderDefine
+    {
+        ushort ShaderDefineInfoIndex;  //index to shader info section
+        ushort UniformStringStartIndex; //index start of the uniform string list
+    } Defines[Header.ShaderDefineCount] <bgcolor=cGreen>;
+    
+    FSeek(pos + Header.StringTableOffset);
+    byte StringTable[Header.StringTableSize];
+
+    FSeek(pos + Header.UniformBufferOffset);
+    Uniform Uniforms[(Header.StringTableOffset - Header.UniformBufferOffset) / 4] <optimize=false>;
+    
+    FSeek(pos + Header.ShaderDefineInfoOffset);
+    struct ShaderDefineInfo
+    {
+        byte unk;
+        byte unk;
+        byte unks1[6];
+        byte unk2;
+        byte unks2[7];
+        byte unk3;
+        byte unks3[7 + 24];
+       
+        // One int
+        ubyte NumConstants : 4; // b registers -> cbuffer
+        ubyte pad : 4;
+        ubyte NumResourceOrTextureBinds; // t registers -> Texture2D/3D<>
+        ubyte NumSamplers : 5; // s registers -> SamplerState
+        ubyte pad : 5;
+        ubyte NumReadWriteBuffers : 4; // u registers -> RWBuffer<>
+        ubyte pad : 2;
+        
+        byte unks4[4];
+        
+        local int basePos = FTell();
+        
+        /*
+        FSeek(pos + Header.UniformBufferOffset + UniformStringStartIndex * 4);
+        Uniform Constants[NumConstants] <optimize=false>;
+        Uniform Resources[NumResourceOrTextureBinds] <optimize=false>;
+        Uniform Samplers[NumSamplers] <optimize=false>;
+        Uniform ReadWriteBuffers[NumReadWriteBuffers] <optimize=false>;
+        */
+    } DefineInfos[Header.ShaderDefineCount] <bgcolor=cGreen>;
+    
+    FSeek(pos + Header.RuntimeShaderSlotsOffset);
+    ulong RuntimeShaderPointers[Header.RuntimeShaderSlotCount] <comment="This is where the pointers to each instantiated shader goes">;
+    
+    FSeek(pos + Header.ShaderOffset);
+    struct 
+    {
+        OffsetT BytecodeOffset;
+        uint Size <format=hex>;
+        uint DefineIndex;
+        enum <ubyte>
+        {
+            VertexShader = 0,
+            PixelShader = 1,
+            GeometryShader = 2,
+            HullShader = 3,
+            DomainShader = 4,
+            ComputeShader = 5,   
+        } ShaderType;
+        byte InitStage <comment="If current stage = this, create">; //2
+        ushort pad;
+        
+        local uint origin = FTell();
+        
+        FSeek(pos + Header.BytecodeOffset + BytecodeOffset);
+        byte Bytecode[Size];
+
+        FSeek(origin);
+    } Shaders[Header.ShaderCount] <read=Str("%s", EnumToString(ShaderType)), bgcolor=cGreen, optimize=false>;
+
+    FSeek(pos + Header.SamplerNameOffset);
+    NameOffset16 samplerNames[Header.SamplerCount]<optimize=false>;
+
+    FSeek(pos + Header.SamplerConfigOffset);
+    uint SamplerConfig[Header.SamplerCount] <format=binary>;
+
+} TechniqueOrShaderResource <open=true, bgcolor=cYellow>;
+
+typedef struct {
+    ubyte Index; 
+    ubyte flag;
+    NameOffset16 Name;
+} Uniform <bgcolor=cGreen, read=Str("[%d] %s", Index, Name.Name)>;
+
+
+typedef struct {
+    ushort nameOffset;
+    
+    local uint origin = FTell();
+    
+    FSeek((pos + Header.StringTableOffset) + nameOffset);
+    string Name;
+    
+    FSeek(origin);
+} NameOffset16<read=Str(this.Name)>;
+
+typedef struct 
+{
+    uint nameOffset;
+    
+    local uint origin = FTell();
+    
+    FSeek(pos + stringTableOffset + nameOffset);
+    string name;
+    
+    FSeek(origin);
+} NameOffset<read=Str(this.name)>;
