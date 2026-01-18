@@ -38,8 +38,46 @@ struct MatFileHeader
     uint Body1Size <format=hex>;
     uint Body2Size <format=hex, comment="Used by i.e gracommon/material/fog/a/mcrystal_100_flower_d_yellow.mtl">;
     ushort NumTexturePaths;   
-    byte ParamType <comment="Seems important. Possibly the param layout preset - 8 is invalid?">;
-    byte unk <comment="Is this unused?">;
+    
+    // Each handler is created at 
+    // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ? 48 8B D9 48 8B 0D
+    enum <byte>
+    {
+        BasicMesh,
+        SubsurfaceMesh,
+        HairMesh = 2,
+        EyeMesh = 3,
+        WaterMesh = 4,
+        GroundMesh = 5,
+        ClothMesh = 6,
+        Unk7 = 7,
+        Unk8_Special = 8,
+        OcclusionMesh = 9,
+        TearMesh = 10,
+        SkinMesh = 11,
+        LayeredMesh = 12,
+        TilingMesh = 13,
+        GlassMesh = 14,
+        CustomMesh_SpecifiedShaderFile = 15,
+        ShinyClothMesh = 16,
+        DeferredDecalMesh = 17,
+        CrystalMesh = 18,
+        IridescentMesh = 19,
+        SummonMesh = 20,
+        SummonHairMesh = 21,
+        RepeatMesh = 22,
+        AggregateMesh = 23,
+        PictureMesh = 27,
+        MagmaMesh = 28,
+        MagmaLayeredMesh = 29,
+        MossMesh = 30,
+        FogMesh = 31,
+        AggregateTreeMesh = 32,
+        RockLayeredMesh = 33,
+        OceanWaveMesh = 34,
+    } MeshShaderType <comment="i.e shader/BasicMesh.tec">;
+    
+    byte Unk_0x13; // ref: 44 38 91 ? ? ? ? 7D
     uint ConstantBufferSize <format=hex>;
     ushort NumConstants;
     ushort NumShaders <comment="Usually never more than 1, if not 0, shb shaders are used">;
@@ -47,7 +85,7 @@ struct MatFileHeader
     byte UnkCount0x1D <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
     byte Unk0x1E <comment="Doesn't appear to be used by any files, but has a purpose based on code">;
     ubyte UnkBitFlags <format=hex, comment="If 0x20, no header in body 1?">;
-} Header <bgcolor=cYellow>; // Header size is 0x28 if version == 1? otherwise 0x20
+} Header <bgcolor=cYellow, read=Str("MeshShaderType: %s", EnumToString(MeshShaderType))>; // Header size is 0x28 if version == 1? otherwise 0x20
 
 void WriteColorHex(uint& outValue, string inString)
 {
@@ -114,6 +152,8 @@ union
                 {
                     NameOffset16 Path;
                     byte pad[0x06];
+                    
+                    Printf("Shader: %s", Path.name);
                 } ShaderFiles[Header.NumShaders] <comment="There should only ever be 1, game doesn't loop", optimize=false, bgcolor=cBlack>;
             }
         }
