@@ -20,12 +20,58 @@ typedef uint OffsetT <format=hex, fgcolor=cRed>;
 BitfieldDisablePadding();
 LittleEndian();
 
+typedef struct (int uniformStringStartIndex)
+{
+    byte unk;
+    byte unk;
+    byte unks1[6];
+    byte unk2;
+    byte unks2[7];
+    byte unk3;
+    byte unks3[7 + 24];
+   
+    // One int
+    ubyte NumConstants : 4; // b registers -> cbuffer
+    ubyte pad : 4;
+    ubyte NumResourceOrTextureBinds; // t registers -> Texture2D/3D<>
+    ubyte NumSamplers : 5; // s registers -> SamplerState
+    ubyte pad : 5;
+    ubyte NumReadWriteBuffers : 4; // u registers -> RWBuffer<>
+    ubyte pad : 2;
+    
+    byte unks4[4];
+    
+    local int basePos = FTell();
+    
+    if (uniformStringStartIndex != -1)
+    {
+        FSeek(pos + Header.UniformBufferOffset + uniformStringStartIndex * 4);
+        if (NumConstants)
+            Uniform Constants[NumConstants] <optimize=false>;
+        if (NumResourceOrTextureBinds)
+            Uniform Resources[NumResourceOrTextureBinds] <optimize=false>;
+        if (NumSamplers)
+            Uniform Samplers[NumSamplers] <optimize=false>;
+        if (NumReadWriteBuffers)
+            Uniform ReadWriteBuffers[NumReadWriteBuffers] <optimize=false>;
+        
+        FSeek(basePos);
+    }
+} ShaderDefineInfo;
+
 typedef struct
 {
     ushort ShaderDefineInfoIndex;  //index to shader info section
     ushort UniformStringStartIndex; //index start of the uniform string list
-} ShaderDefine;
     
+    local uint origin = FTell();
+    
+    //shader define info (56 byte struct)
+    FSeek(pos + Header.ShaderDefineInfoOffset + ShaderDefineInfoIndex * 56);
+    ShaderDefineInfo shaderDefineInfo(UniformStringStartIndex);
+    FSeek(origin);
+} ShaderDefine;
+
 struct
 {
     /* Unk1
@@ -128,7 +174,7 @@ struct
     uint ShaderIndices[Header.IndicesCount]; //some indices link to shaders
     
     FSeek(pos + Header.ShaderDefineOffset);
-    ShaderDefine Defines[Header.ShaderDefineCount] <bgcolor=cGreen>;
+    ShaderDefine Defines[Header.ShaderDefineCount] <optimize=false, bgcolor=cGreen>;
     
     FSeek(pos + Header.StringTableOffset);
     byte StringTable[Header.StringTableSize];
@@ -137,37 +183,7 @@ struct
     Uniform Uniforms[(Header.StringTableOffset - Header.UniformBufferOffset) / 4] <optimize=false>;
     
     FSeek(pos + Header.ShaderDefineInfoOffset);
-    struct ShaderDefineInfo
-    {
-        byte unk;
-        byte unk;
-        byte unks1[6];
-        byte unk2;
-        byte unks2[7];
-        byte unk3;
-        byte unks3[7 + 24];
-       
-        // One int
-        ubyte NumConstants : 4; // b registers -> cbuffer
-        ubyte pad : 4;
-        ubyte NumResourceOrTextureBinds; // t registers -> Texture2D/3D<>
-        ubyte NumSamplers : 5; // s registers -> SamplerState
-        ubyte pad : 5;
-        ubyte NumReadWriteBuffers : 4; // u registers -> RWBuffer<>
-        ubyte pad : 2;
-        
-        byte unks4[4];
-        
-        local int basePos = FTell();
-        
-        /*
-        FSeek(pos + Header.UniformBufferOffset + UniformStringStartIndex * 4);
-        Uniform Constants[NumConstants] <optimize=false>;
-        Uniform Resources[NumResourceOrTextureBinds] <optimize=false>;
-        Uniform Samplers[NumSamplers] <optimize=false>;
-        Uniform ReadWriteBuffers[NumReadWriteBuffers] <optimize=false>;
-        */
-    } DefineInfos[Header.ShaderDefineCount] <optimize=false, bgcolor=cGreen>;
+    ShaderDefineInfo DefineInfos(-1)[Header.ShaderDefineCount] <optimize=false, bgcolor=cGreen>;
     
     FSeek(pos + Header.RuntimeShaderSlotsOffset);
     ulong RuntimeShaderPointers[Header.RuntimeShaderSlotCount] <comment="This is where the pointers to each instantiated shader goes">;
@@ -199,8 +215,8 @@ struct
             FSeek(origin);
         }
 
-        FSeek(pos + Header.ShaderDefineInfoOffset + DefineIndex * 56);
-        ShaderDefineInfo DefineInfo;
+        FSeek(pos + Header.ShaderDefineOffset + DefineIndex * 4);
+        ShaderDefine DefineInfo;
         FSeek(origin);
     
     } Shaders[Header.ShaderCount] <read=Str("%s", EnumToString(ShaderType)), bgcolor=cGreen, optimize=false>;
@@ -217,6 +233,10 @@ typedef struct {
     ubyte Index; 
     ubyte flag;
     NameOffset16 Name;
+    
+    if (Strcmp(Name.Name, "rWrinklesBlendParam") == 0)
+        Printf("");
+    
 } Uniform <bgcolor=cGreen, read=Str("[%d] %s", Index, Name.Name)>;
 
 
