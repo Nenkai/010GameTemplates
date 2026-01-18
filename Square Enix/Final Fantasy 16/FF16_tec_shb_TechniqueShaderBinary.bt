@@ -20,6 +20,12 @@ typedef uint OffsetT <format=hex, fgcolor=cRed>;
 BitfieldDisablePadding();
 LittleEndian();
 
+typedef struct
+{
+    ushort ShaderDefineInfoIndex;  //index to shader info section
+    ushort UniformStringStartIndex; //index start of the uniform string list
+} ShaderDefine;
+    
 struct
 {
     /* Unk1
@@ -122,11 +128,7 @@ struct
     uint ShaderIndices[Header.IndicesCount]; //some indices link to shaders
     
     FSeek(pos + Header.ShaderDefineOffset);
-    struct ShaderDefine
-    {
-        ushort ShaderDefineInfoIndex;  //index to shader info section
-        ushort UniformStringStartIndex; //index start of the uniform string list
-    } Defines[Header.ShaderDefineCount] <bgcolor=cGreen>;
+    ShaderDefine Defines[Header.ShaderDefineCount] <bgcolor=cGreen>;
     
     FSeek(pos + Header.StringTableOffset);
     byte StringTable[Header.StringTableSize];
@@ -188,15 +190,19 @@ struct
         byte InitStage <comment="If current stage = this, create">; //2
         ushort pad;
         
+        local uint origin = FTell();
         if (Size)
         {
-            local uint origin = FTell();
-            
             FSeek(pos + Header.BytecodeOffset + BytecodeOffset);
             byte Bytecode[Size];
     
             FSeek(origin);
         }
+
+        FSeek(pos + Header.ShaderDefineInfoOffset + DefineIndex * 56);
+        ShaderDefineInfo DefineInfo;
+        FSeek(origin);
+    
     } Shaders[Header.ShaderCount] <read=Str("%s", EnumToString(ShaderType)), bgcolor=cGreen, optimize=false>;
 
     FSeek(pos + Header.SamplerNameOffset);
