@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFXVI Animation Binary (Havok) + Custom Data (Footer)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.anmb
+//  ID Bytes: 41 4E 4D 45
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
+FSeek(FileSize() - 0x10);
+struct
+{
+    int Magic <format=hex, comment="Should match ANME">;
+    short UnkVersion;
+    short Unk2;
+    int64 Offset;
+} ANMEHeader <bgcolor=cPurple>;
+
+// This is how the game reads
+local long currentOffset = (FileSize() - 0x10) + ANMEHeader.Offset;
+while (true)
+{
+    if (ReadUInt(currentOffset) == 0x454D4E41) // ANME
+        break; // Reached end, exit
+        
+    FSeek(currentOffset);
+    struct
+    {
+        int SSCIMagic <format=hex>;
+        int Unk;
+        int64 SectionSize <format=hex, comment="Should be >= 8">;
+        
+        if (SSCIMagic == 0x49435353)
+        {
+            int NumBits;
+            int DataByteSize;
+            
+            for (local int i = 0; i < NumBits; i++)
+                byte bit : 1 <comment="Purpose unknown.">;
+        }
+        
+        currentOffset += (0x10 + SectionSize);
+    } SSCI <bgcolor=cBlue>;
+}
