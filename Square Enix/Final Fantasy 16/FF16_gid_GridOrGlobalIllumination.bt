@@ -157,8 +157,8 @@ typedef struct
 struct
 {
     uint Magic <comment="Has to match 'GID '">;
-    byte Version <comment="Minimum 5">;
-    byte Flags <comment="Has to be 1">;
+    byte Version <comment="Minimum 5 (PC), 4 (PS5)">;
+    byte Flags <comment="Has to be 1 (PC)">;
     byte Unk;
     byte pad;
     uint64 TocSize <format=hex>;
@@ -232,7 +232,7 @@ union
         
         struct
         {
-            uint64 Part5Size <format=hex>;
+            uint64 GridBlockHeaderSize <format=hex>; // From PS5 Assert
             int SizeOfZlibChunkInfos <format=hex>;
             int _pad_;
             uint64 SizeMainZlibChunkInfos <format=hex>;
@@ -246,7 +246,7 @@ union
             int b;
             int c;
             int d;
-        } Part5[Part2.GridX * Part2.GridY * Part2.GridZ];
+        } GridBlockHeader[Part2.GridX * Part2.GridY * Part2.GridZ]; // From PS5 Assert
         
         if (Header.Version >= 9)
         {
@@ -343,6 +343,6 @@ if (Header.Version >= 9)
 
 union
 {
-    byte Bytes[Toc2Union.Toc2.Part4.SizeMainZlibChunkInfos];
+    byte Bytes[Toc2Union.Toc2.Part4.SizeMainZlibChunkInfos - 0x18];
 } MainZlibChunkGroupData;
 
