@@ -15,29 +15,52 @@
 BitfieldDisablePadding();
 LittleEndian();
 
+typedef struct
+{
+    int64 TextureSRVRuntimePtr; // 8
+    int Offset <format=hex>; // 10
+    int Flags; // 14
+    int PixelFormat <format=hex>; // 18
+    int Flags2; // 1C
+    int Width : 14;  // 20
+    int Height : 14;
+    int MipCount : 4;
+    int DepthBits : 6;
+    int pad : 26;
+} TextureBuffer;
+
 struct
 {
     struct
     {
         uint Magic <format=hex, comment="Not checked, 'TERA'">;
-        char Unk <comment="Must match 0x78. Explicitly checked.">;
+        char Unk <comment="Must match 0x78 (PC) or 0x75 (PS5). Explicitly checked.">;
         byte Unk;
         byte Unk;
         byte Unk;
         
-        struct
-        {
-            int64 TextureSRVRuntimePtr; // 8
-            int Unused2; // 10
-            int Flags; // 14
-            int PixelFormat <format=hex>; // 18
-            int Flags2; // 1C
-            int Width : 14;  // 20
-            int Height : 14;
-            int MipCount : 4;
-            int DepthBits : 6;
-            int pad : 26;
-        } TextureBuffer[20];
+        // Info taken from PS5 executable, has very few asserts for these
+        TextureBuffer HeightMapTexture;
+        TextureBuffer TextureBuffer2;
+        TextureBuffer NormalMapTexture;
+        TextureBuffer VertexNormalMapTexture;
+        TextureBuffer GrassBaseColorTexture;
+        TextureBuffer BGPartsGrassBaseColorTexture;
+        TextureBuffer TerrainBaseColorTexture;
+        TextureBuffer TerrainSplatMapTexture;
+        TextureBuffer RiverSplatMapTexture;
+        TextureBuffer SeaSplatMapTexture;
+        TextureBuffer LakeSplatMapTexture;
+        TextureBuffer SeaSDFTexture;
+        TextureBuffer BaseColorTexture;
+        TextureBuffer NormalTexture;
+        TextureBuffer HeightTexture;
+        TextureBuffer FloatGrassBaseColorTexture;
+        TextureBuffer VegetationMaskTexture;
+        TextureBuffer VegetationDetailMaskTexture;
+        TextureBuffer VegetationLutTexture;
+        TextureBuffer VegetationTreeLutTexture;
+        // PS5 would have an extra one here called ModulateTexture
         
         FSeek(0x2EC);
         uint MainBufferSize <format=hex>; // Allocation made -> Allocate(this->Header.field_2EC - 0x460LL);
@@ -53,10 +76,10 @@ struct
         int Field_0x354;
         ushort Count_0x358 <format=hex>; // Allocate((unsigned int)(Count_0x350 + 0x60 * (Count_0x358 + 1))
         short Unk;
-        uint Offset_0x35C <format=hex>; // Check not used?
+        uint RiverModelIBMapOffset <format=hex>; // Check not used?
         uint Offset_0x360 <format=hex>; // Check not used?
         uint Offset_0x364 <format=hex>; // Check not used?
-        uint Offset_0x368 <format=hex>; // Check not used?
+        uint Offset_0x368 <format=hex>; // Check not used? Something to do with RiverModelIBMapOffset maybe?
         uint Offset_0x36C <format=hex>; // Check not used?
         uint Offset_0x370 <format=hex>; // Check not used?
         uint Offset_0x374 <format=hex>; // Check not used?
