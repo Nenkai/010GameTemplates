@@ -396,8 +396,8 @@ typedef struct
             case kTimelineElem_11:
                 {
                     // 48 89 5C 24 ? 57 48 83 EC ? 4C 8B 41 ? 48 8B F9 C5 F8 29 74 24 ? C5 FA 10 35
-                    int field_0x00;
-                    int field_0x04;
+                    int MotionLayerId;
+                    int SecondsMaybe;
                     int field_0x08;
                     int field_0x0C;
                     int field_0x10;
@@ -825,9 +825,9 @@ typedef struct
                 {
                     // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B 41
                     int Unused;
-                    int UnkId; // hardcoded checks on 1602/1603 and 821/822
-                    byte Bool_0x08;
-                    byte field_0x09;
+                    int MagicId; // hardcoded checks on 1602/1603 and 821/822
+                    byte UnkBoolUseOtherPosition;
+                    byte HasTargetMaybe;
                     byte pad[0x1E];                    
                     FSeek(startof(Unused) + 0x28);
                 };
@@ -1325,7 +1325,7 @@ struct
                 FSeek(startof(Timeline) + TimelineElementsOffset + (i * 0x20));
                 TimelineElement Elements <bgcolor=cBlue>;
             }
-        } TimelineElementList;
+        } TimelineElementList <open=true>;
         
         struct
         {
@@ -1346,5 +1346,5 @@ struct
                 TargetData TargetData_ <bgcolor=cPurple>;
             }
         } TargetDataArray;
-    } Timeline <bgcolor=cYellow>;
+    } Timeline <bgcolor=cYellow, open=true>;
 } CharaTimelineFile <open=true>;
