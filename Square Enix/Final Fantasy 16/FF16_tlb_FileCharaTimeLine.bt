@@ -59,15 +59,39 @@ typedef struct
             int KeyframeCount;
             struct
             {
-                int FloatCountOrType;
-                float FrameOffset;
-                float b[FloatCountOrType > 0 ? FloatCountOrType : 1];
-            } Keyframe[KeyframeCount] <optimize=false>;
-        } Keyframes;
+                enum <int>
+                { 
+                    Linear = 0,
+                    Constant = 1,
+                    Cubic = 2, // Catmull–Rom
+                    Bezier = 3,   
+                } Type : 2;
+                float Frame;
+                
+                switch (Type)
+                {
+                    case Linear:
+                    case Constant:
+                        float Value; 
+                        break;
+                        
+                    case Cubic:
+                        byte samples[16];
+                        byte padding[8];
+                        break;
+                        
+                    case Bezier:
+                        float value;        
+                        float outTangent;
+                        float inTangent;
+                        break;
+                }
+            } Keyframe[KeyframeCount] <optimize=false, read=Str("%s @ frame %f", EnumToString(Type), Frame)>;
+        } Keyframes <read=Str("%d keyframes", KeyframeCount)>;
     } KeyframesUnion;
     
     FSeek(startof(DataOffset) + 0x10);
-} Curve;
+} Curve <bgcolor=cYellow>;
 
 typedef struct
 {
