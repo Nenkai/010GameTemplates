@@ -1,0 +1,101 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: SQEX Sead Library AutoSe Param Binary (used as MastsParam in FFXVI) - SQEX::Sd::AutoSe
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.apb
+//  ID Bytes: 41 53 50 42
+//   History: 
+//------------------------------------------------
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+
+typedef struct
+{
+    enum <byte>
+    {
+        // Check:
+        // SQEX::Sd::AutoSe::Impl::MSDetectorFootStep
+        // SQEX::Sd::AutoSe::Impl::MSDetectorRustle
+        // SQEX::Sd::AutoSe::Impl::MSDetectorWingAction
+        // SQEX::Sd::AutoSe::Impl::MSDetectorSwing
+        // SQEX::Sd::AutoSe::Impl::MSDetectorMisc
+        
+        // GUESSED FROM FFXV! MAY BE INACCURATE!
+        // FFXV has debug symbols with AutoSe, but it seems the file was upgraded entirely at one point
+        // Notably the file format is all different - FFXV has property names, this doesn't
+        MSDetectorFootStep_volumeWalk = 8,
+        MSDetectorFootStep_volumeRun = 9,
+        
+        MSDetectorFootStep_assumeJustStopBeforeVelocity = 11,
+        MSDetectorFootStep_assumeFootShuffleBodyVelocity = 12,
+        MSDetectorFootStep_assumeFootShuffleFootAccel = 15,
+        
+        MSDetectorFootStep_volumeAdd = 16,
+        MSDetectorFootStep_volumeShuffle = 19,
+        
+        MSDetectorWingAction_volumeFlapUp = 50,
+        MSDetectorWingAction_volumeFlapDown = 51,
+        
+        MSDetectorSwing_detectClipDist = 54,        
+
+    } PropertyType;
+    byte ArrayIndex;
+    
+    FSeek(startof(Header) + ValuesOffset + (j * 0x04));
+    float Value <bgcolor=cBlue>;
+} Property <bgcolor=cYellow, read=Str("%s[%d]: %f", 
+    EnumToString(PropertyType) == "" ? Str("%d", PropertyType) : EnumToString(PropertyType), ArrayIndex, Value)>;
+        
+struct
+{
+    // File size must be at least 0x20 (header size)
+    struct
+    {
+        uint Magic <format=hex, comment="ASPB, checked.">;
+        byte Version <comment="Checked. FFXVI = 1">;
+        byte Unk0x05;
+        byte HeaderSizeMaybe <format=hex, comment="Unused.">;
+        byte Unk0x07;
+        int FileSize <format=hex>;
+        ubyte EntryCount;
+        byte pad[3];
+        OffsetT Offset_0x10;
+        OffsetT Offset_0x14;
+        int Field_0x18;
+        int Field_0x1C;
+    } Header <bgcolor=cPurple>;
+    
+    FSeek(startof(Header) + Header.Offset_0x10);
+    struct
+    {
+        short ThisSizeMaybe <format=hex>;
+        ushort Flags;
+        float Float_0x04;
+        byte pad[(startof(this) + ThisSizeMaybe) - FTell()];
+    } Struct_0x10 <bgcolor=cRed>;
+    
+    for (local int i = 0; i < Header.EntryCount; i++)
+    {
+        FSeek(startof(Header) + Header.Offset_0x14 + (i * 0x10));
+        struct
+        {
+            byte ThisSizeMaybe <format=hex>;
+            byte Id; // 0 and 1 should always be present
+            ushort DataCount;
+            OffsetT TypesOffset;
+            OffsetT ValuesOffset;
+            int pad;
+            
+            for (local int j = 0; j < DataCount; j++)
+            {
+                FSeek(startof(Header) + TypesOffset + (j * 0x02));
+                Property Property_ <bgcolor=cYellow>;
+            }
+            
+        } Entry;
+    }
+} AutoSeParamBinary <open=true>;
