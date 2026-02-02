@@ -1,0 +1,83 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: FFXVI Camera F(ade) Curve Binary
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.cfb
+//  ID Bytes: 43 46 43 42
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int DataOffset <format=hex, fgcolor=cRed>;
+    int DataSize <format=hex>;
+    float Min;
+    float Max;
+    
+    FSeek(startof(DataOffset) + DataOffset);
+    union
+    {
+        byte DataBytes[DataSize];
+        struct
+        {
+            int KeyframeCount;
+            struct
+            {
+                enum <int>
+                { 
+                    Linear = 0,
+                    Constant = 1,
+                    Cubic = 2, // Catmull–Rom
+                    Bezier = 3,   
+                } Type : 2;
+                float Frame;
+                
+                switch (Type)
+                {
+                    case Linear:
+                    case Constant:
+                        float Value; 
+                        break;
+                        
+                    case Cubic:
+                        byte samples[16];
+                        byte padding[8];
+                        break;
+                        
+                    case Bezier:
+                        float value;        
+                        float outTangent;
+                        float inTangent;
+                        break;
+                }
+            } Keyframe[KeyframeCount] <optimize=false, read=Str("%s @ frame %f", EnumToString(Type), Frame)>;
+        } Keyframes <read=Str("%d keyframes", KeyframeCount)>;
+    } KeyframesUnion;
+    
+    FSeek(startof(DataOffset) + 0x10);
+} Curve <bgcolor=cYellow>;
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="Unchecked.">;
+        uint Version <format=hex, comment="FFXVI = 1, unchecked.">;
+        int NumFrames;
+        int pad[3];
+    } Header <bgcolor=cPurple, read=Str("Num Frames: %d", NumFrames)>;
+
+    Curve Curve0x18;
+    Curve Curve0x28;
+    Curve Curve0x38;
+    Curve Curve0x48;
+    Curve Curve0x58;
+    Curve Curve0x68;
+    Curve Curve0x78;
+    Curve Curve0x88;
+    byte pad[0x20];
+} CameraFadeCurveBinary <open=true>;
