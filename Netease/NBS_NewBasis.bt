@@ -13,7 +13,7 @@
 struct
 {
     byte Version <bgcolor=cPurple>; // > 1 = nbs::NBSProber::ParseVersion2 or nbs::NBSProber::ParseLowVersion - nbs::NBSDecoder::GetVersion
-    byte UnkType <bgcolor=cPurple>; // 5 = isPanorama
+    byte UnkType <bgcolor=cPurple>; // 5 = isPanorama, If not 2, use libnbsextend instead of inner linked
     byte NumSections <bgcolor=cPurple>;
     
     local int baseInfoIndex;
@@ -53,8 +53,10 @@ struct
                         int NamesLength;
                         char Names[NamesLength] <comment="Engine expects names to be separated by a space in one string">;
                         
+                        local int basePos = FTell();
                         for (local int j = 0; j < ClipCount; j++)
                         {
+                            FSeek(basePos + (j * 0x10));
                             struct
                             {
                                 int KeyStart;
@@ -79,19 +81,34 @@ struct
                             struct
                             {
                                 int KeyIndex;
-                                int FrameDataOffset <format=hex>;
-                                
-                                FSeek(FrameDataOffset);
-                                struct
-                                {
-                                    int Size <fgcolor=cYellow>;
-                                    byte Bytes[Size];
-                                } FrameData <bgcolor=cBlack>;
+                                int FrameDataStartOffset <format=hex>;
                             } Key;
                         }
                     } KeyInfo <bgcolor=cBlue>;
                     break;
                     
+                case BaseColorData:
+                    struct
+                    {
+                        struct
+                        {
+                            int DataSize <fgcolor=cYellow>;
+                            byte Data[DataSize] <bgcolor=cBlack>;
+                        } Frames[Section[0].BaseInfo.FrameCount] <optimize=false>;
+                    } BaseColorData;
+                    break;
+                case AudioInfo:
+                    struct
+                    {
+                        byte Unk;
+                        byte NumChannels;
+                        int SampleRate;
+                        uint64 SampleCount;
+                        int SampleTotalDataSize;
+                        byte MP3SampleData[SampleTotalDataSize] <bgcolor=cDkPurple>;
+                    } AudioInfo <bgcolor=cPurple>;
+                    
+                    break;
                 case AlphaInfo:
                     struct
                     {
@@ -121,8 +138,16 @@ struct
                         }
                         
                         int DataStartOffset <format=hex>;
-                        int DataEndOffset <format=hex>;
+                        int DataSize <format=hex>;
+                        
+                        FSeek(DataStartOffset);
+                        struct
+                        {
+                            int DataSize <fgcolor=cYellow>;
+                            byte Data[DataSize] <bgcolor=cBlack>;
+                        } Frames[Section[0].BaseInfo.FrameCount] <optimize=false>;
                     } AlphaInfo <bgcolor=cRed>;
+                    break;
             }
             
             FSeek(0x03 + (i * 0x05) + 0x05);
