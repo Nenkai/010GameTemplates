@@ -105,7 +105,7 @@ struct
                         int SampleRate;
                         uint64 SampleCount;
                         int SampleTotalDataSize;
-                        byte MP3SampleData[SampleTotalDataSize] <bgcolor=cDkPurple>;
+                        byte MPEGSampleData[SampleTotalDataSize] <bgcolor=cDkPurple>;
                     } AudioInfo <bgcolor=cPurple>;
                     
                     break;
