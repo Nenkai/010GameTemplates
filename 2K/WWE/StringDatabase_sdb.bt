@@ -1,0 +1,36 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: WWE 2K SDB File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.sdb
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+byte Unk;
+byte IsMangled;
+short Unk;
+int Count;
+
+for (local int i = 0; i < Count; i++)
+{
+    FSeek(8 + (i * 0x0C));
+    struct
+    {
+        int Offset <fgcolor=cRed, format=hex>;
+        int Size <format=hex>;
+        uint LabelHash <comment="CRC32C insensitive">;
+        
+        if (Size > 0)
+        {
+            FSeek(Offset);
+            byte Str[Size] <bgcolor=cLtGray>;
+        }
+        
+        FSeek(startof(this) + 0x0C);
+    } String <bgcolor=cYellow, read=Str("Hash: %d", LabelHash)>;
+}
