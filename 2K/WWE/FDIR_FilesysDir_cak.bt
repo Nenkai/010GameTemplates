@@ -1,0 +1,110 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Cake archive (FDIR/cak), for >=v9
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.cak|*.dir
+//  ID Bytes: 46 44 49 52
+//   History: 
+//------------------------------------------------
+
+struct FilesysDirHeader
+{
+    uint Magic <format=hex>;
+    byte VersionMajor;
+    byte VersionMinor;
+    ushort Flags;
+} Header <bgcolor=cPurple, open=true>;
+
+int FileCount;
+int DirCount;
+
+if (Header.VersionMajor >= 9)
+    int ChunkCount;
+    
+struct
+{
+    uint Size <format=hex>;
+    uint CRC <format=hex>;
+    uint Offset <format=hex, fgcolor=cRed>;
+} Section[5] <bgcolor=cDkPurple>;   
+
+int pad1;
+int pad2;
+uint TotalTocSize <format=hex>;
+
+FSeek(Section[0].Offset);
+struct
+{
+    uint64 NameHash;
+    uint BitFlags;
+} DirLookups[DirCount] <read=Str("0x%LX", NameHash), bgcolor=cYellow>;
+
+FSeek(Section[1].Offset);
+struct
+{
+    uint64 NameHash;
+    uint BitFlags;
+} FileLookups[FileCount] <read=Str("0x%LX", NameHash), bgcolor=cGray>;
+
+typedef struct
+{
+    if (Header.VersionMajor >= 9)
+    {
+        uint StringOffset <format=hex>;
+        uint ParentDirIndex;
+        uint CompressedSize <format=hex>;
+        uint ResourceTypeSignature <format=hex>;
+        uint64 DataOffset <format=hex>;
+        uint ExpandedSize <format=hex>;
+        ushort NumChunks;
+        uint RawBitFlags <format=hex>;
+        uint ChunkEndOffsets[NumChunks];
+        
+        if (Header.VersionMinor >= 9)
+            byte ChunkUnks[NumChunks]; // Never used in retail, seemingly
+    }
+} FileEntry <optimize=false, read=ReadFileEntry>;
+
+string ReadFileEntry(FileEntry& entry)
+{
+    return Str("%s [%c%c%c%c]", ReadString(Section[4].Offset + entry.StringOffset + 1), 
+        entry.ResourceTypeSignature, entry.ResourceTypeSignature >> 8, entry.ResourceTypeSignature >> 16, entry.ResourceTypeSignature >> 24);
+}
+
+FSeek(Section[2].Offset);
+struct
+{
+    for (local int i = 0; i < FileCount; i++)
+    {
+        FileEntry FileEntry_;
+    }
+} FileEntries;
+
+FSeek(Section[3].Offset);
+struct
+{
+    for (local int i = 0; i < DirCount; i++)
+    {
+        struct
+        {
+            if (Header.VersionMajor >= 9)
+            {
+                uint64 Hash <format=hex>;
+                uint PathStringOffset;
+                ushort SubFolderCount <format=hex>;
+                ushort Empty1;
+                ushort FileCount;
+                ushort Empty2;
+                
+                if (SubFolderCount)
+                    uint SubFolderIndices[SubFolderCount];
+                if (FileCount)
+                    uint FileIndices[FileCount];
+            }
+        } DirEntry <optimize=false>;
+    }
+} DirEntries;
