@@ -106,10 +106,10 @@ typedef struct
     FSeek(Align(FTell(), 4)); // Must align to 0x04
     
     // TOC
-    // if not zero, this is an offset into the string table - GfxCore::MtlDef::GetEffect
-    ushort EffectStringOffset <format=hex>;
-    // if not zero, this is an offset into the string table - GfxCore::MtlDef::GetTechnique
-    ushort TechniqueStringOffset <format=hex>;
+    // if not zero (or -1?), this is an offset into the string table - GfxCore::MtlDef::GetEffect
+    short EffectStringOffset <format=hex>;
+    // if not zero (or -1?), this is an offset into the string table - GfxCore::MtlDef::GetTechnique
+    short TechniqueStringOffset <format=hex>;
     
     // All these fields are passed to a CYMXEN_SubObject field with bitflags at CSkinModelDX11::CreateModelDataCopy
     byte Bool0; // Flag 0x04
