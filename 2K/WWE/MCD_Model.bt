@@ -11,13 +11,8 @@
 //   History: 
 //------------------------------------------------
 
-// THIS TEMPLATE ONLY SUPPORTS K26!
-
 // This research is based off game reading logic
 // rather than guessing from the file layout itself.
-
-// NOTE: The game engine does not do any version checks, therefore there is no backwards compatibility.
-// The structure must NOT change
 
 int AlignValue(int pos, int alignment) {
     local int amount = (-pos % alignment + alignment) % alignment;
@@ -400,14 +395,36 @@ typedef struct
                 ushort MorphNameStringIndex[NumMorphs] <optimize=false, read=Str("%d (%s)", this, GetString(this))>;
                 Align(4); // Must align to 0x04
                 int NumVerts;
-                int Unk2;
-                int Unk3;
-                int Unk4;
-                int Unk5;
-                int Unk6;
-                int Unk7;
+                float Unk2;
+                float Unk3;
+                float Unk4;
+                float Unk5;
+                float Unk6;
+                float Unk7;
                 int DataSize <format=hex>;
-                byte Data[DataSize];
+                
+                local int NumChunkHeaders = (NumVertices + 31) / 32;
+                union
+                {
+                    byte MorphDataBytes[DataSize];
+                    struct
+                    {
+                        // One per 32 vertices
+                        struct
+                        {
+                            uint VertBitMask <format=binary, comment="1 bit per vertex, if bit is true, vertex has morph data">;
+                            uint PackedDataOffset <comment="This * 4">;
+                        } MorphChunkDef[NumMorphs * NumChunkHeaders] <comment="Represents a chunk of 32 potential morph vertices">;
+                        
+                        byte PackedData[(startof(MorphData) + DataSize) - FTell()];
+                    } MorphData;
+                } MorphData_;
+                
+                // For each present vertex
+                // uint Position - 11-11-10 bits
+                // uint Normal   -  8-8-8 signed
+                
+                
             } CMorph_ <read=Str("%d morph(s)", parentof(this).NumMorphs)>;
         }
         
