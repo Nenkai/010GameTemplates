@@ -422,7 +422,7 @@ typedef struct
                 
                 // For each present vertex
                 // uint Position - 11-11-10 bits
-                // uint Normal   -  8-8-8 signed
+                // uint Normal   - 8-8-8 signed + bool for whether has normal. (float)(char)axis * 0.007874
                 
                 
             } CMorph_ <read=Str("%d morph(s)", parentof(this).NumMorphs)>;
