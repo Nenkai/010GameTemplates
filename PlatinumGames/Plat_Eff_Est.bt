@@ -228,7 +228,7 @@ typedef struct (int dataOffset)
                     byte VERIFIED_0x1E;
                     byte _0x1F;
                     int VERIFIED_0x20;
-                    int VERIFIED_0x24;
+                    float VERIFIED_0x24;
                     int VERIFIED_0x28; // is this a int?
                     byte _pad_[0x14];
                 } EffectParticleGenerationData; 
@@ -363,18 +363,18 @@ typedef struct (int dataOffset)
             {
                 float VERIFIED_0x00[18]; // [0] = 距離チェックの範囲がマイナスに設定されています
                 
-            } EffectFreeVecWork;
+            } EffectFreeVecWork <comment="'free' general purpose vector parameters for an effect. Purpose depends per espId being used.">;
             break;
             
         case sEffectFreeWork: // FWK
             // All correct
             struct
             {
-              int16 wk0; // パーティクル発生個数が０以下です。, 環境フラグの設定が不正です (when >= 4)
+              int16 wk0;
               int16 wk1;
-              int16 wk2; // wk2は0以上を指定してください[%d]
-              int16 wk3; // wk3は-2以上を指定してください[%d]
-              int16 wk4; // wk4は-2以上を指定してください
+              int16 wk2;
+              int16 wk3;
+              int16 wk4;
               int16 wk5;
               int16 wk6;
               int16 wk7;
@@ -387,8 +387,7 @@ typedef struct (int dataOffset)
               byte wk14;
               byte wk15;
               uint _dummy[2];
-            } CmnWork;
-
+            } CmnWork  <comment="'free' general purpose integer parameters for an effect. Purpose depends per espId being used.">;
             break;
             
         case EffectEmitterMoveData: // EMMV
@@ -447,7 +446,9 @@ typedef struct (int dataOffset)
             break;
         }
     } Data;
-} Function <comment=EnumToString(Meta.FuncName)>;
+} Function <read=Str("%s%c%c%c%c (%s)", Meta.Size == 0 ? "[EMPTY] " : "", 
+    Meta.FuncName >> 0,  Meta.FuncName >> 8,  Meta.FuncName >> 16,  Meta.FuncName >> 24, 
+    EnumToString(Meta.FuncName))>;
 
 //////////////////////////////////////////////////
 // MAIN HEADER
