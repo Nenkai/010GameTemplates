@@ -95,6 +95,21 @@ typedef struct
 
 typedef struct
 {
+    int Active;
+    int UnkIdSlot;
+    int EidId1 <comment="This is used if EidId2 is 0.">;
+    int EidId2;
+    double XOffset <comment="Lateral offset">;
+    double YOffset <comment="Vertical offset">;
+    double ZOffset <comment="Forward offset">;
+    double Revolution <comment="revolution (orbit) around character">;
+    float Rotation;
+    float VFXScale;
+    int pad[8];
+} VFXEmitParams;
+
+typedef struct
+{
     int AssetType;
     int AssetPathOffset;
     
@@ -196,12 +211,12 @@ enum TimelineElementType
     kTimelineElem_1006 = 1006,                         // OneShot
     kTimelineElem_1007 = 1007,                         // Range
     kTimelineElem_1008 = 1008,                         // Range
-    kTimelineElem_1009 = 1009,                         // Range
+    kTimelineElem_EnableComboRange = 1009,             // Range
     kTimelineElem_TurnToTarget = 1010,                 // Range
-    kTimelineElem_1011 = 1011,                         // OneShot
+    kTimelineElem_SummonMagicShotCreate = 1011,        // OneShot
     kTimelineElem_MagicCreate = 1012,                  // OneShot
     kTimelineElem_1013 = 1013,                         // OneShot
-    kTimelineElem_1014 = 1014,                         // Range
+    kTimelineElem_EnableBattleFlagRange = 1014,        // Range
     kTimelineElem_1015 = 1015,                         // OneShot
     kTimelineElem_PrecedeInputUnk = 1016,              // Range
     kTimelineElem_1017 = 1017,                         // Range
@@ -268,11 +283,11 @@ enum TimelineElementType
     kTimelineElem_1081 = 1081,                         // Range
     kTimelineElem_1082 = 1082,                         // OneShot
     kTimelineElem_1083 = 1083,                         // Range
-    kTimelineElem_1084 = 1084,                         // Range
+    kTimelineElem_EnableMagicBurstRange = 1084,        // Range
     kTimelineElem_1085 = 1085,                         // Range
     kTimelineElem_1086 = 1086,                         // Range
     kTimelineElem_1087 = 1087,                         // Range
-    kTimelineElem_1088 = 1088,                         // OneShot
+    kTimelineElem_ApplyCharacterForceTrigger = 1088,   // OneShot
     kTimelineElem_1089 = 1089,                         // Range
     kTimelineElem_1091 = 1091,                         // OneShot
     kTimelineElem_1092 = 1092,                         // Range
@@ -299,7 +314,7 @@ enum TimelineElementType
     kTimelineElem_1114 = 1114,                         // OneShot
     kTimelineElem_1115 = 1115,                         // Range
     kTimelineElem_1116 = 1116,                         // Range
-    ActionEventTrigger = 1117,                         // OneShot
+    kTimelineElem_ActionEventTrigger = 1117,           // OneShot
     kTimelineElem_1118 = 1118,                         // OneShot
     kTimelineElem_1119 = 1119,                         // OneShot
     kTimelineElem_1120 = 1120,                         // Range
@@ -311,7 +326,7 @@ enum TimelineElementType
     kTimelineElem_1126 = 1126,                         // OneShot
     kTimelineElem_1127 = 1127,                         // Range
     kTimelineElem_1129 = 1129,                         // Range
-    kTimelineElem_1130 = 1130,                         // Range
+    kTimelineElem_EnablePrecisionTorgalRange = 1130,   // Range
     kTimelineElem_1131 = 1131,                         // OneShot
     kTimelineElem_1132 = 1132,                         // OneShot
     kTimelineElem_1133 = 1133,                         // Range
@@ -822,9 +837,11 @@ typedef struct
             case 1008:
                 // 40 53 48 83 EC ? 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B 40 ? E8 ? ? ? ? 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 5C 24 ? 84 C0 74 ? 48 8B CB E8 ? ? ? ? 48 85 C0 74 ? B2
                 break;
-            case 1009:
+            case kTimelineElem_EnableComboRange: // 1009
                 {
                     // 48 83 EC ? 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 15 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 8C D1 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 88 ? ? ? ? 48 8B 01 FF 50 ? 48 83 C4 ? C3 48 83 EC
+                    // This one seems to control whether a timeline can combo into another (following the rules set by the combo.nxd table)
+                    // Disabling it in a timeline prevents the combo from chaining properly.
                     byte pad[0x20];
                 };
                 break;
@@ -845,6 +862,25 @@ typedef struct
                     byte pad[0x18];
                 };
                 break;
+            case kTimelineElem_SummonMagicShotCreate: // 1011
+                {
+                    enum <int>
+                    {
+                        NormalShot = 1,
+                        ChargedShot = 2,
+                        PrecisionShot = 3,
+                        Custom_TiedToCommand = 4,
+                    } SummonMagicSourceType <comment="Which magic id to use, based on the current summon's SummonMode row magic ids">;
+                    
+                    byte Custom_Bool1 <comment="Type 4 only">;
+                    byte Custom_Bool2 <comment="Type 4 only">;
+                    FSkip(2); // implicit padding
+                    int Custom_MagicIdForSkillLevel1 <comment="Type 4 only">;
+                    int Custom_MagicIdForSkillLevel2 <comment="Type 4 only">;
+                    byte pad[0x10];                    
+                    FSeek(startof(SummonMagicSourceType) + 0x28);
+                };
+                break;
             case kTimelineElem_MagicCreate: // 1012
                 {
                     // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B 41
@@ -856,10 +892,13 @@ typedef struct
                     FSeek(startof(Unused) + 0x28);
                 };
                 break;
-            case 1014:
+            case kTimelineElem_EnableBattleFlagRange:
                 {
                     // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 10 48 8B C8 FF 52 ? 4C 8B 05 ? ? ? ? 48 8B 15 ? ? ? ? 4A 8B 8C C2 ? ? ? ? 8B D0 4C 8B 01 41 FF 50 ? 48 85 C0 74 ? 48 8B 88
-                    int UnkType; // No more than 0x1F (bitset)
+                    // When set to 8, activates invulnerability on Clive to both damage and knockback (iFrames, basically). 
+                    //   If used in conjuction with the already documented (on the wiki) Element 1021, 
+                    //   it can be used to trigger 'precision' evasions, such as the Precision Dodge and Precision Rook's Gambit
+                    int Flag <comment="Type 0-22">; // No more than 0x1F (bitset)
                     byte pad[0x1C];
                 };
                 break;
@@ -882,8 +921,8 @@ typedef struct
             case kTimelineElem_1023:
                 {
                     // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC 48 83 EC ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 4C 8B F1
-                    int Offset_0x00 <format=hex, fgcolor=cRed>;
-                    int Count_0x00;
+                    int VFXParamsOffset <format=hex, fgcolor=cRed>;
+                    int VFXParamCount;
                     int field_0x08 <format=hex, fgcolor=cRed>;
                     int field_0x0C;
                     AssetRef VFX <format=hex, fgcolor=cRed>;
@@ -902,21 +941,8 @@ typedef struct
                     int field_0x4C;
                     int field_0x50;
                     
-                    FSeek(startof(Offset_0x00) + Offset_0x00);
-                    struct
-                    {
-                        int Active;
-                        int UnkIdSlot;
-                        int EidId1 <comment="This is used if EidId2 is 0.">;
-                        int EidId2;
-                        double field_0x10;
-                        double field_0x18;
-                        double field_0x20;
-                        double field_0x28;
-                        float field_0x30;
-                        float field_0x34;
-                        int pad[8];
-                    } Sub[Count_0x00];
+                    FSeek(startof(VFXParamsOffset) + VFXParamsOffset);
+                    VFXEmitParams VFXEmitParams_[VFXParamCount];
                     
                     FSeek(startof(this) + 0x54);
 
@@ -925,8 +951,8 @@ typedef struct
             case 1030:
                 {
                     // 48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 48 8B EC 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B F9
-                    int Offset_0x00 <format=hex, fgcolor=cRed>;
-                    int Count_0x00 <fgcolor=cGreen>;
+                    int VFXParamsOffset <format=hex, fgcolor=cRed>;
+                    int VFXParamCount;
                     int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
                     int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
                     AssetRef VFX <format=hex, fgcolor=cRed>;
@@ -949,21 +975,8 @@ typedef struct
                     int field_0x4C;
                     int field_0x50;
                     
-                    FSeek(startof(Offset_0x00) + Offset_0x00);
-                    struct
-                    {
-                        int Active;
-                        int UnkIdSlot;
-                        int EidId1 <comment="This is used if EidId2 is 0.">;
-                        int EidId2;
-                        double field_0x10;
-                        double field_0x18;
-                        double field_0x20;
-                        double field_0x28;
-                        float field_0x30;
-                        float field_0x34;
-                        int pad[8];
-                    } Sub[Count_0x00];
+                    FSeek(startof(VFXParamsOffset) + VFXParamsOffset);
+                    VFXEmitParams VFXEmitParams_[VFXParamCount];
 
                     FSeek(startof(UnionType) + UnkNameOffset3);
                     string UnkName3 <bgcolor=cGray>;
@@ -1004,8 +1017,8 @@ typedef struct
                 break;
             case 1049:
                 {
-                    int Offset_0x00 <format=hex, fgcolor=cRed>;
-                    int Count_0x00 <fgcolor=cGreen>;
+                    int VFXParamsOffset <format=hex, fgcolor=cRed>;
+                    int VFXParamCount;
                     int Offset_0x08 <format=hex, fgcolor=cRed>; // 0x1C Stride
                     int Count_0x08 <fgcolor=cGreen>; // vfxexternallist
                     AssetRef VFX <format=hex, fgcolor=cRed>;
@@ -1027,21 +1040,8 @@ typedef struct
                     int field_0x4C;
                     int field_0x50;
 
-                    FSeek(startof(Offset_0x00) + Offset_0x00);
-                    struct
-                    {
-                        int Active;
-                        int UnkIdSlot;
-                        int EidId1 <comment="This is used if EidId2 is 0.">;
-                        int EidId2;
-                        double field_0x10;
-                        double field_0x18;
-                        double field_0x20;
-                        double field_0x28;
-                        float field_0x30;
-                        float field_0x34;
-                        int pad[8];
-                    } Sub[Count_0x00];
+                    FSeek(startof(VFXParamsOffset) + VFXParamsOffset);
+                    VFXEmitParams VFXEmitParams_[VFXParamCount];
 
                     FSeek(startof(Offset_0x00) + 0x70);
                 };
@@ -1114,23 +1114,60 @@ typedef struct
                     byte Pad[0x20];
                 };
                 break;
-             case kTimelineElem_1084:
+             case kTimelineElem_EnableMagicBurstRange: // 1084
                 {
                     // 40 53 48 83 EC ? 48 8B D9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 48 8B 0D ? ? ? ? 8B 91 ? ? ? ? 39 50 ? 75 ? 48 8B 43 ? 48 81 C1
-                    int UnkType;
+                    // When active, magic burst is possible. Also modifies timings displayed by the magic burst helper gauge in the training room.
+                    // Note: for an action to be a valid magic burst, its MovementType1 and MovementType2 should be 13 and 0. 
+                    int UnkType <comment="Type 0-3">;
                     byte Pad[0x20];
                 };
                 break;
-            case kTimelineElem_1088:
+            case kTimelineElem_ApplyCharacterForceTrigger: // 1088
                 {
                     // 48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 48 83 EC ? 48 8B E9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 E8
-                    int field_0x00;
-                    float field_0x04;
-                    float field_0x08;
-                    int field_0x0C;
-                    int field_0x10;
-                    float field_0x14;
-                    float field_0x18;
+                    // Applies a force on the current character at the given frame (set frameDuration to 0) following the given parameters
+                    
+                    /* Notes from mThund3R:
+                       Tried messing around with these values by editing the third magic burst airborne shot. They seem very similar to what is found in systemmove.nxd
+                       The values there are, in order: 
+                       -5, 8, 8, -27.5
+                       
+                       This creates upwards, slightly backwards movement
+                       If we change the values like this: -5, 8, 16, -27.5 (doubled vertical_force)
+                       the explosion will now throw clive higher into the air, in such a way that the time required to get back down is doubled
+                       
+                       If we want to go higher, but reach the ground in the same timeframe as vanilla air magic burst 3, we need to double vertical_interpolation as well:
+                       -5, 8, 16, -50
+                       
+                       It seems force and interpolation work together to determine both the actual movement, and how fast it's performed.
+                       To confirm this theory, setting vertical_interpolation to 100 will cause the time clive will take to reach the ground to be halved. 
+                       
+                       The horizontal parameters work the same way. 
+                       Setting the parameters like this:
+                       -10, 8, 8, -27.5 (double the horizontal_force)
+                       will cause the explosion to send Clive more backwards, and the movement will be completed in half the usual time. 
+                       
+                       If we double horizontal_interpolation as well (8 -> 16) Clive will now complete the movement with in the usual time period.
+                       Note that, with horizontal movement, the combination of force and interpolation will provide the force applied to the character clues when to STOP. There is no "reaching the ground" element, unlike vertical movement.
+                        
+                       This means that having a higher force/interpolation ratio WILL go a bit further horizontally than having a 1/1 ratio. I'm still studying how this works precisely, I'm sorry if I cannot give more information at the moment
+                       
+                       Now one last challenge: reverse the movement direction.
+                       
+                       Sounds easy enough, right? Just invert the, say, horizontal_force.
+                       Yes, but we also need to invert the interpolation, or the force will be nullified.
+                       It looks like the sign of the force needs to be the opposite of the sign of the interpolation.
+                        
+                        5, -8, 8, -27.5 will make the explosion push Clive slightly forward, rather than backwards.
+                    */
+                    int HorizontalType <comment="0-2">;
+                    float HorizontalForce;
+                    float HorizontalRate;
+                    int Unused;
+                    int VerticalType <comment="0-2">;
+                    float VerticalForce;
+                    float VerticalRate;
                     byte field_0x1C;
                     byte pad[0x03];
                 };
@@ -1221,15 +1258,17 @@ typedef struct
                     byte pad_[0x1E];
                 };
                 break;
-            case ActionEventTrigger: // 1117
+            case kTimelineElem_ActionEventTrigger: // 1117
                 {
                     // 48 89 5C 24 ? 57 48 83 EC ? 48 8B F9 48 83 C1 ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 52 ? 48 8B 0D ? ? ? ? 48 8D 54 24 ? 44 8B C0 E8 ? ? ? ? 48 8B 5C 24
                     int UnkId; // has hardcoded check on id 79 and 80
                     byte pad[0x20];
                 };
                 break;
-            case 1130:
+            case kTimelineElem_EnablePrecisionTorgalRange: // 1130
                 {
+                    // During active frames, a precision sic / ravage is possible. 
+                    // Can also be tracked using the precision sic helper gauge in the training room 
                     // 48 8B 05 ? ? ? ? C6 40 ? ? C3 48 8B 05
                     byte pad[0x20];
                 };
