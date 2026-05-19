@@ -981,7 +981,7 @@ typedef struct
                     FSeek(startof(UnionType) + UnkNameOffset3);
                     string UnkName3 <bgcolor=cGray>;
                     
-                    FSeek(startof(Offset_0x00) + 0x54);
+                    FSeek(startof(VFXParamsOffset) + 0x54);
                 }
                 break;
             case 1035: // Inherits from 1001?
@@ -1043,7 +1043,7 @@ typedef struct
                     FSeek(startof(VFXParamsOffset) + VFXParamsOffset);
                     VFXEmitParams VFXEmitParams_[VFXParamCount];
 
-                    FSeek(startof(Offset_0x00) + 0x70);
+                    FSeek(startof(VFXParamsOffset) + 0x70);
                 };
                 break;
             case kTimelineElem_BattleVoiceTrigger: // 1053
