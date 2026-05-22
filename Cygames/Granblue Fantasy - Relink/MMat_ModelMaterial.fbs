@@ -17,7 +17,7 @@ enum ShaderParameterTypeNameHash : uint
     g_UseIceEmissive0      = 0x3C966EE3,
     g_4298F7E4             = 0x4298F7E4,
     g_EnableOutLine        = 0x49D8C1B9,
-    g_53F49792             = 0x53F49792,
+    g_53F49792_EnableAlpha_GUESSED = 0x53F49792, // Name is guessed on functionality.
     g_56346692             = 0x56346692,
     g_IsUseAlbedoAlphaClip = 0x60F31A22,
     g_IsUseDetailNormal    = 0x6C5CB9AC,
