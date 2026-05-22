@@ -32,7 +32,7 @@ enum ShaderParameterTypeNameHash : uint
     g_AB261CFA             = 0xAB261CFA,
     g_AC6F995D             = 0xAC6F995D,
     g_B0EA41D9             = 0xB0EA41D9,
-    g_B460A0F0             = 0xB460A0F0,
+    g_IsUseDepthFade       = 0xB460A0F0,
     g_BAEF6920             = 0xBAEF6920,
     g_C5BD3DED             = 0xC5BD3DED,
     g_C9762248             = 0xC9762248,
