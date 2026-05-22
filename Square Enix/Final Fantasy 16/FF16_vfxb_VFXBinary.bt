@@ -11,11 +11,22 @@
 //   History: 
 //------------------------------------------------
 
+BitfieldDisablePadding();
+
 // STILL INCOMPLETE.
+// LOTS OF UNKNOWNS STILL.
+// TODO:
+// - Item types
+// - Find out where the timeline resides
+// - Figure out pointer type 2? or is it just vm storage?
+// - And lots more. Probably due for refactors too.
 // Ported from https://github.com/AlexPlaceres/FF16Templates/blob/main/Incomplete/vfxb.bt
 
-typedef int OffsetT<fgcolor=cRed, format=hex>;
-typedef int AddressT<fgcolor=cPurple, format=hex>;
+//////////////////////////////////////////////////////////////////
+// GENERAL PURPOSE STRUCTURES
+//////////////////////////////////////////////////////////////////
+typedef int OffsetT <fgcolor=cRed, format=hex>;
+typedef int AddressT <fgcolor=cPurple, format=hex>;
 
 typedef struct TPadding(uint64 count)
 {
@@ -23,11 +34,36 @@ typedef struct TPadding(uint64 count)
     byte Data[PaddingCount];
 } Padding<bgcolor=cNone, read=Str("%u bytes", this.PaddingCount)>;
 
-typedef struct TOffset24
+typedef struct TOffset30
 {
-    int Offset : 24;
-    int Flags : 8;
-} Offset24<fgcolor=0x008CFF, read=Str("%Xh, %s", this.Offset, IntToBinaryStr(this.Flags))>;
+    int Offset : 30;
+    enum <int>
+    {
+        OffsetType_PropertyDataGlobal = 0,
+        OffsetType_LocalPropertyData = 1,
+        OffsetType_Unk2 = 2,
+        OffsetType_None = 3,
+    } Type : 2;
+} Offset30<fgcolor=0x008CFF, read=Str("%Xh (%s)", this.Offset, EnumToString(this.Type))>;
+
+int IsValidOffset(Offset30& offs)
+{
+    return offs.Offset != 0x3FFFFFFF && offs.Type != OffsetType_None;
+}
+
+uint GetOffset(Offset30& offs)
+{
+    if (!IsValidOffset(offs))
+        return 0;
+        
+    switch (offs.Type)
+    {
+        case OffsetType_PropertyDataGlobal:
+            return Toc2.ItemBlobInfo.GlobalPropertyDataOffset + offs.Offset;
+        case OffsetType_LocalPropertyData:
+            return Toc2.ItemBlobInfo.GlobalPropertyDataOffset + LocalPropertyDataOffset + offs.Offset;
+    }   
+}
 
 typedef struct TVarOffset(ubyte offsetSize, ubyte flagSize)
 {
@@ -37,15 +73,6 @@ typedef struct TVarOffset(ubyte offsetSize, ubyte flagSize)
     int offset : offset_size;
     int flags : flag_size;
 } VarOffset<fgcolor=0x008CFF, read=Str("%Xh, %s", this.offset, IntToBinaryStr(this.flags))>;
-
-
-typedef struct TItemEntry
-{
-    OffsetT offset;
-    VarOffset field_0x04(30, 2);
-    VarOffset field_0x08(30, 2);
-    int field_0x0C;
-} ItemEntry;
 
 typedef struct TStringT{
     string data;
@@ -59,209 +86,63 @@ typedef struct TVector4{
     float x, y, z, w;
 } Vector4<read=Str("%.3f, %.3f, %.3f, %.3f", this.x, this.y, this.z, this.w)>;
 
-struct Header
-{
-    char Magic[4]<fgcolor=cYellow>;
-    
-    byte field_0x4;
-    byte field_0x5;
-    byte field_0x6;
-    Padding padding(1);
-    
-    int PropertyDataSize;
-    int ItemDataSize;
-    int TotalDataSize <comment="item + property data size">;
-    int field_0x14;
-    int VertexSetCount <fgcolor=cGreen>;
-    byte TextureCount <fgcolor=cGreen>;
-    byte ConstantCount <fgcolor=cGreen>;
-    byte field_0x1E;
-    byte field_0x1F <fgcolor=cGreen>; // struct_0x2 count
-    byte StringCount <fgcolor=cGreen>;
-    byte field_0x21;
-    byte field_0x22;
-    byte field_0x23;
-    byte field_0x24;
-    byte field_0x25;
-    byte field_0x26;
-    byte field_0x27;
-    byte field_0x28;
-    byte field_0x29;
-    byte field_0x2A;
-    byte field_0x2B;
-    
-    Padding padding_1(4);
-    
-    ItemEntry RootItems[15];
-    byte unknown_data[0x98]<bgcolor=cGray>;
-    
-    struct
-    {
-        AddressT Offset;
-        uint Size;
-    } ShaderBlobInfo <read=Str("%Xh, %d bytes", this.Offset, this.Size)>;
-    
-    struct{
-        AddressT Offset;
-        int field_0x04;
-        int field_0x08;
-    } StringBlobInfo <read=Str("%Xh", this.Offset)>;
-    
-    struct{
-        AddressT Offset;
-        int field_0x04;
-    } Blob0x02Info <read=Str("%Xh", this.Offset)>;
-    
-    struct
-    {
-        AddressT BaseAddress;
-        OffsetT PropertiesOffset; // USED
-        OffsetT ItemsOffset; // USED
-        OffsetT ConstantsOffset; // USED
-        OffsetT field_0x1E4;
-        OffsetT ConstantDataOffset; // USED
-        OffsetT field_0x1EC;
-        OffsetT field_0x1F0;
-        OffsetT VertexSetOffset; // USED
-        OffsetT TextureIndicesOffset; // USED
-        OffsetT field_0x1FC; // USED
-        OffsetT field_0x200;
-        OffsetT field_0x204; // USED
-        OffsetT field_0x208;
-        OffsetT field_0x20C; // USED
-        
-        local AddressT properties_address = BaseAddress + PropertiesOffset;
-        local AddressT items_address = BaseAddress + ItemsOffset;
-        local AddressT ConstantsAddress = BaseAddress + ConstantsOffset;
-        local AddressT ConstantDataAddress = BaseAddress + ConstantDataOffset;
-        local AddressT VertexSetAddress = BaseAddress + VertexSetOffset;
-        local AddressT texture_indices_address = BaseAddress + TextureIndicesOffset;
-        local AddressT project_info_address = BaseAddress + field_0x1FC;
-        local AddressT texture_groups_address = BaseAddress + field_0x20C;
-    } ItemBlobInfo <open=true>;
-};
-
-Header Header_<bgcolor=cDkGreen>;
-
-FSeek(Header_.ShaderBlobInfo.Offset);
-ubyte ShaderBlob[Header_.ShaderBlobInfo.Size]<bgcolor=cBlack, fgcolor=cGray>;
-
-FSeek(Header_.StringBlobInfo.Offset);
-StringT Strings[Header_.StringCount]<fgcolor=cYellow, optimize=false>;
-
-FSeek(Header_.Blob0x02Info.Offset);
-struct
-{
-    struct
-    {
-        byte field_0x00;
-        byte field_0x01;
-        byte field_0x02;
-        byte field_0x03;
-        byte field_0x04;
-        byte field_0x05;
-        byte field_0x06;
-        byte field_0x07;
-        OffsetT Offset;
-    } Entries[Header_.field_0x1F];
-
-    for(local int j = 0; j < Header_.field_0x1F; j++)
-    {
-        FSeek(startof(this) + Entries[j].Offset);
-        int sanity_check;
-    }
-} struct_0x2 <bgcolor=cLtBlue, read=Str("count: %d", Header_.field_0x1F)>;
-
-FSeek(Header_.ItemBlobInfo.VertexSetAddress);
-struct
-{
-    short name_offsets[Header_.VertexSetCount] <fgcolor=cRed>;
-    
-    for(local int j = 0; j < Header_.VertexSetCount; j++)
-    {
-        FSeek(startof(this) + sizeof(name_offsets) + name_offsets[j]);
-        StringT Set<fgcolor=cYellow>;
-    }
-} VertexSets <read=Str("count: %d", Header_.VertexSetCount), bgcolor=0xC9A91C>;
-
-FSeek(Header_.ItemBlobInfo.project_info_address);
-struct
-{
-    int field_0x00;
-    int field_0x04;
-    int ItemCount <fgcolor=cGreen>;
-    Padding padding(32);
-    int field_0x2C;
-    int field_0x30;
-    Padding padding_1(20);
-} project_info<bgcolor=cDkGreen>;
-
-FSeek(Header_.ItemBlobInfo.texture_indices_address);
-int64 TextureStringIndices[Header_.TextureCount]<bgcolor=cRed>;
+//////////////////////////////////////////////////////////////////
+// TEMPLATE SPECIFIC TYPEDEFS
+//////////////////////////////////////////////////////////////////
 
 enum<byte> ConstantDataType
 {
+    kMatrix4x4 = 0,
     kVector4 = 1,
+    kUnkType2 = 2,
     kFloat32 = 3,
 };
 
 typedef struct TConstantEntry
 {
     ConstantDataType Type;
-    byte NameLength;
-    byte NameOffset <fgcolor=cRed>;
+    ubyte NameLength <format=hex>;
+    ubyte NameOffset <format=hex, fgcolor=cRed>;
     byte Field_0x03;
     int ConstantId;
-    int EidId;
-    int ConstantDataOffset;
+    uint EidId;
+    int ConstantDataOffset <format=hex, comment="Relative to the start offset (ConstantDataAddress)">;
     
-    FSeek(strings_address + NameOffset);
+    FSeek(Toc2.ItemBlobInfo.ConstantsAddress + (Toc.ConstantCount * 0x10) + 0x10 + NameOffset);
     string Name <fgcolor=cYellow>;
     
-    FSeek(Header_.ItemBlobInfo.ConstantDataAddress + ConstantDataOffset);
-    switch (Type)
-    {
-        case kFloat32: float Value; break;
-        case kVector4: Vector4 Value; break;
-        default: int temp; break;
-    }
-    
-    FSeek(startof(this) + 0x10);
-} ConstantEntry<read=Str("%s %s", EnumToString(this.Type), this.Name)>;
-
-FSeek(Header_.ItemBlobInfo.ConstantsAddress);
-if(Header_.ConstantCount)
-{
+    FSeek(Toc2.ItemBlobInfo.ConstantDataAddress + ConstantDataOffset);
     struct
     {
-        local AddressT byte_field_address = FTell() + (Header_.ConstantCount * 0x10);
-        local AddressT strings_address = byte_field_address + 0x10;
-        
-        for (local int i = 0; i < Header_.ConstantCount; i++)
-            ConstantEntry entry;
-        
-        byte byte_field[16];
-    } Constants<read=Str("Count: %d", Header_.ConstantCount), bgcolor=cBlue>;
-}
+        switch (Type)
+        {
+            case kMatrix4x4: float Matrix[4*4]; break; // Maybe more?
+            case kFloat32: float Value; break;
+            case kVector4: Vector4 Value; break;
+            default: int temp; break;
+        }
+    } Data;
+} ConstantEntry<read=Str("[Id %d, Eid %d] %s %s", ConstantId, EidId, EnumToString(this.Type), this.Name == "" ? "<No Name>" : this.Name)>;
 
-struct Item;
+struct ItemGroup;
+
 typedef struct TTextureGroup
 {
     byte indices[8];
     local int count = 0;
     local int i <hidden=true>;
-    local int64 string_index <hidden=true> = -1;
+    local int64 texResourceIndex <hidden=true> = -1;
     for(i = 0; i < 8; i++)
     {
         if(indices[i] == -1)
             continue;
             
         count += 1;
-        string_index = TextureStringIndices[indices[i]];
-        local StringT texture;
-        if(string_index > 255)
+        texResourceIndex = TextureResourceIndices[indices[i]];
+        local StringT resource;
+        if(texResourceIndex > 255)
             continue;
-        texture.data = Strings[string_index].data;
+        resource.data = Resources[texResourceIndex].data;
         
     }
 } TextureGroup;
@@ -302,298 +183,932 @@ typedef struct TKeyList
         
 } KeyList<read=Str("keys: %d", this.count)>;
 
-enum <short> PropertyType{
-    k1E = 0x1E,
-    kItem = 0x2B,
-    k31 = 0x31,
-    k8A = 0x8A,
-    k8B = 0x8B,
-    k8C = 0x8C,
-    k8E = 0x8E,
-    k8F = 0x8F,
-    k91 = 0x91,
-    kA5 = 0xA5,
+typedef struct
+{
+    // Func handler: 48 8B C4 48 89 58 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ? 48 81 EC ? ? ? ? C5 F8 29 70 ? C5 F8 29 78 ? C5 78 29 40 ? C5 78 29 48 ? C5 78 29 90 ? ? ? ? C5 78 29 98 ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 ? 48 8B 41
+    
+    Offset30 DataSectionOffset;
+    ubyte InstructionsLength;
+    ubyte DataLength;
+    FSkip(2);
+    
+    local long instStart = FTell();
+    
+    // Instructions start.
+    while (FTell() < (instStart + InstructionsLength))
+    {
+        enum <byte>
+        {
+            // The later ones will need verification, patterns were mostly recognized by AI.
+            
+            PushConst = 0,
+            
+            // same delta value passed to curve interpolation function
+            
+            PushTime = 1,
+            
+            // Returns an interpolated curve value from the specified curve.
+            // Arguments: inst = int offset into data, data value is offset into curve.
+            ReturnCurveValue = 2,
+            
+            // Pushes a float from a pointer from data section.
+            // Arguments: inst = int offset into data, data value is offset into float value.
+            PushFloat = 3,
+            
+            // Pushes uint (casted to float) from data section.
+            // Arguments: inst = int offset into data, data value is offset into uint value.
+            PushUInt = 4,
+            
+            // Pushes random float value [0, 1] from PRNG (xorshift seeded).
+            PushRand = 5,
+            
+            // Pushes random float value rom PRNG (xorshift seeded) % value.
+            // Arguments: inst = int offset into data, data value is uint as the value to mod with.
+            // hash % value
+            PushRandMod = 6,
+            
+            // Returns perlin noise (?), value popped from stack. PerlinNoise(time * frequency)
+            PerlinNoise = 7,
+            
+            // Pops 3 values
+            // lerp(data[A], data[B], (sin(X)+1)*0.5)
+            SinLerp2 = 8,
+            
+            // Pops 3 values
+            // sinblend(data[A], data[B], data[C])
+            SinLerp3 = 9,
+            
+            // Pops 2 values
+            // a+b
+            Add = 10,
+            
+            // Pops 2 values
+            // a*b
+            Multiply = 11,
+            
+            // Pops 2 values
+            // a/b
+            Divide = 12,
+            
+            // Pops 2 values
+            // a/safe(b)
+            DivideSafe = 13,
+            
+            // Pops 3 values
+            // a*b+c
+            FMA = 14,
+            
+            // Pops 3 values
+            // (b-a)*t + a
+            Lerp = 15,
+            
+            // max(0, x)
+            Max0 = 16,
+            
+            // Pops 2, pushes min
+            // min(a, b)
+            Min = 17,
+            
+            // Pops 2, pushes max(a, b)
+            Max = 18,
+            
+            // Pops 1, writes to tagged pointer from data[inst[0]]; side-effecting
+            Store = 19,
+            
+            // Pops 2
+            ModSafe = 20,
+            
+            // Returns the float at the start of the data pool
+            ReturnFloatConstant = 21,
+            
+            // Returns the uint (casted to float) at the start of the data pool
+            ReturnUIntConstant = 22,
+            
+            // lerp(Curve(data[2], time), Curve(data[1], time), ptr(data[0]))
+            CurveCrossfade = 23,
+            
+            // abs(Curve(ptr(data[0]), time))
+            CurveAbs = 24,
+            
+            // Curve(ptr(data[0]), time)
+            Curve = 25,
+            
+            // ptr(data[1]) + data[0]
+            AddConst = 26,
+            
+            // Curve(ptr(data[0]), time) + ptr(data[1])
+            CurveAddPtr = 27,
+            
+            // lerp(data[0], data[1], rng())
+            RandLerp = 28,
+            
+            // lerp(Curve(data[2], time), Curve(data[1], time), ptr(data[0])) + ptr(data[3])
+            CurveCrossfadeAdd = 29,
+            
+            // X = 2pi * (ptr(data[1]) / ptr(data[2])) + ptr(data[3])
+            // result = lerp(ptr(data[5]), ptr(data[4]), (sin(X)+1)*0.5) + ptr(data[0])
+            SinLerp2Add = 30,
+            
+            // abs(lerp(Curve(data[2], time), Curve(data[1], time), ptr(data[0])))
+            CurveCrossfadeAbs = 31,
+            
+            // lerp(Curve(data[0], time), Curve(data[1], time), rng())
+            RandCrossfade = 32,
+            
+            // abs(Curve(ptr(data[0]), time) + ptr(data[1]))
+            CurveAddPtrAbs = 33,
+            
+            // max(0, Curve(ptr(data[0]), time))
+            CurveRelu = 34,
+            
+            // data[0] * ptr(data[1])
+            ConstMulPtr = 35,
+            
+            // lerp(data[2], Curve(ptr(data[1]), time), ptr(data[0]))
+            CurveConstCrossfade = 36,
+            
+            // X = 2pi * (ptr(data[1]) / ptr(data[2])) + ptr(data[3])
+            // result = Curve(ptr(data[0]), time) + lerp(ptr(data[5]), ptr(data[4]), (sin(X)+1)*0.5)
+            SinLerp2PtrAddCurve = 37,
+            
+            // lerp(ptr(data[4]), ptr(data[0]), (sin(X)+1)*0.5) * ptr(data[0])
+            SinLerp2PtrSelfMul = 38,
+            
+            // X = 2π * (ptr(data[1]) / ptr(data[2])) + ptr(data[3])
+            // result = Curve(ptr(data[0]), time) * lerp(ptr(data[5]), ptr(data[4]), (sin(X)+1)*0.5)
+            SinLerp2PtrMulCurve = 39,
+            
+            // abs(Curve(ptr(data[0]), time) + ptr(data[2]) * data[1])
+            CurveAddPtrMulConstAbs = 40,
+            
+            // ptr(data[2]) * data[1] + data[0]
+            PtrMulConstAddConst = 41,
+            
+            // X = 2π * (ptr(data[1]) / ptr(data[2])) + ptr(data[3])
+            // result = lerp(ptr(data[5]), ptr(data[4]), (sin(X)+1)*0.5) * ptr(data[0])
+            Sinlerp2PtrMulPtr = 42,
+            
+            // rng() * data[2] + data[1] + data[0]
+            RandLinearConst = 43,
+            
+            // Curve(ptr(data[0]), time) + ptr(data[1]) + ptr(data[3]) * data[2]
+            CurveAddPtrAddPtrMulConst = 44,
+            
+            // ptr(data[0]) + ptr(data[1])
+            PtrAddPtr = 45,
+            
+            // Curve(ptr(data[0]), time) + ptr(data[2]) * data[1]
+            CurveAddPtrMulConst = 46, 
+            
+            // ptr(data[1]) + data[0] + ptr(data[3]) * data[2]
+            PtrAddConstAddPtrMulConst = 47,
+            
+            // abs(lerp(Curve(data[2], time), Curve(data[1], time), ptr(data[0])) + ptr(data[3]))
+            CurveCrossfadeAddAbs = 48,
+            
+            // abs(ptr(data[1]) * data[0])
+            PtrMulConstAbsSafe = 49,
+            
+            // abs(lerp(Curve(data[2], time), Curve(data[1], time), ptr(data[0])) * ptr(data[3]))
+            CurveCrossfadeMulAbs = 50,
+            
+            // Curve(ptr(data[0]), time) * ptr(data[1])
+            CurveMulPtr = 51,
+        } InstructionType;
+        
+        if (EnumToString(InstructionType) == "")
+            Printf("Unsupported instruction %d", InstructionType);
+    }
+} VFX_VM;
+        
+//////////////////////////////////////////////////////////////////
+// PROPERTY TYPES
+//////////////////////////////////////////////////////////////////
+
+enum <short> PropertyType
+{
+    kPropertyType_Unknown = 0, // Breaks from loop if encountered.
+    kPropertyType_1 = 1, // BuildCombinedRotation
+    kPropertyType_2 = 2,
+    kPropertyType_3 = 3, // ApplyYAndZRotationsToQuaternion
+    // Gap.
+    kPropertyType_5 = 5,
+    kPropertyType_6 = 6,
+    kPropertyType_7 = 7, // Set matrix to identity?
+    kPropertyType_8 = 8,
+    kPropertyType_9 = 9,
+    kPropertyType_10 = 10,
+    kPropertyType_11 = 11,
+    kPropertyType_12 = 12,
+    kPropertyType_13 = 13,
+    kPropertyType_14 = 14,
+    kPropertyType_15 = 15,
+    kPropertyType_16 = 16,
+    kPropertyType_17 = 17,
+    kPropertyType_18 = 18,
+    kPropertyType_19 = 19,
+    kPropertyType_20 = 20,
+    kPropertyType_21 = 21,
+    kPropertyType_22 = 22,
+    kPropertyType_23 = 23,
+    kPropertyType_24 = 24,
+    kPropertyType_25 = 25,
+    kPropertyType_26 = 26,
+    kPropertyType_27 = 27,
+    kPropertyType_28 = 28,
+    kPropertyType_29 = 29,
+    kPropertyType_30 = 30,
+    kPropertyType_31 = 31,
+    kPropertyType_32 = 32,
+    kPropertyType_33 = 33,
+    kPropertyType_34 = 34,
+    kPropertyType_35 = 35,
+    kPropertyType_36 = 36,
+    kPropertyType_37 = 37, // Moves to the next item in list? Does something with it?
+    kPropertyType_38 = 38,
+    kPropertyType_39 = 39, // Does something with item offset 0x58
+    kPropertyType_40 = 40,
+    kPropertyType_41 = 41,
+    kPropertyType_42 = 42,
+    kPropertyType_ItemGroup = 43,
+    kPropertyType_44 = 44,
+    kPropertyType_45 = 45,
+    kPropertyType_46 = 46,
+    kPropertyType_47 = 47,
+    kPropertyType_48 = 48,
+    kPropertyType_49 = 49,
+    kPropertyType_52 = 52,
+    kPropertyType_54 = 54,
+    kPropertyType_55 = 55,
+    kPropertyType_56 = 56,
+    kPropertyType_57 = 57,
+    kPropertyType_58 = 58,
+    kPropertyType_59 = 59,
+    kPropertyType_60 = 60,
+    kPropertyType_61 = 61,
+    kPropertyType_62 = 62,
+    kPropertyType_63 = 63,
+    kPropertyType_64 = 64,
+    kPropertyType_65 = 65,
+    kPropertyType_66 = 66,
+    kPropertyType_67 = 67,
+    kPropertyType_68 = 68,
+    kPropertyType_69 = 69,
+    kPropertyType_70 = 70,
+    kPropertyType_71 = 71,
+    kPropertyType_72 = 72,
+    kPropertyType_73 = 73,
+    kPropertyType_74 = 74,
+    kPropertyType_75 = 75,
+    kPropertyType_76 = 76,
+    kPropertyType_77 = 77,
+    kPropertyType_78 = 78,
+    kPropertyType_79 = 79,
+    kPropertyType_80 = 80,
+    kPropertyType_81 = 81,
+    kPropertyType_82 = 82,
+    kPropertyType_83 = 83,
+    // Gap.
+    kPropertyType_85 = 85,
+    kPropertyType_86 = 86,
+    kPropertyType_87 = 87,
+    kPropertyType_88 = 88,
+    kPropertyType_89 = 89,
+    kPropertyType_90 = 90,
+    kPropertyType_91 = 91,
+    kPropertyType_92 = 92,
+    kPropertyType_93 = 93,
+    kPropertyType_94 = 94,
+    kPropertyType_95 = 95,
+    kPropertyType_96 = 96,
+    kPropertyType_97 = 97,
+    kPropertyType_98 = 98,
+    kPropertyType_99 = 99,
+    kPropertyType_100 = 100,
+    kPropertyType_101 = 101,
+    kPropertyType_102 = 102,
+    kPropertyType_103 = 103,
+    kPropertyType_104 = 104,
+    kPropertyType_105 = 105,
+    kPropertyType_106 = 106,
+    kPropertyType_107 = 107,
+    kPropertyType_108 = 108,
+    kPropertyType_109 = 109,
+    kPropertyType_110 = 110,
+    kPropertyType_111 = 111,
+    kPropertyType_112 = 112,
+    kPropertyType_113 = 113,
+    kPropertyType_114 = 114,
+    kPropertyType_115 = 115,
+    kPropertyType_116 = 116,
+    kPropertyType_117 = 117,
+    kPropertyType_118 = 118,
+    kPropertyType_119 = 119,
+    kPropertyType_120 = 120,
+    kPropertyType_121 = 121,
+    kPropertyType_122 = 122,
+    kPropertyType_123 = 123,
+    kPropertyType_124 = 124,
+    kPropertyType_125 = 125,
+    kPropertyType_126 = 126,
+    kPropertyType_127 = 127,
+    kPropertyType_128 = 128,
+    kPropertyType_129 = 129,
+    kPropertyType_130 = 130,
+    kPropertyType_131 = 131,
+    kPropertyType_132 = 132,
+    kPropertyType_133 = 133,
+    // Gap.
+    kPropertyType_135 = 135,
+    kPropertyType_136 = 136,
+    kPropertyType_137 = 137,
+    kPropertyType_138 = 138, // Expression, copy return value to instance storage?
+    kPropertyType_139 = 139, // Copy const value to instance storage?
+    kPropertyType_140 = 140,
+    kPropertyType_141 = 141,
+    kPropertyType_142 = 142,
+    kPropertyType_143 = 143,
+    kPropertyType_144 = 144,
+    kPropertyType_145 = 145,
+    kPropertyType_146 = 146,
+    kPropertyType_147 = 147,
+    kPropertyType_148 = 148,
+    kPropertyType_149 = 149,
+    kPropertyType_150 = 150,
+    kPropertyType_151 = 151,
+    kPropertyType_152 = 152,
+    kPropertyType_153 = 153,
+    kPropertyType_154 = 154,
+    kPropertyType_155 = 155,
+    kPropertyType_156 = 156,
+    kPropertyType_157 = 157,
+    kPropertyType_158 = 158,
+    kPropertyType_159 = 156,
+    kPropertyType_160 = 160,
+    kPropertyType_161 = 161,
+    kPropertyType_162 = 162,
+    kPropertyType_163 = 163,
+    kPropertyType_164 = 164,
+    kPropertyType_165 = 165,
+    kPropertyType_166 = 166,
+    kPropertyType_167 = 167,
+    kPropertyType_168 = 168,
+    kPropertyType_169 = 169,
 };
 
-void GenerateProperty_0xA5(){
-    PropertyType type <bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    Offset24 field_0x3;
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    Offset24 field_0x5<bgcolor=cYellow>;
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x91(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    VarOffset field_0x3(30, 2);
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    OffsetT field_0x5<bgcolor=cYellow>;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x5);
-    KeyList keys<bgcolor=cDkBlue>;
-    
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x8C(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    Offset24 field_0x3;
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    Offset24 field_0x5<bgcolor=cYellow>;
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x8B(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    VarOffset field_0x3(30, 2);
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    float field_0x5<bgcolor=cYellow>;
-    
-    FSeek(parentof(this).address_0x0 + field_0x3.offset);
-    float field_0x6<bgcolor=cDkYellow>;
-    
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x8A(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    OffsetT field_0x3;
-    int field_0x4;
-    int field_0x5;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    float field_0x6<bgcolor=cYellow>;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x3);
-    float field_0x7<bgcolor=cYellow>;
-    
-    
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x8E(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    Offset24 field_0x3;
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    Offset24 field_0x5;
-    
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x8F(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    OffsetT field_0x2;
-    Offset24 field_0x3;
-    int field_0x4;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x2);
-    OffsetT field_0x5;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x5);
-    KeyList keys<bgcolor=cDkBlue>;
-    
-    FSeek(startof(this) + size);
-}
-
-void GenerateProperty_0x31()
+void GenerateItemType_7()
 {
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    int field_0x2, field_0x3, field_0x4, field_0x5;
-    int field_0x6, field_0x7, field_0x8, field_0x9;
-    short field_0xA;
-    short offset;
-    int field_0xC;
-    int field_0xD;
-    int field_0xE;
-    int field_0xF;
-    int field_0x10;
-    int field_0x11;
-    int field_0x12;
-    int field_0x13;
-    int field_0x14;
-    int field_0x15;
-    int field_0x16;
-    int field_0x17;
-    int field_0x18;
-    int field_0x19;
-    int field_0x1A;
-    
-    FSeek(Header_.ItemBlobInfo.texture_groups_address + offset);
-    TextureGroup texture_group<bgcolor=cDkRed>;
-    
-    FSeek(startof(this) + size);
+    Offset30 MatrixOffset;
+
+    FSeek(GetOffset(MatrixOffset));
+    float Matrix[4*4] <bgcolor=cWhite>;
 }
 
-void GenerateItemProperty()
+void GenerateItemGroupProperty()
 {
-    PropertyType Type <bgcolor=cGreen>;
-    short Size <bgcolor=cBlue>;
-    int Count <fgcolor=cGreen>;
-    VarOffset field_0x3(30, 2);
-    short field_0x4 : 6;
-    short field_0x4a : 10;
-    short field_0x5;
-    Offset24 field_0x6, field_0x7;
-    OffsetT field_0x8, field_0x9;
+    ubyte Count : 4;
+    byte Flag : 1;
+    byte Flag2 : 1;
+    uint pad : 26;
+    Offset30 ItemInfosOffset;
+    ushort IndexInto0x3C_0x40 : 6;
+    ushort Field_0x0C_Bits2 : 10;
+    ushort field_0x0E;
+    Offset30 field_0x10;
+    Offset30 field_0x14;
+    Offset30 VMOffset0x18;
+    Offset30 VMOffset0x1C;
     
-    FSeek(parentof(this).address_0x0 + field_0x3.offset);
-    struct
+    local int actualItemInfosOffset = GetOffset(ItemInfosOffset);
+    if (actualItemInfosOffset)
     {
-        OffsetT Offset;
-        float field_0x4;
-        Offset24 field_0x8;
-        Offset24 field_0xC;
-    } ItemInfo[Count]<bgcolor=0x92006D>;
+        FSeek(actualItemInfosOffset);
+        struct
+        {
+            OffsetT Offset;
+            float Float_0x04;
+            float Float_0x08;
+            float Float_0x0C;
+        } ItemInfo[Count] <optimize=false, bgcolor=0x92006D>;
+    }
+    
+    // This bit evaluates a single float value.
+    local int o18 = GetOffset(VMOffset0x18);
+    if (o18)
+    {
+        FSeek(o18);
+        VFX_VM VFX_VM_0x18;
+    }
+    
+    local int o1C = GetOffset(VMOffset0x1C);
+    if (o1C)
+    {
+        FSeek(o1C);
+        VFX_VM VFX_VM_0x1C;
+    }
     
     for (local int j = 0; j < Count; j++)
     {
-        FSeek(Header_.ItemBlobInfo.items_address + ItemInfo[j].Offset);
-        Item item<bgcolor=0x92006D>;
+        FSeek(Toc2.ItemBlobInfo.items_address + ItemInfo[j].Offset);
+        ItemGroup ItemGroup_ <bgcolor=0x92006D>;
     }
-     
-    if (field_0x8 > -1)
-    {
-        FSeek(Header_.ItemBlobInfo.properties_address + field_0x8);
-        OffsetT field_0xA<bgcolor=0x92006D>;
-        FSeek(Header_.ItemBlobInfo.properties_address + field_0xA);
-        float field_0xB<bgcolor=0x92006D>;
-    }
-    
-    if (field_0x9 > -1)
-    {
-        FSeek(Header_.ItemBlobInfo.properties_address + field_0x9);
-        OffsetT field_0xC<bgcolor=0x92006D>;
-        
-        FSeek(Header_.ItemBlobInfo.properties_address + field_0xC);
-        float field_0xD<bgcolor=0x92006D>;
-    }
-    
-    
-    FSeek(startof(this) + Size);
 }
 
-void GenerateProperty_0x1E()
+void GenerateItemType_30()
 {
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    VarOffset field_0x2(30, 2);
-    int field_0x3;
-    float field_0x4;
+    Offset30 MatrixOffset;
+    float Float_0x0C;
+    float Float_0x10;
     
-    FSeek(parentof(this).address_0x0 + field_0x2.offset);
-    float field_0x5<bgcolor=cWhite>;
-    FSeek(startof(this) + size);
+    FSeek(GetOffset(MatrixOffset));
+    float Matrix[4*4] <bgcolor=cWhite>;
 }
 
-void GeneratePropertyGeneric(){
-    PropertyType type<bgcolor=cGreen>;
-    short size<bgcolor=cBlue>;
-    byte data[size - 4];
+
+void GenerateItemType_138()
+{
+    Offset30 VMInstructionsOffset;
+    Offset30 VMDataOffset;
+    int RetVMValue;
+    byte VMInstructionsSize;
+    byte VMDataSize;
+    byte TimeSourceType;
 }
 
-typedef struct TItemProperty{
-    switch(ReadShort())
-    {
-        case k1E: GenerateProperty_0x1E(); break;
-        case kItem: GenerateItemProperty(); break;
-        case k31: GenerateProperty_0x31(); break;
-        case k8A: GenerateProperty_0x8A(); break;
-        case k8B: GenerateProperty_0x8B(); break;
-        case k8C: GenerateProperty_0x8C(); break;
-        case k8E: GenerateProperty_0x8E(); break;
-        case k8F: GenerateProperty_0x8F(); break;
-        case k91: GenerateProperty_0x91(); break;
-        case kA5: GenerateProperty_0xA5(); break;
-        default: GeneratePropertyGeneric(); break;  
-    }
-} ItemProperty<read=Str("%s (%Xh)", EnumToString(this.type), this.type)>;
+void GenerateItemType_139()
+{
+    Offset30 ValueOffset;
+    Offset30 RetVMValueLocation;
+    byte Unk1;
+    byte Unk2;
+    
+    FSeek(GetOffset(ValueOffset));
+    float Value;
+}
+
+void GenerateItemType_143()
+{
+    Offset30 CurveOffset;
+    Offset30 RetValueOffset;
+    ubyte TimeSourceType;
+    ubyte Unk;
+}
 
 typedef struct TItem
 {
-    OffsetT field_0x0;
-    OffsetT field_0x4;
-    int property_size : 24;
-    int property_offset : 8;
-    float field_0xC;
-    float field_0x10;
-    float field_0x14;
-    OffsetT field_0x18;
-    Offset24 field_0x1C;
-    Offset24 field_0x20;
-    OffsetT field_0x24;
-    int field_0x28;
+    PropertyType Type <bgcolor=cGreen>;
+    ushort Size <format=hex, bgcolor=cBlue>;
+
+    switch (Type)
+    {
+        case kPropertyType_1: /* nothing */ break;
+        case kPropertyType_3: /* nothing */ break;
+        case kPropertyType_7: GenerateItemType_7(); break;
+        case kPropertyType_30: GenerateItemType_30(); break;
+        case kPropertyType_37: /* nothing */ break;
+        case kPropertyType_39: /* nothing */; break;
+        case kPropertyType_ItemGroup: GenerateItemGroupProperty(); break;
+        case kPropertyType_138: GenerateItemType_138(); break;
+        case kPropertyType_139: GenerateItemType_139(); break;
+        case kPropertyType_143: GenerateItemType_143(); break;
+        /*
+        case kPropertyType_49: GenerateProperty_49(); break;
+        case kPropertyType_140: GenerateProperty_140(); break;
+        case kPropertyType_142: GenerateProperty_142(); break;
+        case kPropertyType_145: GenerateProperty_145(); break;
+        case kPropertyType_165: GenerateProperty_165(); break;
+        */
+        default: 
+            Printf("Unknown Item Type %d\n", Type);
+            byte Bytes[Size - 0x04]; 
+            break;  
+    }
+    
+    FSeek(startof(this) + Size);
+} Item <read=EnumToString(this.Type)>;
+
+typedef struct TItemGroup
+{
+    // 41 BA ? ? ? ? 41 83 78
+    
+    OffsetT LocalPropertyDataOffset; // Defines Type 1
+    OffsetT LocalPropertyDataSize;   // Defines Type 1
+    int ItemsSize : 24 <format=hex>;
+    int ItemsOffset : 8 <comment="Relative to 0x7C, aka end of this">;
+
+    float Float_0xC;
+    float Float_0x10;
+    float Float_0x14;
+    
+    int MaybeUnused_0x18;
+    Offset30 field_0x1C;
+    
+    // These 3 go together in purpose
+    Offset30 FloatArrayOffset;
+    Offset30 MaybeUVArrayOffset;
+    int FloatArrayLength;
+    
     int field_0x2C;
     int field_0x30;
     int field_0x34;
     
-    int child_count<fgcolor=cGreen>;
-    Offset24 field_0x3C;
-    OffsetT field_0x40;
-    Offset24 field_0x44;
-    int field_0x48;
+    // These 4 go together in purpose
+    uint Count_0x38_For0x3C_0x40 <fgcolor=cGreen>;
+    Offset30 Offset_0x3C; // Stride 0x14
+    Offset30 Offset_0x40; // Stride 0x60
+    Offset30 Offset_0x44;
     
-    Offset24 field_0x4C;
-    int field_0x50, field_0x54, field_0x58;
+    Offset30 Offset_0x48;
     
-    int field_0x5C, field_0x60, field_0x64, field_0x68;
+    Offset30 Offset_0x4C;
+    Offset30 MatrixOffset;
     
-    int field_0x6C;
-    uint hash;
+    int field_0x54;
+    
+    VarOffset Offset_0x58(31, 1);
+    
+    Offset30 Offset_0x5C;
+    int field_0x60;
+    
+    Offset30 Offset_0x64;
+    
+    Offset30 Offset_0x68; // Stride 0x0C
+    uint Count_0x6C_For0x68;
+    
+    uint HashSeed <format=hex>;
     int field_0x74;
     int field_0x78;
     
-    local int64 address_0x0 = Header_.ItemBlobInfo.properties_address + field_0x0;
-    FSeek(address_0x0);
-    float test<bgcolor=cRed>;
-    
-    FSeek(Header_.ItemBlobInfo.properties_address + field_0x4);
-    float test_0x1;
-    
-    if (field_0x40 > -1)
+    local int actualFloatArrayOffset = GetOffset(FloatArrayOffset);
+    if (actualFloatArrayOffset)
     {
-        FSeek(Header_.ItemBlobInfo.properties_address + field_0x40);
-        float sanity<bgcolor=cGreen>;
+        FSeek(actualFloatArrayOffset);
+        struct
+        {
+            float Value;
+        } FloatArray[FloatArrayLength] <bgcolor=cBlue>;
     }
     
-    FSeek(startof(this) + 0x7C);
-    
-    local int64 end_point = FTell() + property_size;
-    FSkip(property_offset);
-    while(FTell() < end_point)
+    local int maybeUvArrayOffset = GetOffset(MaybeUVArrayOffset); 
+    if (maybeUvArrayOffset)
     {
-        ItemProperty property<bgcolor=cNone>;
+        struct
+        {
+            int Flags;
+            float U;
+            float V;
+        } MaybeUVArray[FloatArrayLength]  <bgcolor=cDkBlue>;
     }
-} Item <read=Str("children: %d", this.child_count)>;
+    
+    local int actualOffset0x3C = GetOffset(Offset_0x3C); 
+    if (actualOffset0x3C)
+    {
+        struct
+        {
+            int Field_0x00;
+            int Field_0x04;
+            int Field_0x08;
+            float Field_0x0C;
+            int RuntimeHash <format=hex>;
+        } Offset0x3C_Data[Count_0x38_For0x3C_0x40]  <bgcolor=cRed>;
+    }
+    
+    local int actualOffset0x40 = GetOffset(Offset_0x40); 
+    if (actualOffset0x40)
+    {
+        struct
+        {
+            int Field_0x00;
+            int Field_0x04;
+            int Field_0x08;
+            int Field_0x0C;
+            int Field_0x10;
+            int Field_0x14;
+            int Field_0x18;
+            int Field_0x1C;
+            int Field_0x20;
+            int Field_0x24;
+            int Field_0x28;
+            int Field_0x2C;
+            int Field_0x30;
+            int Field_0x34;
+            int Field_0x38;
+            int Field_0x3C;
+            int Field_0x40;
+            int Field_0x44;
+            int Field_0x48;
+            int Field_0x4C;
+            int Field_0x50;
+            int Field_0x54;
+            int Field_0x58;
+            int Field_0x5C;
+        } Offset0x40_Data[FloatArrayLength]  <bgcolor=cDkRed>;
+    }
+    
+    local int maybeOffset_0x64 = GetOffset(Offset_0x64);
+    if (maybeOffset_0x64)
+    {
+        FSeek(GetOffset(Offset_0x64));
+        float Matrix_0x64[3*3];
+    }
+    
+    local int dataEnd;
+    if (ItemsSize != 0)
+        dataEnd = (startof(this) + 0x7C) + ItemsSize;
+    else
+        dataEnd = (startof(this) + 0x7C) + ItemsOffset;
+    
+    // Game actually loops that way.
+    FSeek(startof(this) + 0x7C + ItemsOffset);
+    struct
+    {
+        local int i = 0;
+        while (FTell() < dataEnd)
+        {
+            Item Item_ <bgcolor=cNone>;
+            i++;
+        }
+    } Items <read=Str("%d Items", i)>;
+    
+    
+} ItemGroup;
 
-for(local int i = 0; i < 15; i++)
+
+//////////////////////////////////////////////////////////////////
+// HEADER START
+//////////////////////////////////////////////////////////////////
+
+struct
 {
-    if (Header_.RootItems[i].offset == 1)
+    char Magic[4] <fgcolor=cYellow, comment="'VFXB', unchecked.">;
+    ubyte Magic2 <format=hex, comment="FFXVI: PC: 0xAE. Must be 0xAE on PC. > 0x0E on PS5. CHECKED.">;
+    byte field_0x5 <comment="PC: 1, Must be 0x04 on PS5.">;
+    byte field_0x6 <comment="Unused.">;
+    // Padding
+} Header <bgcolor=cPurple, size=0x08>;
+
+struct
+{
+    uint GlobalPropertyDataSize <format=hex>; // Defines Type 0's Size. Offset is ItemBlobInfo->ItemBlobStartOffset + PropertiesOffset
+    uint ItemBlobSize <format=hex>;
+    uint TotalDataSize <format=hex, comment="item + property data size">;
+    uint ConstantDataSize <format=hex>;
+    int VertexSetCount <fgcolor=cGreen>;
+    ubyte TextureCount <fgcolor=cGreen>;
+    ubyte ConstantCount <fgcolor=cGreen>;
+    ubyte ConstantLastIndex;
+    ubyte TextureDescriptorCount <fgcolor=cGreen>;
+    ubyte ResourceCount <fgcolor=cGreen>;
+    ubyte Struct0x1EC_Data2_Count <fgcolor=cGreen>;
+    ubyte Count_0x22; // 41 0F B6 87 ? ? ? ? 44 3B C0
+    ubyte field_0x23; // 41 0F B6 84 24 ? ? ? ? 3B D8
+    byte field_0x24;
+    byte field_0x25;
+    ushort field_0x26; // 41 0F B7 87 ? ? ? ? 41 0F B7 8F - v14 = (unsigned __int16)(VFXInstance->VFXBToc1.field_0x26 & VFXInstance->VFXBToc1.field_198)
+    struct
+    {
+        uint SlotCount : 4;
+        uint SlotIdx0  : 4;   // bits 0-3
+        uint SlotIdx1  : 4;   // bits 4-7
+        uint SlotIdx2  : 4;   // bits 8-11
+        uint SlotIdx3  : 4;   // bits 12-15
+        uint SlotIdx4  : 4;   // bits 16-19
+        uint SlotIdx5  : 4;   // bits 20-23
+        uint SlotIdx6  : 4;   // bits 24-27
+        uint SlotIdx7  : 4;   // bits 28-31
+        uint SlotIdx8  : 4;   // bits 32-35
+        uint SlotIdx9  : 4;   // bits 36-39
+        uint SlotIdx10  : 4;   // bits 40-43
+        uint SlotIdx11  : 4;   // bits 44-47
+        uint SlotIdx12  : 4;   // bits 48-51
+        uint SlotIdx13  : 4;   // bits 52-55
+        uint SlotIdx14  : 4;   // bits 56-59
+    } TypeToItemIndices;
+    
+    struct TItemEntry
+    {
+        OffsetT ItemOffset;
+        uint Flags <format=hex>;
+        short Offset2;
+        byte CountMaybe;
+        ubyte Unk;
+        int field_0x0C;
+    } RootItemInfo[15];
+    
+    struct
+    {
+        int Unk1 : 6;
+        int Unk2 : 6;
+        int rest: 20;
+    } Field_0x120; // C4 42 43 F7 84 24
+    int field_0x124;
+    int field_0x128;
+    int field_0x12C; // 41 8B 87 ? ? ? ? 41 89 46 ? 8B 45
+    int field_0x130;
+    int field_0x134;
+    short field_0x138_ForProjectInfo; // 0F B7 81 ? ? ? ? 33 D2 49 8B F0
+    short field_0x13A;
+    ubyte Count_0x13C;
+    ubyte Count_0x13D_For_0x1EC <edit=check, comment="Bool">;
+    ubyte field_0x13E; // 0F B6 86 ? ? ? ? 48 8D 14 40 - 12LL * vfxInst->VFXBToc1.field_13e
+    byte field_0x13F;
+    float field_0x140;
+    float field_0x144; //  C5 FA 10 80 ? ? ? ? EB ? C5 F0 57 05, 41 8B 80 ? ? ? ? 89 83 ? ? ? ? 0F B7 84 24
+    int field_0x148;
+    float field_0x14C;
+    short field_0x150; // 44 0F B7 8E ? ? ? ? 83 E0
+    short field_0x152;
+    
+    // 0x20 - 8B 81 ? ? ? ? C1 E8 ? 24 ? 48 8B 97
+    int Flags_0x154 <format=hex, comment="If 0x8000, create a constant buffer for offset at 0x19C?">;
+    short field_0x158; // 66 39 90 ? ? ? ? 75
+    short field_0x15A; // 66 39 90 ? ? ? ? 75
+    int field_0x15C;
+    float field_0x160;
+    float field_0x164;
+    float field_0x168;
+    float field_0x16C;
+    float field_0x170;
+    float field_0x174;
+    int field_0x178;
+    float field_0x17C;
+    int field_0x180;
+    float field_0x184;
+    byte field_0x188;
+    byte field_0x189; // 0F B6 8E ? ? ? ? 48 8D 55
+    short field_0x18A;
+    int field_0x18C;
+    int field_0x190;
+    int field_0x194;
+    uint BitMask_0x198 <format=hex>; // 41 0F B7 8F ? ? ? ? 23 C8
+    Offset30 ConstantBufferFlags;
+    int field_0x1A0;
+    int field_0x1A4;
+    int field_0x1A8;
+    byte field_0x1AC;
+    byte field_0x1AD;
+    byte field_0x1AE;
+    byte Flags_0x1AF; // 0F B6 8E ? ? ? ? 49 8D 9F
+    int field_0x1B0;
+    int field_0x1B4;
+} Toc;
+
+struct
+{
+    struct
+    {
+        AddressT Offset;
+        uint Size;
+    } ShaderBlobInfo <read=Str("%Xh, %d bytes", this.Offset, this.Size)>;
+    
+    struct{
+        AddressT Offset;
+        int field_0x04;
+        int field_0x08;
+    } ResourceInfo <read=Str("%Xh", this.Offset)>;
+    
+    struct{
+        AddressT Offset;
+        int field_0x04;
+    } TextureDescriptorInfo <read=Str("%Xh", this.Offset)>;
+    
+    struct
+    {
+        // The main one. This + ItemBlobSize
+        AddressT ItemBlobStartOffset;
+        
+        OffsetT PropertiesOffset; // USED
+        OffsetT ItemsOffset; // USED
+        OffsetT ConstantsOffset; // USED
+        OffsetT Offset_0x1E4;
+        OffsetT ConstantDataOffset; // USED
+        OffsetT Offset_0x1EC;
+        OffsetT field_0x1F0;
+        OffsetT VertexSetOffset; // USED
+        OffsetT TextureIndicesOffset; // USED
+        OffsetT ProjectInfoOffset; // USED
+        OffsetT Offset_0x200;
+        OffsetT field_0x204; // USED
+        OffsetT Offset_0x208;
+        OffsetT TextureGroupsOffset; // USED
+        
+        local AddressT GlobalPropertyDataOffset = ItemBlobStartOffset + PropertiesOffset;
+        local AddressT items_address = ItemBlobStartOffset + ItemsOffset;
+        local AddressT ConstantsAddress = ItemBlobStartOffset + ConstantsOffset;
+        local AddressT ConstantDataAddress = ItemBlobStartOffset + ConstantDataOffset;
+        local AddressT VertexSetAddress = ItemBlobStartOffset + VertexSetOffset;
+        local AddressT texture_indices_address = ItemBlobStartOffset + TextureIndicesOffset;
+        local AddressT project_info_address = ItemBlobStartOffset + ProjectInfoOffset;
+        local AddressT texture_groups_address = ItemBlobStartOffset + TextureGroupsOffset;
+    } ItemBlobInfo <open=true>;
+} Toc2;
+
+FSeek(Toc2.ShaderBlobInfo.Offset);
+ubyte ShaderBlob[Toc2.ShaderBlobInfo.Size]<bgcolor=cBlack, fgcolor=cGray>;
+
+FSeek(Toc2.ResourceInfo.Offset);
+StringT Resources[Toc.ResourceCount]<fgcolor=cYellow, optimize=false>;
+
+struct
+{
+    for (local int i = 0; i < Toc.TextureDescriptorCount; i++)
+    {
+        FSeek(Toc2.TextureDescriptorInfo.Offset + i * 0x0C);
+        struct
+        {
+            ubyte TextureIndex;
+            enum <byte>
+            {
+                R32_FLOAT = 0, // 0x46150 - R32_FLOAT
+                R32G32_FLOAT = 1, // 0xB6260 - R32G32_FLOAT
+                R32G32B32A32_FLOAT = 2, // 0xE6470 - R32G32B32A32_FLOAT
+                R16_FLOAT = 3, // 0x26140 - R16_FLOAT
+                R16G16B16A16_FLOAT = 4, // 0xC6460 - R16G16B16A16_FLOAT 
+                R8_UNORM = 5, // 0x11130 - R8_UNORM
+                R8G8B8A8_UNORM = 6, // 0xA1450 - R8G8B8A8_UNORM
+            } FormatType : 7;
+            byte UnkBit : 1;
+            ushort Width;
+            ushort DimensionType;
+            ushort Height;
+            OffsetT DataOffset;
+            
+            FSeek(startof(this) + DataOffset);
+            switch (FormatType)
+            {
+                case R32_FLOAT:
+                    float Data[Width * Height]; break;
+                case R32G32_FLOAT:
+                    float Data[Width * Height * 2]; break;
+                case R32G32B32A32_FLOAT:
+                    float Data[Width * Height * 4]; break;
+                case R16_FLOAT:
+                    hfloat Data[Width * Height]; break;
+                case R16G16B16A16_FLOAT:
+                    hfloat Data[Width * Height * 4]; break;
+                case R8_UNORM:
+                    byte Data[Width * Height]; break;
+                case R8G8B8A8_UNORM:
+                    byte Data[Width * Height * 4]; break;
+            }
+        } TextureDescriptor;
+    }
+} TextureDescriptors <bgcolor=cLtBlue, read=Str("Count: %d", Toc.TextureDescriptorCount)>;
+
+FSeek(Toc2.ItemBlobInfo.VertexSetAddress);
+struct
+{
+    short name_offsets[Toc.VertexSetCount] <fgcolor=cRed>;
+    
+    for(local int j = 0; j < Toc.VertexSetCount; j++)
+    {
+        FSeek(startof(this) + sizeof(name_offsets) + name_offsets[j]);
+        StringT Set<fgcolor=cYellow>;
+    }
+} VertexSets <read=Str("count: %d", Toc.VertexSetCount), bgcolor=0xC9A91C>;
+
+FSeek(Toc2.ItemBlobInfo.project_info_address);
+struct
+{
+    int field_0x00;
+    int field_0x04;
+    int ItemCount <fgcolor=cGreen>;
+    Padding padding(32);
+    int field_0x2C;
+    int field_0x30;
+    Padding padding_1(20);
+} project_info<bgcolor=cDkGreen>;
+
+FSeek(Toc2.ItemBlobInfo.texture_indices_address);
+int64 TextureResourceIndices[Toc.TextureCount]<bgcolor=cRed>;
+
+if (Toc.ConstantCount)
+{
+    struct
+    {
+        for (local int i = 0; i < Toc.ConstantCount; i++)
+        {
+            FSeek(Toc2.ItemBlobInfo.ConstantsAddress + (i * 0x10));
+            ConstantEntry Constant;
+        }
+        
+        FSeek(Toc2.ItemBlobInfo.ConstantsAddress + (Toc.ConstantCount * 0x10));
+        
+        // This is indexed first. Group type is hardcoded on the game side
+        // So each type must have a different purpose of some kind?
+        
+        // essentially: GetConstantGroup(int index)
+        // return &Constants[ConstStartIndexPerGroupType[index + 1] - ConstStartIndexPerGroupType[index]];
+        // This matches the number of root items in the main toc.
+        byte ConstStartIndexPerGroupType[16];
+    } ConstantGroups<read=Str("Count: %d", Toc.ConstantCount), bgcolor=cBlue>;
+}
+
+for (local int i = 0; i < 15; i++)
+{
+    if (Toc.RootItemInfo[i].ItemOffset == 1)
         continue;
     
-    FSeek(Header_.ItemBlobInfo.items_address + Header_.RootItems[i].offset);
-    Item item <bgcolor=0xFF00BF>;
+    FSeek(Toc2.ItemBlobInfo.items_address + Toc.RootItemInfo[i].ItemOffset);
+    ItemGroup ItemGroup_ <bgcolor=0xFF00BF>;
 }
