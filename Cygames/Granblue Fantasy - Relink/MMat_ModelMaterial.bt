@@ -11,7 +11,8 @@
 //   History: 
 //------------------------------------------------
 
-
+// NOTE: This file is a FlatBuffers file and not intended to be read with a template
+// FlatBuffers schema: https://github.com/Nenkai/GBFRDataTools/blob/master/GBFRDataTools.FlatBuffers/MInfo_ModelInfo.fbs
 
 typedef struct
 {
