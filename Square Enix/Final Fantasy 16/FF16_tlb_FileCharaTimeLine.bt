@@ -13,7 +13,7 @@
 
 /* File is used for *.tlb files, responsible for character/enemy/entity fight moves/timelines.
  *
- * Not complete, there's a LOT of different union/struct/timeline elements.
+ * Not complete, there's a LOT of different union/struct/timeline elements.case 2
  * 
  * If you are expanding this to support more union types, 
  * Make sure that byte coverage is correct, especially strings. Make sure not to miss
@@ -151,7 +151,7 @@ enum TimelineElementType
     kTimelineElem_24 = 24,                             // Range
     kTimelineElem_25 = 25,                             // Range
     kTimelineElem_26 = 26,                             // Range
-    kTimelineElem_27 = 27,                             // Range
+    kTimelineElem_AttackMovement = 27,                 // Range
     kTimelineElem_28 = 28,                             // OneShot
     kTimelineElem_29 = 29,                             // Range
     kTimelineElem_30 = 30,                             // Range
@@ -512,7 +512,7 @@ typedef struct
                     byte pad[0x20];
                 };
                 break;
-            case 27: // Sound related?
+            case kTimelineElem_AttackMovement: // Processes an attack's movement. May depend on some properties in the ActionMoveType nex table.
                 {
                     // 40 53 48 83 EC ? 48 8B D9 E8 ? ? ? ? 48 85 C0 74 ? 48 8B C8 E8 ? ? ? ? 48 85 C0 74 ? 4C 8B 43
                     byte Bool_0x00;
