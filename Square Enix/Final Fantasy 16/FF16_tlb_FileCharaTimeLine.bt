@@ -285,7 +285,7 @@ enum TimelineElementType
     kTimelineElem_1083 = 1083,                         // Range
     kTimelineElem_EnableMagicBurstRange = 1084,        // Range
     kTimelineElem_1085 = 1085,                         // Range
-    kTimelineElem_1086 = 1086,                         // Range
+    kTimelineElem_AirborneFallRange = 1086,            // Range
     kTimelineElem_1087 = 1087,                         // Range
     kTimelineElem_ApplyCharacterForceTrigger = 1088,   // OneShot
     kTimelineElem_1089 = 1089,                         // Range
@@ -1121,6 +1121,15 @@ typedef struct
                     // Note: for an action to be a valid magic burst, its MovementType1 and MovementType2 should be 13 and 0. 
                     int UnkType <comment="Type 0-3">;
                     byte Pad[0x20];
+                };
+                break;
+            case kTimelineElem_AirborneFallRange: // 1086
+                {
+                    // Intended for scenarios where the character is in the air, to make them fall forcefully
+                    float HeightFall;
+                    byte OnlyIfTargetHit; // Whether to apply only if a target was hit
+                    byte Unk;
+                    byte Pad[0x02];
                 };
                 break;
             case kTimelineElem_ApplyCharacterForceTrigger: // 1088
