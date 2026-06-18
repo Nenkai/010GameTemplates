@@ -203,13 +203,13 @@ enum TimelineElementType
     kTimelineElem_87 = 87,                             // Range
     kTimelineElem_88 = 88,                             // OneShot
     
-    kTimelineElem_1001 = 1001,                         // Range
+    kTimelineElem_PlayAnimationRange = 1001,           // Range
     kTimelineElem_1002 = 1002,                         // Range
     kTimelineElem_1003 = 1003,                         // Range
     kTimelineElem_1004 = 1004,                         // Range
     kTimelineElem_1005 = 1005,                         // Range
     kTimelineElem_1006 = 1006,                         // OneShot
-    kTimelineElem_1007 = 1007,                         // Range
+    kTimelineElem_FreezeAirAscendRateRange = 1007,     // Range
     kTimelineElem_1008 = 1008,                         // Range
     kTimelineElem_EnableComboRange = 1009,             // Range
     kTimelineElem_TurnToTarget = 1010,                 // Range
@@ -762,7 +762,7 @@ typedef struct
                     byte pad[0x09];
                 };
                 break;
-            case kTimelineElem_1001: // Seems shared across timelines - 1033, 1060, 1035
+            case kTimelineElem_PlayAnimationRange: // 1001 - Seems shared across timelines - 1033, 1060, 1035
                 {
                     // Verified in code
                     AssetRef Anim <format=hex, fgcolor=cRed>;
@@ -827,8 +827,12 @@ typedef struct
                 };
                 break;
                 
-            case 1007:
+            case kTimelineElem_FreezeAirAscendRateRange: // 1007
                 {
+                    // Mainly for stomps, freezes the height gain rate.
+                    // If applying this after a stomp (jump_enemy_v_1.tlb) to the whole timeline range, clive will gain air until the end of this element.
+                    // Height is capped.
+                    
                     byte Flag;
                     byte pad[0x1F];
                 };
@@ -1125,9 +1129,8 @@ typedef struct
                 break;
             case kTimelineElem_AirborneFallRange: // 1086
                 {
-                    // Intended for scenarios where the character is in the air, to make them fall forcefully
                     float HeightFall;
-                    byte OnlyIfTargetHit; // Whether to apply only if a target was hit
+                    byte OnlyIfTargetHit;
                     byte Unk;
                     byte Pad[0x02];
                 };
