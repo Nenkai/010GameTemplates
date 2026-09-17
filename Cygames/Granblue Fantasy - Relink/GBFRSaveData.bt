@@ -1,0 +1,125 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int FieldOffsetTableNegative <format=hex, fgcolor=cRed>;
+    
+    FSeek(startof(FieldOffsetTableNegative) - FieldOffsetTableNegative);
+    short OffsetTableSize;
+    
+    if (OffsetTableSize >= 0x0D)
+        Printf("\n");
+        
+    short OffsetTable[(OffsetTableSize / sizeof(ushort)) - 1] <format=hex, fgcolor=cRed>;
+    FSeek(FileSize());
+} FlatArkFields <bgcolor=cBlack>;
+
+typedef struct
+{
+    int FieldsOffset <format=hex, fgcolor=cRed>;
+    FSeek(startof(FieldsOffset) + FieldsOffset);
+    
+    FlatArkFields Fields;
+    FSeek(FileSize());
+} FlatArkHeader <bgcolor=cPurple>;
+
+typedef struct
+{
+    
+    int DataOffset <bgcolor=cYellow>;
+    FSeek(startof(DataOffset) + DataOffset);
+    
+    int NumEntries_ <bgcolor=cYellow>;
+    int EntriesOffsets[NumEntries_] <format=hex, bgcolor=cYellow>;
+
+    local int j = 0;
+    for (j = 0; j < NumEntries_; j++)
+    {
+        FSeek(startof(EntriesOffsets[j]) + EntriesOffsets[j]);
+        struct
+        {
+            FlatArkFields Fields;
+            
+            FSeek(startof(Fields) + Fields.OffsetTable[1]);
+            uint IDType;
+            
+            if (exists(Fields.OffsetTable[2]) && Fields.OffsetTable[2] != 0)
+            {
+                FSeek(startof(Fields) + Fields.OffsetTable[2]);
+                uint UnitID;
+            }
+        } SaveDataUnit <read=Str("Type=%d, ID=%d", IDType, exists(UnitID) ? UnitID : 0)>;
+    }
+    
+    FSeek(FileSize());
+} SlotData;
+
+struct
+{
+    struct
+    {
+        uint MainVersion;
+        uint64 SteamId;
+        uint Empty;
+        uint SubVersion;
+        uint64 Offset1 <format=hex, fgcolor=cRed>;
+        uint64 SlotDataOffset <format=hex, fgcolor=cRed>;
+        uint64 Size1 <format=hex>;
+        uint64 SlotDataSize <format=hex>;
+    } Header <open=true, bgcolor=cPurple>;
+    
+    FSeek(Header.SlotDataOffset);
+    struct
+    {
+        FlatArkHeader Hdr;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[1]);
+        uint Version;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[2]);
+        SlotData BoolTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[3]);
+        SlotData ByteTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[4]);
+        SlotData UByteTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[5]);
+        SlotData ShortTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[6]);
+        SlotData UShortTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[7]);
+        SlotData IntTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[8]);
+        SlotData UIntTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[9]);
+        SlotData LongTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[10]);
+        SlotData ULongTable;
+        
+        FSeek(startof(Hdr) + Hdr.FieldsOffset + Hdr.Fields.OffsetTable[11]);
+        SlotData FloatTable;
+    } SlotData_ <open=true>;
+    
+    FSeek(Header.SlotDataOffset + ReadUInt(Header.SlotDataOffset + Header.SlotDataSize - 0x14));
+    uint64 Hashes[10] <bgcolor=cYellow, format=hex>;
+    int HashesOffset <format=hex, fgcolor=cRed>;
+    
+} SaveData;
