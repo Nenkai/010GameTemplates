@@ -1,0 +1,132 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: WWE 2K26 Animation Bank file (.clips)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.clips
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int AlignValue(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
+
+    return pos + amount;
+}
+
+void Align(int alignment)
+{
+    FSeek(AlignValue(FTell(), 4));
+}
+
+typedef struct
+{
+    // value = readbits(BitWidth) * Scale + Base;
+    signed byte ScaleMult; // 2^this
+    ubyte BitWidth;
+    short pad;
+    float Base;    
+} QuantizationInfo;
+
+struct
+{
+    struct
+    {
+        uint64 RuntimeEntriesPtr;
+        uint64 Unk;
+        int Count;
+        int EntryCount;
+    } Header <bgcolor=cPurple, size=0x18>;
+   
+    
+    struct
+    {
+        uint64 Hash <format=hex>;
+        int Size <format=hex>;
+        int Offset <fgcolor=cRed, format=hex>;
+    } ClipLocator[Header.EntryCount] <bgcolor=cWhite, read=Str("0x%X%X", Hash >> 32, Hash)>;
+    
+    for (local int i = 0; i < Header.EntryCount; i++)
+    {
+        FSeek(ClipLocator[i].Offset);
+        struct
+        {
+            uint64 ThisHash <format=hex>;
+            short ActIndex;
+            short Empty_0x0A;
+            float Framerate;
+            
+            // FNV-1A 64
+            // For bones:
+            // "base" = 0x9A7CE19BAA54C278LL
+            // "root" = 0xA354FD1FF0C467C5LL
+            // "vector" = 0xE9628ACACA9C7D82LL
+            struct
+            {
+                uint64 RuntimePtr <format=hex>; // Pointer to this+0xB8
+                byte Pad_0x10[0x08];
+                uint QwordSize;
+                uint QwordSize2; // (this + 0xB8) + (this * 0x08)
+            } BoneHashesInfo;
+
+            struct
+            {
+                uint64 RuntimePtr <format=hex>;
+                byte Pad_0x30[0x0C];
+                uint ScalarCount; // Stride 0x04, Part2Ptr + (ScalarCount * 0x08)
+                uint Int_0x40;
+                uint FrameCount;
+                uint UnkMin_0x48;
+                uint UnkMax_0x4C;
+            } Part2Info;
+            
+            struct
+            {
+                uint64 RuntimePart3Ptr <format=hex>;
+                byte Pad_0x58[0x08];
+                uint Int_0x60;
+                uint Part3Size; // Part3Ptr + this, aligned to 0x04
+            } Part3Info;
+            
+            struct
+            {
+                uint64 RuntimePtr <format=hex>;
+                byte Pad_0x70[0x08];
+                uint QwordSize;
+                uint QwordSize2; // Part4Ptr + (this * 0x08)
+            } TransformQuantizationInfo;
+            
+            struct
+            {
+                uint64 RuntimePart5Ptr;
+                byte Pad_0x88[0x0C];
+                uint QwordSize;
+            } Part5Info;
+            
+            // Part 5 & 6 in WWE 2K25 are merged into one in WWE 2K26
+            //uint64 RuntimePart6Ptr;
+            int test[2];
+            
+            uint64 BoneHashes[BoneHashesInfo.QwordSize2] <format=hex, bgcolor=cBlue>; // root = 0x9A7CE19BAA54C278LL
+            uint UnkHashes[Part2Info.ScalarCount] <bgcolor=cDkBlue>;
+            Align(0x08);
+            
+            uint64 Part3[Part3Info.Part3Size] <bgcolor=cWhite>;
+
+            struct
+            {
+                QuantizationInfo Translation[3]; // X, Y, Z
+                QuantizationInfo Rotation[3]; // X, Y, Z
+            } TransformQuantizations[TransformQuantizationInfo.QwordSize2 / 6] <bgcolor=cBlack>;
+            
+            uint64 DataBitstream[Part5Info.QwordSize] <bgcolor=cRed>;
+            
+            // WWE 2K25: 0xB8 structure (fields are in identical spots, just 0x18 extra bytes)
+            //           Notably Part6 is the bit stream, Part5 is ?
+            // WWE 2K26: 0xA0 structure
+        } C_Animation <bgcolor=cYellow, read=Str("0x%X%X", ThisHash >> 32, ThisHash)>; 
+    }
+} AnimationBank; // Anim::AnimationBank
