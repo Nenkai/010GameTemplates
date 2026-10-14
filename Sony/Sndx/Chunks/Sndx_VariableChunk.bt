@@ -1,0 +1,61 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Variable Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty; // 32 stride
+    uint NumVariables;
+    
+    for (local int i = 0; i < NumVariables; i++)
+    {
+        FSeek(startof(this) + 8 + (i * 0x20));
+        struct
+        {
+            enum <uint>
+            {
+                VariableFlags_IsGlobal = 0x01,
+                VariableFlags_0x02 = 0x02,
+                VariableFlags_0x04 = 0x04,
+            } VariableFlags <edit=flags>;
+            
+            uint VariableIndex <comment="Add 1000 for globals. Must be ordered by this for binary search">;
+            OffsetT NameOffset;
+            uint Unused;
+            OffsetT ConstantsOffset;
+            float DefaultValue;
+            float MinValue;
+            float MaxValue;
+            
+            if (ConstantsOffset != 0) // Game check for offset != 0, not the flag.
+            {
+                FSeek(startof(ConstantsOffset) + ConstantsOffset);
+                struct
+                {
+                    int Empty;
+                    int Count;
+                    for (local int j = 0; j < Count; j++)
+                    {
+                        struct
+                        {   
+                            OffsetT NameOffset;
+                            float Value;
+                        } Constant <read=ReadString(startof(NameOffset) + NameOffset)>;
+                    }
+                } Constants;
+            }
+        } Variable <optimize=false, read=ReadString(startof(NameOffset) + NameOffset)>;
+    }
+
+} VariableChunk;

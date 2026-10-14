@@ -1,0 +1,93 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Request Data Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Unk;
+    CountT NumRequests;
+    OffsetT RequestOffsets[NumRequests];
+    
+    for (local int i = 0; i < NumRequests; i++)
+    {
+        FSeek(startof(RequestOffsets[i]) + RequestOffsets[i]);
+        struct
+        {
+            enum <int>
+            {
+                RequestFlags_HasExtraData = 0x01,
+                RequestFlags_0x02 = 0x02,
+                RequestFlags_0x04 = 0x04,
+                RequestFlags_0x08 = 0x08,
+                RequestFlags_0x10 = 0x10,
+                RequestFlags_0x20 = 0x20,
+                RequestFlags_0x40 = 0x40, 
+            } Flags <edit=flags, format=hex>;
+            
+            enum <byte>
+            {
+              RequestType_Waveform = 0,
+              RequestType_Sequence = 1,
+              RequestType_Transition = 2,
+              RequestType_Morph = 3,
+              RequestType_ExternalRequest = 4, // Points to 'EXTR' Chunk - "Unkown external data (%d)\n"
+            } RequestType; // "Unknown request type (%d)\n"
+            
+            byte Unk[3];
+            
+            int Index;
+            OffsetT NameStringOffset;
+            
+            if (Flags & RequestFlags_HasExtraData)
+            {
+                local int stop = false;
+                while (!stop)
+                {
+                    struct
+                    {
+                        byte Type;
+                        byte ArrayLength;
+                        short NextPropertyOffset;
+                        
+                        switch (Type)
+                        {
+                            case 6:
+                                byte UnkFlags0x05;
+                                byte UnkBool0x06;
+                                byte UnkBool0x07;
+                                break;
+                                
+                            case 8:
+                                int BitFlags;
+                                break;
+                                
+                            case 9:
+                                int StringOffset;
+                                break;
+                                
+                            case 64:
+                                int Unk0x04;
+                                break;
+                        }
+                        
+                        if (NextPropertyOffset == 0)
+                            stop = true;
+                        else
+                            FSeek(startof(this) + 2 + NextPropertyOffset);
+                    } ExtraProperty <read=Str("PropType: %d", Type)>;
+                }
+            }
+        } Request <read=ReadString(startof(NameStringOffset) + NameStringOffset)>;
+    }
+} RequestDataChunk <bgcolor=cBlue>;

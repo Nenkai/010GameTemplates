@@ -1,0 +1,211 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Wave Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT WaveCount;
+    OffsetT WaveOffsets[WaveCount];
+    
+    for (local int i = 0; i < WaveCount; i++)
+    {
+        FSeek(startof(WaveOffsets[i]) + WaveOffsets[i]);
+        struct
+        {
+            enum <uint>
+            {
+              WaveFlags_HasExtendedData = 0x01,
+              WaveFlags_DataExternal = 0x02,
+              WaveFlags_Flag0x04 = 0x04,
+              WaveFlags_Flag0x08 = 0x08,
+              WaveFlags_Flag0x10 = 0x10,
+              WaveFlags_Flag0x20 = 0x20,
+            } WaveFlags <comment="Bit flags", edit=flags>;
+            
+            // PS4 uses Ngs2
+            // PSV uses Sas2 (?, not Sas?)
+            enum <ubyte>
+            {
+                WaveFormat_PCM_U8 = 0,       // SCE_NGS2_WAVEFORM_TYPE_PCM_U8 (0x10), SAS2: 32
+                WaveFormat_PCM_I8 = 1,       // SCE_NGS2_WAVEFORM_TYPE_PCM_I8 (0x11), SAS2: 33
+                                             
+                WaveFormat_PCM_I16L = 4,     // SCE_NGS2_WAVEFORM_TYPE_PCM_I16L (0x12), SAS2: 34
+                WaveFormat_PCM_I16B = 5,     // SCE_NGS2_WAVEFORM_TYPE_PCM_I16B (0x13), SAS2: 35
+                                             
+                WaveFormat_PCM_I24L = 8,     // SCE_NGS2_WAVEFORM_TYPE_PCM_I24L (0x14), SAS2: 36
+                WaveFormat_PCM_I24B = 9,     // SCE_NGS2_WAVEFORM_TYPE_PCM_I24B (0x15), SAS2: 37
+                                             
+                WaveFormat_PCM_I32L = 12,    // SCE_NGS2_WAVEFORM_TYPE_PCM_I32L (0x16), SAS2: 38
+                WaveFormat_PCM_I32B = 13,    // SCE_NGS2_WAVEFORM_TYPE_PCM_I32B (0x17), SAS2: 39
+                                             
+                WaveFormat_PCM_F32L = 16,    // SCE_NGS2_WAVEFORM_TYPE_PCM_F32L (0x18), SAS2: 40
+                WaveFormat_PCM_F32B = 17,    // SCE_NGS2_WAVEFORM_TYPE_PCM_F32B (0x19), SAS2: 41
+                                             
+                WaveFormat_PCM_F64L = 20,    // SCE_NGS2_WAVEFORM_TYPE_PCM_F64L (0x1A), SAS2: N/A
+                WaveFormat_PCM_F64B = 21,    // SCE_NGS2_WAVEFORM_TYPE_PCM_F64B (0x1B), SAS2: N/A
+                                             
+                WaveFormat_VAG = 32,         // SCE_NGS2_WAVEFORM_TYPE_VAG (0x1C), SAS2: 48
+                WaveFormat_VAG2 = 33,        // No differences?
+                                             
+                WaveFormat_34 = 34,          // Not sure, SAS2: 49
+                
+                WaveFormat_SPU_NOISE = 40,   // SCE_NGS2_WAVEFORM_TYPE_SPU_NOISE (0x87), SAS2: 22
+                
+                WaveFormat_SINE = 48,        // SCE_NGS2_WAVEFORM_TYPE_SINE (0x81), SAS2: 16
+                WaveFormat_SAW_UP = 49,      // SCE_NGS2_WAVEFORM_TYPE_SAW_UP (0x82), SAS2: 17
+                WaveFormat_SAW_DOWN = 50,    // SCE_NGS2_WAVEFORM_TYPE_SAW_DOWN (0x83), SAS2: 18
+                WaveFormat_TRIANGLE = 51,    // SCE_NGS2_WAVEFORM_TYPE_TRIANGLE (0x84), SAS2: 19
+                WaveFormat_SQUARE = 52,      // SCE_NGS2_WAVEFORM_TYPE_SQUARE (0x85), SAS2: 20
+                WaveFormat_WHITE_NOISE = 53, // SCE_NGS2_WAVEFORM_TYPE_WHITE_NOISE (0x86), SAS2: 21
+                
+                WaveFormat_ATRAC9 = 66,      // SCE_NGS2_WAVEFORM_TYPE_ATRAC9 (0x40), SAS2: 66
+            } WaveFormat;
+            
+            ubyte NumChannels;
+            enum <ubyte>
+            {
+                WaveChannel_FL_FrontLeft = 0,
+                WaveChannel_FR_FrontRight = 1,  
+                WaveChannel_FC_FrontCenter = 2,  
+                WaveChannel_LFE_LowFrequencyEffect = 3,  
+                WaveChannel_NoneMaybe = 4,  
+                WaveChannel_SL_SurroundLeft = 5,
+                WaveChannel_SR_SurroundRight = 6,  
+                WaveChannel_BL_BackLeft = 7,
+                WaveChannel_BR_BackRight = 8,
+                WaveChannel_All = 0xFF,
+            } Channels;
+            
+            byte pad;
+            uint SampleRate;
+            ushort Volume;
+            short Pitch;
+            int Field_0x10;
+            uint SampleCount;
+            int LoopStart;
+            int LoopEnd;
+            int StreamDataLength <format=hex>;
+            OffsetT StreamDataOffset <comment="If WaveFlags_DataExternal, offset relative to this, otherwise absolute offset">;
+            
+            if (WaveFlags & WaveFlags_HasExtendedData)
+            {
+                local int stop = false;
+                while (!stop)
+                {
+                    struct
+                    {
+                        byte Type;
+                        byte ArrayLength;
+                        short NextPropertyOffset;
+                        
+                        switch (Type)
+                        {
+                            case 1:
+                                int Values[ArrayLength];
+                                break;
+                            case 2:
+                                struct
+                                {
+                                    ubyte Field_0x00;
+                                    ubyte Field_0x01;
+                                    ushort Field_0x02;
+                                    ushort Field_0x04;
+                                    ushort Field_0x06;
+                                } Property2Data[ArrayLength];
+                                break;
+                            case 3:
+                                struct
+                                {
+                                    ubyte Field_0x00;
+                                    ubyte Field_0x01;
+                                    short Field_0x02;
+                                } Property3Data[ArrayLength];
+                                break;
+                            case 4:
+                                int Value1;
+                                int Value2;
+                                break;  
+                            case 5: break; 
+                            case 6:
+                                ubyte Value1;
+                                ubyte Value2;
+                                ubyte Value3;
+                                ubyte Value4;
+                                break;
+                                
+                            case 7: break;
+                            case 10:
+                                int Values[ArrayLength];
+                                break;
+                            case 11:
+                                int Value1;
+                                int Value2;
+                                break;
+                            case 12:
+                                int Values[ArrayLength];
+                                break;
+                            case 13:
+                                struct
+                                {
+                                    ubyte Value1;
+                                    ubyte Value2;
+                                    ushort RXFadeId;
+                                } Property13Data[ArrayLength];
+                                break;
+                                
+                            case 14: break;
+                            case 15:
+                                int Values[ArrayLength];
+                                break;
+                            case 17:
+                                int Unk;
+                                break;
+                            case 18:
+                                struct
+                                {
+                                    ubyte Value1;
+                                    ubyte Value2;
+                                    ushort pad;
+                                } Property18Data[ArrayLength];
+                            case 19:
+                                struct
+                                {
+                                    ubyte Value1;
+                                    ubyte Value2;
+                                    ushort pad;
+                                } Property19Data[ArrayLength];
+                                break;
+                                
+                            case 20:
+                                ubyte Count;
+                                ubyte Unk;
+                                short Pad;
+                                float Unks[Count];
+                                break;
+                                
+                            default:
+                                Printf("Unsupported Wave extra property tag %d\n", Type);
+                                break; 
+                        }
+                        if (NextPropertyOffset == 0)
+                            stop = true;
+                        else
+                            FSeek(startof(this) + 2 + NextPropertyOffset);
+                    } ExtraProperty <bgcolor=cDkBlue, read=Str("PropType: %d", Type)>;
+                }
+            }
+        } Wave <bgcolor=cLtBlue>;
+    }
+} WaveChunk;

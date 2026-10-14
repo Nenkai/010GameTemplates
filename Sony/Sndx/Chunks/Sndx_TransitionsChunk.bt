@@ -1,0 +1,308 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Transition Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+#include "./Sndx_Expressions.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT NumTransitions;
+    
+    OffsetT TransitionOffsets[NumTransitions];
+    
+    for (local int i = 0; i < NumTransitions; i++)
+    {
+        FSeek(startof(TransitionOffsets[i]) + TransitionOffsets[i]);
+        struct
+        {
+            uint Flags <format=hex, edit=flags>;
+            byte reserved[0x18];
+            CountT ActionCount;
+            OffsetT ActionOffsets[ActionCount];
+            
+            for (local int j = 0; j < ActionCount; j++)
+            {
+                FSeek(startof(ActionOffsets[j]) + ActionOffsets[j]);
+                struct
+                {
+                    enum <uint>
+                    {
+                        TransitionActionFlags_Once = 0x01,
+                        TransitionActionFlags_0x02 = 0x02,
+                        TransitionActionFlags_0x04 = 0x04,
+                        TransitionActionFlags_0x08 = 0x08,
+                        TransitionActionFlags_0x10 = 0x10,
+                    } TransitionActionFlags <format=hex, edit=flags>;
+                    uint ActionId;
+                    OffsetT NameOffset;
+                    ubyte Field_0x0B;
+                    ubyte NumTriggers;
+                    byte pad[2];
+                    OffsetT ConditionExpressionsOffset;
+                    OffsetT TriggersOffset;
+                    ushort ThenCommandsCount;
+                    ushort ElseCommandsCount;
+                    OffsetT ThenCommandsOffset;
+                    OffsetT ElseCommandsOffset;
+                    byte reserved[0x1C];
+                    
+                    if (ConditionExpressionsOffset != 0)
+                    {
+                        FSeek(startof(ConditionExpressionsOffset) + ConditionExpressionsOffset);
+                        SeqExpression ConditionExpression;
+                    }
+                    
+                    if (TriggersOffset != 0)
+                    {
+                        FSeek(startof(TriggersOffset) + TriggersOffset);
+                        SeqExpression TriggerExpressions[NumTriggers];
+                    }
+                    
+                    if (ThenCommandsCount != 0 && ThenCommandsOffset != 0)
+                    {
+                        FSeek(startof(ThenCommandsOffset) + ThenCommandsOffset);
+                        struct
+                        {
+                            struct
+                            {
+                                ubyte NumArgs : 7;
+                                ubyte End : 1;
+                                enum <ubyte>
+                                {
+                                    TransCommand_End = 0x10,
+                                    TransCommand_JumpToCommand = 0x11,
+                                    TransCommand_If = 0x12,
+                                    TransCommand_CallAction = 0x13,
+                                    
+                                    TransCommand_PlayGrain_Waveform = 0x30,
+                                    TransCommand_PlayGrain_Sequence = 0x31,
+                                    TransCommand_PlayGrain_Trans = 0x32,
+                                    TransCommand_PlayGrain_ExternalRequest = 0x33,
+                                    TransCommand_PlayGrain_Request = 0x38,
+                                    
+                                    TransCommand_FadeTracks = 0x40,
+                                    TransCommand_SetTrackName = 0x41,
+                                    
+                                    TransCommand_TrackTweenWithCurrent = 0x42,
+                                    TransCommand_TrackTweenWithValue = 0x43,
+                                    TransCommand_GrainTweenWithCurrent = 0x44,
+                                    TransCommand_GrainTweenWithValue = 0x45,
+                                    TransCommand_TrackTweenWithPreviousTo = 0x46,
+                                    TransCommand_TrackTweenWithUnk = 0x47,
+                                    TransCommand_GrainTweenWithPreviousTo = 0x48,
+                                    TransCommand_GrainTweenWithUnk = 0x49,
+                                    
+                                    TransCommand_VariableTween = 0x50,
+                                    TransCommand_VariableTweenWithValue = 0x51,
+                                    TransCommand_ActionToggleTweenWithCurrentVariable = 0x52,
+                                    TransCommand_ActionToggleTweenWithValue = 0x53,
+                                    // 50/51 = global variable?
+                                    
+                                    TransCommand_SetTempoSlot0 = 0x60,
+                                    TransCommand_SetTempoSlot1 = 0x61,
+                                    TransCommand_SetTempoSlot2 = 0x62,
+                                    TransCommand_SetTempoSlot3 = 0x63,
+                                    
+                                    TransCommand_FaderParamSlot0 = 0x70,
+                                    TransCommand_FaderParamSlot1 = 0x71,
+                                    TransCommand_FaderParamSlot2 = 0x72,
+                                    TransCommand_FaderParamSlot3 = 0x73,
+                                    
+                                    TransCommand_ClearFaderSlot0 = 0x78,
+                                    TransCommand_ClearFaderSlot1 = 0x79,
+                                    TransCommand_ClearFaderSlot2 = 0x7A,
+                                    TransCommand_ClearFaderSlot3 = 0x7B,
+                                    
+                                    TransCommand_SetTimelineMarkerSlot0 = 0x80,
+                                    TransCommand_SetTimelineMarkerSlot1 = 0x81,
+                                    TransCommand_SetTimelineMarkerSlot2 = 0x82,
+                                    TransCommand_SetTimelineMarkerSlot3 = 0x83,
+                                    
+                                    TransCommand_ClearTimelineMarkerSlot0 = 0x88,
+                                    TransCommand_ClearTimelineMarkerSlot1 = 0x89,
+                                    TransCommand_ClearTimelineMarkerSlot2 = 0x8A,
+                                    TransCommand_ClearTimelineMarkerSlot3 = 0x8B,
+                                } CommandType <format=hex>;
+                                
+                                switch (CommandType)
+                                {
+                                    case TransCommand_End: // 0x10
+                                        break;
+                                        
+                                    case TransCommand_JumpToCommand: // 0x11
+                                        if (NumArgs >= 1) SeqExpression CommandIndex <comment="Default = current + 1">;
+                                        break;
+                                        
+                                    case TransCommand_If: // 0x12
+                                        if (NumArgs >= 1) SeqExpression BoolCond;
+                                        if (NumArgs >= 2) SeqExpression IfTrueCommandIndex <comment="Relative">;
+                                        if (NumArgs >= 3) SeqExpression IfFalseCommandIndex <comment="Relative">;
+                                        break;
+                                        
+                                    case TransCommand_CallAction: // 0x13
+                                        if (NumArgs >= 1) SeqExpression ActionId;
+                                        if (NumArgs >= 2) SeqExpression Arg1 <comment="Default = 0.0">;
+                                        if (NumArgs >= 3) SeqExpression Arg2 <comment="Default = 0.0">;
+                                        if (NumArgs >= 4) SeqExpression Arg3 <comment="Default = 0.0">;
+                                        if (NumArgs >= 5) SeqExpression Arg4 <comment="Default = 0.0">;
+                                        break;
+                                        
+                                    case TransCommand_PlayGrain_Waveform:        // 0x30
+                                    case TransCommand_PlayGrain_Sequence:        // 0x31
+                                    case TransCommand_PlayGrain_Trans:           // 0x32
+                                    case TransCommand_PlayGrain_ExternalRequest: // 0x33
+                                    case TransCommand_PlayGrain_Request:         // 0x38
+                                        if (NumArgs >= 1) SeqExpression TrackId <comment="Default 0">;
+                                        if (NumArgs >= 2) SeqExpression ResourceId <comment="Default 0">;
+                                        if (NumArgs >= 3) SeqExpression Volume <comment="Default 1.0">;
+                                        if (NumArgs >= 4) SeqExpression Arg4;
+                                        if (NumArgs >= 5) SeqExpression Flags <comment="Default 0">;
+                                        if (NumArgs >= 6) SeqExpression Delay <comment="Default 0">;
+                                        if (NumArgs >= 7) SeqExpression FadeIn <comment="Default 0">;
+                                        if (NumArgs >= 8) SeqExpression FadeCurve <comment="Default 0">;
+                                        if (NumArgs >= 9) SeqExpression TempoSlot <comment="Default -1">;
+                                        if (NumArgs >= 10) SeqExpression BPM <comment="Default 120.0">;
+                                        if (NumArgs >= 11) SeqExpression Numerator <comment="Default 4">;
+                                        if (NumArgs >= 12) SeqExpression Denominator <comment="Default 4">;
+                                        if (NumArgs >= 13) SeqExpression Arg13;
+                                        if (NumArgs >= 14) SeqExpression Arg14;
+                                        if (NumArgs >= 15) SeqExpression Arg15;
+                                        break;
+                                        
+                                    case TransCommand_FadeTracks: // 0x40
+                                        if (NumArgs >= 1) SeqExpression TracksRange;
+                                        if (NumArgs >= 2) SeqExpression FadeTime <comment="Default 0.0">;
+                                        if (NumArgs >= 3) SeqExpression CurveParam <comment="Default 0">;
+                                        if (NumArgs >= 4) SeqExpression UnkArg4 <comment="Default 0">;
+                                        break;
+                                        
+                                    case TransCommand_SetTrackName: // 0x41
+                                        if (NumArgs >= 1) SeqExpression TrackId;
+                                        if (NumArgs >= 2) SeqExpression TrackName <comment="Max 14 chars">;
+                                        break;
+                                        
+                                    case TransCommand_TrackTweenWithCurrent:    // 0x42
+                                    case TransCommand_TrackTweenWithValue:      // 0x43
+                                    case TransCommand_GrainTweenWithCurrent:    // 0x44
+                                    case TransCommand_GrainTweenWithValue:      // 0x45
+                                    case TransCommand_TrackTweenWithPreviousTo: // 0x46
+                                    case TransCommand_TrackTweenWithUnk:        // 0x47
+                                    case TransCommand_GrainTweenWithPreviousTo: // 0x48
+                                    case TransCommand_GrainTweenWithUnk:        // 0x49
+                                        if (NumArgs >= 1) SeqExpression Range;
+                                        if (NumArgs >= 2) SeqExpression UnkInt;
+                                        
+                                        local int lastIndex = 2;
+                                        if (CommandType == TransCommand_TrackTweenWithValue || CommandType == TransCommand_GrainTweenWithValue)
+                                        {
+                                            lastIndex = 3;
+                                            if (NumArgs >= 3) 
+                                                SeqExpression UnkFloat1 <comment="Default 0.0">; 
+                                        }
+                                        
+                                        if (lastIndex + 0 < NumArgs) SeqExpression UnkFloat2 <comment="Default 0.0">;
+                                        if (lastIndex + 1 < NumArgs) SeqExpression UnkFloat3 <comment="Default 0.0">;
+                                        if (lastIndex + 2 < NumArgs) SeqExpression UnkFloat4 <comment="Default 0.0">;
+                                        if (lastIndex + 3 < NumArgs) SeqExpression UnkInt2 <comment="Default 0">;
+                                        break;
+                                        
+                                    case TransCommand_VariableTween: // 0x50
+                                        // (scope << 16) | index
+                                        // 1 = all resources? 3 = player locals? 4 = globals? anything else = variable id?
+                                        if (NumArgs >= 1) SeqExpression VarRef <comment="Default 0">;
+                                        if (NumArgs >= 2) SeqExpression StartValue <comment="Default 0.0">;
+                                        if (NumArgs >= 3) SeqExpression To <comment="Default 0">;
+                                        if (NumArgs >= 4) SeqExpression Delay <comment="Default 0.0">;
+                                        if (NumArgs >= 5) SeqExpression Duration <comment="Default 0.0">;
+                                        if (NumArgs >= 6) SeqExpression Curve <comment="Default 0">;
+                                        break;
+                                    case TransCommand_VariableTweenWithValue: // 0x51
+                                        // (scope << 16) | index
+                                        // 1 = all resources? 3 = player locals? 4 = globals? anything else = variable id?
+                                        if (NumArgs >= 1) SeqExpression VarRef <comment="Default 0">;
+                                        if (NumArgs >= 2) SeqExpression To <comment="Default 0">;
+                                        if (NumArgs >= 3) SeqExpression Delay <comment="Default 0.0">;
+                                        if (NumArgs >= 4) SeqExpression Duration <comment="Default 0.0">;
+                                        if (NumArgs >= 5) SeqExpression Curve <comment="Default 0">;
+                                        break;
+                                        
+                                    case TransCommand_ActionToggleTweenWithCurrentVariable: // 0x52
+                                    case TransCommand_ActionToggleTweenWithValue:           // 0x53
+                                        if (NumArgs >= 1) SeqExpression Range;
+
+                                        local int lastIndex = 1;
+                                        if (CommandType == TransCommand_ActionToggleWithValue)
+                                        {
+                                            lastIndex = 2;
+                                            if (NumArgs >= 2) 
+                                                SeqExpression UnkFloat1 <comment="Default 0.0">; 
+                                        }
+                                        
+                                        if (lastIndex + 0 < NumArgs) SeqExpression UnkFloat2 <comment="Default 0.0">;
+                                        if (lastIndex + 1 < NumArgs) SeqExpression EnableFlag <comment="Default 0.0">;
+                                        break;
+                                        
+                                    case TransCommand_SetTempoSlot0: // 0x60
+                                    case TransCommand_SetTempoSlot1: // 0x61
+                                    case TransCommand_SetTempoSlot2: // 0x62
+                                    case TransCommand_SetTempoSlot3: // 0x63
+                                         if (NumArgs >= 1) SeqExpression BPM <comment="Default 120.0">;
+                                         if (NumArgs >= 2) SeqExpression Numerator <comment="Default 0">;
+                                         if (NumArgs >= 3) SeqExpression Denominator <comment="Default 0">;
+                                         break;
+                                        
+                                    case TransCommand_FaderParamSlot0: // 0x70
+                                    case TransCommand_FaderParamSlot1: // 0x71
+                                    case TransCommand_FaderParamSlot2: // 0x72
+                                    case TransCommand_FaderParamSlot3: // 0x73
+                                        if (NumArgs >= 1) SeqExpression Ranges;
+                                        if (NumArgs >= 2) SeqExpression Expr;
+                                        if (NumArgs >= 3) SeqExpression UnkInt3 <comment="Default 0.0">;
+                                        if (NumArgs >= 4) SeqExpression UnkFloat4 <comment="Default 0">;
+                                        break;
+                                         
+                                    case TransCommand_ClearFaderSlot0: // 0x78
+                                    case TransCommand_ClearFaderSlot1: // 0x79
+                                    case TransCommand_ClearFaderSlot2: // 0x7A
+                                    case TransCommand_ClearFaderSlot3: // 0x7B
+                                        break;
+                                         
+                                    case TransCommand_SetTimelineMarkerSlot0: // 0x80
+                                    case TransCommand_SetTimelineMarkerSlot1: // 0x81
+                                    case TransCommand_SetTimelineMarkerSlot2: // 0x82
+                                    case TransCommand_SetTimelineMarkerSlot3: // 0x83
+                                        if (NumArgs >= 1) SeqExpression Ranges;
+                                        break;
+                                         
+                                    case TransCommand_ClearTimelineMarkerSlot0: // 0x88
+                                    case TransCommand_ClearTimelineMarkerSlot1: // 0x89
+                                    case TransCommand_ClearTimelineMarkerSlot2: // 0x8A
+                                    case TransCommand_ClearTimelineMarkerSlot3: // 0x8B
+                                        break;
+                                        
+                                    default:
+                                        Printf("Unsupported Transition command 0x%X\n", CommandType);
+                                        break; 
+                                }
+                                if (End)
+                                    return;
+                            } Command[ThenCommandsCount] <optimize=false>;
+                        } ThenCommands;
+                    }
+                    
+                } Action <read=ReadString(startof(NameOffset) + NameOffset)>;
+            }
+        } Transition;
+    }
+} TransitionsChunk <bgcolor=cDkRed>;

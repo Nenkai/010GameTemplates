@@ -1,0 +1,664 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Sequence Data (SFX/MIDI) Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+#include "./Sndx_Expressions.bt"
+
+struct SeqValue;
+
+string GetValueString(SeqValue& value)
+{
+    if (!exists(value.ValueType))
+        return "<default value>";
+
+    switch (value.ValueType)
+    {
+        case SeqValueType_Weighted:
+            return Str("Weighted (%d choices)", value.n);
+        case SeqValueType_WeightedPRNG:
+            return Str("WeightedPRNG (%d choices)", value.n);
+        case SeqValueType_Random:
+            return Str("Random [%d..%d), step: %d", value.Min.Value, value.Max.Value, value.Step.Value);
+        case SeqValueType_RandomPRNG:
+            return Str("RandomPRNG [%d..%d) step: %d", value.Min.Value, value.Max.Value, value.Step.Value);
+    }   
+
+    return Str("%d (%s)", value.Value, EnumToString(value.ValueType));
+}
+
+typedef struct // Part of SesqReadData
+{
+    local int Value = 0;
+    if (ReadUByte() >= 0xA0)
+        return;
+        
+    ubyte ValueSize : 4;
+    enum <ubyte> 
+    { 
+        SeqValueType_PositiveBcd = 0, 
+        SeqValueType_NegativeBcd = 1, 
+        SeqValueType_Random = 2, 
+        SeqValueType_RandomPRNG = 3,
+        // Empty
+        SeqValueType_Weighted = 5,
+        SeqValueType_WeightedPRNG = 6,
+        SeqValueType_Expression = 7,
+    } ValueType : 4;
+        
+    switch (ValueType)
+    {
+        case SeqValueType_PositiveBcd: // 0
+        case SeqValueType_NegativeBcd: // 1
+            BcdValue Values(ValueSize); // Binary coded decimals
+
+            for (local int i = 0; i < ValueSize; i++)
+                Value = Value * 100 + Values.Byte[i].Tens * 10 + Values.Byte[i].Ones;
+            if (ValueType == SeqValueType_NegativeBcd) 
+                Value = -Value;
+            
+            break;
+            
+        case SeqValueType_Random: // 2
+        case SeqValueType_RandomPRNG: // 3
+            if (ValueType == SeqValueType_RandomPRNG)
+                SeqValue Mode <comment="0 = plain random, 1 = shuffle bag, 2 = random, never same as previous, 3 = round-robin">;
+            SeqValue Min;
+            SeqValue Max;
+            SeqValue Step;
+            
+            if (ValueSize == 1)
+                SeqValue Flags <comment="3 bits slot (0-7), 1 bit store picked slot, 1 bit = no roll, read slot only">;
+            break;
+
+        case SeqValueType_Weighted: // 5
+        case SeqValueType_WeightedPRNG: // 6
+            BcdValue Count(1);
+            if (ValueType == SeqValueType_WeightedPRNG)
+                SeqValue Mode <comment="0 = plain random, 1 = shuffle bag, 2 = random, never same as previous, 3 = round-robin">;
+                
+            local int n = Count.Byte[0].Tens * 10 + Count.Byte[0].Ones;
+            for (local int i = 0; i < n; i++) {
+                struct
+                {
+                    SeqValue Value;
+                    SeqValue Weight;
+                } Weight;
+            }
+            
+            if (ValueSize == 2) 
+                SeqValue Flags <comment="3 bits slot (0-7), 1 bit store picked slot, 1 bit = no roll, read slot only">;
+            
+            break;
+            
+        case SeqValueType_Expression:
+            SeqExpression Expression_;
+            break;
+            
+        default:
+            Warning("Unimplemented sesq value type %s", EnumToString(Type));
+            
+            BcdValue count(ValueSize);
+            // Use count and read two? min max?
+            break;
+            
+    }
+    
+} SeqValue <read=GetValueString, optimize=false, warn=false>;
+      
+typedef struct
+{
+    local int stop = false;
+    while (!stop)
+    {
+        struct
+        {
+            enum <ubyte>
+            {
+                SFX_PLAY_BY_ID = 0xA0,
+                // 0xA1 not supported
+                SFX_PLAY_WAVEFORM = 0xA2,
+                SFX_PLAY_SEQUENCE = 0xA3,
+                SFX_PLAY_TONE = 0xA4,
+                SFX_RELEASE = 0xA5,
+                SFX_BREAK = 0xA6,
+                SFX_STOP = 0xA7,
+                SFX_SYNC = 0xA8,
+                SFX_SET_PARAM = 0xA9,
+                SFX_SET_MY_PARAM = 0xAA,
+                SFX_ADSR = 0xAB,
+                SFX_ENVELOPE = 0xAC,
+                // Nothing
+                SFX_PLAY_EXTERNAL = 0xAE,
+                
+                SFX_PLAY = 0xB0,
+                SFX_STOP2 = 0xB1,
+                SFX_RELEASE2 = 0xB2,
+                SFX_SYNC2 = 0xB3,
+                
+                SFX_MIDI_PARAM = 0xC0,
+                SFX_MIDI_ADSR = 0xC3,
+                SFX_MIDI_ADSR2 = 0xC4,
+                
+                SFX_MIDI_PLAY = 0xD0,
+                SFX_MIDI_STOP = 0xD1,
+                SFX_MIDI_RELEASE = 0xD2,
+                SFX_MIDI_SYNC = 0xD3,
+                
+                SFX_LET = 0xE0,
+                
+                SFX_NONE = 0xF0,
+                SFX_WAIT = 0xF1,
+                SFX_RETURN = 0xF2,
+                SFX_LOOP_BEGIN = 0xF3,
+                SFX_LOOP_END = 0xF4,
+                SFX_JUMP = 0xF5,
+                SFX_SWITCH = 0xF6,
+                SFX_MARKER = 0xF9,
+                SFX_BREAK_TONE = 0xFA,
+                SFX_STOP_TONE = 0xFB,
+                SFX_HOLD_BEGIN = 0xFC,
+                SFX_WAIT_REPEASE = 0xFD,
+                SFX_TRACE = 0xFE,
+                SFX_TERM = 0xFF, // End
+            } SFXCommand <format=hex, fgcolor=cPurple>; 
+            
+            switch (SFXCommand)
+            {
+                case SFX_PLAY_BY_ID: // 0xA0
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue RequestId <comment="Default 0">;
+                        SeqValue Mode <comment="0, 1, 2 - Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default -1">;
+                        if (Value6.Value != -1)
+                        {
+                            SeqValue Value6_1 <comment="Default -1">;
+                            SeqValue Value6_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY_BY_ID;
+                    break;
+                    
+                case SFX_PLAY_WAVEFORM: // 0xA2
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue WaveId <comment="Default 0">;
+                        SeqValue Mode <comment="0, 1, 2 - Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default -1">;
+                        if (Value6.Value != -1)
+                        {
+                            SeqValue Value6_1 <comment="Default -1">;
+                            SeqValue Value6_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY_WAVEFORM;
+                    break;
+                    
+                case SFX_PLAY_SEQUENCE: // 0xA3
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue SequenceId <comment="Default 0">;
+                        SeqValue Mode <comment="0, 1, 2 - Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default -1">;
+                        if (Value6.Value != -1)
+                        {
+                            SeqValue Value6_1 <comment="Default -1">;
+                            SeqValue Value6_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY_SEQUENCE;
+                    break;
+                    
+                case SFX_PLAY_TONE: // 0xA4
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue ToneRange1 <comment="Default 0">;
+                        SeqValue ToneRange2 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0x1000">;
+                        SeqValue Value5 <comment="Mode 0, 1, 2 - Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                        SeqValue Value7 <comment="Default 0">;
+                        SeqValue Value8 <comment="Default -1">;
+                        
+                        if (Value8.Value != -1)
+                        {
+                            SeqValue Value8_1 <comment="Default -1">;
+                            SeqValue Value8_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY_TONE;
+                    break;
+                    
+                case SFX_RELEASE: // 0xA5
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                    } SFX_RELEASE;
+                    break;
+                    
+                case SFX_BREAK: // 0xA6
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                    } SFX_BREAK;
+                    break;
+                    
+                case SFX_STOP: // 0xA7
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                    } SFX_STOP;
+                    break;
+                    
+                case SFX_SYNC: // 0xA8
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                    } SFX_SYNC;
+                    break;
+                    
+                case SFX_SET_PARAM:
+                case 0xB8:
+                    struct
+                    {
+                        SeqValue ControlType <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                    } SFX_SET_PARAM;
+                    break;
+                    
+                case SFX_SET_MY_PARAM: // 0xAA
+                case 0xB9:
+                    struct
+                    {
+                        SeqValue ControlType <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                    } SFX_SET_MY_PARAM;
+                    break;
+                    
+                case SFX_ADSR: // 0xAB
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                        SeqValue Value7 <comment="Default 0">;
+                        SeqValue Value8 <comment="Default 0">;
+                        SeqValue Value9 <comment="Default 0">;
+                        SeqValue Value10 <comment="Default 0">;
+                        SeqValue Value11 <comment="Default 0">;
+                    } SFX_ADSR;
+                    break;
+                    
+                case SFX_ENVELOPE: // 0xAC
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                    } SFX_ENVELOPE;
+                    break;
+                    
+                case SFX_PLAY_EXTERNAL: // 0xAE
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue ExternalId <comment="Default 0">;
+                        SeqValue Mode <comment="0, 1, 2 - Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default -1">;
+                        
+                        if (Value8.Value != -1)
+                        {
+                            SeqValue Value8_1 <comment="Default -1">;
+                            SeqValue Value8_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY_EXTERNAL;
+                    break;
+                    
+                case SFX_PLAY: // 0xB0
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue ToneRange1 <comment="Default 0">;
+                        SeqValue ToneRange2 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0x1000">;
+                        SeqValue Value5 <comment="Mode 0, 1, 2 - Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                        SeqValue Value7 <comment="Default -1">;
+                        
+                        if (Value7.Value != -1)
+                        {
+                            SeqValue Value7_1 <comment="Default -1">;
+                            SeqValue Value7_2 <comment="Default -1">;
+                        }
+                    } SFX_PLAY;
+                    break;
+                    
+                case SFX_STOP2: // 0xB1:
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                    } SFX_STOP2;
+                    break;
+                    
+                case SFX_RELEASE2: // 0xB2:
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                    } SFX_RELEASE2;
+                    break;
+                    
+                case SFX_SYNC2: // 0xB3:
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                    } SFX_SYNC2;
+                    break;
+                     
+                case SFX_MIDI_PARAM: // 0xC0:
+                    struct
+                    {
+                        SeqValue Value1 <comment="default 0">;
+                        SeqValue ControlType <comment="default 0">;
+                        SeqValue Value3 <comment="default 0">;
+                        SeqValue Value4 <comment="default 0">;
+                        SeqValue Value5 <comment="default 0">;
+                        SeqValue Value6 <comment="default 0">;
+                    } SFX_MIDI_PARAM;
+                    break;
+                
+                case SFX_MIDI_ADSR: // 0xC3:
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                        SeqValue Value7 <comment="Default 0">;
+                        SeqValue Value8 <comment="Default 0">;
+                        SeqValue Value9 <comment="Default 0">;
+                        SeqValue Value10 <comment="Default 0">;
+                        SeqValue Value11 <comment="Default 0">;
+                    } SFX_MIDI_ADSR;
+                    break;
+                    
+                case SFX_MIDI_ADSR2: // 0xC4:
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue Value2 <comment="Default 0">;
+                        SeqValue Value3 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0">;
+                        SeqValue Value5 <comment="Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                    } SFX_MIDI_ADSR2;
+                    break;
+                    
+                case SFX_MIDI_PLAY: // 0xD0
+                    struct
+                    {
+                        SeqValue Value1 <comment="Default 0">;
+                        SeqValue ToneRange1 <comment="Default 0">;
+                        SeqValue ToneRange2 <comment="Default 0">;
+                        SeqValue Value4 <comment="Default 0x1000">;
+                        SeqValue Value5 <comment="Mode 0, 1, 2 - Default 0">;
+                        SeqValue Value6 <comment="Default 0">;
+                        SeqValue Value7 <comment="Default -1">;
+                        
+                        if (Value7.Value != -1)
+                        {
+                            SeqValue Value7_1 <comment="Default -1">;
+                            SeqValue Value7_2 <comment="Default -1">;
+                        }
+                    } SFX_MIDI_PLAY;
+                    break;
+                    
+                case SFX_MIDI_STOP: // 0xD1:
+                    struct
+                    {
+                        SeqValue Value1;
+                        SeqValue Value2;
+                    } SFX_STOP2;
+                    break;
+                    
+                case SFX_MIDI_RELEASE: // 0xD2:
+                    struct
+                    {
+                        SeqValue Value1;
+                        SeqValue Value2;
+                    } SFX_RELEASE2;
+                    break;
+                    
+                case SFX_MIDI_SYNC: // 0xD3:
+                    struct
+                    {
+                        SeqValue Value1;
+                        SeqValue Value2;
+                        SeqValue Value3;
+                    } SFX_SYNC2;
+                    break;
+                    
+                case SFX_LET: // 0xF0 - Sets variable value
+                    struct
+                    {
+                        SeqExpression Expression_;
+                        SeqValue Value;
+                    } SFX_LET;
+                    break;
+                    
+                case SFX_NONE:
+                    break;
+                    
+                case SFX_WAIT: // 0xF1:
+                    struct
+                    {
+                        SeqValue Time; // Multiplied by 1000
+                    } SFX_WAIT;
+                     break;
+                     
+                case SFX_LOOP_BEGIN: // 0xF3
+                    struct
+                    {
+                        SeqValue Offset <comment="Default 0">;
+                    } SFX_LOOP_BEGIN;
+                    break;
+                    
+                case SFX_LOOP_END: // 0xF4
+                    break;
+                    
+                case SFX_JUMP: // 0xF5 - Jump if
+                    struct
+                    {
+                        SeqValue ConditionFlag <comment="Default 0, 1 = true, 0 = false">;
+                        SeqValue TrueJumpIdx <comment="Default -1">;
+                        SeqValue TrueSeqIdx  <comment="Default -3 - -3/-2/-1 special values, otherwise seq index">;
+                        SeqValue FalseJumpIdx <comment="Default -1">;
+                        SeqValue FalseSeqIdx <comment="Default -3. -2 if both jump indexes are negative. -3/-2/-1 special values, otherwise seq index">;
+                    } SFX_JUMP;
+                    break;
+                    
+                case SFX_SWITCH: // 0xF6 - Jump if
+                    struct
+                    {
+                        SeqValue DefaultValue <comment="Default 0">;
+                        SeqValue DefaultJumpIdx <comment="Default 0">;
+                        SeqValue DefaultSeqIdx <comment="Default -3 - -3/-2/-1 special values, otherwise seq index">;
+                        
+                        local int j = 0;
+                        while (ReadUByte() < 0xA0)
+                        {
+                            struct
+                            {
+                                SeqValue Value <comment="Default -2">;
+                                SeqValue JumpIdx <comment="Default 0">;
+                                SeqValue SeqIdx <comment="Default -3 - -3/-2/-1 special values, otherwise seq index">;
+                            } SwCase;
+                            
+                            if (SwCase[j++].Value.Value == DefaultValue.Value)
+                                break;
+                        }
+                    } SFX_SWITCH;
+                    break;
+                    
+                case SFX_MARKER: // 0xF9
+                    struct
+                    {
+                        SeqValue Value <comment="Default 0">;
+                    } SFX_MARKER;
+                    break;
+                    
+                case SFX_BREAK_TONE: // 0xFA
+                    struct
+                    {
+                        SeqValue ToneRange1 <comment="Default 0">;
+                        SeqValue ToneRange2 <comment="Default 0">;
+                    } SFX_BREAK_TONE;
+                    break;
+                    
+                case SFX_STOP_TONE: // 0xFB
+                    struct
+                    {
+                        SeqValue ToneRange1 <comment="Default 0">;
+                        SeqValue ToneRange2 <comment="Default 0">;
+                        SeqValue StopMode <comment="0, 1, 2, Default 0">;
+                    } SFX_STOP_TONE;
+                    break;
+                    
+                case SFX_HOLD_BEGIN: // 0xFC
+                    struct
+                    {
+                        SeqValue Value <comment="Default 0">;
+                    } SFX_HOLD_BEGIN;
+                    break;
+                    
+                case SFX_WAIT_REPEASE: // 0xFD
+                    break;
+                    
+                case SFX_TRACE: // 0xFE - Debug/trace print
+                    struct
+                    {
+                        SeqValue Value <comment="Default 0">;
+                    } SFX_TRACE;
+                    break;
+                    
+                case SFX_TERM: // 0xFF
+                    stop = true;
+                    break;
+                    
+                default:
+                    Printf("WARN: SFX Command '%s' (0x%X) not supported\n", EnumToString(SFXCommand), SFXCommand);
+                    stop = true;
+                    break;
+            }
+        } SFXCommand_ <read=EnumToString(SFXCommand), bgcolor=cBlack>;
+    }
+} SFXCommands;
+
+typedef struct
+{
+    uint Empty;
+    CountT NumSequences;
+    OffsetT SequenceOffsets[NumSequences];
+    
+    for (local int i = 0; i < NumSequences; i++)
+    {
+        FSeek(startof(SequenceOffsets[i]) + SequenceOffsets[i]);
+        struct
+        {
+            enum <uint>
+            {
+                SequenceFlags_HasExtraData = 0x01,   
+            } SequenceFlags <edit=flags>;
+            
+            enum <byte>
+            {
+                SequenceMode_SFX = 0,
+                SequenceMode_MIDI = 1,
+            } SequenceMode;
+            
+            byte pad;
+            ushort Field_0x06;
+            ushort Field_0x08;
+            ushort Field_0x0A;
+            uint DataLength <format=hex>;
+            OffsetT DataOffset;
+            
+            if (SequenceMode != SequenceMode_MIDI && SequenceFlags & SequenceFlags_HasExtraData)
+            {
+                local int stop = false;
+                while (!stop)
+                {
+                    struct
+                    {
+                        byte Type;
+                        byte ArrayLength;
+                        short NextPropertyOffset;
+                        
+                        switch (Type)
+                        {
+                            case 4:
+                                CountT RegionMarkerCount;
+                                int RegionMarkersOffset;
+                                // Stride 0x0C
+                                break;
+                        }
+                        
+                        if (NextPropertyOffset == 0)
+                            stop = true;
+                        else
+                            FSeek(startof(this) + 2 + NextPropertyOffset);
+                    } ExtraProperty <read=Str("PropType: %d", Type)>;
+                }
+            }
+            
+            if (DataOffset) // Game checks for DataOffset != 0
+            {
+                FSeek(startof(DataOffset) + DataOffset);
+                if (SequenceMode == SequenceMode_SFX)
+                    SFXCommands SFXCommands_;
+                else
+                    Printf("Unsupported MIDI mode \n");
+            }
+        } Sequence;
+    }
+} SequenceDataChunk <bgcolor=cDkYellow>;

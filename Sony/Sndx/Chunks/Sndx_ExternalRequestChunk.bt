@@ -1,0 +1,28 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx External Request Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT Count;
+    
+    // Stride 0x20
+    struct
+    {
+        uint Empty;
+        OffsetT NameOffset <comment="Or path maybe?">;
+        byte Reserved[0x18];
+    } ExternalRequest[Count] <read=ReadString(startof(NameOffset) + NameOffset)>;
+} ExternalRequestChunk;

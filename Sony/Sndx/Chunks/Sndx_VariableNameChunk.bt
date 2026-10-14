@@ -1,0 +1,26 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Variable Name Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT NumNames;
+    struct
+    {
+        OffsetT NameOffset;
+        uint NameHash <comment="Must be ordered for binary search", format=hex>;
+        uint VariableIndex;
+    } VariableName[NumNames] <read=ReadString(startof(NameOffset) + NameOffset)>;
+} VariableNameChunk;

@@ -1,0 +1,249 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef SNDX_EXPRESSIONS_H
+#define SNDX_EXPRESSIONS_H
+
+typedef struct (int n) 
+{
+    ubyte b[n];
+    local uint value = 0;
+
+    for (local int i = 0; i < n; i++) 
+        value = (value << 7) | b[i];
+
+} ExprImmediate <read=Str("%u (0x%X)", value, value)>;
+
+typedef struct
+{
+    enum <ubyte>
+    {
+        // 0x00->0x7E = push literal
+        // 0x80->0x8F = push unsigned immediate (/ 4 = byte width, % 4 = decimals (index into [1.0, 0.1, 0.001, 0.0001])
+        // 0x90->0x9F = same as above, negative immediate
+        
+        // 1 input args
+        ExpressionInstruction_Nop = 0xA0,
+        ExpressionInstruction_Negate = 0xA1,
+        ExpressionInstruction_LogicalNot = 0xA2,
+        ExpressionInstruction_Abs = 0xA3,
+        
+        // 2 input args
+        ExpressionInstruction_Multiply = 0xA8,
+        ExpressionInstruction_Divide = 0xA9,
+        ExpressionInstruction_Modulo = 0xAA,
+        ExpressionInstruction_Add = 0xAB, // Also string concatenation
+        ExpressionInstruction_Subtract = 0xAC,
+        ExpressionInstruction_0xAD = 0xAD,
+        ExpressionInstruction_LessThanOrEqual = 0xAE,
+        ExpressionInstruction_LessThan = 0xAF,
+        ExpressionInstruction_GreaterThanOrEqual = 0xB0,
+        ExpressionInstruction_GreaterThan = 0xB1,
+        ExpressionInstruction_Equal = 0xB2,
+        ExpressionInstruction_NotEqual = 0xB3,
+        ExpressionInstruction_LogicalAnd = 0xB4,
+        ExpressionInstruction_LogicalOr = 0xB5,
+        ExpressionInstruction_Min = 0xB6,
+        ExpressionInstruction_Max = 0xB7,
+        ExpressionInstruction_0xB8 = 0xB8, // b * floor(a / b)
+        ExpressionInstruction_0xB9 = 0xB9, // b * ceil (a / b)
+        ExpressionInstruction_0xBA = 0xBA, // a - b * floor (a/ b)
+        ExpressionInstruction_Pow = 0xBB,
+        ExpressionInstruction_TableData = 0xBC, // TBLD Lookup - table index, row index
+        
+        // 3 input args
+        ExpressionInstruction_Ternary = 0xC8,
+        ExpressionInstruction_Clamp = 0xC9,                   // clamp(value, low, high)
+        ExpressionInstruction_InRange = 0xCA,                 // low <= value <= high
+        ExpressionInstruction_OutRange = 0xCB,                // value < low || value > high
+        ExpressionInstruction_LessThan_LessThan = 0xCC,       // a < b < c
+        ExpressionInstruction_LesserEqual_LessThan = 0xCD,    // a <= b < c
+        ExpressionInstruction_LessThan_LesserEqual = 0xCE,    // a < b <= c
+        ExpressionInstruction_LesserEqual_LesserEqual = 0xCF, // a <= b <= c
+        
+        // variadic num of args
+        ExpressionInstruction_RandomRangeMode0 = 0xD0, // Random mode 1
+        ExpressionInstruction_RandomRangeMode1 = 0xD1,
+        ExpressionInstruction_RandomRangeMode2 = 0xD2,
+        ExpressionInstruction_RandomRangeMode3 = 0xD3,
+        ExpressionInstruction_RandomWeightedMode0 = 0xD4,
+        ExpressionInstruction_RandomWeightedMode1 = 0xD5,
+        ExpressionInstruction_RandomWeightedMode2 = 0xD6,
+        ExpressionInstruction_RandomWeightedMode3 = 0xD7,
+        
+        ExpressionInstruction_String1 = 0xE0, // 1 immediate
+        ExpressionInstruction_String2 = 0xE1, // 2 immediate
+
+        ExpressionInstruction_ReadUnk1WithIndex = 0xE8, // 1 immediate
+        ExpressionInstruction_ReadUnk2WithIndex = 0xE9, // 1 immediate
+        
+        // 1 to 4 immediates
+        ExpressionInstruction_LocalVariable0 = 0xF0,
+        ExpressionInstruction_LocalVariable1 = 0xF1,
+        ExpressionInstruction_LocalVariable2 = 0xF2,
+        ExpressionInstruction_LocalVariable3 = 0xF3,
+        ExpressionInstruction_GlobalVariable0 = 0xF4,
+        ExpressionInstruction_GlobalVariable1 = 0xF5,
+        ExpressionInstruction_GlobalVariable2 = 0xF6,
+        ExpressionInstruction_GlobalVariable3 = 0xF7,
+
+        ExpressionInstruction_NativeCallback = 0xF8, // variadic num of args, 1 immediate
+        ExpressionInstruction_ReadUnk3WithIndex = 0xF9, // 1 immediate
+        ExpressionInstruction_Nop2 = 0xFE,
+        
+    } Opcode_ <format=hex>;
+
+    switch (Opcode_)
+    {
+        case ExpressionInstruction_Nop:
+        case ExpressionInstruction_Negate:
+        case ExpressionInstruction_LogicalNot:
+        case ExpressionInstruction_Abs:
+            break;
+            
+        case ExpressionInstruction_Multiply:
+        case ExpressionInstruction_Divide:
+        case ExpressionInstruction_Modulo:
+        case ExpressionInstruction_Add:
+        case ExpressionInstruction_Subtract:
+        case ExpressionInstruction_0xAD:
+        case ExpressionInstruction_LessThanOrEqual:
+        case ExpressionInstruction_LessThan:
+        case ExpressionInstruction_GreaterThanOrEqual:
+        case ExpressionInstruction_GreaterThan:
+        case ExpressionInstruction_Equal:
+        case ExpressionInstruction_NotEqual:
+        case ExpressionInstruction_LogicalAnd:
+        case ExpressionInstruction_LogicalOr:
+        case ExpressionInstruction_Min:
+        case ExpressionInstruction_Max:
+        case ExpressionInstruction_0xB8:
+        case ExpressionInstruction_0xB9:
+        case ExpressionInstruction_0xBA:
+        case ExpressionInstruction_Pow:
+        case ExpressionInstruction_TableData:
+            break;
+            
+        case ExpressionInstruction_Ternary:
+        case ExpressionInstruction_Clamp:
+        case ExpressionInstruction_InRange:
+        case ExpressionInstruction_OutRange:
+        case ExpressionInstruction_LessThan_LessThan:
+        case ExpressionInstruction_LesserEqual_LessThan:
+        case ExpressionInstruction_LessThan_LesserEqual:
+        case ExpressionInstruction_LesserEqual_LesserEqual:
+            break;
+            
+        case ExpressionInstruction_RandomRangeMode0:
+        case ExpressionInstruction_RandomRangeMode1:
+        case ExpressionInstruction_RandomRangeMode2:
+        case ExpressionInstruction_RandomRangeMode3:
+        case ExpressionInstruction_RandomWeightedMode0:
+        case ExpressionInstruction_RandomWeightedMode1:
+        case ExpressionInstruction_RandomWeightedMode2:
+        case ExpressionInstruction_RandomWeightedMode3:
+            byte ArgCount;
+            break;
+            
+        case ExpressionInstruction_String1:
+        case ExpressionInstruction_String2:
+            ExprImmediate StrLength((Opcode_ % 2) + 1);
+            byte Str[StrLength.value];
+            break;
+            
+        case ExpressionInstruction_ReadUnk1WithIndex:
+        case ExpressionInstruction_ReadUnk2WithIndex:
+            ExprImmediate Index(1);
+            break;
+            
+        case ExpressionInstruction_LocalVariable0:
+        case ExpressionInstruction_LocalVariable1:
+        case ExpressionInstruction_LocalVariable2:
+        case ExpressionInstruction_LocalVariable3:
+            ExprImmediate VariableIndex((Opcode_ % 4) + 1);
+            ExprImmediate BlobLength(1);
+            byte Name[BlobLength.value];
+            break;
+            
+        case ExpressionInstruction_GlobalVariable0:
+        case ExpressionInstruction_GlobalVariable1:
+        case ExpressionInstruction_GlobalVariable2:
+        case ExpressionInstruction_GlobalVariable3:
+            ExprImmediate VariableIndex((Opcode_ % 4) + 1);
+            ExprImmediate BlobLength(1);
+            byte Name[BlobLength.value];
+            break;
+            
+        case ExpressionInstruction_NativeCallback:
+            byte ArgCount;
+            
+            // Valid ids:
+            // Trans: 
+            //   16, 
+            //   32, 33, 34, 35, (group)
+            //   40, 41, 42, 43, 44, (group)
+            //   48, 49, 50, 51, (group)
+            //   56, 57, 58, 59, (group)
+            //   64, 65, 66, 
+            //   67, 68, 76, (group)
+            //   70, 71, 72, 73, 74, 75, 77, 78, 
+            //   96, 97, 98, 99, (group)
+            ExprImmediate FuncId(1);
+            ExprImmediate BlobLength(1);
+            byte Blob[BlobLength.value];
+            break;
+            
+        case ExpressionInstruction_ReadUnk3WithIndex:
+            ExprImmediate Index(1);
+            break;
+            
+        default:
+            if (Opcode_ < 0xA0)
+                break;
+                
+            Printf("Opcode '%s' (0x%X) not supported\n", EnumToString(Opcode_), Opcode_);
+            break;
+    }
+} ExpressionInstruction <read=PrintExpressionInstruction>;
+
+string PrintExpressionInstruction(ExpressionInstruction& op)
+{
+    if (op.Opcode_ < 0x80)
+        return Str("%d (Push Literal)", op.Opcode_);
+        
+    if (op.Opcode_ > 0x80 && op.Opcode_ <= 0x8F)
+        return Str("Positive Immediate (%d decimals, %d bytes)", op.Opcode_ % 4, op.Opcode_ / 4);
+        
+    if (op.Opcode_ >= 0x90 && op.Opcode_ <= 0x9F)
+        return Str("Negative Immediate (%d decimals, %d bytes)", op.Opcode_ % 4, op.Opcode_ / 4);
+        
+    return EnumToString(op.Opcode_);
+}
+
+typedef struct
+{
+    _7BitInt Length;
+    union
+    {
+        byte Bytes[Length.Value];
+        struct
+        {
+            while (FTell() < startof(ExpressionDataUnion) + Length.Value)
+            {
+                ExpressionInstruction Inst;
+            }
+        } ExpressionData;
+    } ExpressionDataUnion;
+} SeqExpression <optimize=false>;
+
+#endif

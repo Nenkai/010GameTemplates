@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Variable Name Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT NumTables;
+    OffsetT TablesOffsets[NumTables];
+    
+    for (local int i = 0; i < NumTables; i++)
+    {
+        FSeek(startof(TablesOffsets[i]) + TablesOffsets[i]);
+        struct
+        {
+            uint UnkUnusedFlagsMaybe <format=hex>;
+            OffsetT NameOffset;
+            int Pad[5];
+            CountT Count;
+            OffsetT Offsets[Count];
+            for (local int j = 0; j < Count; j++)
+            {
+                FSeek(startof(Offsets[j]) + Offsets[j]);
+                struct
+                {
+                    uint UnkUnusedFlagsMaybe <format=hex>;
+                    OffsetT NameOffset;
+                    OffsetT ExprOffset;
+                    CountT RowValueCount;
+                    OffsetT RowValueExprOffsets[RowValueCount];
+                    
+                    for (local int j = 0; j < RowValueCount; j++)
+                    {
+                        if (RowValueExprOffsets[j] != 0)
+                        {
+                            FSeek(startof(RowValueExprOffsets[j]) + RowValueExprOffsets[j]);
+                            SeqExpression RowExpression;
+                        }
+                    }
+                } ColumnValues <optimize=false, read=ReadString(startof(NameOffset) + NameOffset)>;
+            }
+        } Table <optimize=false, read=ReadString(startof(NameOffset) + NameOffset)>;
+    }
+} TableDataChunk <bgcolor=0xB6FF00>;

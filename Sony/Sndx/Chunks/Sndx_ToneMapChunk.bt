@@ -1,0 +1,99 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Tone Map Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    uint ListCount;
+    
+    for (local int i = 0; i < ListCount; i++)
+    {
+        FSeek(startof(this) + 0x08 + (i * 0x10));   
+        struct
+        {
+            enum <uint>
+            {
+                ToneListFlags_NoBinarySearch = 0x01,
+            } ToneListFlags <edit=flags>;
+            ushort Min;
+            ushort Max;
+            ushort NumToneGroups;
+            short Field_0x0A;
+            OffsetT GroupsPtr;
+            
+            for (local int j = 0; j < NumToneGroups; j++)
+            {
+                FSeek(startof(GroupsPtr) + GroupsPtr + (j * 0x10));
+                struct
+                {
+                    enum <ushort>
+                    {
+                        ToneGroupFlags_OnePerNote = 0x01,
+                        ToneGroupFlags_OverlappingEntries = 0x02,
+                        ToneGroupFlags_ExtendedEntries = 0x04,   
+                    } ToneGroupFlags <edit=flags>;
+                    
+                    ushort Key;
+                    ushort Field_0x04;
+                    ushort NoteLo;
+                    ushort NoteHi;
+                    ushort NumTones;
+                    OffsetT TonesPtr;
+                    
+                    local int stride = (ToneGroupFlags & ToneGroupFlags_ExtendedEntries) ? 0x14 : 0x0C;
+                    for (local int k = 0; k < NumTones; k++)
+                    {
+                        FSeek(startof(TonesPtr) + TonesPtr + (k * stride));
+                        struct
+                        {
+                            enum <byte>
+                            {
+                                RegionType_Request = 0xFF, // If 0xFF, use type from Request
+                                RegionType_Wave = 0,
+                                RegionType_Sequence = 1,
+                                RegionType_2 = 2,
+                                RegionType_3 = 3,
+                                RegionType_Trans = 4,   
+                            } RegionType;
+                            ubyte Field_0x01;
+                            short RootNote;
+                            ushort RequestIndex;
+                            
+                            enum <ushort>
+                            {
+                                NoteFlag_0x01 = 0x01,
+                                NoteFlag_0x02 = 0x02,
+                                NoteFlag_0x04 = 0x04,
+                                NoteFlag_0x08 = 0x08,
+                                NoteFlag_0x10 = 0x10,
+                            } NoteFlags <edit=flags>;
+                            
+                            ushort NoteLo;
+                            ushort NoteHi;
+                            
+                            if (ToneGroupFlags & ToneGroupFlags_ExtendedEntries) 
+                            {
+                                ushort CtrlLo;
+                                ushort CtrlHi;
+                                byte Extra[4];
+                            }
+
+                        } Note;
+                    }
+                } NoteGroup;
+            }
+        } ToneList;
+    }
+} ToneMapChunk;

@@ -1,0 +1,45 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef SNDX_TYPES_H
+#define SNDX_TYPES_H
+
+typedef uint OffsetT <format=hex, fgcolor=cRed>;
+typedef uint CountT <fgcolor=cGreen>;
+
+typedef struct (int size)
+{
+    if (size != 0)
+    {
+        struct
+        {
+            byte Ones : 4;
+            byte Tens : 4;
+        } Byte[size];
+    }
+} BcdValue <warn=false>;
+
+typedef struct 
+{
+    local int Value = 0;
+    local int i = 0;
+    while (true)
+    {
+        byte byte_;
+        Value = (Value << 7) | byte_[i];
+        if ((byte_[i] & 0x80) == 0)
+            break;
+    }
+} _7BitInt <read=Value, optimize=false>;
+
+#endif

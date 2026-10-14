@@ -1,0 +1,393 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Buss FX Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT Entries0x10Count;
+    OffsetT Entries0x10ListOffset <comment="Not used, simply an offset to the full list of 0x10 entries for each patch">;
+    CountT Entries0x14Count;
+    OffsetT Entries0x14ListOffset <comment="Not used, simply an offset to the full list of 0x14 entries for each patch">;
+    CountT PatchCount;
+    OffsetT PatchesOffset <comment="Main entries">;
+    ushort Field_0x1C;
+    ushort Field_0x1E;
+    byte pad[0x08];
+    
+    for (local int i = 0; i < PatchCount; i++)
+    {
+        FSeek(startof(PatchesOffset) + PatchesOffset + (i * 0x30));
+        struct
+        {
+            int Empty;
+            OffsetT NameOffset;
+            int Field_0x08;
+            byte StageIndex;
+            byte BussCount;
+            byte FXCount;
+            byte Count_0x0F;
+            OffsetT BussOffset;
+            OffsetT FXOffset;
+            
+            // outputLevel=<float>,isLimiterEnable=<?>;
+            OffsetT ConfigStringOffset;
+            ushort BXFaderIdStart;
+            ushort BXFaderIdCount;
+            int UnkMilliseconds0x20;
+            int UnkMilliseconds0x24;
+            byte pad2[0x08];
+            
+            struct
+            {
+                // Entries0x10ListOffset points to these
+                for (local int j = 0; j < BussCount; j++)
+                {
+                    FSeek(startof(BussOffset) + BussOffset + (j * 0x08));
+                    struct
+                    {
+                        OffsetT NameOffset;
+                        byte BussId <comment="128 max">;
+                        byte BussMode <comment="0, 1 or 2">;
+                        short pad;
+                    } Buss <read=ReadString(startof(NameOffset) + NameOffset)>;
+                }
+            } BussList;
+            
+            struct
+            {
+                // Entries0x14ListOffset points to these
+                for (local int j = 0; j < FXCount; j++)
+                {
+                    FSeek(startof(FXOffset) + FXOffset + (j * 0x20));
+                    struct
+                    {
+                        int Field_0x00;
+                        OffsetT NameOffset;
+                        ushort FXRackVoiceId;
+                        byte BussId;
+                        byte LinkCount;
+                        OffsetT ParameterStringOffset;
+                        OffsetT LinksOffset;
+                        byte pad[0x0C];
+                        
+                        FSeek(startof(ParameterStringOffset) + ParameterStringOffset);
+                        string ParameterString;
+                        
+                        if (LinkCount)
+                        {
+                            FSeek(startof(LinksOffset) + LinksOffset);
+                            struct
+                            {
+                                byte DestBussId <comment="0 = master rack">;
+                                byte LinkType;
+                                short GainDb;
+                            } Link[LinkCount];
+                        }
+                    } FX <read=ReadString(startof(NameOffset) + NameOffset)>;
+                }
+            } FXList;
+
+        } Patch <read=ReadString(startof(NameOffset) + NameOffset)>;
+    }
+} BussFXChunk;
+
+/* GT Sport 1.68
+Rack Parameters as supported by libSndx
+SndxBussFxParam stru_2BABDE0[3] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+};
+
+SndxBussFxParam _sendBussId_[17] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "type", 1, 0, 4, 0, 4, 136, 16, "NONE:0 LP:1 HP:2 BP_A:3 BP_B:4 NT:5 LS:6 HS:7 PK:8 LP_1:9 HP_1:10" },
+  { "fc", 1, 4, 4, 0, 4, 136, 16, "1~24000" },
+  { "q", 1, 8, 4, 0, 4, 136, 16, "0~1" },
+  { "gain", 1, 12, 4, 0, 4, 136, 16, "-96~18" },
+  { "inGain", 1, 144, 4, 0, 0, 0, 0, "-96~18" },
+  { "outGain", 1, 148, 4, 0, 0, 0, 0, "-96~18" },
+  { "affectL", 1, 152, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectR", 1, 153, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectC", 1, 154, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectLfe", 1, 155, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectLs", 1, 156, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectRs", 1, 157, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectLb", 1, 158, 1, 0, 0, 0, 0, "True:1 False:0" },
+  { "affectRb", 1, 159, 1, 0, 0, 0, 0, "True:1 False:0" },
+};
+
+SndxBussFxParam _sendBussId__0[13] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "isRemoveDc", 2, 0, 4, 0, 0, 0, 0, "Off:0 On:1 DetectOnly:2" },
+  { "isRms", 2, 4, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "isLoudness", 2, 8, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "mode", 2, 12, 4, 0, 0, 0, 0, "Downward:0 Upward:1" },
+  { "inGain", 2, 16, 4, 0, 0, 0, 0, "-96~18" },
+  { "threshold", 2, 20, 4, 0, 0, 0, 0, "-96~18" },
+  { "ratio", 2, 24, 4, 0, 0, 0, 0, "1~50" },
+  { "attackTime", 2, 28, 4, 0, 0, 0, 0, "1~1000" },
+  { "releaseTime", 2, 32, 4, 0, 0, 0, 0, "1~3000" },
+  { "gain", 2, 36, 4, 0, 0, 0, 0, "-96~18" },
+};
+
+SndxBussFxParam _sendBussId__1[17] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "wet", 3, 0, 4, 0, 0, 0, 0, "0.0~1.0" },
+  { "dry", 3, 4, 4, 0, 0, 0, 0, "0.0~1.0" },
+  { "room", 3, 8, 4, 0, 0, 0, 0, "-10000~0" },
+  { "roomHF", 3, 12, 4, 0, 0, 0, 0, "-10000~0" },
+  { "reflectionPattern", 3, 16, 4, 0, 0, 0, 0, "0~2" },
+  { "decayTime", 3, 20, 4, 0, 0, 0, 0, "0.1~20.0" },
+  { "decayHFRatio", 3, 24, 4, 0, 0, 0, 0, "0.1~2.0" },
+  { "reflections", 3, 28, 4, 0, 0, 0, 0, "-10000~1000" },
+  { "reflectionsDelay", 3, 32, 4, 0, 0, 0, 0, "0.0~0.3" },
+  { "reverb", 3, 36, 4, 0, 0, 0, 0, "-10000~2000" },
+  { "reverbDelay", 3, 40, 4, 0, 0, 0, 0, "0.0~0.1" },
+  { "diffusion", 3, 44, 4, 0, 0, 0, 0, "0~100.0" },
+  { "density", 3, 48, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "HFReference", 3, 52, 4, 0, 0, 0, 0, "20.0~20000.0" },
+};
+
+SndxBussFxParam _sendBussId__2[5] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "drive", 4, 0, 4, 0, 0, 0, 0, "-96.0~30.0" },
+  { "gain", 4, 4, 4, 0, 0, 0, 0, "-96.0~30.0" },
+};
+
+SndxBussFxParam _sendBussId__3[23] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "chlink", 5, 0, 4, 0, 0, 0, 0, "0~1" },
+  { "auto-upmix", 5, 4, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "front-level", 5, 8, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "center-ls-fc", 5, 12, 4, 0, 0, 0, 0, "1~24000" },
+  { "center-ls-gain", 5, 16, 4, 0, 0, 0, 0, "0.0~400.0" },
+  { "center-hs-fc", 5, 20, 4, 0, 0, 0, 0, "1~24000" },
+  { "center-hs-gain", 5, 24, 4, 0, 0, 0, 0, "0.0~400.0" },
+  { "center-level", 5, 28, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "lfe-fc", 5, 32, 4, 0, 0, 0, 0, "70~250" },
+  { "lfe-level", 5, 36, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "sur-lh-fc", 5, 40, 4, 0, 0, 0, 0, "0~24000" },
+  { "sur-lf-level", 5, 44, 4, 0, 0, 0, 0, "-400.0~400.0" },
+  { "sur-hf-level", 5, 48, 4, 0, 0, 0, 0, "-400.0~400.0" },
+  { "sur-dt-l", 5, 52, 4, 0, 0, 0, 0, "0.0~20.0" },
+  { "sur-dt-r", 5, 56, 4, 0, 0, 0, 0, "0.0~20.0" },
+  { "sur-df", 5, 60, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "sur-level", 5, 64, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "sur-input", 5, 68, 4, 0, 0, 0, 0, "FRONT:0 REAR:1 SUR51:2" },
+  { "side-level", 5, 72, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "back-level", 5, 76, 4, 0, 0, 0, 0, "0.0~100.0" },
+};
+
+SndxBussFxParam _sendBussId__4[11] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "inLevel", 6, 0, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "phase", 6, 4, 4, 0, 0, 0, 0, "1~4" },
+  { "delay", 6, 8, 4, 0, 0, 0, 0, "0.1~40.0" },
+  { "rate", 6, 12, 4, 0, 0, 0, 0, "0.0~20.0" },
+  { "depth", 6, 16, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "feedback", 6, 20, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dry", 6, 24, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "wet", 6, 28, 4, 0, 0, 0, 0, "0.0~100.0" },
+};
+
+SndxBussFxParam _sendBussId__5[11] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "inLevel", 7, 0, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "taps", 7, 8, 4, 0, 0, 0, 0, "1~8" },
+  { "tapDelay", 7, 0, 4, 4, 4, 80, 8, "1~1000" },
+  { "tapLevel", 7, 4, 4, 4, 4, 80, 8, "0.0~100.0" },
+  { "feedback", 7, 88, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "lowpass", 7, 92, 4, 0, 0, 0, 0, "1.0~24000.0" },
+  { "dry", 7, 96, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "wet", 7, 100, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "/libexec/ld-elf.so.1", 0, 0, 0, 0, 0, 0, 0, "/libexec/ld-elf.so.1" }
+};
+
+SndxBussFxParam _sendBussId__6[4] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "gain", 8, 0, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "/libexec/ld-elf.so.1", 0, 0, 0, 0, 0, 0, 0, "/libexec/ld-elf.so.1" }
+};
+
+SndxBussFxParam _sendBussId__7[5] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "channels", 9, 0, 4, 0, 0, 0, 0, "1.0ch:1 2.0ch:2 5.1ch:6 7.1ch:8" },
+  { "cents", 9, 4, 4, 0, 0, 0, 0, "-1200~1200" },
+};
+
+SndxBussFxParam _sendBussId__8[6] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "mode", 10, 0, 4, 0, 0, 0, 0, "Focus:0 Round:1" },
+  { "angle", 10, 4, 4, 0, 0, 0, 0, "-360.0~360.0" },
+  { "focus", 10, 8, 4, 0, 0, 0, 0, "0.0~100.0" },
+};
+
+SndxBussFxParam _sendBussId__9[35] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "dmix2ch-front-level", 11, 0, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-center-level", 11, 4, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-lfe-level", 11, 8, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-sur-level", 11, 12, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-side-level", 11, 16, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-back-level", 11, 20, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-output-level", 11, 24, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix2ch-comp-isrms", 11, 28, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "dmix2ch-comp-igain", 11, 32, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix2ch-comp-thr", 11, 36, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix2ch-comp-ratio", 11, 40, 4, 0, 0, 0, 0, "1.0~50.0" },
+  { "dmix2ch-comp-at", 11, 44, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix2ch-comp-rel", 11, 48, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix2ch-comp-ogain", 11, 52, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix51ch-sur-level", 11, 56, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix51ch-side-level", 11, 60, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix51ch-back-level", 11, 64, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix51ch-output-level", 11, 68, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "dmix51ch-comp-isrms", 11, 72, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "dmix51ch-comp-igain", 11, 76, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix51ch-comp-thr", 11, 80, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix51ch-comp-ratio", 11, 84, 4, 0, 0, 0, 0, "1.0~50.0" },
+  { "dmix51ch-comp-at", 11, 88, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix51ch-comp-rel", 11, 92, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix51ch-comp-ogain", 11, 96, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix71ch-comp-isrms", 11, 100, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "dmix71ch-comp-igain", 11, 104, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix71ch-comp-thr", 11, 108, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "dmix71ch-comp-ratio", 11, 112, 4, 0, 0, 0, 0, "1.0~50.0" },
+  { "dmix71ch-comp-at", 11, 116, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix71ch-comp-rel", 11, 120, 4, 0, 0, 0, 0, "1.0~500.0" },
+  { "dmix71ch-comp-ogain", 11, 124, 4, 0, 0, 0, 0, "-96.0~18.0" },
+};
+
+SndxBussFxParam _sendBussId__10[11] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "chLink", 12, 0, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "isRms", 12, 4, 4, 0, 0, 0, 0, "True:1 False:0" },
+  { "inGain", 12, 8, 4, 0, 0, 0, 0, "-96~18" },
+  { "threshold", 12, 12, 4, 0, 0, 0, 0, "-96~18" },
+  { "ratio", 12, 16, 4, 0, 0, 0, 0, "1~50" },
+  { "attackTime", 12, 20, 4, 0, 0, 0, 0, "1~1000" },
+  { "releaseTime", 12, 24, 4, 0, 0, 0, 0, "1~3000" },
+  { "gain", 12, 28, 4, 0, 0, 0, 0, "-96~18" },
+};
+
+SndxBussFxParam _sendBussId__11[67] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "fl-to-fl-gain", 13, 0, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-fr-gain", 13, 4, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-fc-gain", 13, 8, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-lfe-gain", 13, 12, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-ls-gain", 13, 16, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-rs-gain", 13, 20, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-lb-gain", 13, 24, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fl-to-rb-gain", 13, 28, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-fl-gain", 13, 32, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-fr-gain", 13, 36, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-fc-gain", 13, 40, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-lfe-gain", 13, 44, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-ls-gain", 13, 48, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-rs-gain", 13, 52, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-lb-gain", 13, 56, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fr-to-rb-gain", 13, 60, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-fl-gain", 13, 64, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-fr-gain", 13, 68, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-fc-gain", 13, 72, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-lfe-gain", 13, 76, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-ls-gain", 13, 80, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-rs-gain", 13, 84, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-lb-gain", 13, 88, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "fc-to-rb-gain", 13, 92, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-fl-gain", 13, 96, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-fr-gain", 13, 100, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-fc-gain", 13, 104, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-lfe-gain", 13, 108, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-ls-gain", 13, 112, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-rs-gain", 13, 116, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-lb-gain", 13, 120, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lfe-to-rb-gain", 13, 124, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-fl-gain", 13, 128, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-fr-gain", 13, 132, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-fc-gain", 13, 136, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-lfe-gain", 13, 140, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-ls-gain", 13, 144, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-rs-gain", 13, 148, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-lb-gain", 13, 152, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "ls-to-rb-gain", 13, 156, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-fl-gain", 13, 160, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-fr-gain", 13, 164, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-fc-gain", 13, 168, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-lfe-gain", 13, 172, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-ls-gain", 13, 176, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-rs-gain", 13, 180, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-lb-gain", 13, 184, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rs-to-rb-gain", 13, 188, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-fl-gain", 13, 192, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-fr-gain", 13, 196, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-fc-gain", 13, 200, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-lfe-gain", 13, 204, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-ls-gain", 13, 208, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-rs-gain", 13, 212, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-lb-gain", 13, 216, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "lb-to-rb-gain", 13, 220, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-fl-gain", 13, 224, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-fr-gain", 13, 228, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-fc-gain", 13, 232, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-lfe-gain", 13, 236, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-ls-gain", 13, 240, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-rs-gain", 13, 244, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-lb-gain", 13, 248, 4, 0, 0, 0, 0, "-96.0~18.0" },
+  { "rb-to-rb-gain", 13, 252, 4, 0, 0, 0, 0, "-96.0~18.0" },
+};
+
+SndxBussFxParam _sendBussId__12[10] =
+{
+  { "sendBussId", 0, 0, 4, 0, 4, 72, 8, "0~127" },
+  { "sendLevel", 0, 4, 4, 0, 4, 72, 8, "0~4" },
+  { "inGain", 14, 4, 4, 0, 0, 0, 0, "-96.0~30.0" },
+  { "quality", 14, 0, 4, 0, 0, 0, 0, "Low:0 High:1" },
+  { "dry", 14, 12, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "wet", 14, 16, 4, 0, 0, 0, 0, "0.0~100.0" },
+  { "outGain", 14, 8, 4, 0, 0, 0, 0, "-96.0~30.0" },
+  { "irDataTop", 14, 20, 4, 0, 0, 0, 0, "" },
+  { "irDataBottom", 14, 24, 4, 0, 0, 0, 0, "" },
+  { "irDataEnable", 14, 28, 4, 0, 0, 0, 0, "0~1" }
+};
+*/

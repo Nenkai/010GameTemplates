@@ -1,0 +1,35 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Name Chunk
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "./Sndx_Types.bt"
+
+typedef struct
+{
+    uint Empty;
+    CountT NumNames;
+    
+    /* Hash Calculation:
+       uint hash = 0;
+       while (*inputStr)
+           hash = (hash * 131) + *inputStr++;
+    */
+    struct
+    {
+        OffsetT NameOffset <format=hex, fgcolor=cRed>;
+        uint NameHash <format=hex>;
+        int RequestIndex;
+        
+        Printf("%s, ReqIndex: %d\n", ReadString(startof(this) + NameOffset), RequestIndex);
+    } Name[NumNames] <bgcolor=cWhite, optimize=false,
+        read=Str("%s, ReqIndex: %d", ReadString(startof(this) + NameOffset), RequestIndex)>;
+} NameChunk;

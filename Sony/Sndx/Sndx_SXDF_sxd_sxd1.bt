@@ -1,0 +1,149 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: libSndx Resource file (SXDF)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.sxd|*.sxd1|*.sxd3
+//  ID Bytes: 53 58 44 46
+//   History: 
+//------------------------------------------------
+
+#include "Chunks/Sndx_ToneMapChunk.bt"
+#include "Chunks/Sndx_NameChunk.bt"
+#include "Chunks/Sndx_RequestDataChunk.bt"
+#include "Chunks/Sndx_TransitionsChunk.bt"
+#include "Chunks/Sndx_SequenceDataChunk.bt"
+#include "Chunks/Sndx_WaveChunk.bt"
+#include "Chunks/Sndx_BussFXChunk.bt"
+#include "Chunks/Sndx_VariableChunk.bt"
+#include "Chunks/Sndx_VariableNameChunk.bt"
+#include "Chunks/Sndx_XFadeChunk.bt"
+#include "Chunks/Sndx_XFadeNameChunk.bt"
+#include "Chunks/Sndx_ExternalRequestChunk.bt"
+#include "Chunks/Sndx_TableDataChunk.bt"
+
+// A sndx has at the very least:
+// A name and request chunk, and then one or more chunks of: Wave/Seqd/Trans
+// Or, if it's a BussFX setup: BussFX chunk, optionally GVAR/GVRN/BXFD/BXFN
+               
+struct
+{
+    uint Magic <format=hex, comment="Must match SXDF (checked)">;
+    uint Field_0x04 <comment="Not read?">;
+    uint FileSize <format=hex, comment="Must be at least 0x60 (header size, checked)">;
+    uint SeparateFileSize <format=hex, comment=".sxd2 file size">;
+    byte Hash[0x10];
+    char Name[0x40];
+} Header <size=0x60, bgcolor=cPurple>;
+    
+FSeek(0x60);
+
+while (FTell() != FileSize())
+{
+    struct
+    {
+        uint ChunkId <format=hex, bgcolor=cRed>;
+        uint ChunkSize <format=hex, bgcolor=cRed>;
+        
+        union
+        {
+            byte ChunkBytes[ChunkSize];
+            switch (ChunkId)
+            {
+                case 0x454E4F54: // TONE
+                    // Used to play a tone. Points to a request
+                    ToneMapChunk ToneMapChunk_;
+                    break;
+                    
+                case 0x454D414E: // NAME - Request Names
+                    NameChunk NameChunk_;
+                    break;
+                    
+                case 0x44514552: // REQD - Requests, pointed to by names, tones, or addressed directly
+                    RequestDataChunk RequestDataChunk_;
+                    break;
+                    
+                case 0x534E5254: // TRNS - Transitions, pointed to by requests
+                    TransitionsChunk TransitionsChunk_;
+                    break;
+                    
+                case 0x4850524D: // MRPH - Morphes, pointed to by requests
+                    // It doesn't seem like morphes playback is even implemented at all, 
+                    // at least in GT Sport the player is pretty empty. There might be a list (count + offset[]), but not sure.
+                    
+                    Printf("WARNING: MRPH (Morphes) chunk not supported, have not seen a game that uses it yet!\n");
+                    break;
+                    
+                case 0x44514553: // SEQD - Sequences, pointed to by requests
+                    SequenceDataChunk SequenceDataChunk_;
+                    break;
+                    
+                case 0x45564157: // WAVE - Waves, pointed to by requests
+                    WaveChunk WaveChunk_;
+                    break;
+                    
+                case 0x58465342: // BSFX - Buss/FX, can exist on its own for setting up Buss/FX parameters
+                    BussFXChunk BussFXChunk_;
+                    break;
+                    
+                case 0x5241564C: // LVAR - Local Variables - can exist on its own (with names)
+                    // Variable values are set manually with:
+                    // - void sceSndxInstancePlayByName(SndxInstance *RBX, unsigned int index, char a3, char *str1, char *str2, char *str3, float var1Value, float var2Value, float var3Value, float var4Value);
+                    // - void __fastcall sceSndxInstanceSetVariableByIdF(int a1, unsigned int a2, __int64 variableId, float value);
+                    // Look for 
+                    // - "Unknown global variable ID (%d)\n" 
+                    // - "The variable (ID=%d) is not defined in the resource (handle=%d)\n"
+                    // for getters
+                    VariableChunk LocalVariablesChunk;
+                    break;
+                    
+                case 0x52415647: // GVAR - Global Variables - can exist on its own (with names)
+                    VariableChunk GlobalVariablesChunk;
+                    break;
+                    
+                case 0x4E52564C: // LVRN - Local Variable Names - can exist on its own (with names)
+                    VariableNameChunk LocalVariableNameChunk; 
+                    break;
+                    
+                case 0x4E525647: // GVRN - Global Variable Names - can exist on its own (with names)
+                    VariableNameChunk GlobalVariableNameChunk;
+                    break;
+                    
+                case 0x4E465852: // RXFN - ? XFader Names (Used by Waves tag 13)
+                    XFadeNameChunk XFadeNameChunk_;
+                    break;
+                    
+                case 0x4E465842: // BXFN - Buss XFader Names
+                    XFadeNameChunk XFadeNameChunk_;
+                    break;
+                    
+                case 0x44465852: // RXFD - ? XFaders (Used by Waves tag 13)
+                    XFadeChunk RXFadeChunk_;
+                    break;
+                    
+                case 0x44465842: // BXFD - Buss XFaders
+                    XFadeChunk BussXFadeChunk_;
+                    break;
+                    
+                case 0x52545845: // EXTR - External Requests
+                    ExternalRequestChunk ExternalRequestChunk_;
+                    break;
+                    
+                case 0x444C4254: // TBLD - Table Data
+                    TableDataChunk TableDataChunk_;
+                    break;
+                    
+                case 0x41544144: // Data
+                    break;
+                    
+                default:
+                    Printf("Unsupported chunk id '%c%c%c%c'", ChunkId & 0xFF, (ChunkId >> 8) & 0xFF, (ChunkId >> 16) & 0xFF, (ChunkId >> 24) & 0xFF);
+                    break;
+                
+            }
+        } ChunkUnion;
+    } Chunk <optimize=false, read=Str("%c%c%c%c", ChunkId & 0xFF, (ChunkId >> 8) & 0xFF, (ChunkId >> 16) & 0xFF, (ChunkId >> 24) & 0xFF)>;
+}
